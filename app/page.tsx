@@ -385,7 +385,7 @@ export default function Home() {
               ].map((feature, index) => (
                 <motion.div
                   key={index}
-                  className="flex flex-col items-center text-center p-6 rounded-xl border bg-card text-card-foreground shadow-sm"
+                  className="flex flex-col items-center text-center p-6 rounded-xl border backdrop-blur-md bg-background/30 shadow-md"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}

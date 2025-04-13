@@ -99,15 +99,26 @@ export function EnhancedHeroSection() {
           >
             <div className="relative w-full max-w-md">
               <motion.div
-                className="relative rounded-xl border bg-background/80 backdrop-blur-sm p-6 shadow-lg"
+                className="relative rounded-xl border border-white/20 bg-white/10 dark:bg-black/10 backdrop-blur-md p-6 shadow-lg"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
               >
+                <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 dark:from-white/5 dark:to-transparent rounded-xl pointer-events-none"></div>
                 <Tabs defaultValue="hire" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 mb-6">
-                    <TabsTrigger value="hire">Hire Someone</TabsTrigger>
-                    <TabsTrigger value="work">Offer Services</TabsTrigger>
+                  <TabsList className="grid w-full grid-cols-2 mb-6 bg-white/20 dark:bg-black/20 backdrop-blur-sm">
+                    <TabsTrigger
+                      value="hire"
+                      className="data-[state=active]:bg-white/20 dark:data-[state=active]:bg-white/10"
+                    >
+                      Hire Someone
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="work"
+                      className="data-[state=active]:bg-white/20 dark:data-[state=active]:bg-white/10"
+                    >
+                      Offer Services
+                    </TabsTrigger>
                   </TabsList>
                   <TabsContent value="hire" className="space-y-5">
                     <div className="space-y-3">
@@ -117,15 +128,21 @@ export function EnhancedHeroSection() {
                         <Input
                           type="search"
                           placeholder="Search for services..."
-                          className="w-full bg-background pl-10"
+                          className="w-full bg-white/20 dark:bg-black/20 backdrop-blur-sm pl-10 border-white/20"
                         />
                       </div>
                       <div className="grid grid-cols-2 gap-3">
-                        <EnhancedButton variant="outline" className="justify-start">
+                        <EnhancedButton
+                          variant="outline"
+                          className="justify-start bg-white/10 dark:bg-black/10 backdrop-blur-sm border-white/20"
+                        >
                           <Briefcase className="mr-2 h-4 w-4" />
                           Business
                         </EnhancedButton>
-                        <EnhancedButton variant="outline" className="justify-start">
+                        <EnhancedButton
+                          variant="outline"
+                          className="justify-start bg-white/10 dark:bg-black/10 backdrop-blur-sm border-white/20"
+                        >
                           <Users className="mr-2 h-4 w-4" />
                           Personal
                         </EnhancedButton>
@@ -134,7 +151,12 @@ export function EnhancedHeroSection() {
                         <p className="text-xs text-muted-foreground mb-2">Popular searches:</p>
                         <div className="flex flex-wrap gap-1.5">
                           {["Web Design", "Logo", "Writing", "Marketing"].map((tag, i) => (
-                            <EnhancedButton key={i} variant="secondary" size="sm" className="text-xs h-7">
+                            <EnhancedButton
+                              key={i}
+                              variant="secondary"
+                              size="sm"
+                              className="text-xs h-7 bg-white/10 dark:bg-black/20 backdrop-blur-sm"
+                            >
                               {tag}
                             </EnhancedButton>
                           ))}
@@ -150,14 +172,24 @@ export function EnhancedHeroSection() {
                       <h3 className="text-lg font-medium">What services can you offer?</h3>
                       <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input type="search" placeholder="Your skills..." className="w-full bg-background pl-10" />
+                        <Input
+                          type="search"
+                          placeholder="Your skills..."
+                          className="w-full bg-white/20 dark:bg-black/20 backdrop-blur-sm pl-10 border-white/20"
+                        />
                       </div>
                       <div className="grid grid-cols-2 gap-3">
-                        <EnhancedButton variant="outline" className="justify-start">
+                        <EnhancedButton
+                          variant="outline"
+                          className="justify-start bg-white/10 dark:bg-black/10 backdrop-blur-sm border-white/20"
+                        >
                           <Clock className="mr-2 h-4 w-4" />
                           Part-time
                         </EnhancedButton>
-                        <EnhancedButton variant="outline" className="justify-start">
+                        <EnhancedButton
+                          variant="outline"
+                          className="justify-start bg-white/10 dark:bg-black/10 backdrop-blur-sm border-white/20"
+                        >
                           <Briefcase className="mr-2 h-4 w-4" />
                           Full-time
                         </EnhancedButton>
@@ -166,7 +198,12 @@ export function EnhancedHeroSection() {
                         <p className="text-xs text-muted-foreground mb-2">Top categories:</p>
                         <div className="flex flex-wrap gap-1.5">
                           {["Design", "Development", "Writing", "Marketing"].map((tag, i) => (
-                            <EnhancedButton key={i} variant="secondary" size="sm" className="text-xs h-7">
+                            <EnhancedButton
+                              key={i}
+                              variant="secondary"
+                              size="sm"
+                              className="text-xs h-7 bg-white/10 dark:bg-black/20 backdrop-blur-sm"
+                            >
                               {tag}
                             </EnhancedButton>
                           ))}
