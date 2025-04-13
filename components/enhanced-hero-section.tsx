@@ -86,7 +86,7 @@ export function EnhancedHeroSection() {
               >
                 <div className="relative">
                   <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
-                    Hire & Complete Jobs All In One Place!
+                    Redefining The Gig Economy
                   </h1>
                   <motion.div
                     className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-purple-500/20 blur-xl opacity-0"
@@ -107,7 +107,7 @@ export function EnhancedHeroSection() {
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
               >
-                The marketplace where you can both hire skilled professionals and offer your own services to others.
+                Empowering limitless connections, shaping the future of work.
               </motion.p>
             </div>
             <motion.div
