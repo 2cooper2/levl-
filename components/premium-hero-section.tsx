@@ -1,16 +1,19 @@
 "use client"
 
+import { useState } from "react"
+import { motion } from "framer-motion"
 import { EnhancedButton } from "@/components/ui/enhanced-button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { ArrowRight, Briefcase, Clock, Search, Users } from "lucide-react"
-import { motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/context/auth-context"
+import { GlassCard, GradientBorder } from "@/components/premium-background"
 
-export function EnhancedHeroSection() {
+export function PremiumHeroSection() {
   const router = useRouter()
   const { isAuthenticated } = useAuth()
+  const [searchQuery, setSearchQuery] = useState("")
 
   const handleGetStarted = () => {
     if (isAuthenticated) {
@@ -32,36 +35,39 @@ export function EnhancedHeroSection() {
     }
   }
 
-  const fadeIn = {
+  const fadeInUp = {
     hidden: { opacity: 0, y: 20 },
-    visible: {
+    visible: (i: number) => ({
       opacity: 1,
       y: 0,
-      transition: { duration: 0.6 },
-    },
+      transition: {
+        delay: i * 0.1,
+        duration: 0.5,
+        ease: [0.1, 0.25, 0.3, 1],
+      },
+    }),
   }
 
   return (
     <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 relative overflow-hidden">
-      <div className="absolute -left-64 -top-64 h-[500px] w-[500px] rounded-full bg-primary/10 blur-3xl opacity-50"></div>
-      <div className="absolute -right-64 -bottom-64 h-[500px] w-[500px] rounded-full bg-purple-500/10 blur-3xl opacity-50"></div>
-
       <div className="container px-4 md:px-6 relative z-10">
         <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 xl:grid-cols-2">
-          <motion.div
-            className="flex flex-col justify-center space-y-4"
-            variants={fadeIn}
-            initial="hidden"
-            animate="visible"
-          >
-            <div className="space-y-2">
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-              >
-                <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
-                  Level Up Your Skills & Services
+          <div className="flex flex-col justify-center space-y-4">
+            <motion.div
+              className="space-y-2"
+              initial="hidden"
+              animate="visible"
+              variants={{
+                visible: {
+                  transition: {
+                    staggerChildren: 0.1,
+                  },
+                },
+              }}
+            >
+              <motion.div custom={0} variants={fadeInUp}>
+                <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
+                  Level Up Your <span className="gradient-text">Skills & Services</span>
                 </h1>
                 <div className="inline-flex items-center mt-2 px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-sm font-medium">
                   <span className="mr-1">✓</span> Lower fees than TaskRabbit
@@ -69,41 +75,40 @@ export function EnhancedHeroSection() {
               </motion.div>
               <motion.p
                 className="max-w-[600px] text-muted-foreground md:text-xl leading-relaxed"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
+                custom={1}
+                variants={fadeInUp}
               >
                 The marketplace where you can both hire skilled professionals and offer your own services to others.
               </motion.p>
-            </div>
+            </motion.div>
             <motion.div
               className="flex flex-col gap-3 min-[400px]:flex-row"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
             >
-              <EnhancedButton size="lg" variant="gradient" className="gap-1.5 text-base" onClick={handleGetStarted}>
-                Get Started <ArrowRight className="h-4 w-4 ml-1" />
-              </EnhancedButton>
+              <GradientBorder>
+                <EnhancedButton
+                  size="lg"
+                  className="gap-1.5 text-base btn-premium bg-primary hover:bg-primary/90 text-white w-full"
+                  onClick={handleGetStarted}
+                >
+                  Get Started <ArrowRight className="h-4 w-4 ml-1" />
+                </EnhancedButton>
+              </GradientBorder>
               <EnhancedButton size="lg" variant="outline" className="text-base">
                 Learn More
               </EnhancedButton>
             </motion.div>
-          </motion.div>
+          </div>
           <motion.div
             className="flex items-center justify-center"
-            variants={fadeIn}
-            initial="hidden"
-            animate="visible"
-            transition={{ delay: 0.3 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <div className="relative w-full max-w-md">
-              <motion.div
-                className="relative rounded-xl border bg-background/80 backdrop-blur-sm p-6 shadow-lg"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-              >
+            <GlassCard className="w-full max-w-md p-1">
+              <div className="bg-background/80 backdrop-blur-sm rounded-lg p-6 shadow-lg">
                 <Tabs defaultValue="hire" className="w-full">
                   <TabsList className="grid w-full grid-cols-2 mb-6">
                     <TabsTrigger value="hire">Hire Someone</TabsTrigger>
@@ -118,6 +123,8 @@ export function EnhancedHeroSection() {
                           type="search"
                           placeholder="Search for services..."
                           className="w-full bg-background pl-10"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
                         />
                       </div>
                       <div className="grid grid-cols-2 gap-3">
@@ -141,7 +148,10 @@ export function EnhancedHeroSection() {
                         </div>
                       </div>
                     </div>
-                    <EnhancedButton variant="gradient" className="w-full" onClick={handleFindServices}>
+                    <EnhancedButton
+                      className="w-full btn-premium bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90"
+                      onClick={handleFindServices}
+                    >
                       Find Services
                     </EnhancedButton>
                   </TabsContent>
@@ -173,13 +183,16 @@ export function EnhancedHeroSection() {
                         </div>
                       </div>
                     </div>
-                    <EnhancedButton variant="gradient" className="w-full" onClick={handleOfferServices}>
+                    <EnhancedButton
+                      className="w-full btn-premium bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90"
+                      onClick={handleOfferServices}
+                    >
                       Start Offering
                     </EnhancedButton>
                   </TabsContent>
                 </Tabs>
-              </motion.div>
-            </div>
+              </div>
+            </GlassCard>
           </motion.div>
         </div>
       </div>

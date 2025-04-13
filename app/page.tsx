@@ -4,8 +4,8 @@ import Link from "next/link"
 import { EnhancedButton } from "@/components/ui/enhanced-button"
 import { EnhancedMainNav } from "@/components/enhanced-main-nav"
 import { AnimatedGradientBackground } from "@/components/animated-gradient-background"
+import { BackgroundPattern } from "@/components/background-pattern"
 import { EnhancedCategoryCard } from "@/components/enhanced-category-card"
-import { EnhancedTestimonialCard } from "@/components/enhanced-testimonial-card"
 import { EnhancedHeroSection } from "@/components/enhanced-hero-section"
 import {
   Briefcase,
@@ -48,52 +48,10 @@ export default function Home() {
       <main className="flex-1">
         <EnhancedHeroSection />
 
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-muted/50">
-          <div className="container px-4 md:px-6">
-            <motion.div
-              className="flex flex-col items-center justify-center space-y-4 text-center"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-            >
-              <div className="space-y-2">
-                <div className="inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
-                  Popular Categories
-                </div>
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                  Find the perfect service for your needs
-                </h2>
-                <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  Browse through thousands of services across various categories
-                </p>
-              </div>
-            </motion.div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-12">
-              {[
-                { icon: Briefcase, name: "Business", count: 1240 },
-                { icon: CreditCard, name: "Finance", count: 840 },
-                { icon: Users, name: "Marketing", count: 1120 },
-                { icon: Shield, name: "Legal", count: 560 },
-                { icon: Palette, name: "Creative", count: 1450 },
-                { icon: HomeIcon, name: "Lifestyle", count: 980 },
-                { icon: Heart, name: "Health", count: 760 },
-                { icon: Code, name: "Technology", count: 1680 },
-              ].map((category, index) => (
-                <EnhancedCategoryCard
-                  key={index}
-                  icon={category.icon}
-                  name={category.name}
-                  count={category.count}
-                  index={index}
-                />
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-muted/50">
-          <div className="container px-4 md:px-6">
+        {/* Simple steps to get started section - moved up */}
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-muted/50 relative">
+          <BackgroundPattern />
+          <div className="container px-4 md:px-6 relative z-10">
             <motion.div
               className="flex flex-col items-center justify-center space-y-4 text-center mb-12"
               initial={{ opacity: 0, y: 20 }}
@@ -155,86 +113,61 @@ export default function Home() {
               ))}
             </div>
           </div>
+          <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent"></div>
         </section>
 
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-background">
-          <div className="container px-4 md:px-6">
-            <div className="grid gap-6 lg:grid-cols-2 lg:gap-12">
-              <motion.div
-                className="flex flex-col justify-center space-y-4"
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5 }}
-              >
-                <div className="space-y-2">
-                  <div className="inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
-                    Testimonials
-                  </div>
-                  <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">What our users say</h2>
-                  <p className="max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                    Join thousands of satisfied users who have found success on LevL
-                  </p>
+        {/* Find the perfect service section - moved down */}
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-background relative">
+          <BackgroundPattern className="opacity-50" />
+          <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
+          <div className="container px-4 md:px-6 relative z-10">
+            <motion.div
+              className="flex flex-col items-center justify-center space-y-4 text-center"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="space-y-2">
+                <div className="inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
+                  Popular Categories
                 </div>
-                <div className="flex items-center gap-4 pt-4">
-                  <EnhancedButton
-                    size="lg"
-                    className="bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90"
-                    onClick={() => router.push("/auth/signup")}
-                  >
-                    Join Now
-                  </EnhancedButton>
-                  <EnhancedButton size="lg" variant="outline">
-                    Learn More
-                  </EnhancedButton>
-                </div>
-              </motion.div>
-              <div className="grid gap-4 md:grid-cols-2">
-                {[
-                  {
-                    quote:
-                      "LevL helped me find amazing clients for my freelance business. The platform is intuitive and secure.",
-                    author: "Sarah J.",
-                    role: "Graphic Designer",
-                    avatar: "/placeholder.svg?height=80&width=80&text=SJ",
-                  },
-                  {
-                    quote:
-                      "I needed help with my website and found the perfect developer within hours. Highly recommended!",
-                    author: "Michael T.",
-                    role: "Small Business Owner",
-                    avatar: "/placeholder.svg?height=80&width=80&text=MT",
-                  },
-                  {
-                    quote:
-                      "As someone who offers multiple services, LevL makes it easy to manage my gigs and find new opportunities.",
-                    author: "David R.",
-                    role: "Marketing Consultant",
-                    avatar: "/placeholder.svg?height=80&width=80&text=DR",
-                  },
-                  {
-                    quote: "The payment protection and review system gives me confidence when hiring professionals.",
-                    author: "Emma L.",
-                    role: "Startup Founder",
-                    avatar: "/placeholder.svg?height=80&width=80&text=EL",
-                  },
-                ].map((testimonial, index) => (
-                  <EnhancedTestimonialCard
-                    key={index}
-                    quote={testimonial.quote}
-                    author={testimonial.author}
-                    role={testimonial.role}
-                    avatar={testimonial.avatar}
-                    index={index}
-                  />
-                ))}
+                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+                  Find the perfect service for your needs
+                </h2>
+                <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                  Browse through thousands of services across various categories
+                </p>
               </div>
+            </motion.div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-12">
+              {[
+                { icon: Briefcase, name: "Business", count: 1240 },
+                { icon: CreditCard, name: "Finance", count: 840 },
+                { icon: Users, name: "Marketing", count: 1120 },
+                { icon: Shield, name: "Legal", count: 560 },
+                { icon: Palette, name: "Creative", count: 1450 },
+                { icon: HomeIcon, name: "Lifestyle", count: 980 },
+                { icon: Heart, name: "Health", count: 760 },
+                { icon: Code, name: "Technology", count: 1680 },
+              ].map((category, index) => (
+                <EnhancedCategoryCard
+                  key={index}
+                  icon={category.icon}
+                  name={category.name}
+                  count={category.count}
+                  index={index}
+                />
+              ))}
             </div>
           </div>
         </section>
 
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-br from-primary to-purple-600 text-primary-foreground">
-          <div className="container px-4 md:px-6">
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-br from-violet-500 to-purple-600 text-primary-foreground relative overflow-hidden">
+          <div className="absolute inset-0 bg-[url('/placeholder.svg?height=200&width=200')] opacity-[0.03] bg-repeat"></div>
+          <div className="absolute top-0 left-0 right-0 h-px bg-white/10"></div>
+          <div className="absolute bottom-0 left-0 right-0 h-px bg-black/10"></div>
+          <div className="container px-4 md:px-6 relative z-10">
             <motion.div
               className="flex flex-col items-center justify-center space-y-4 text-center"
               initial={{ opacity: 0, y: 20 }}
@@ -270,8 +203,8 @@ export default function Home() {
               <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-8 pt-8">
                 {[
                   { icon: Zap, label: "Fast Matching", value: "2 min avg" },
-                  { icon: Users, label: "Active Users", value: "50,000+" },
-                  { icon: CheckCircle, label: "Completed Jobs", value: "120,000+" },
+                  { icon: Users, label: "All-in-One", value: "Hire & Work" },
+                  { icon: CheckCircle, label: "Quality Talent", value: "Verified Pros" },
                   { icon: Headphones, label: "Support", value: "24/7" },
                 ].map((stat, index) => (
                   <motion.div
@@ -282,11 +215,11 @@ export default function Home() {
                     viewport={{ once: true }}
                     transition={{ duration: 0.5, delay: index * 0.1 }}
                   >
-                    <div className="rounded-full bg-white/10 p-3 mb-3">
+                    <div className="rounded-full bg-white/20 p-3 mb-3 shadow-lg backdrop-blur-sm">
                       <stat.icon className="h-6 w-6" />
                     </div>
-                    <div className="text-2xl font-bold">{stat.value}</div>
-                    <div className="text-sm opacity-80">{stat.label}</div>
+                    <div className="text-2xl font-bold text-white drop-shadow-sm">{stat.value}</div>
+                    <div className="text-sm text-white/90">{stat.label}</div>
                   </motion.div>
                 ))}
               </div>
@@ -294,8 +227,10 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-muted/50">
-          <div className="container px-4 md:px-6">
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-muted/50 relative">
+          <BackgroundPattern />
+          <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
+          <div className="container px-4 md:px-6 relative z-10">
             <motion.div
               className="flex flex-col items-center justify-center space-y-4 text-center mb-12"
               initial={{ opacity: 0, y: 20 }}
@@ -366,13 +301,15 @@ export default function Home() {
               ))}
             </div>
           </div>
+          <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent"></div>
         </section>
 
         {/* Add the waitlist section before the footer */}
         <WaitlistSection />
       </main>
-      <footer className="w-full border-t bg-background py-6 md:py-12">
-        <div className="container px-4 md:px-6">
+      <footer className="w-full border-t bg-background py-6 md:py-12 relative">
+        <BackgroundPattern className="opacity-30" />
+        <div className="container px-4 md:px-6 relative z-10">
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-5">
             <div className="space-y-4 lg:col-span-2">
               <div className="flex items-center gap-2">
