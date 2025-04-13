@@ -1,6 +1,7 @@
 "use server"
 
 import { z } from "zod"
+import { createServerClient } from "@/lib/supabase"
 
 const waitlistSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
@@ -8,22 +9,36 @@ const waitlistSchema = z.object({
   message: z.string().optional(),
 })
 
-// In-memory storage for waitlist entries (in a real app, this would be a database)
-const waitlistEntries: Array<z.infer<typeof waitlistSchema> & { date: Date }> = []
-
 export async function joinWaitlist(data: z.infer<typeof waitlistSchema>) {
   try {
     // Validate the data
     const validatedData = waitlistSchema.parse(data)
 
-    // Store the waitlist entry in memory (in a real app, this would be a database)
-    waitlistEntries.push({
-      ...validatedData,
-      date: new Date(),
-    })
+    // Initialize Supabase client
+    const supabase = createServerClient()
 
-    console.log("New waitlist entry (server):", validatedData)
-    console.log("Total waitlist entries (server):", waitlistEntries.length)
+    // Insert the data into the waitlist table
+    const { error } = await supabase.from("waitlist").insert([
+      {
+        name: validatedData.name,
+        email: validatedData.email,
+        message: validatedData.message || null,
+      },
+    ])
+
+    if (error) {
+      console.error("Error inserting into waitlist:", error)
+
+      // Handle duplicate email error
+      if (error.code === "23505") {
+        return {
+          success: false,
+          message: "This email is already on our waitlist.",
+        }
+      }
+
+      throw error
+    }
 
     return {
       success: true,

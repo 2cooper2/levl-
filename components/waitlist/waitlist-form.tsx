@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -38,26 +37,18 @@ export function WaitlistForm() {
       // Validate the data client-side first
       waitlistSchema.parse(data)
 
-      // Store in localStorage for demo purposes
-      const waitlistEntries = JSON.parse(localStorage.getItem("waitlistEntries") || "[]")
-      waitlistEntries.push({
-        ...data,
-        date: new Date().toISOString(),
-      })
-      localStorage.setItem("waitlistEntries", JSON.stringify(waitlistEntries))
-      console.log("New waitlist entry:", data)
-      console.log("Total waitlist entries:", waitlistEntries.length)
-
-      // Also send to server (optional in demo mode)
+      // Submit to Supabase via server action
       const result = await joinWaitlist(data)
 
       setFormStatus({
-        success: true,
-        message: "You've been added to our waitlist! We'll notify you when we launch.",
+        success: result.success,
+        message: result.message,
       })
 
       // Reset form on success
-      event.currentTarget.reset()
+      if (result.success) {
+        event.currentTarget.reset()
+      }
     } catch (error) {
       console.error("Error in form submission:", error)
       let errorMessage = "Something went wrong. Please try again."
@@ -111,20 +102,6 @@ export function WaitlistForm() {
           {formStatus.message}
         </div>
       )}
-
-      <div className="text-xs text-muted-foreground text-center">
-        <p>Demo Mode: Entries are stored locally in your browser.</p>
-        <button
-          type="button"
-          onClick={() => {
-            console.table(JSON.parse(localStorage.getItem("waitlistEntries") || "[]"))
-            alert("Waitlist entries logged to console. Press F12 to view.")
-          }}
-          className="text-primary hover:underline mt-1"
-        >
-          View Entries in Console
-        </button>
-      </div>
     </form>
   )
 }
