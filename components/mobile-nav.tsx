@@ -3,15 +3,17 @@
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { LevlLogo } from "@/components/levl-logo"
-import { Menu } from "lucide-react"
+import { Menu, Moon, Sun } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 import { useAuth } from "@/context/auth-context"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useTheme } from "next-themes"
 
 export function MobileNav() {
   const [open, setOpen] = useState(false)
   const { user, isAuthenticated, logout } = useAuth()
+  const { setTheme, theme } = useTheme()
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -22,9 +24,11 @@ export function MobileNav() {
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="flex flex-col">
-        <div className="flex items-center gap-2 border-b pb-4">
-          <LevlLogo className="h-8 w-8" />
-          <span className="text-xl font-bold">LevL</span>
+        <div className="flex items-center justify-between gap-2 border-b pb-4">
+          <div className="flex items-center gap-2">
+            <LevlLogo className="h-8 w-8" />
+            <span className="text-xl font-bold">LevL</span>
+          </div>
         </div>
         {isAuthenticated && (
           <div className="flex items-center gap-3 my-4 py-4 border-b">
@@ -106,6 +110,18 @@ export function MobileNav() {
               </Link>
             </>
           )}
+          <div className="flex items-center justify-between border-t pt-4 mt-2">
+            <span className="text-lg font-medium">Dark Mode</span>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="rounded-full"
+            >
+              {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              <span className="sr-only">Toggle theme</span>
+            </Button>
+          </div>
         </nav>
         <div className="mt-auto flex flex-col gap-2 pt-4 border-t">
           {isAuthenticated ? (

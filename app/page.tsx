@@ -163,7 +163,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-br from-violet-500 to-purple-600 text-primary-foreground relative overflow-hidden">
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-br from-primary/90 to-purple-400 text-primary-foreground relative overflow-hidden">
           <div className="absolute inset-0 bg-[url('/placeholder.svg?height=200&width=200')] opacity-[0.03] bg-repeat"></div>
           <div className="absolute top-0 left-0 right-0 h-px bg-white/10"></div>
           <div className="absolute bottom-0 left-0 right-0 h-px bg-black/10"></div>
