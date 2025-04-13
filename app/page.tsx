@@ -105,9 +105,9 @@ export default function Home() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: index * 0.2 }}
                 >
-                  <div className="absolute -top-4 text-8xl font-bold text-primary/10">{item.step}</div>
-                  <div className="relative z-10 mt-8">
-                    <div className="mb-4 rounded-full bg-primary/10 p-4 text-primary mx-auto w-16 h-16 flex items-center justify-center">
+                  <div className="absolute -top-10 text-8xl font-bold text-primary/10">{item.step}</div>
+                  <div className="relative z-10 mt-12">
+                    <div className="mb-4 rounded-full bg-primary/10 p-4 text-primary mx-auto w-16 h-16 flex items-center justify-center pt-6">
                       <item.icon className="h-8 w-8" />
                     </div>
                     <h3 className="text-xl font-bold">{item.title}</h3>

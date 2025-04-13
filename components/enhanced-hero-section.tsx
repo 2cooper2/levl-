@@ -61,7 +61,7 @@ export function EnhancedHeroSection() {
                 transition={{ duration: 0.6, delay: 0.2 }}
               >
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
-                  Level Up Your Skills & Services
+                  Hire & Complete Jobs All In One Place!
                 </h1>
                 <div className="inline-flex items-center mt-2 px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-sm font-medium">
                   <span className="mr-1">✓</span> Lower fees than TaskRabbit
@@ -163,9 +163,6 @@ export function EnhancedHeroSection() {
                         </div>
                       </div>
                     </div>
-                    <EnhancedButton variant="gradient" className="w-full" onClick={handleFindServices}>
-                      Find Services
-                    </EnhancedButton>
                   </TabsContent>
                   <TabsContent value="work" className="space-y-5">
                     <div className="space-y-3">
