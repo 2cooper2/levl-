@@ -130,6 +130,10 @@
     animation: scale 0.3s ease-out forwards;
   }
 
+  .animate-shimmer {
+    animation: shimmer 2s infinite;
+  }
+
   @keyframes fadeIn {
     from {
       opacity: 0;
@@ -169,6 +173,15 @@
     to {
       transform: scale(1);
       opacity: 1;
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
     }
   }
 }

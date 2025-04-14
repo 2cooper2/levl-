@@ -96,9 +96,6 @@ export function PremiumHeroSection() {
                   Get Started <ArrowRight className="h-4 w-4 ml-1" />
                 </EnhancedButton>
               </GradientBorder>
-              <EnhancedButton size="lg" variant="outline" className="text-base">
-                Learn More
-              </EnhancedButton>
             </motion.div>
           </div>
           <motion.div
