@@ -587,7 +587,9 @@ export function EnhancedHeroSection() {
 
   return (
     <>
-      <style jsx global>{scrollbarHideStyles}</style>
+      <style jsx global>
+        {scrollbarHideStyles}
+      </style>
       <section className="w-full py-8 md:py-12 lg:py-24 xl:py-32 relative overflow-hidden">
         {/* Animated background elements */}
         <div
@@ -600,8 +602,7 @@ export function EnhancedHeroSection() {
         ></div>
 
         {/* Futuristic grid lines */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_49.5%,rgba(255,255,255,0.05)_49.5%,rgba(255,255,255,0.05)_50.5%,transparent_50.5%),linear-gradient(to_bottom,transparent_49.5%,rgba(255,255,255,0.05)_49.5%,rgba(255,255,255,0.05)_50.5%,transparent_50.5%)] bg-[length:50px_50px] opacity-20 pointer-events-none">
-        </div>
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_49.5%,rgba(255,255,255,0.05)_49.5%,rgba(255,255,255,0.05)_50.5%,transparent_50.5%),linear-gradient(to_bottom,transparent_49.5%,rgba(255,255,255,0.05)_49.5%,rgba(255,255,255,0.05)_50.5%,transparent_50.5%)] bg-[length:50px_50px] opacity-20 pointer-events-none"></div>
 
         <div className="container px-3 md:px-6 relative z-10">
           <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 xl:grid-cols-2">
@@ -609,7 +610,7 @@ export function EnhancedHeroSection() {
               className="flex flex-col justify-center space-y-4"
               variants={fadeIn}
               initial="hidden"
-              animate="visible"ate="visible"
+              animate="visible"
             >
               <div className="space-y-2">
                 <motion.div
@@ -822,7 +823,9 @@ export function EnhancedHeroSection() {
                               </div>
                               <div className="text-right">
                                 <div className="text-xs text-black/60 dark:text-white/60">Current Earnings</div>
-                                <div className="font-bold text-black dark:text-white">{skills[activeSkill].earnings}</div>
+                                <div className="font-bold text-black dark:text-white">
+                                  {skills[activeSkill].earnings}
+                                </div>
                                 <div className="text-xs text-green-500 mt-0.5 flex items-center justify-end">
                                   <TrendingUp className="h-3 w-3 mr-0.5" /> {skills[activeSkill].nextEarnings}
                                 </div>
@@ -857,11 +860,15 @@ export function EnhancedHeroSection() {
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
                               <div className="bg-white/5 dark:bg-black/10 rounded-md p-2">
                                 <div className="text-xs text-black/60 dark:text-white/60">Mentors</div>
-                                <div className="font-bold text-black dark:text-white">{skills[activeSkill].mentors}</div>
+                                <div className="font-bold text-black dark:text-white">
+                                  {skills[activeSkill].mentors}
+                                </div>
                               </div>
                               <div className="bg-white/5 dark:bg-black/10 rounded-md p-2">
                                 <div className="text-xs text-black/60 dark:text-white/60">Projects</div>
-                                <div className="font-bold text-black dark:text-white">{skills[activeSkill].projects}</div>
+                                <div className="font-bold text-black dark:text-white">
+                                  {skills[activeSkill].projects}
+                                </div>
                               </div>
                               <div className="bg-white/5 dark:bg-black/10 rounded-md p-2">
                                 <div className="text-xs text-black/60 dark:text-white/60">Rating</div>
@@ -1041,7 +1048,9 @@ export function EnhancedHeroSection() {
                       {activeTab === "projects" && (
                         <div className="space-y-4">
                           <div className="flex items-center justify-between mb-2">
-                            <h4 className="text-sm font-semibold text-black dark:text-white">Skill-Building Projects</h4>
+                            <h4 className="text-sm font-semibold text-black dark:text-white">
+                              Skill-Building Projects
+                            </h4>
                             <div className="text-xs text-primary">Earn while you learn</div>
                           </div>
 
@@ -1249,7 +1258,9 @@ export function EnhancedHeroSection() {
                                               {response.author}
                                             </span>
                                           </div>
-                                          <div className="text-xs text-black/40 dark:text-white/40">{response.time}</div>
+                                          <div className="text-xs text-black/40 dark:text-white/40">
+                                            {response.time}
+                                          </div>
                                         </div>
 
                                         <p className="text-xs text-black/80 dark:text-white/80 mb-2">
@@ -1381,144 +1392,145 @@ export function EnhancedHeroSection() {
                           <div className="flex items-center justify-between mb-2">
                             <h4 className="text-sm font-semibold text-black dark:text-white">Achievement Milestones</h4>
                             <div className="text-xs text-primary">Unlock rewards</div>
-                        </div>
-
-                        <div className="space-y-3">
-                          {skills[activeSkill].milestones.map((milestone, index) => (
-                            <div
-                              key={index}
-                              className={`p-3 rounded-lg border transition-all duration-300 ${
-                                selectedMilestone === index
-                                  ? "bg-white/10 dark:bg-black/20 border-primary/30"
-                                  : "bg-white/5 dark:bg-black/10 border-white/10 hover:border-white/30"
-                              }`}
-                              onClick={() => setSelectedMilestone(index)}
-                            >
-                              <div className="flex justify-between items-start mb-2">
-                                <h5 className="text-sm font-medium text-black dark:text-white">{milestone.name}</h5>
-                                <div className="px-2 py-0.5 rounded-full bg-primary/20 text-primary text-xs">
-                                  {typeof milestone.progress === "number" && typeof milestone.total === "number"
-                                    ? `${Math.round((milestone.progress / milestone.total) * 100)}%`
-                                    : typeof milestone.progress === "object" || typeof milestone.total === "object"
-                                      ? "In Progress"
-                                      : `${milestone.progress}/${milestone.total}`}
-                                </div>
-                              </div>
-
-                              <div className="mb-2">
-                                <div className="h-1.5 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
-                                  <div
-                                    className="h-full rounded-full bg-gradient-to-r from-primary to-purple-500"
-                                    style={{
-                                      width:
-                                        typeof milestone.progress === "number" && typeof milestone.total === "number"
-                                          ? `${(milestone.progress / milestone.total) * 100}%`
-                                          : "0%",
-                                    }}
-                                  ></div>
-                                </div>
-                              </div>
-
-                              <div className="flex justify-between items-center text-xs">
-                                <div className="text-black/60 dark:text-white/60 flex items-center">
-                                  <Award className="h-3 w-3 mr-1 text-yellow-500" />
-                                  <span className="text-black dark:text-white">{milestone.reward}</span>
-                                </div>
-                                {selectedMilestone === index && (
-                                  <button className="text-primary flex items-center">
-                                    View details <ArrowRight className="h-3 w-3 ml-1" />
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-
-                        <div className="bg-gradient-to-r from-primary/10 to-purple-500/10 rounded-lg p-3">
-                          <div className="flex items-center mb-2">
-                            <Shield className="h-4 w-4 text-primary mr-2" />
-                            <h5 className="text-sm font-medium text-black dark:text-white">Skill Certification</h5>
                           </div>
-                          <p className="text-xs text-black/80 dark:text-white/80 mb-3">
-                            Complete all milestones to earn a verified skill certification that showcases your expertise
-                            to clients.
-                          </p>
-                          <div className="flex justify-between items-center">
-                            <div className="text-xs text-black/60 dark:text-white/60">
-                              Overall progress: <span className="text-black dark:text-white">42%</span>
-                            </div>
-                            <EnhancedButton variant="outline" size="sm" className="h-7 text-xs">
-                              View Certificate
-                            </EnhancedButton>
+
+                          <div className="space-y-3">
+                            {skills[activeSkill].milestones.map((milestone, index) => (
+                              <div
+                                key={index}
+                                className={`p-3 rounded-lg border transition-all duration-300 ${
+                                  selectedMilestone === index
+                                    ? "bg-white/10 dark:bg-black/20 border-primary/30"
+                                    : "bg-white/5 dark:bg-black/10 border-white/10 hover:border-white/30"
+                                }`}
+                                onClick={() => setSelectedMilestone(index)}
+                              >
+                                <div className="flex justify-between items-start mb-2">
+                                  <h5 className="text-sm font-medium text-black dark:text-white">{milestone.name}</h5>
+                                  <div className="px-2 py-0.5 rounded-full bg-primary/20 text-primary text-xs">
+                                    {typeof milestone.progress === "number" && typeof milestone.total === "number"
+                                      ? `${Math.round((milestone.progress / milestone.total) * 100)}%`
+                                      : typeof milestone.progress === "object" || typeof milestone.total === "object"
+                                        ? "In Progress"
+                                        : `${milestone.progress}/${milestone.total}`}
+                                  </div>
+                                </div>
+
+                                <div className="mb-2">
+                                  <div className="h-1.5 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
+                                    <div
+                                      className="h-full rounded-full bg-gradient-to-r from-primary to-purple-500"
+                                      style={{
+                                        width:
+                                          typeof milestone.progress === "number" && typeof milestone.total === "number"
+                                            ? `${(milestone.progress / milestone.total) * 100}%`
+                                            : "0%",
+                                      }}
+                                    ></div>
+                                  </div>
+                                </div>
+
+                                <div className="flex justify-between items-center text-xs">
+                                  <div className="text-black/60 dark:text-white/60 flex items-center">
+                                    <Award className="h-3 w-3 mr-1 text-yellow-500" />
+                                    <span className="text-black dark:text-white">{milestone.reward}</span>
+                                  </div>
+                                  {selectedMilestone === index && (
+                                    <button className="text-primary flex items-center">
+                                      View details <ArrowRight className="h-3 w-3 ml-1" />
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
                           </div>
+
+                          <div className="bg-gradient-to-r from-primary/10 to-purple-500/10 rounded-lg p-3">
+                            <div className="flex items-center mb-2">
+                              <Shield className="h-4 w-4 text-primary mr-2" />
+                              <h5 className="text-sm font-medium text-black dark:text-white">Skill Certification</h5>
+                            </div>
+                            <p className="text-xs text-black/80 dark:text-white/80 mb-3">
+                              Complete all milestones to earn a verified skill certification that showcases your
+                              expertise to clients.
+                            </p>
+                            <div className="flex justify-between items-center">
+                              <div className="text-xs text-black/60 dark:text-white/60">
+                                Overall progress: <span className="text-black dark:text-white">42%</span>
+                              </div>
+                              <EnhancedButton variant="outline" size="sm" className="h-7 text-xs">
+                                View Certificate
+                              </EnhancedButton>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Feature highlights */}
+                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                      <div className="flex items-start">
+                        <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2 mt-0.5">
+                          <Brain className="h-3 w-3 text-primary" />
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-semibold text-black dark:text-white">AI Coaching</h4>
+                          <p className="text-xs text-black/60 dark:text-white/60">Personalized guidance</p>
                         </div>
                       </div>
-                    )}
+
+                      <div className="flex items-start">
+                        <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2 mt-0.5">
+                          <Users className="h-3 w-3 text-primary" />
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-semibold text-black dark:text-white">Mentor Network</h4>
+                          <p className="text-xs text-black/60 dark:text-white/60">Expert feedback</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start">
+                        <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2 mt-0.5">
+                          <Target className="h-3 w-3 text-primary" />
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-semibold text-black dark:text-white">Skill Projects</h4>
+                          <p className="text-xs text-black/60 dark:text-white/60">Learn while earning</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start">
+                        <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2 mt-0.5">
+                          <Trophy className="h-3 w-3 text-primary" />
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-semibold text-black dark:text-white">Skill Certification</h4>
+                          <p className="text-xs text-black/60 dark:text-white/60">Verified credentials</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <EnhancedButton
+                      variant="gradient"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => router.push("/skill-accelerator")}
+                    >
+                      <Zap className="mr-2 h-4 w-4" />
+                      Accelerate Your Skills
+                    </EnhancedButton>
                   </div>
 
-                  {/* Feature highlights */}
-                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                    <div className="flex items-start">
-                      <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2 mt-0.5">
-                        <Brain className="h-3 w-3 text-primary" />
-                      </div>
-                      <div>
-                        <h4 className="text-xs font-semibold text-black dark:text-white">AI Coaching</h4>
-                        <p className="text-xs text-black/60 dark:text-white/60">Personalized guidance</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start">
-                      <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2 mt-0.5">
-                        <Users className="h-3 w-3 text-primary" />
-                      </div>
-                      <div>
-                        <h4 className="text-xs font-semibold text-black dark:text-white">Mentor Network</h4>
-                        <p className="text-xs text-black/60 dark:text-white/60">Expert feedback</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start">
-                      <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2 mt-0.5">
-                        <Target className="h-3 w-3 text-primary" />
-                      </div>
-                      <div>
-                        <h4 className="text-xs font-semibold text-black dark:text-white">Skill Projects</h4>
-                        <p className="text-xs text-black/60 dark:text-white/60">Learn while earning</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start">
-                      <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2 mt-0.5">
-                        <Trophy className="h-3 w-3 text-primary" />
-                      </div>
-                      <div>
-                        <h4 className="text-xs font-semibold text-black dark:text-white">Skill Certification</h4>
-                        <p className="text-xs text-black/60 dark:text-white/60">Verified credentials</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <EnhancedButton
-                    variant="gradient"
-                    size="sm"
-                    className="w-full"
-                    onClick={() => router.push("/skill-accelerator")}
-                  >
-                    <Zap className="mr-2 h-4 w-4" />
-                    Accelerate Your Skills
-                  </EnhancedButton>
-                </div>
-
-                {/* Futuristic decorative elements */}
-                <div className="absolute top-1/4 right-6 w-2 h-2 rounded-full bg-primary/50 animate-pulse"></div>
-                <div
-                  className="absolute bottom-1/3 left-8 w-1.5 h-1.5 rounded-full bg-purple-500/50 animate-ping"
-                  style={{ animationDuration: "3s" }}
-                ></div>
-              </motion.div>
-            </div>
-          </motion.div>
+                  {/* Futuristic decorative elements */}
+                  <div className="absolute top-1/4 right-6 w-2 h-2 rounded-full bg-primary/50 animate-pulse"></div>
+                  <div
+                    className="absolute bottom-1/3 left-8 w-1.5 h-1.5 rounded-full bg-purple-500/50 animate-ping"
+                    style={{ animationDuration: "3s" }}
+                  ></div>
+                </motion.div>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </section>
     </>
