@@ -42,6 +42,17 @@ const shimmerAnimation = {
   "100%": { transform: "translateX(100%)" },
 }
 
+// Add styles for hiding scrollbars
+const scrollbarHideStyles = `
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+`
+
 export function EnhancedHeroSection() {
   const router = useRouter()
   const { isAuthenticated } = useAuth()
@@ -575,798 +586,801 @@ export function EnhancedHeroSection() {
   }
 
   return (
-    <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 relative overflow-hidden">
-      {/* Animated background elements */}
-      <div
-        className="absolute -left-64 -top-64 h-[500px] w-[500px] rounded-full bg-primary/10 blur-3xl opacity-50 animate-pulse"
-        style={{ animationDuration: "15s" }}
-      ></div>
-      <div
-        className="absolute -right-64 -bottom-64 h-[500px] w-[500px] rounded-full bg-purple-500/10 blur-3xl opacity-50 animate-pulse"
-        style={{ animationDuration: "20s" }}
-      ></div>
+    <>
+      <style jsx global>{scrollbarHideStyles}</style>
+      <section className="w-full py-8 md:py-12 lg:py-24 xl:py-32 relative overflow-hidden">
+        {/* Animated background elements */}
+        <div
+          className="absolute -left-64 -top-64 h-[500px] w-[500px] rounded-full bg-primary/10 blur-3xl opacity-50 animate-pulse"
+          style={{ animationDuration: "15s" }}
+        ></div>
+        <div
+          className="absolute -right-64 -bottom-64 h-[500px] w-[500px] rounded-full bg-purple-500/10 blur-3xl opacity-50 animate-pulse"
+          style={{ animationDuration: "20s" }}
+        ></div>
 
-      {/* Futuristic grid lines */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_49.5%,rgba(255,255,255,0.05)_49.5%,rgba(255,255,255,0.05)_50.5%,transparent_50.5%),linear-gradient(to_bottom,transparent_49.5%,rgba(255,255,255,0.05)_49.5%,rgba(255,255,255,0.05)_50.5%,transparent_50.5%)] bg-[length:50px_50px] opacity-20 pointer-events-none"></div>
+        {/* Futuristic grid lines */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_49.5%,rgba(255,255,255,0.05)_49.5%,rgba(255,255,255,0.05)_50.5%,transparent_50.5%),linear-gradient(to_bottom,transparent_49.5%,rgba(255,255,255,0.05)_49.5%,rgba(255,255,255,0.05)_50.5%,transparent_50.5%)] bg-[length:50px_50px] opacity-20 pointer-events-none">
+        </div>
 
-      <div className="container px-4 md:px-6 relative z-10">
-        <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 xl:grid-cols-2">
-          <motion.div
-            className="flex flex-col justify-center space-y-4"
-            variants={fadeIn}
-            initial="hidden"
-            animate="visible"
-          >
-            <div className="space-y-2">
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-              >
-                <div className="relative">
-                  <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none text-black dark:text-white leading-relaxed pb-1">
-                    Redefining The Gig Economy
-                  </h1>
-                  <motion.div
-                    className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-purple-500/20 blur-xl opacity-0"
-                    animate={{ opacity: [0, 0.3, 0] }}
-                    transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY, repeatType: "reverse" }}
-                  />
-                </div>
-                <div
-                  className="inline-flex items-center mt-3 px-4 py-1.5 rounded-full bg-gradient-to-r from-primary/10 to-purple-500/10 backdrop-blur-sm border border-white/10 shadow-sm relative overflow-hidden group"
-                  onMouseEnter={() => setShowDiamondGlint(true)}
-                  onMouseLeave={() => setShowDiamondGlint(false)}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1500 ease-in-out"></div>
-                  <div className="relative">
-                    <div className="relative">
-                      <Gem className="h-3.5 w-3.5 mr-2 text-primary" />
-                      {showDiamondGlint && (
-                        <>
-                          {/* Diamond-shaped glint animation */}
-                          <motion.div
-                            className="absolute inset-0"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: [0, 1, 0] }}
-                            transition={{ duration: 0.8 }}
-                          >
-                            {/* Top facet */}
-                            <div className="absolute top-0 left-1/2 w-1.5 h-1.5 bg-white rounded-sm -translate-x-1/2 -translate-y-1/4 rotate-45 opacity-80 shadow-[0_0_5px_2px_rgba(255,255,255,0.8)]" />
-
-                            {/* Right facet */}
-                            <div className="absolute top-1/2 right-0 w-1.5 h-1.5 bg-white rounded-sm -translate-y-1/2 translate-x-1/4 rotate-45 opacity-80 shadow-[0_0_5px_2px_rgba(255,255,255,0.8)]" />
-
-                            {/* Bottom facet */}
-                            <div className="absolute bottom-0 left-1/2 w-1.5 h-1.5 bg-white rounded-sm -translate-x-1/2 translate-y-1/4 rotate-45 opacity-80 shadow-[0_0_5px_2px_rgba(255,255,255,0.8)]" />
-
-                            {/* Left facet */}
-                            <div className="absolute top-1/2 left-0 w-1.5 h-1.5 bg-white rounded-sm -translate-y-1/2 -translate-x-1/4 rotate-45 opacity-80 shadow-[0_0_5px_2px_rgba(255,255,255,0.8)]" />
-
-                            {/* Center sparkle */}
-                            <div className="absolute inset-0 m-auto w-1 h-1 bg-white rounded-full opacity-90 shadow-[0_0_8px_4px_rgba(255,255,255,0.9)]" />
-                          </motion.div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  <span className="text-sm font-medium text-black dark:text-white relative z-10">
-                    Lower fees than TaskRabbit
-                  </span>
-                </div>
-              </motion.div>
-              <motion.p
-                className="max-w-[600px] md:text-xl leading-relaxed text-black dark:text-white"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-              >
-                Empowering limitless connections, shaping the future of work.
-              </motion.p>
-            </div>
+        <div className="container px-3 md:px-6 relative z-10">
+          <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 xl:grid-cols-2">
             <motion.div
-              className="flex flex-col gap-3 min-[400px]:flex-row"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
+              className="flex flex-col justify-center space-y-4"
+              variants={fadeIn}
+              initial="hidden"
+              animate="visible"ate="visible"
             >
-              <EnhancedButton
-                size="lg"
-                variant="gradient"
-                className="gap-1.5 text-base relative overflow-hidden group"
-                onClick={handleGetStarted}
-              >
-                <span className="relative z-10 flex items-center">
-                  Get Started <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                </span>
-                <span className="absolute inset-0 bg-gradient-to-r from-primary/80 to-purple-500/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                <span className="absolute -inset-px rounded-md bg-gradient-to-r from-primary to-purple-500 opacity-70 group-hover:opacity-100 blur-sm transition-opacity"></span>
-              </EnhancedButton>
-            </motion.div>
-          </motion.div>
-
-          {/* Enhanced Skill Accelerator UI */}
-          <motion.div
-            className="flex items-center justify-center"
-            variants={fadeIn}
-            initial="hidden"
-            animate="visible"
-            transition={{ delay: 0.3 }}
-          >
-            <div className="relative w-full max-w-md">
-              <motion.div
-                className="relative rounded-xl overflow-hidden border border-white/20 bg-white/10 dark:bg-black/10 backdrop-blur-md p-6 shadow-lg"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-                style={{
-                  boxShadow: "0 10px 30px -10px rgba(var(--primary-rgb), 0.2)",
-                }}
-              >
-                {/* Glassmorphic effect */}
-                <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/5 dark:from-white/5 dark:to-transparent rounded-xl pointer-events-none"></div>
-
-                {/* Animated border glow */}
-                <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-primary/30 via-purple-500/30 to-primary/30 opacity-70 blur-sm"></div>
-
-                {/* Success message toast */}
-                <AnimatePresence>
-                  {showSuccessMessage && (
+              <div className="space-y-2">
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                >
+                  <div className="relative">
+                    <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none text-black dark:text-white leading-relaxed pb-1">
+                      Redefining The Gig Economy
+                    </h1>
                     <motion.div
-                      className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50 bg-green-500/90 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center shadow-lg"
-                      initial={{ opacity: 0, y: -20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      Application submitted successfully!
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                      className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-purple-500/20 blur-xl opacity-0"
+                      animate={{ opacity: [0, 0.3, 0] }}
+                      transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY, repeatType: "reverse" }}
+                    />
+                  </div>
+                  <div
+                    className="inline-flex items-center mt-3 px-4 py-1.5 rounded-full bg-gradient-to-r from-primary/10 to-purple-500/10 backdrop-blur-sm border border-white/10 shadow-sm relative overflow-hidden group"
+                    onMouseEnter={() => setShowDiamondGlint(true)}
+                    onMouseLeave={() => setShowDiamondGlint(false)}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1500 ease-in-out"></div>
+                    <div className="relative">
+                      <div className="relative">
+                        <Gem className="h-3.5 w-3.5 mr-2 text-primary" />
+                        {showDiamondGlint && (
+                          <>
+                            {/* Diamond-shaped glint animation */}
+                            <motion.div
+                              className="absolute inset-0"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: [0, 1, 0] }}
+                              transition={{ duration: 0.8 }}
+                            >
+                              {/* Top facet */}
+                              <div className="absolute top-0 left-1/2 w-1.5 h-1.5 bg-white rounded-sm -translate-x-1/2 -translate-y-1/4 rotate-45 opacity-80 shadow-[0_0_5px_2px_rgba(255,255,255,0.8)]" />
 
-                <div className="space-y-4 relative z-10">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div className="h-10 w-10 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center mr-3 relative group">
-                        <Rocket className="h-5 w-5 text-white" />
-                        <div className="absolute inset-0 rounded-full bg-white/30 scale-0 group-hover:scale-150" />
-                        <div className="absolute inset-0 rounded-full bg-white/30 scale-0 group-hover:scale-150 opacity-0 transition-all duration-700"></div>
+                              {/* Right facet */}
+                              <div className="absolute top-1/2 right-0 w-1.5 h-1.5 bg-white rounded-sm -translate-y-1/2 translate-x-1/4 rotate-45 opacity-80 shadow-[0_0_5px_2px_rgba(255,255,255,0.8)]" />
+
+                              {/* Bottom facet */}
+                              <div className="absolute bottom-0 left-1/2 w-1.5 h-1.5 bg-white rounded-sm -translate-x-1/2 translate-y-1/4 rotate-45 opacity-80 shadow-[0_0_5px_2px_rgba(255,255,255,0.8)]" />
+
+                              {/* Left facet */}
+                              <div className="absolute top-1/2 left-0 w-1.5 h-1.5 bg-white rounded-sm -translate-y-1/2 -translate-x-1/4 rotate-45 opacity-80 shadow-[0_0_5px_2px_rgba(255,255,255,0.8)]" />
+
+                              {/* Center sparkle */}
+                              <div className="absolute inset-0 m-auto w-1 h-1 bg-white rounded-full opacity-90 shadow-[0_0_8px_4px_rgba(255,255,255,0.9)]" />
+                            </motion.div>
+                          </>
+                        )}
                       </div>
-                      <h3 className="text-xl font-bold text-black dark:text-white">Skill Accelerator</h3>
                     </div>
+                    <span className="text-sm font-medium text-black dark:text-white relative z-10">
+                      Lower fees than TaskRabbit
+                    </span>
                   </div>
+                </motion.div>
+                <motion.p
+                  className="max-w-[600px] md:text-xl leading-relaxed text-black dark:text-white"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.6, delay: 0.4 }}
+                >
+                  Empowering limitless connections, shaping the future of work.
+                </motion.p>
+              </div>
+              <motion.div
+                className="flex flex-col gap-3 min-[400px]:flex-row"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.6 }}
+              >
+                <EnhancedButton
+                  size="lg"
+                  variant="gradient"
+                  className="gap-1.5 text-base relative overflow-hidden group"
+                  onClick={handleGetStarted}
+                >
+                  <span className="relative z-10 flex items-center">
+                    Get Started <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                  </span>
+                  <span className="absolute inset-0 bg-gradient-to-r from-primary/80 to-purple-500/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                  <span className="absolute -inset-px rounded-md bg-gradient-to-r from-primary to-purple-500 opacity-70 group-hover:opacity-100 blur-sm transition-opacity"></span>
+                </EnhancedButton>
+              </motion.div>
+            </motion.div>
 
-                  <p className="text-sm text-black/80 dark:text-white/80">
-                    The world's first AI-powered skill development ecosystem that helps you earn while you learn and
-                    grow your freelance career exponentially.
-                  </p>
+            {/* Enhanced Skill Accelerator UI */}
+            <motion.div
+              className="flex items-center justify-center w-full"
+              variants={fadeIn}
+              initial="hidden"
+              animate="visible"
+              transition={{ delay: 0.3 }}
+            >
+              <div className="relative w-full max-w-md">
+                <motion.div
+                  className="relative rounded-xl overflow-hidden border border-white/20 bg-white/10 dark:bg-black/10 backdrop-blur-md p-3 sm:p-6 shadow-lg"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.6, delay: 0.4 }}
+                  style={{
+                    boxShadow: "0 10px 30px -10px rgba(var(--primary-rgb), 0.2)",
+                  }}
+                >
+                  {/* Glassmorphic effect */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/5 dark:from-white/5 dark:to-transparent rounded-xl pointer-events-none"></div>
 
-                  {/* Skill Progression Tabs */}
-                  <div className="flex space-x-2 overflow-x-auto pb-1">
-                    {skills.map((skill, index) => (
-                      <button
-                        key={index}
-                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 flex items-center ${
-                          activeSkill === index
-                            ? "bg-gradient-to-r from-primary to-purple-500 text-white"
-                            : "bg-white/10 dark:bg-black/20 text-black dark:text-white hover:bg-white/20 dark:hover:bg-black/30"
-                        }`}
-                        onClick={() => setActiveSkill(index)}
-                        onMouseEnter={() => setHoverSkill(index)}
-                        onMouseLeave={() => setHoverSkill(null)}
+                  {/* Animated border glow */}
+                  <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-primary/30 via-purple-500/30 to-primary/30 opacity-70 blur-sm"></div>
+
+                  {/* Success message toast */}
+                  <AnimatePresence>
+                    {showSuccessMessage && (
+                      <motion.div
+                        className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50 bg-green-500/90 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center shadow-lg"
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.3 }}
                       >
-                        <span className="mr-1.5">{skill.icon}</span>
-                        {skill.name}
-                        {hoverSkill === index && <span className="ml-1.5 text-xs opacity-70">{skill.level}</span>}
-                      </button>
-                    ))}
-                  </div>
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Application submitted successfully!
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
-                  {/* Navigation Tabs */}
-                  <div className="flex border-b border-white/10 overflow-x-auto">
-                    {["overview", "learning", "projects", "forum", "analytics", "milestones"].map((tab) => (
-                      <button
-                        key={tab}
-                        className={`px-3 py-2 text-xs font-medium capitalize transition-all duration-300 ${
-                          activeTab === tab
-                            ? "text-primary border-b-2 border-primary"
-                            : "text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white"
-                        }`}
-                        onClick={() => setActiveTab(tab)}
-                      >
-                        {tab}
-                      </button>
-                    ))}
-                  </div>
+                  <div className="space-y-4 relative z-10">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <div className="h-10 w-10 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center mr-3 relative group">
+                          <Rocket className="h-5 w-5 text-white" />
+                          <div className="absolute inset-0 rounded-full bg-white/30 scale-0 group-hover:scale-150" />
+                          <div className="absolute inset-0 rounded-full bg-white/30 scale-0 group-hover:scale-150 opacity-0 transition-all duration-700"></div>
+                        </div>
+                        <h3 className="text-xl font-bold text-black dark:text-white">Skill Accelerator</h3>
+                      </div>
+                    </div>
 
-                  {/* Tab Content */}
-                  <div className="min-h-[300px]">
-                    {/* Overview Tab */}
-                    {activeTab === "overview" && (
-                      <div className="space-y-4">
-                        {/* Active Skill Card */}
-                        <div
-                          className="bg-white/10 dark:bg-black/20 backdrop-blur-sm rounded-lg p-4 border border-white/10"
-                          style={{ borderLeft: `4px solid ${skills[activeSkill].color}` }}
+                    <p className="text-sm text-black/80 dark:text-white/80">
+                      The world's first AI-powered skill development ecosystem that helps you earn while you learn and
+                      grow your freelance career exponentially.
+                    </p>
+
+                    {/* Skill Progression Tabs */}
+                    <div className="flex space-x-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+                      {skills.map((skill, index) => (
+                        <button
+                          key={index}
+                          className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 flex items-center ${
+                            activeSkill === index
+                              ? "bg-gradient-to-r from-primary to-purple-500 text-white"
+                              : "bg-white/10 dark:bg-black/20 text-black dark:text-white hover:bg-white/20 dark:hover:bg-black/30"
+                          }`}
+                          onClick={() => setActiveSkill(index)}
+                          onMouseEnter={() => setHoverSkill(index)}
+                          onMouseLeave={() => setHoverSkill(null)}
                         >
-                          <div className="flex justify-between items-start mb-3">
-                            <div>
-                              <div className="flex items-center">
-                                <span className="mr-2">{skills[activeSkill].icon}</span>
-                                <h4 className="font-bold text-black dark:text-white">{skills[activeSkill].name}</h4>
-                              </div>
-                              <div className="flex items-center mt-1">
-                                <div className="px-2 py-0.5 rounded-full bg-white/10 dark:bg-black/30 text-xs">
-                                  {skills[activeSkill].level}
+                          <span className="mr-1.5">{skill.icon}</span>
+                          {skill.name}
+                          {hoverSkill === index && <span className="ml-1.5 text-xs opacity-70">{skill.level}</span>}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Navigation Tabs */}
+                    <div className="flex border-b border-white/10 overflow-x-auto -mx-1 px-1 scrollbar-hide">
+                      {["overview", "learning", "projects", "forum", "analytics", "milestones"].map((tab) => (
+                        <button
+                          key={tab}
+                          className={`px-2 sm:px-3 py-2 text-xs font-medium capitalize whitespace-nowrap transition-all duration-300 ${
+                            activeTab === tab
+                              ? "text-primary border-b-2 border-primary"
+                              : "text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white"
+                          }`}
+                          onClick={() => setActiveTab(tab)}
+                        >
+                          {tab}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Tab Content */}
+                    <div className="min-h-[300px]">
+                      {/* Overview Tab */}
+                      {activeTab === "overview" && (
+                        <div className="space-y-4">
+                          {/* Active Skill Card */}
+                          <div
+                            className="bg-white/10 dark:bg-black/20 backdrop-blur-sm rounded-lg p-4 border border-white/10"
+                            style={{ borderLeft: `4px solid ${skills[activeSkill].color}` }}
+                          >
+                            <div className="flex justify-between items-start mb-3">
+                              <div>
+                                <div className="flex items-center">
+                                  <span className="mr-2">{skills[activeSkill].icon}</span>
+                                  <h4 className="font-bold text-black dark:text-white">{skills[activeSkill].name}</h4>
                                 </div>
-                                <ArrowRight className="h-3 w-3 mx-1 text-white/50" />
-                                <div className="px-2 py-0.5 rounded-full bg-gradient-to-r from-primary/50 to-purple-500/50 text-xs text-white">
-                                  {skills[activeSkill].nextLevel}
+                                <div className="flex items-center mt-1">
+                                  <div className="px-2 py-0.5 rounded-full bg-white/10 dark:bg-black/30 text-xs">
+                                    {skills[activeSkill].level}
+                                  </div>
+                                  <ArrowRight className="h-3 w-3 mx-1 text-white/50" />
+                                  <div className="px-2 py-0.5 rounded-full bg-gradient-to-r from-primary/50 to-purple-500/50 text-xs text-white">
+                                    {skills[activeSkill].nextLevel}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-xs text-black/60 dark:text-white/60">Current Earnings</div>
+                                <div className="font-bold text-black dark:text-white">{skills[activeSkill].earnings}</div>
+                                <div className="text-xs text-green-500 mt-0.5 flex items-center justify-end">
+                                  <TrendingUp className="h-3 w-3 mr-0.5" /> {skills[activeSkill].nextEarnings}
                                 </div>
                               </div>
                             </div>
-                            <div className="text-right">
-                              <div className="text-xs text-black/60 dark:text-white/60">Current Earnings</div>
-                              <div className="font-bold text-black dark:text-white">{skills[activeSkill].earnings}</div>
-                              <div className="text-xs text-green-500 mt-0.5 flex items-center justify-end">
-                                <TrendingUp className="h-3 w-3 mr-0.5" /> {skills[activeSkill].nextEarnings}
+
+                            <p className="text-xs text-black/80 dark:text-white/80 mb-3">
+                              {skills[activeSkill].description}
+                            </p>
+
+                            {/* Progress Bar */}
+                            <div className="mb-3">
+                              <div className="flex justify-between text-xs mb-1">
+                                <span className="text-black/60 dark:text-white/60">
+                                  Progress to {skills[activeSkill].nextLevel}
+                                </span>
+                                <span className="font-medium text-black dark:text-white">{progress}%</span>
+                              </div>
+                              <div className="h-2 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
+                                <div
+                                  className="h-full rounded-full bg-gradient-to-r from-primary to-purple-500 relative"
+                                  style={{ width: `${progress}%`, transition: "width 0.5s ease-out" }}
+                                >
+                                  {progress > 30 && (
+                                    <div className="absolute top-0 right-0 h-full w-5 bg-white/30 animate-pulse"></div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Stats */}
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+                              <div className="bg-white/5 dark:bg-black/10 rounded-md p-2">
+                                <div className="text-xs text-black/60 dark:text-white/60">Mentors</div>
+                                <div className="font-bold text-black dark:text-white">{skills[activeSkill].mentors}</div>
+                              </div>
+                              <div className="bg-white/5 dark:bg-black/10 rounded-md p-2">
+                                <div className="text-xs text-black/60 dark:text-white/60">Projects</div>
+                                <div className="font-bold text-black dark:text-white">{skills[activeSkill].projects}</div>
+                              </div>
+                              <div className="bg-white/5 dark:bg-black/10 rounded-md p-2">
+                                <div className="text-xs text-black/60 dark:text-white/60">Rating</div>
+                                <div className="font-bold text-black dark:text-white flex items-center justify-center">
+                                  4.8 <Star className="h-3 w-3 ml-0.5 text-yellow-400 fill-yellow-400" />
+                                </div>
+                              </div>
+                              <div className="bg-white/5 dark:bg-black/10 rounded-md p-2">
+                                <div className="text-xs text-black/60 dark:text-white/60">Clients</div>
+                                <div className="font-bold text-black dark:text-white flex items-center justify-center">
+                                  {skills[activeSkill].stats.repeatClients}
+                                </div>
                               </div>
                             </div>
                           </div>
 
-                          <p className="text-xs text-black/80 dark:text-white/80 mb-3">
-                            {skills[activeSkill].description}
-                          </p>
-
-                          {/* Progress Bar */}
-                          <div className="mb-3">
-                            <div className="flex justify-between text-xs mb-1">
-                              <span className="text-black/60 dark:text-white/60">
-                                Progress to {skills[activeSkill].nextLevel}
-                              </span>
-                              <span className="font-medium text-black dark:text-white">{progress}%</span>
-                            </div>
-                            <div className="h-2 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
-                              <div
-                                className="h-full rounded-full bg-gradient-to-r from-primary to-purple-500 relative"
-                                style={{ width: `${progress}%`, transition: "width 0.5s ease-out" }}
-                              >
-                                {progress > 30 && (
-                                  <div className="absolute top-0 right-0 h-full w-5 bg-white/30 animate-pulse"></div>
-                                )}
+                          {/* Testimonial */}
+                          <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3 border border-white/10">
+                            <div className="flex items-start">
+                              <div className="h-8 w-8 rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 flex items-center justify-center mr-3 text-xs font-bold text-primary">
+                                {skills[activeSkill].testimonial.author.split(" ")[0][0]}
+                                {skills[activeSkill].testimonial.author.split(" ")[1][0]}
                               </div>
-                            </div>
-                          </div>
-
-                          {/* Stats */}
-                          <div className="grid grid-cols-4 gap-2 text-center">
-                            <div className="bg-white/5 dark:bg-black/10 rounded-md p-2">
-                              <div className="text-xs text-black/60 dark:text-white/60">Mentors</div>
-                              <div className="font-bold text-black dark:text-white">{skills[activeSkill].mentors}</div>
-                            </div>
-                            <div className="bg-white/5 dark:bg-black/10 rounded-md p-2">
-                              <div className="text-xs text-black/60 dark:text-white/60">Projects</div>
-                              <div className="font-bold text-black dark:text-white">{skills[activeSkill].projects}</div>
-                            </div>
-                            <div className="bg-white/5 dark:bg-black/10 rounded-md p-2">
-                              <div className="text-xs text-black/60 dark:text-white/60">Rating</div>
-                              <div className="font-bold text-black dark:text-white flex items-center justify-center">
-                                4.8 <Star className="h-3 w-3 ml-0.5 text-yellow-400 fill-yellow-400" />
-                              </div>
-                            </div>
-                            <div className="bg-white/5 dark:bg-black/10 rounded-md p-2">
-                              <div className="text-xs text-black/60 dark:text-white/60">Clients</div>
-                              <div className="font-bold text-black dark:text-white flex items-center justify-center">
-                                {skills[activeSkill].stats.repeatClients}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Testimonial */}
-                        <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3 border border-white/10">
-                          <div className="flex items-start">
-                            <div className="h-8 w-8 rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 flex items-center justify-center mr-3 text-xs font-bold text-primary">
-                              {skills[activeSkill].testimonial.author.split(" ")[0][0]}
-                              {skills[activeSkill].testimonial.author.split(" ")[1][0]}
-                            </div>
-                            <div>
-                              <div className="flex items-center mb-1">
-                                <div className="text-xs font-medium text-black dark:text-white mr-2">
-                                  {skills[activeSkill].testimonial.author}
+                              <div>
+                                <div className="flex items-center mb-1">
+                                  <div className="text-xs font-medium text-black dark:text-white mr-2">
+                                    {skills[activeSkill].testimonial.author}
+                                  </div>
+                                  <div className="flex">
+                                    {[...Array(5)].map((_, i) => (
+                                      <Star
+                                        key={i}
+                                        className={`h-3 w-3 ${i < skills[activeSkill].testimonial.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
+                                      />
+                                    ))}
+                                  </div>
                                 </div>
-                                <div className="flex">
-                                  {[...Array(5)].map((_, i) => (
-                                    <Star
-                                      key={i}
-                                      className={`h-3 w-3 ${i < skills[activeSkill].testimonial.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
-                                    />
-                                  ))}
-                                </div>
+                                <p className="text-xs text-black/80 dark:text-white/80 italic">
+                                  "{skills[activeSkill].testimonial.text}"
+                                </p>
                               </div>
-                              <p className="text-xs text-black/80 dark:text-white/80 italic">
-                                "{skills[activeSkill].testimonial.text}"
-                              </p>
                             </div>
                           </div>
-                        </div>
 
-                        {/* Skill Path Visualization */}
-                        <div className="relative h-[80px]" ref={skillsRef}>
-                          <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-white/20 -translate-y-1/2"></div>
+                          {/* Skill Path Visualization */}
+                          <div className="relative h-[80px]" ref={skillsRef}>
+                            <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-white/20 -translate-y-1/2"></div>
 
-                          {/* Skill nodes */}
-                          {["Beginner", "Intermediate", "Advanced", "Expert", "Master"].map((level, i) => {
-                            const isActive =
-                              i <=
-                              ["Beginner", "Intermediate", "Advanced", "Expert", "Master"].indexOf(
-                                skills[activeSkill].nextLevel,
+                            {/* Skill nodes */}
+                            {["Beginner", "Intermediate", "Advanced", "Expert", "Master"].map((level, i) => {
+                              const isActive =
+                                i <=
+                                ["Beginner", "Intermediate", "Advanced", "Expert", "Master"].indexOf(
+                                  skills[activeSkill].nextLevel,
+                                )
+                              return (
+                                <div
+                                  key={i}
+                                  className={`skill-node absolute top-1/2 -translate-y-1/2 -translate-x-1/2 transition-all duration-500 ${isActive ? "opacity-100" : "opacity-50"}`}
+                                  style={{ left: `${(i / 4) * 100}%` }}
+                                  onMouseEnter={(e) => handleNodeHover(i, e)}
+                                  onMouseLeave={handleNodeLeave}
+                                >
+                                  <div
+                                    className={`h-4 w-4 rounded-full ${
+                                      isActive
+                                        ? "bg-gradient-to-r from-primary to-purple-500"
+                                        : "bg-white/20 dark:bg-black/40"
+                                    }`}
+                                  ></div>
+                                  <div className="absolute top-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-medium text-black dark:text-white">
+                                    {level}
+                                  </div>
+                                  {i < 4 && (
+                                    <div className="absolute top-1/2 left-[8px] -translate-y-1/2 h-0.5 bg-white/20 w-[calc(25vw-32px)]"></div>
+                                  )}
+                                </div>
                               )
-                            return (
+                            })}
+
+                            {/* Tooltip */}
+                            {showTooltip && (
                               <div
-                                key={i}
-                                className={`skill-node absolute top-1/2 -translate-y-1/2 -translate-x-1/2 transition-all duration-500 ${isActive ? "opacity-100" : "opacity-50"}`}
-                                style={{ left: `${(i / 4) * 100}%` }}
-                                onMouseEnter={(e) => handleNodeHover(i, e)}
-                                onMouseLeave={handleNodeLeave}
+                                className="absolute z-20 w-48 p-2 bg-black/80 backdrop-blur-md text-white rounded-md text-xs"
+                                style={{
+                                  left: "50%",
+                                  top: "-40px",
+                                  transform: "translateX(-50%)",
+                                  pointerEvents: "none",
+                                }}
+                              >
+                                <div className="font-bold mb-1">{tooltipContent.title}</div>
+                                <div>{tooltipContent.description}</div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Learning Tab */}
+                      {activeTab === "learning" && (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="text-sm font-semibold text-black dark:text-white">Learning Path</h4>
+                            <div className="text-xs text-primary">
+                              {skills[activeSkill].learningPath.filter((item) => item.status === "completed").length} /{" "}
+                              {skills[activeSkill].learningPath.length} Completed
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            {skills[activeSkill].learningPath.map((item, index) => (
+                              <div
+                                key={index}
+                                className="flex items-center p-2 rounded-lg bg-white/5 dark:bg-black/10 border border-white/10 hover:border-primary/30 transition-all duration-300"
                               >
                                 <div
-                                  className={`h-4 w-4 rounded-full ${
-                                    isActive
-                                      ? "bg-gradient-to-r from-primary to-purple-500"
-                                      : "bg-white/20 dark:bg-black/40"
+                                  className={`h-6 w-6 rounded-full flex items-center justify-center mr-3 ${
+                                    item.status === "completed"
+                                      ? "bg-green-500/20"
+                                      : item.status === "in-progress"
+                                        ? "bg-primary/20"
+                                        : "bg-white/10"
                                   }`}
-                                ></div>
-                                <div className="absolute top-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-medium text-black dark:text-white">
-                                  {level}
+                                >
+                                  {item.status === "completed" ? (
+                                    <CheckCircle className="h-4 w-4 text-green-500" />
+                                  ) : item.status === "in-progress" ? (
+                                    <Clock className="h-4 w-4 text-primary" />
+                                  ) : (
+                                    <BookOpen className="h-4 w-4 text-white/50" />
+                                  )}
                                 </div>
-                                {i < 4 && (
-                                  <div className="absolute top-1/2 left-[8px] -translate-y-1/2 h-0.5 bg-white/20 w-[calc(25vw-32px)]"></div>
+                                <div className="flex-1">
+                                  <div className="text-sm font-medium text-black dark:text-white">{item.name}</div>
+                                  <div className="text-xs text-black/60 dark:text-white/60">
+                                    {item.duration} •{" "}
+                                    {item.status === "completed"
+                                      ? "Completed"
+                                      : item.status === "in-progress"
+                                        ? "In Progress"
+                                        : "Upcoming"}
+                                  </div>
+                                </div>
+                                {item.status !== "completed" && (
+                                  <EnhancedButton variant="outline" size="sm" className="h-8 text-xs bg-white/5">
+                                    {item.status === "in-progress" ? "Continue" : "Start"}
+                                  </EnhancedButton>
                                 )}
                               </div>
-                            )
-                          })}
+                            ))}
+                          </div>
 
-                          {/* Tooltip */}
-                          {showTooltip && (
-                            <div
-                              className="absolute z-20 w-48 p-2 bg-black/80 backdrop-blur-md text-white rounded-md text-xs"
-                              style={{
-                                left: "50%",
-                                top: "-40px",
-                                transform: "translateX(-50%)",
-                                pointerEvents: "none",
-                              }}
-                            >
-                              <div className="font-bold mb-1">{tooltipContent.title}</div>
-                              <div>{tooltipContent.description}</div>
+                          <div className="mt-4">
+                            <h4 className="text-sm font-semibold text-black dark:text-white mb-2">Skill Breakdown</h4>
+                            <div className="space-y-2">
+                              {skills[activeSkill].skills.map((skill, index) => (
+                                <div key={index} className="space-y-1">
+                                  <div className="flex justify-between text-xs">
+                                    <span className="text-black dark:text-white">{skill.name}</span>
+                                    <span className="text-black/60 dark:text-white/60">{skill.level}%</span>
+                                  </div>
+                                  <div className="h-1.5 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
+                                    <div
+                                      className="h-full rounded-full bg-gradient-to-r from-primary to-purple-500"
+                                      style={{ width: `${skill.level}%` }}
+                                    ></div>
+                                  </div>
+                                </div>
+                              ))}
                             </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Learning Tab */}
-                    {activeTab === "learning" && (
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="text-sm font-semibold text-black dark:text-white">Learning Path</h4>
-                          <div className="text-xs text-primary">
-                            {skills[activeSkill].learningPath.filter((item) => item.status === "completed").length} /{" "}
-                            {skills[activeSkill].learningPath.length} Completed
                           </div>
                         </div>
+                      )}
 
-                        <div className="space-y-2">
-                          {skills[activeSkill].learningPath.map((item, index) => (
-                            <div
-                              key={index}
-                              className="flex items-center p-2 rounded-lg bg-white/5 dark:bg-black/10 border border-white/10 hover:border-primary/30 transition-all duration-300"
-                            >
+                      {/* Projects Tab */}
+                      {activeTab === "projects" && (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="text-sm font-semibold text-black dark:text-white">Skill-Building Projects</h4>
+                            <div className="text-xs text-primary">Earn while you learn</div>
+                          </div>
+
+                          <div className="space-y-3">
+                            {skills[activeSkill].skillProjects.map((project, index) => (
                               <div
-                                className={`h-6 w-6 rounded-full flex items-center justify-center mr-3 ${
-                                  item.status === "completed"
-                                    ? "bg-green-500/20"
-                                    : item.status === "in-progress"
-                                      ? "bg-primary/20"
-                                      : "bg-white/10"
-                                }`}
+                                key={index}
+                                className="p-3 rounded-lg bg-white/5 dark:bg-black/10 border border-white/10 hover:border-primary/30 transition-colors duration-300"
                               >
-                                {item.status === "completed" ? (
-                                  <CheckCircle className="h-4 w-4 text-green-500" />
-                                ) : item.status === "in-progress" ? (
-                                  <Clock className="h-4 w-4 text-primary" />
-                                ) : (
-                                  <BookOpen className="h-4 w-4 text-white/50" />
-                                )}
-                              </div>
-                              <div className="flex-1">
-                                <div className="text-sm font-medium text-black dark:text-white">{item.name}</div>
-                                <div className="text-xs text-black/60 dark:text-white/60">
-                                  {item.duration} •{" "}
-                                  {item.status === "completed"
-                                    ? "Completed"
-                                    : item.status === "in-progress"
-                                      ? "In Progress"
-                                      : "Upcoming"}
-                                </div>
-                              </div>
-                              {item.status !== "completed" && (
-                                <EnhancedButton variant="outline" size="sm" className="h-8 text-xs bg-white/5">
-                                  {item.status === "in-progress" ? "Continue" : "Start"}
-                                </EnhancedButton>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-
-                        <div className="mt-4">
-                          <h4 className="text-sm font-semibold text-black dark:text-white mb-2">Skill Breakdown</h4>
-                          <div className="space-y-2">
-                            {skills[activeSkill].skills.map((skill, index) => (
-                              <div key={index} className="space-y-1">
-                                <div className="flex justify-between text-xs">
-                                  <span className="text-black dark:text-white">{skill.name}</span>
-                                  <span className="text-black/60 dark:text-white/60">{skill.level}%</span>
-                                </div>
-                                <div className="h-1.5 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
+                                <div className="flex justify-between items-start mb-2">
+                                  <h5 className="text-sm font-medium text-black dark:text-white">{project.name}</h5>
                                   <div
-                                    className="h-full rounded-full bg-gradient-to-r from-primary to-purple-500"
-                                    style={{ width: `${skill.level}%` }}
-                                  ></div>
+                                    className={`px-2 py-0.5 rounded-full text-xs ${
+                                      project.status === "in-progress"
+                                        ? "bg-primary/20 text-primary"
+                                        : "bg-white/10 text-black/60 dark:text-white/60"
+                                    }`}
+                                  >
+                                    {project.status === "in-progress" ? "In Progress" : "Available"}
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center justify-between text-xs text-black/60 dark:text-white/60 mb-3">
+                                  <div className="flex items-center">
+                                    <Target className="h-3 w-3 mr-1" />
+                                    <span>{project.difficulty} Level</span>
+                                  </div>
+                                  <div className="font-medium text-black dark:text-white flex items-center">
+                                    <DollarSign className="h-3 w-3 mr-0.5 text-green-500" />
+                                    {project.earnings}
+                                  </div>
+                                </div>
+
+                                <div className="flex justify-between items-center">
+                                  <div className="flex -space-x-2">
+                                    {[...Array(3)].map((_, i) => (
+                                      <div
+                                        key={i}
+                                        className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center border-2 border-white/10"
+                                      >
+                                        <Users className="h-3 w-3 text-primary" />
+                                      </div>
+                                    ))}
+                                    <div className="h-6 px-2 rounded-full bg-white/10 text-xs flex items-center ml-1 text-black/60 dark:text-white/60">
+                                      +2 mentors
+                                    </div>
+                                  </div>
+
+                                  <EnhancedButton
+                                    variant={project.status === "in-progress" ? "outline" : "default"}
+                                    size="sm"
+                                    className={`h-8 text-xs ${project.status === "in-progress" ? "border-primary/50 text-primary" : ""}`}
+                                    onClick={() => handleApplyForProject(project.name)}
+                                  >
+                                    {project.status === "in-progress" ? "Continue" : "Apply"}
+                                  </EnhancedButton>
                                 </div>
                               </div>
                             ))}
                           </div>
-                        </div>
-                      </div>
-                    )}
 
-                    {/* Projects Tab */}
-                    {activeTab === "projects" && (
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="text-sm font-semibold text-black dark:text-white">Skill-Building Projects</h4>
-                          <div className="text-xs text-primary">Earn while you learn</div>
-                        </div>
-
-                        <div className="space-y-3">
-                          {skills[activeSkill].skillProjects.map((project, index) => (
-                            <div
-                              key={index}
-                              className="p-3 rounded-lg bg-white/5 dark:bg-black/10 border border-white/10 hover:border-primary/30 transition-colors duration-300"
-                            >
-                              <div className="flex justify-between items-start mb-2">
-                                <h5 className="text-sm font-medium text-black dark:text-white">{project.name}</h5>
-                                <div
-                                  className={`px-2 py-0.5 rounded-full text-xs ${
-                                    project.status === "in-progress"
-                                      ? "bg-primary/20 text-primary"
-                                      : "bg-white/10 text-black/60 dark:text-white/60"
-                                  }`}
-                                >
-                                  {project.status === "in-progress" ? "In Progress" : "Available"}
-                                </div>
-                              </div>
-
-                              <div className="flex items-center justify-between text-xs text-black/60 dark:text-white/60 mb-3">
-                                <div className="flex items-center">
-                                  <Target className="h-3 w-3 mr-1" />
-                                  <span>{project.difficulty} Level</span>
-                                </div>
-                                <div className="font-medium text-black dark:text-white flex items-center">
-                                  <DollarSign className="h-3 w-3 mr-0.5 text-green-500" />
-                                  {project.earnings}
-                                </div>
-                              </div>
-
-                              <div className="flex justify-between items-center">
-                                <div className="flex -space-x-2">
-                                  {[...Array(3)].map((_, i) => (
-                                    <div
-                                      key={i}
-                                      className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center border-2 border-white/10"
-                                    >
-                                      <Users className="h-3 w-3 text-primary" />
-                                    </div>
-                                  ))}
-                                  <div className="h-6 px-2 rounded-full bg-white/10 text-xs flex items-center ml-1 text-black/60 dark:text-white/60">
-                                    +2 mentors
-                                  </div>
-                                </div>
-
-                                <EnhancedButton
-                                  variant={project.status === "in-progress" ? "outline" : "default"}
-                                  size="sm"
-                                  className={`h-8 text-xs ${project.status === "in-progress" ? "border-primary/50 text-primary" : ""}`}
-                                  onClick={() => handleApplyForProject(project.name)}
-                                >
-                                  {project.status === "in-progress" ? "Continue" : "Apply"}
-                                </EnhancedButton>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-
-                        <div className="flex justify-center">
-                          <button className="text-xs text-primary flex items-center">
-                            View all available projects <ArrowRight className="h-3 w-3 ml-1" />
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Forum Tab */}
-                    {activeTab === "forum" && (
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="text-sm font-semibold text-black dark:text-white">Community Forum</h4>
-                          <div className="text-xs text-primary">Learn from peers</div>
-                        </div>
-
-                        {/* Search and filters */}
-                        <div className="flex gap-2 mb-3">
-                          <div className="relative flex-1">
-                            <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-black/40 dark:text-white/40" />
-                            <input
-                              type="text"
-                              placeholder="Search discussions..."
-                              className="w-full h-8 pl-8 pr-3 text-xs rounded-md bg-white/10 dark:bg-black/20 border border-white/10 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/50"
-                            />
+                          <div className="flex justify-center">
+                            <button className="text-xs text-primary flex items-center">
+                              View all available projects <ArrowRight className="h-3 w-3 ml-1" />
+                            </button>
                           </div>
-                          <button className="h-8 px-2 rounded-md bg-white/10 dark:bg-black/20 border border-white/10 text-xs flex items-center">
-                            <Filter className="h-3.5 w-3.5 mr-1" /> Filter
-                          </button>
                         </div>
+                      )}
 
-                        {/* Topic list */}
-                        <div className="space-y-3 max-h-[250px] overflow-y-auto pr-1">
-                          {activeTopic === null ? (
-                            // Topic list view
-                            forumTopics.map((topic, index) => (
-                              <div
-                                key={index}
-                                className="p-3 rounded-lg bg-white/5 dark:bg-black/10 border border-white/10 hover:border-primary/30 transition-colors duration-300 cursor-pointer"
-                                onClick={() => setActiveTopic(index)}
-                              >
-                                <div className="flex justify-between items-start mb-2">
-                                  <h5 className="text-sm font-medium text-black dark:text-white">{topic.title}</h5>
-                                  <div className="text-xs text-black/40 dark:text-white/40">{topic.lastActive}</div>
-                                </div>
+                      {/* Forum Tab */}
+                      {activeTab === "forum" && (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="text-sm font-semibold text-black dark:text-white">Community Forum</h4>
+                            <div className="text-xs text-primary">Learn from peers</div>
+                          </div>
 
-                                <p className="text-xs text-black/70 dark:text-white/70 mb-2 line-clamp-2">
-                                  {topic.preview}
-                                </p>
+                          {/* Search and filters */}
+                          <div className="flex gap-2 mb-3">
+                            <div className="relative flex-1">
+                              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-black/40 dark:text-white/40" />
+                              <input
+                                type="text"
+                                placeholder="Search discussions..."
+                                className="w-full h-8 pl-8 pr-3 text-xs rounded-md bg-white/10 dark:bg-black/20 border border-white/10 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/50"
+                              />
+                            </div>
+                            <button className="h-8 px-2 rounded-md bg-white/10 dark:bg-black/20 border border-white/10 text-xs flex items-center">
+                              <Filter className="h-3.5 w-3.5 mr-1" /> Filter
+                            </button>
+                          </div>
 
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center space-x-3 text-xs text-black/60 dark:text-white/60">
-                                    <div className="flex items-center">
-                                      <MessageSquare className="h-3 w-3 mr-1" />
-                                      <span>{topic.replies}</span>
-                                    </div>
-                                    <div className="flex items-center">
-                                      <ThumbsUp className="h-3 w-3 mr-1" />
-                                      <span>{topic.likes}</span>
-                                    </div>
-                                  </div>
-
-                                  <div className="flex items-center">
-                                    <div className="h-5 w-5 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-medium text-primary mr-1">
-                                      {topic.author.substring(0, 2)}
-                                    </div>
-                                    <span className="text-xs text-black/60 dark:text-white/60">{topic.author}</span>
-                                  </div>
-                                </div>
-
-                                <div className="flex flex-wrap gap-1 mt-2">
-                                  {topic.tags.map((tag, i) => (
-                                    <span
-                                      key={i}
-                                      className="px-1.5 py-0.5 bg-white/5 dark:bg-black/20 rounded text-[10px] text-black/60 dark:text-white/60"
-                                    >
-                                      #{tag}
-                                    </span>
-                                  ))}
-                                </div>
-                              </div>
-                            ))
-                          ) : (
-                            // Topic detail view
-                            <div className="space-y-3">
-                              <div className="flex items-center mb-2">
-                                <button
-                                  className="text-xs flex items-center text-primary mr-3"
-                                  onClick={() => setActiveTopic(null)}
+                          {/* Topic list */}
+                          <div className="space-y-3 max-h-[250px] overflow-y-auto pr-1 -mr-1">
+                            {activeTopic === null ? (
+                              // Topic list view
+                              forumTopics.map((topic, index) => (
+                                <div
+                                  key={index}
+                                  className="p-3 rounded-lg bg-white/5 dark:bg-black/10 border border-white/10 hover:border-primary/30 transition-colors duration-300 cursor-pointer"
+                                  onClick={() => setActiveTopic(index)}
                                 >
-                                  <ArrowRight className="h-3 w-3 mr-1 rotate-180" /> Back
-                                </button>
-                                <h4 className="text-sm font-semibold text-black dark:text-white">
-                                  {forumTopics[activeTopic].title}
-                                </h4>
-                              </div>
+                                  <div className="flex justify-between items-start mb-2">
+                                    <h5 className="text-sm font-medium text-black dark:text-white">{topic.title}</h5>
+                                    <div className="text-xs text-black/40 dark:text-white/40">{topic.lastActive}</div>
+                                  </div>
 
-                              {/* Original post */}
-                              <div className="p-3 rounded-lg bg-white/5 dark:bg-black/10 border border-white/10">
-                                <div className="flex items-center justify-between mb-2">
-                                  <div className="flex items-center">
-                                    <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-medium text-primary mr-2">
-                                      {forumTopics[activeTopic].author.substring(0, 2)}
+                                  <p className="text-xs text-black/70 dark:text-white/70 mb-2 line-clamp-2">
+                                    {topic.preview}
+                                  </p>
+
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-3 text-xs text-black/60 dark:text-white/60">
+                                      <div className="flex items-center">
+                                        <MessageSquare className="h-3 w-3 mr-1" />
+                                        <span>{topic.replies}</span>
+                                      </div>
+                                      <div className="flex items-center">
+                                        <ThumbsUp className="h-3 w-3 mr-1" />
+                                        <span>{topic.likes}</span>
+                                      </div>
                                     </div>
-                                    <span className="text-xs font-medium text-black dark:text-white">
-                                      {forumTopics[activeTopic].author}
-                                    </span>
+
+                                    <div className="flex items-center">
+                                      <div className="h-5 w-5 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-medium text-primary mr-1">
+                                        {topic.author.substring(0, 2)}
+                                      </div>
+                                      <span className="text-xs text-black/60 dark:text-white/60">{topic.author}</span>
+                                    </div>
                                   </div>
-                                  <div className="text-xs text-black/40 dark:text-white/40">
-                                    {forumTopics[activeTopic].lastActive}
+
+                                  <div className="flex flex-wrap gap-1 mt-2">
+                                    {topic.tags.map((tag, i) => (
+                                      <span
+                                        key={i}
+                                        className="px-1.5 py-0.5 bg-white/5 dark:bg-black/20 rounded text-[10px] text-black/60 dark:text-white/60"
+                                      >
+                                        #{tag}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              // Topic detail view
+                              <div className="space-y-3">
+                                <div className="flex items-center mb-2">
+                                  <button
+                                    className="text-xs flex items-center text-primary mr-3"
+                                    onClick={() => setActiveTopic(null)}
+                                  >
+                                    <ArrowRight className="h-3 w-3 mr-1 rotate-180" /> Back
+                                  </button>
+                                  <h4 className="text-sm font-semibold text-black dark:text-white">
+                                    {forumTopics[activeTopic].title}
+                                  </h4>
+                                </div>
+
+                                {/* Original post */}
+                                <div className="p-3 rounded-lg bg-white/5 dark:bg-black/10 border border-white/10">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center">
+                                      <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-medium text-primary mr-2">
+                                        {forumTopics[activeTopic].author.substring(0, 2)}
+                                      </div>
+                                      <span className="text-xs font-medium text-black dark:text-white">
+                                        {forumTopics[activeTopic].author}
+                                      </span>
+                                    </div>
+                                    <div className="text-xs text-black/40 dark:text-white/40">
+                                      {forumTopics[activeTopic].lastActive}
+                                    </div>
+                                  </div>
+
+                                  <p className="text-xs text-black/80 dark:text-white/80 mb-3">
+                                    {forumTopics[activeTopic].preview}
+                                  </p>
+
+                                  <div className="flex items-center space-x-3 text-xs">
+                                    <button className="flex items-center text-black/60 dark:text-white/60 hover:text-primary">
+                                      <ThumbsUp className="h-3 w-3 mr-1" />
+                                      <span>Like ({forumTopics[activeTopic].likes})</span>
+                                    </button>
+                                    <button className="flex items-center text-black/60 dark:text-white/60 hover:text-primary">
+                                      <Reply className="h-3 w-3 mr-1" />
+                                      <span>Reply</span>
+                                    </button>
                                   </div>
                                 </div>
 
-                                <p className="text-xs text-black/80 dark:text-white/80 mb-3">
-                                  {forumTopics[activeTopic].preview}
-                                </p>
-
-                                <div className="flex items-center space-x-3 text-xs">
-                                  <button className="flex items-center text-black/60 dark:text-white/60 hover:text-primary">
-                                    <ThumbsUp className="h-3 w-3 mr-1" />
-                                    <span>Like ({forumTopics[activeTopic].likes})</span>
-                                  </button>
-                                  <button className="flex items-center text-black/60 dark:text-white/60 hover:text-primary">
-                                    <Reply className="h-3 w-3 mr-1" />
-                                    <span>Reply</span>
-                                  </button>
-                                </div>
-                              </div>
-
-                              {/* Responses */}
-                              {forumTopics[activeTopic].responses.length > 0 ? (
-                                <div className="space-y-2 pl-4 border-l border-white/10">
-                                  {forumTopics[activeTopic].responses.map((response, i) => (
-                                    <div
-                                      key={i}
-                                      className="p-3 rounded-lg bg-white/5 dark:bg-black/10 border border-white/10"
-                                    >
-                                      <div className="flex items-center justify-between mb-2">
-                                        <div className="flex items-center">
-                                          <div className="h-5 w-5 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-medium text-black/70 dark:text-white/70 mr-2">
-                                            {response.author.substring(0, 2)}
+                                {/* Responses */}
+                                {forumTopics[activeTopic].responses.length > 0 ? (
+                                  <div className="space-y-2 pl-4 border-l border-white/10">
+                                    {forumTopics[activeTopic].responses.map((response, i) => (
+                                      <div
+                                        key={i}
+                                        className="p-3 rounded-lg bg-white/5 dark:bg-black/10 border border-white/10"
+                                      >
+                                        <div className="flex items-center justify-between mb-2">
+                                          <div className="flex items-center">
+                                            <div className="h-5 w-5 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-medium text-black/70 dark:text-white/70 mr-2">
+                                              {response.author.substring(0, 2)}
+                                            </div>
+                                            <span className="text-xs font-medium text-black dark:text-white">
+                                              {response.author}
+                                            </span>
                                           </div>
-                                          <span className="text-xs font-medium text-black dark:text-white">
-                                            {response.author}
-                                          </span>
+                                          <div className="text-xs text-black/40 dark:text-white/40">{response.time}</div>
                                         </div>
-                                        <div className="text-xs text-black/40 dark:text-white/40">{response.time}</div>
+
+                                        <p className="text-xs text-black/80 dark:text-white/80 mb-2">
+                                          {response.content}
+                                        </p>
+
+                                        <div className="flex items-center space-x-3 text-xs">
+                                          <button className="flex items-center text-black/60 dark:text-white/60 hover:text-primary">
+                                            <ThumbsUp className="h-3 w-3 mr-1" />
+                                            <span>Like ({response.likes})</span>
+                                          </button>
+                                          <button className="flex items-center text-black/60 dark:text-white/60 hover:text-primary">
+                                            <Reply className="h-3 w-3 mr-1" />
+                                            <span>Reply</span>
+                                          </button>
+                                        </div>
                                       </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <div className="text-center py-4 text-xs text-black/50 dark:text-white/50">
+                                    No responses yet. Be the first to reply!
+                                  </div>
+                                )}
 
-                                      <p className="text-xs text-black/80 dark:text-white/80 mb-2">
-                                        {response.content}
-                                      </p>
-
-                                      <div className="flex items-center space-x-3 text-xs">
-                                        <button className="flex items-center text-black/60 dark:text-white/60 hover:text-primary">
-                                          <ThumbsUp className="h-3 w-3 mr-1" />
-                                          <span>Like ({response.likes})</span>
-                                        </button>
-                                        <button className="flex items-center text-black/60 dark:text-white/60 hover:text-primary">
-                                          <Reply className="h-3 w-3 mr-1" />
-                                          <span>Reply</span>
-                                        </button>
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              ) : (
-                                <div className="text-center py-4 text-xs text-black/50 dark:text-white/50">
-                                  No responses yet. Be the first to reply!
-                                </div>
-                              )}
-
-                              {/* Reply input */}
-                              <div className="p-3 rounded-lg bg-white/5 dark:bg-black/10 border border-white/10">
-                                <textarea
-                                  placeholder="Write your reply..."
-                                  className="w-full h-20 p-2 text-xs rounded-md bg-white/10 dark:bg-black/20 border border-white/10 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/50 mb-2"
-                                ></textarea>
-                                <div className="flex justify-end">
-                                  <EnhancedButton size="sm" className="h-7 text-xs">
-                                    Post Reply
-                                  </EnhancedButton>
+                                {/* Reply input */}
+                                <div className="p-3 rounded-lg bg-white/5 dark:bg-black/10 border border-white/10">
+                                  <textarea
+                                    placeholder="Write your reply..."
+                                    className="w-full h-20 p-2 text-xs rounded-md bg-white/10 dark:bg-black/20 border border-white/10 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/50 mb-2"
+                                  ></textarea>
+                                  <div className="flex justify-end">
+                                    <EnhancedButton size="sm" className="h-7 text-xs">
+                                      Post Reply
+                                    </EnhancedButton>
+                                  </div>
                                 </div>
                               </div>
+                            )}
+                          </div>
+
+                          {activeTopic === null && (
+                            <div className="flex justify-between items-center">
+                              <button className="text-xs text-primary flex items-center">
+                                View all discussions <ArrowRight className="h-3 w-3 ml-1" />
+                              </button>
+                              <EnhancedButton size="sm" className="h-7 text-xs flex items-center">
+                                <Plus className="h-3 w-3 mr-1" /> New Topic
+                              </EnhancedButton>
                             </div>
                           )}
                         </div>
+                      )}
 
-                        {activeTopic === null && (
-                          <div className="flex justify-between items-center">
-                            <button className="text-xs text-primary flex items-center">
-                              View all discussions <ArrowRight className="h-3 w-3 ml-1" />
-                            </button>
-                            <EnhancedButton size="sm" className="h-7 text-xs flex items-center">
-                              <Plus className="h-3 w-3 mr-1" /> New Topic
-                            </EnhancedButton>
+                      {/* Analytics Tab */}
+                      {activeTab === "analytics" && (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="text-sm font-semibold text-black dark:text-white">Earnings Projection</h4>
+                            <div className="text-xs text-green-500 flex items-center">
+                              <TrendingUp className="h-3 w-3 mr-1" /> +45% with skill advancement
+                            </div>
                           </div>
-                        )}
-                      </div>
-                    )}
 
-                    {/* Analytics Tab */}
-                    {activeTab === "analytics" && (
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="text-sm font-semibold text-black dark:text-white">Earnings Projection</h4>
-                          <div className="text-xs text-green-500 flex items-center">
-                            <TrendingUp className="h-3 w-3 mr-1" /> +45% with skill advancement
+                          {/* Earnings Chart */}
+                          <div className="h-[120px] w-full rounded-lg overflow-hidden bg-black/20 backdrop-blur-md">
+                            <canvas ref={chartRef} className="w-full h-full" />
                           </div>
-                        </div>
 
-                        {/* Earnings Chart */}
-                        <div className="h-[120px] w-full rounded-lg overflow-hidden bg-black/20 backdrop-blur-md">
-                          <canvas ref={chartRef} className="w-full h-full" />
-                        </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3">
+                              <div className="text-xs text-black/60 dark:text-white/60 mb-1">Current Avg. Rate</div>
+                              <div className="text-lg font-bold text-black dark:text-white">
+                                ${skills[activeSkill].earnings.split("-")[0].replace("$", "")}
+                                <span className="text-xs ml-1 text-black/60 dark:text-white/60">/hr</span>
+                              </div>
+                            </div>
 
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3">
-                            <div className="text-xs text-black/60 dark:text-white/60 mb-1">Current Avg. Rate</div>
-                            <div className="text-lg font-bold text-black dark:text-white">
-                              ${skills[activeSkill].earnings.split("-")[0].replace("$", "")}
-                              <span className="text-xs ml-1 text-black/60 dark:text-white/60">/hr</span>
+                            <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3">
+                              <div className="text-xs text-black/60 dark:text-white/60 mb-1">Projected Rate</div>
+                              <div className="text-lg font-bold text-green-500">
+                                ${skills[activeSkill].nextEarnings.split("-")[0].replace("$", "")}
+                                <span className="text-xs ml-1 text-black/60 dark:text-white/60">/hr</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3">
+                              <div className="text-xs text-black/60 dark:text-white/60 mb-1 flex items-center">
+                                <Clock className="h-3 w-3 mr-1" /> Avg. Completion Time
+                              </div>
+                              <div className="text-sm font-bold text-black dark:text-white">
+                                {skills[activeSkill].stats.avgCompletionTime}
+                              </div>
+                            </div>
+
+                            <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3">
+                              <div className="text-xs text-black/60 dark:text-white/60 mb-1 flex items-center">
+                                <Award className="h-3 w-3 mr-1" /> Top Earners
+                              </div>
+                              <div className="text-sm font-bold text-black dark:text-white">
+                                {skills[activeSkill].stats.topEarners}
+                              </div>
                             </div>
                           </div>
 
                           <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3">
-                            <div className="text-xs text-black/60 dark:text-white/60 mb-1">Projected Rate</div>
-                            <div className="text-lg font-bold text-green-500">
-                              ${skills[activeSkill].nextEarnings.split("-")[0].replace("$", "")}
-                              <span className="text-xs ml-1 text-black/60 dark:text-white/60">/hr</span>
+                            <div className="text-xs text-black/60 dark:text-white/60 mb-2">Market Demand</div>
+                            <div className="flex items-center">
+                              <div className="flex-1 h-2 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
+                                <div
+                                  className="h-full rounded-full bg-gradient-to-r from-yellow-500 to-red-500"
+                                  style={{ width: "85%" }}
+                                ></div>
+                              </div>
+                              <span className="text-xs font-medium ml-2 text-black dark:text-white">Very High</span>
+                            </div>
+                            <div className="text-xs text-black/60 dark:text-white/60 mt-2">
+                              <span className="text-green-500">85% more</span> projects available compared to last month
                             </div>
                           </div>
                         </div>
+                      )}
 
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3">
-                            <div className="text-xs text-black/60 dark:text-white/60 mb-1 flex items-center">
-                              <Clock className="h-3 w-3 mr-1" /> Avg. Completion Time
-                            </div>
-                            <div className="text-sm font-bold text-black dark:text-white">
-                              {skills[activeSkill].stats.avgCompletionTime}
-                            </div>
-                          </div>
-
-                          <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3">
-                            <div className="text-xs text-black/60 dark:text-white/60 mb-1 flex items-center">
-                              <Award className="h-3 w-3 mr-1" /> Top Earners
-                            </div>
-                            <div className="text-sm font-bold text-black dark:text-white">
-                              {skills[activeSkill].stats.topEarners}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3">
-                          <div className="text-xs text-black/60 dark:text-white/60 mb-2">Market Demand</div>
-                          <div className="flex items-center">
-                            <div className="flex-1 h-2 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
-                              <div
-                                className="h-full rounded-full bg-gradient-to-r from-yellow-500 to-red-500"
-                                style={{ width: "85%" }}
-                              ></div>
-                            </div>
-                            <span className="text-xs font-medium ml-2 text-black dark:text-white">Very High</span>
-                          </div>
-                          <div className="text-xs text-black/60 dark:text-white/60 mt-2">
-                            <span className="text-green-500">85% more</span> projects available compared to last month
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Milestones Tab */}
-                    {activeTab === "milestones" && (
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="text-sm font-semibold text-black dark:text-white">Achievement Milestones</h4>
-                          <div className="text-xs text-primary">Unlock rewards</div>
+                      {/* Milestones Tab */}
+                      {activeTab === "milestones" && (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="text-sm font-semibold text-black dark:text-white">Achievement Milestones</h4>
+                            <div className="text-xs text-primary">Unlock rewards</div>
                         </div>
 
                         <div className="space-y-3">
@@ -1443,7 +1457,7 @@ export function EnhancedHeroSection() {
                   </div>
 
                   {/* Feature highlights */}
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
                     <div className="flex items-start">
                       <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2 mt-0.5">
                         <Brain className="h-3 w-3 text-primary" />
@@ -1506,7 +1520,7 @@ export function EnhancedHeroSection() {
             </div>
           </motion.div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   )
 }
