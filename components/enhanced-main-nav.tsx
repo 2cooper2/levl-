@@ -5,15 +5,17 @@ import { usePathname } from "next/navigation"
 import { LevlLogo } from "@/components/levl-logo"
 import { MobileNav } from "@/components/mobile-nav"
 import { Button } from "@/components/ui/button"
-import { useAuth } from "@/context/auth-context"
+import { useSafeAuth } from "@/context/safe-auth-hook"
 import { Menu, Moon, Sun } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useTheme } from "next-themes"
 
 export function EnhancedMainNav() {
   const pathname = usePathname()
-  const { user, isAuthenticated } = useAuth()
   const { setTheme, theme } = useTheme()
+
+  // Add a try-catch block and default values
+  const { user, isAuthenticated } = useSafeAuth()
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
