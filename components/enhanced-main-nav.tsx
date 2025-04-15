@@ -94,6 +94,11 @@ export function EnhancedMainNav() {
               </>
             )}
           </div>
+          {!isAuthenticated && (
+            <div className="md:hidden mr-2">
+              <FloatingWaitlistButton inHeader={true} />
+            </div>
+          )}
           <MobileNav />
         </div>
       </div>
