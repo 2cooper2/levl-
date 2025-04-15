@@ -589,7 +589,7 @@ export function EnhancedHeroSection() {
       <style jsx global>
         {scrollbarHideStyles}
       </style>
-      <section className="w-full py-8 md:py-12 lg:py-24 xl:py-32 relative overflow-hidden">
+      <section className="w-full py-6 md:py-10 lg:py-16 xl:py-24 relative overflow-hidden">
         {/* Animated background elements */}
         <div
           className="absolute -left-64 -top-64 h-[500px] w-[500px] rounded-full bg-primary/10 blur-3xl opacity-50 animate-pulse"
@@ -604,9 +604,11 @@ export function EnhancedHeroSection() {
         <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_49.5%,rgba(255,255,255,0.05)_49.5%,rgba(255,255,255,0.05)_50.5%,transparent_50.5%),linear-gradient(to_bottom,transparent_49.5%,rgba(255,255,255,0.05)_49.5%,rgba(255,255,255,0.05)_50.5%,transparent_50.5%)] bg-[length:50px_50px] opacity-20 pointer-events-none"></div>
 
         <div className="container px-3 md:px-6 relative z-10">
-          <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 xl:grid-cols-2">
+          {/* Changed grid layout to be a flex column on all screen sizes */}
+          <div className="flex flex-col gap-6 md:gap-10 lg:gap-12">
+            {/* Hero content */}
             <motion.div
-              className="flex flex-col justify-center space-y-4"
+              className="flex flex-col justify-center space-y-4 max-w-3xl"
               variants={fadeIn}
               initial="hidden"
               animate="visible"
@@ -699,7 +701,7 @@ export function EnhancedHeroSection() {
               </motion.div>
             </motion.div>
 
-            {/* Enhanced Skill Accelerator UI */}
+            {/* Enhanced Skill Accelerator UI - Now below the hero content and more horizontal */}
             <motion.div
               className="flex items-center justify-center w-full"
               variants={fadeIn}
@@ -707,9 +709,9 @@ export function EnhancedHeroSection() {
               animate="visible"
               transition={{ delay: 0.3 }}
             >
-              <div className="relative w-full max-w-md">
+              <div className="relative w-full max-w-full">
                 <motion.div
-                  className="relative rounded-xl overflow-hidden border border-white/20 bg-white/10 dark:bg-black/10 backdrop-blur-md p-3 sm:p-6 shadow-lg"
+                  className="relative rounded-xl overflow-hidden border border-white/20 bg-white/10 dark:bg-black/10 backdrop-blur-md p-3 sm:p-4 md:p-5 shadow-lg"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.6, delay: 0.4 }}
@@ -739,8 +741,8 @@ export function EnhancedHeroSection() {
                     )}
                   </AnimatePresence>
 
-                  <div className="space-y-4 relative z-10">
-                    <div className="flex items-center justify-between">
+                  <div className="space-y-3 md:space-y-4 relative z-10 lg:grid lg:grid-cols-12 lg:gap-4 lg:space-y-0">
+                    <div className="flex items-center justify-between lg:col-span-12">
                       <div className="flex items-center">
                         <div className="h-10 w-10 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center mr-3 relative group">
                           <Rocket className="h-5 w-5 text-white" />
@@ -751,13 +753,12 @@ export function EnhancedHeroSection() {
                       </div>
                     </div>
 
-                    <p className="text-sm text-black/80 dark:text-white/80">
+                    <p className="text-sm text-black/80 dark:text-white/80 lg:col-span-12">
                       The world's first AI-powered gig ecosystem that helps you earn while you learn and grow your
                       freelance career exponentially.
                     </p>
 
-                    {/* Skill Progression Tabs */}
-                    <div className="flex space-x-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+                    <div className="flex flex-wrap gap-2 md:flex-nowrap overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide lg:col-span-12">
                       {skills.map((skill, index) => (
                         <button
                           key={index}
@@ -777,8 +778,7 @@ export function EnhancedHeroSection() {
                       ))}
                     </div>
 
-                    {/* Navigation Tabs */}
-                    <div className="flex border-b border-white/10 overflow-x-auto -mx-1 px-1 scrollbar-hide">
+                    <div className="flex border-b border-white/10 overflow-x-auto -mx-1 px-1 scrollbar-hide md:justify-start lg:col-span-12">
                       {["overview", "learning", "projects", "forum", "analytics", "milestones"].map((tab) => (
                         <button
                           key={tab}
@@ -794,8 +794,8 @@ export function EnhancedHeroSection() {
                       ))}
                     </div>
 
-                    {/* Tab Content */}
-                    <div className="min-h-[300px]">
+                    <div className="min-h-[280px] md:min-h-[260px] lg:min-h-[240px] lg:col-span-8">
+                      {/* Tab Content */}
                       {/* Overview Tab */}
                       {activeTab === "overview" && (
                         <div className="space-y-4">
@@ -1466,58 +1466,59 @@ export function EnhancedHeroSection() {
                       )}
                     </div>
 
-                    {/* Feature highlights */}
-                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                      <div className="flex items-start">
-                        <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2 mt-0.5">
-                          <MessageSquare className="h-3 w-3 text-primary" />
+                    <div className="lg:col-span-4 space-y-4">
+                      <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                        <div className="flex items-start">
+                          <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2 mt-0.5">
+                            <MessageSquare className="h-3 w-3 text-primary" />
+                          </div>
+                          <div>
+                            <h4 className="text-xs font-semibold text-black dark:text-white">Forum</h4>
+                            <p className="text-xs text-black/60 dark:text-white/60">Community support</p>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="text-xs font-semibold text-black dark:text-white">Forum</h4>
-                          <p className="text-xs text-black/60 dark:text-white/60">Community support</p>
+
+                        <div className="flex items-start">
+                          <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2 mt-0.5">
+                            <Users className="h-3 w-3 text-primary" />
+                          </div>
+                          <div>
+                            <h4 className="text-xs font-semibold text-black dark:text-white">Mentor Network</h4>
+                            <p className="text-xs text-black/60 dark:text-white/60">Expert feedback</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-start">
+                          <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2 mt-0.5">
+                            <Target className="h-3 w-3 text-primary" />
+                          </div>
+                          <div>
+                            <h4 className="text-xs font-semibold text-black dark:text-white">Skill Projects</h4>
+                            <p className="text-xs text-black/60 dark:text-white/60">Learn while earning</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-start">
+                          <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2 mt-0.5">
+                            <Trophy className="h-3 w-3 text-primary" />
+                          </div>
+                          <div>
+                            <h4 className="text-xs font-semibold text-black dark:text-white">Skill Certification</h4>
+                            <p className="text-xs text-black/60 dark:text-white/60">Verified credentials</p>
+                          </div>
                         </div>
                       </div>
 
-                      <div className="flex items-start">
-                        <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2 mt-0.5">
-                          <Users className="h-3 w-3 text-primary" />
-                        </div>
-                        <div>
-                          <h4 className="text-xs font-semibold text-black dark:text-white">Mentor Network</h4>
-                          <p className="text-xs text-black/60 dark:text-white/60">Expert feedback</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start">
-                        <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2 mt-0.5">
-                          <Target className="h-3 w-3 text-primary" />
-                        </div>
-                        <div>
-                          <h4 className="text-xs font-semibold text-black dark:text-white">Skill Projects</h4>
-                          <p className="text-xs text-black/60 dark:text-white/60">Learn while earning</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start">
-                        <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2 mt-0.5">
-                          <Trophy className="h-3 w-3 text-primary" />
-                        </div>
-                        <div>
-                          <h4 className="text-xs font-semibold text-black dark:text-white">Skill Certification</h4>
-                          <p className="text-xs text-black/60 dark:text-white/60">Verified credentials</p>
-                        </div>
-                      </div>
+                      <EnhancedButton
+                        variant="gradient"
+                        size="sm"
+                        className="w-full"
+                        onClick={() => router.push("/skill-accelerator")}
+                      >
+                        <Zap className="mr-2 h-4 w-4" />
+                        Accelerate Your Skills
+                      </EnhancedButton>
                     </div>
-
-                    <EnhancedButton
-                      variant="gradient"
-                      size="sm"
-                      className="w-full"
-                      onClick={() => router.push("/skill-accelerator")}
-                    >
-                      <Zap className="mr-2 h-4 w-4" />
-                      Accelerate Your Skills
-                    </EnhancedButton>
                   </div>
 
                   {/* Futuristic decorative elements */}
