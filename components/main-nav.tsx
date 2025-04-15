@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { LevlLogo } from "@/components/levl-logo"
 import { MobileNav } from "@/components/mobile-nav"
 import { useAuth } from "@/context/auth-context"
+import { FloatingWaitlistButton } from "@/components/waitlist/floating-waitlist-button"
 
 export function MainNav() {
   const pathname = usePathname()
@@ -15,9 +16,9 @@ export function MainNav() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-2">
-          <Link href="/" className="flex items-center gap-0">
+          <Link href="/" className="flex items-center gap-2">
             <LevlLogo className="h-8 w-8" />
-            <span className="text-xl font-bold bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent -ml-1">
+            <span className="text-xl font-bold bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
               LevL
             </span>
           </Link>
@@ -68,11 +69,7 @@ export function MainNav() {
                 <Link href="/auth/login" className="text-sm font-medium transition-colors hover:text-primary">
                   Sign In
                 </Link>
-                <Link href="/auth/signup">
-                  <Button className="bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90">
-                    Sign Up
-                  </Button>
-                </Link>
+                <FloatingWaitlistButton inHeader={true} />
               </>
             )}
           </div>

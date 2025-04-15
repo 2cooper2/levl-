@@ -32,10 +32,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { LevlLogo } from "@/components/levl-logo"
 import { ThemeToggle } from "@/components/theme-toggle"
-// Import the WaitlistSection at the top of the file with other imports
-import { WaitlistSection } from "@/components/waitlist/waitlist-section"
 
-// Then add it to the main content, right before the footer
 export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false)
   const router = useRouter()
@@ -286,14 +283,6 @@ export default function Home() {
               <div className="flex flex-col gap-2 min-[400px]:flex-row">
                 <EnhancedButton
                   size="lg"
-                  variant="secondary"
-                  className="font-medium"
-                  onClick={() => router.push("/auth/signup")}
-                >
-                  Sign Up Now
-                </EnhancedButton>
-                <EnhancedButton
-                  size="lg"
                   variant="outline"
                   className="bg-transparent text-primary-foreground border-primary-foreground hover:bg-primary-foreground/10"
                 >
@@ -326,9 +315,6 @@ export default function Home() {
             </motion.div>
           </div>
         </section>
-
-        {/* Add the waitlist section before the footer */}
-        <WaitlistSection />
       </main>
       <footer className="w-full border-t bg-background py-6 md:py-12 relative">
         <BackgroundPattern className="opacity-30" />

@@ -5,17 +5,16 @@ import { usePathname } from "next/navigation"
 import { LevlLogo } from "@/components/levl-logo"
 import { MobileNav } from "@/components/mobile-nav"
 import { Button } from "@/components/ui/button"
-import { useSafeAuth } from "@/context/safe-auth-hook"
+import { useAuth } from "@/context/auth-context"
 import { Menu, Moon, Sun } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useTheme } from "next-themes"
+import { FloatingWaitlistButton } from "@/components/waitlist/floating-waitlist-button"
 
 export function EnhancedMainNav() {
   const pathname = usePathname()
+  const { user, isAuthenticated } = useAuth()
   const { setTheme, theme } = useTheme()
-
-  // Add a try-catch block and default values
-  const { user, isAuthenticated } = useSafeAuth()
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -23,7 +22,7 @@ export function EnhancedMainNav() {
         <div className="flex items-center gap-2 -ml-2">
           <Link href="/" className="flex items-center gap-0">
             <LevlLogo className="h-12 w-12" />
-            <span className="text-3xl font-bold text-black dark:text-white -ml-2">LevL</span>
+            <span className="text-3xl font-bold text-black dark:text-white -ml-1">LevL</span>
           </Link>
         </div>
         <div className="flex items-center gap-4">
@@ -48,11 +47,9 @@ export function EnhancedMainNav() {
               </>
             ) : (
               <>
-                <Link href="/auth/signup">
-                  <Button className="bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90">
-                    Sign Up
-                  </Button>
-                </Link>
+                <div className="mr-2">
+                  <FloatingWaitlistButton inHeader={true} />
+                </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button

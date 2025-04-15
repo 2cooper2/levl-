@@ -6,6 +6,7 @@ import { EnhancedButton } from "@/components/ui/enhanced-button"
 import { Input } from "@/components/ui/input"
 import { ArrowRight, Search, Sparkles } from "lucide-react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 
 export function HeroSection() {
   const router = useRouter()
@@ -268,7 +269,9 @@ export function HeroSection() {
                   ))}
                 </div>
 
-                <EnhancedButton className="w-full mt-4">Get Started</EnhancedButton>
+                <Link href="/waitlist">
+                  <EnhancedButton className="w-full mt-4">Join Waitlist</EnhancedButton>
+                </Link>
               </div>
             </motion.div>
           </motion.div>

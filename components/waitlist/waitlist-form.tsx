@@ -1,109 +1,108 @@
 "use client"
 
-import type React from "react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { joinWaitlist } from "@/app/actions/waitlist-actions"
-import { z } from "zod"
+import { CheckCircle2, Loader2, AlertCircle } from "lucide-react"
 
-const waitlistSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters" }),
-  email: z.string().email({ message: "Please enter a valid email address" }),
-  message: z.string().optional(),
-})
+interface WaitlistFormProps {
+  onSuccess?: () => void
+}
 
-export function WaitlistForm() {
+export function WaitlistForm({ onSuccess }: WaitlistFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [formStatus, setFormStatus] = useState<{
-    success?: boolean
-    message?: string
-  }>({})
+  const [isSuccess, setIsSuccess] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [debugInfo, setDebugInfo] = useState<string | null>(null)
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+  async function handleSubmit(formData: FormData) {
     setIsSubmitting(true)
-    setFormStatus({})
-
-    const formData = new FormData(event.currentTarget)
-    const data = {
-      name: formData.get("name") as string,
-      email: formData.get("email") as string,
-      message: formData.get("message") as string,
-    }
+    setError(null)
+    setDebugInfo(null)
 
     try {
-      // Validate the data client-side first
-      waitlistSchema.parse(data)
+      const result = await joinWaitlist(formData)
 
-      // Submit to Supabase via server action
-      const result = await joinWaitlist(data)
-
-      setFormStatus({
-        success: result.success,
-        message: result.message,
-      })
-
-      // Reset form on success
       if (result.success) {
-        event.currentTarget.reset()
-      }
-    } catch (error) {
-      console.error("Error in form submission:", error)
-      let errorMessage = "Something went wrong. Please try again."
+        setIsSuccess(true)
+        if (onSuccess) {
+          setTimeout(() => {
+            onSuccess()
+          }, 2000)
+        }
+      } else {
+        setError(result.message || "Something went wrong. Please try again.")
 
-      if (error instanceof z.ZodError) {
-        errorMessage = error.errors[0].message
+        // Check console logs for more information
+        setDebugInfo(
+          "Check browser console for more details. The issue might be that the waitlist table doesn't exist in your Supabase database or there are permission issues.",
+        )
       }
-
-      setFormStatus({
-        success: false,
-        message: errorMessage,
-      })
+    } catch (err) {
+      console.error("Error in waitlist submission:", err)
+      setError("An unexpected error occurred. Please try again later.")
+      setDebugInfo("Check browser console for more details.")
     } finally {
       setIsSubmitting(false)
     }
   }
 
+  if (isSuccess) {
+    return (
+      <div className="flex flex-col items-center justify-center py-8 text-center">
+        <div className="rounded-full bg-green-100 p-3 text-green-600 mb-4">
+          <CheckCircle2 className="h-8 w-8" />
+        </div>
+        <h3 className="text-xl font-semibold mb-2">You're on the list!</h3>
+        <p className="text-muted-foreground">
+          Thank you for joining our waitlist. We'll notify you when LevL launches!
+        </p>
+      </div>
+    )
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-md mx-auto">
+    <form action={handleSubmit} className="space-y-4 py-4">
       <div className="space-y-2">
-        <Input name="name" placeholder="Your name" required className="bg-background/80 backdrop-blur-sm" />
+        <Input name="name" placeholder="Your name" required className="w-full" />
       </div>
       <div className="space-y-2">
-        <Input
-          name="email"
-          type="email"
-          placeholder="Your email"
-          required
-          className="bg-background/80 backdrop-blur-sm"
-        />
+        <Input name="email" type="email" placeholder="Your email" required className="w-full" />
       </div>
       <div className="space-y-2">
         <Textarea
           name="message"
           placeholder="Tell us what you're looking for (optional)"
-          className="bg-background/80 backdrop-blur-sm min-h-[100px]"
+          className="min-h-[100px] w-full"
         />
       </div>
-      <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
-        {isSubmitting ? "Joining..." : "Get Early Access"}
-      </Button>
-
-      {formStatus.message && (
-        <div
-          className={`p-3 rounded-md text-sm ${
-            formStatus.success
-              ? "bg-green-500/10 text-green-500 border border-green-500/20"
-              : "bg-destructive/10 text-destructive border border-destructive/20"
-          }`}
-        >
-          {formStatus.message}
+      {error && (
+        <div className="flex items-start gap-2 text-sm text-red-500 mt-2 p-2 bg-red-50 rounded">
+          <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+          <div>
+            <p>{error}</p>
+            {debugInfo && <p className="text-xs mt-1 text-gray-500">{debugInfo}</p>}
+          </div>
         </div>
       )}
-      <p className="text-xs text-muted-foreground mt-4 text-center">
-        We respect your privacy. Unsubscribe at any time.
+      <Button
+        type="submit"
+        className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Joining...
+          </>
+        ) : (
+          "Join Waitlist"
+        )}
+      </Button>
+      <p className="text-xs text-center text-muted-foreground mt-4">
+        We'll notify you when we launch. No spam, we promise!
       </p>
     </form>
   )

@@ -16,11 +16,7 @@ export function PremiumHeroSection() {
   const [searchQuery, setSearchQuery] = useState("")
 
   const handleGetStarted = () => {
-    if (isAuthenticated) {
-      router.push("/dashboard")
-    } else {
-      router.push("/auth/signup")
-    }
+    router.push("/waitlist")
   }
 
   const handleFindServices = () => {
@@ -28,11 +24,7 @@ export function PremiumHeroSection() {
   }
 
   const handleOfferServices = () => {
-    if (isAuthenticated) {
-      router.push("/dashboard/services/new")
-    } else {
-      router.push("/auth/signup?role=provider")
-    }
+    router.push("/waitlist")
   }
 
   const fadeInUp = {
@@ -93,7 +85,7 @@ export function PremiumHeroSection() {
                   className="gap-1.5 text-base btn-premium bg-primary hover:bg-primary/90 text-white w-full"
                   onClick={handleGetStarted}
                 >
-                  Get Started <ArrowRight className="h-4 w-4 ml-1" />
+                  Join Waitlist <ArrowRight className="h-4 w-4 ml-1" />
                 </EnhancedButton>
               </GradientBorder>
             </motion.div>
@@ -184,7 +176,7 @@ export function PremiumHeroSection() {
                       className="w-full btn-premium bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90"
                       onClick={handleOfferServices}
                     >
-                      Start Offering
+                      Join Waitlist
                     </EnhancedButton>
                   </TabsContent>
                 </Tabs>

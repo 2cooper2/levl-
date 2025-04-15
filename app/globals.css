@@ -10,43 +10,6 @@ body {
   .text-balance {
     text-wrap: balance;
   }
-
-  /* 3D transform utilities */
-  .perspective-1000 {
-    perspective: 1000px;
-  }
-
-  .perspective-1500 {
-    perspective: 1500px;
-  }
-
-  .perspective-2000 {
-    perspective: 2000px;
-  }
-
-  .preserve-3d {
-    transform-style: preserve-3d;
-  }
-
-  .translate-z-\[25px\] {
-    transform: translateZ(25px);
-  }
-
-  .translate-z-\[50px\] {
-    transform: translateZ(50px);
-  }
-
-  .translate-z-\[75px\] {
-    transform: translateZ(75px);
-  }
-
-  .translate-z-\[100px\] {
-    transform: translateZ(100px);
-  }
-
-  .translate-z-\[150px\] {
-    transform: translateZ(150px);
-  }
 }
 
 @layer base {
@@ -62,7 +25,6 @@ body {
 
     --primary: 222.2 47.4% 11.2%;
     --primary-foreground: 210 40% 98%;
-    --primary-rgb: 28, 30, 39;
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -108,7 +70,6 @@ body {
 
     --primary: 210 40% 98%;
     --primary-foreground: 222.2 47.4% 11.2%;
-    --primary-rgb: 210, 216, 232;
 
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -148,50 +109,4 @@ body {
   body {
     @apply bg-background text-foreground;
   }
-}
-
-/* Noise texture */
-.bg-noise {
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-}
-
-/* Depth-based shadows */
-.shadow-depth-1 {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-}
-
-.shadow-depth-2 {
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
-}
-
-.shadow-depth-3 {
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
-}
-
-.shadow-depth-4 {
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
-}
-
-.shadow-depth-5 {
-  box-shadow: 0 19px 38px rgba(0, 0, 0, 0.3), 0 15px 12px rgba(0, 0, 0, 0.22);
-}
-
-/* Radial gradient */
-.bg-gradient-radial {
-  background-image: radial-gradient(var(--tw-gradient-stops));
-}
-
-/* Skill accelerator depth effects */
-.skill-accelerator-shadow {
-  box-shadow: 0 15px 35px -15px rgba(var(--primary-rgb), 0.3);
-}
-
-.skill-accelerator-glow {
-  box-shadow: 0 0 25px 5px rgba(var(--primary-rgb), 0.15);
-}
-
-.skill-accelerator-glass {
-  backdrop-filter: blur(12px);
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
 }
