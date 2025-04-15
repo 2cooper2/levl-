@@ -88,7 +88,7 @@ export function WaitlistForm() {
         />
       </div>
       <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
-        {isSubmitting ? "Joining..." : "Join Waitlist"}
+        {isSubmitting ? "Joining..." : "Get Early Access"}
       </Button>
 
       {formStatus.message && (
@@ -102,6 +102,9 @@ export function WaitlistForm() {
           {formStatus.message}
         </div>
       )}
+      <p className="text-xs text-muted-foreground mt-4 text-center">
+        We respect your privacy. Unsubscribe at any time.
+      </p>
     </form>
   )
 }
