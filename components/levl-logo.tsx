@@ -10,17 +10,20 @@ export function LevlLogo(props: SVGProps<SVGSVGElement>) {
       className={props.className}
       {...props}
     >
-      {/* Circular path (invisible) that guides the dots */}
-      <circle cx="12" cy="12" r="7" fill="none" />
+      {/* Modern Levl logo with rounded squares and diagonal element positioned at the very top */}
+      <g transform="translate(2, 2) scale(0.85)">
+        {/* Top left square */}
+        <rect x="1" y="1" width="8" height="8" rx="2" fill="#7C3AED" />
 
-      {/* Four dots arranged in a circle, with the top dot highlighted */}
-      <circle cx="12" cy="5" r="2.2" fill="#5B21B6" opacity="1" />
-      <circle cx="19" cy="12" r="1.8" fill="#5B21B6" opacity="0.7" />
-      <circle cx="12" cy="19" r="1.8" fill="#5B21B6" opacity="0.5" />
-      <circle cx="5" cy="12" r="1.8" fill="#5B21B6" opacity="0.3" />
+        {/* Bottom left square */}
+        <rect x="1" y="10" width="8" height="8" rx="2" fill="#8B5CF6" />
 
-      {/* Optional: central dot */}
-      <circle cx="12" cy="12" r="1" fill="#5B21B6" opacity="0.5" />
+        {/* Bottom right square */}
+        <rect x="10" y="10" width="8" height="8" rx="2" fill="#7C3AED" />
+
+        {/* Larger diagonal flag/ribbon element positioned at the very top */}
+        <path d="M11 0.5 L18 0.5 L18 7.5 L11 0.5 Z" fill="#9333EA" />
+      </g>
     </svg>
   )
 }

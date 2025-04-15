@@ -5,7 +5,6 @@ import type React from "react"
 import { EnhancedButton } from "@/components/ui/enhanced-button"
 import {
   ArrowRight,
-  Brain,
   Zap,
   Trophy,
   Users,
@@ -636,37 +635,37 @@ export function EnhancedHeroSection() {
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1500 ease-in-out"></div>
                     <div className="relative">
                       <div className="relative">
-                        <Gem className="h-3.5 w-3.5 mr-2 text-primary" />
+                        <Gem className="h-4 w-4 mr-2 text-primary" />
                         {showDiamondGlint && (
                           <>
-                            {/* Diamond-shaped glint animation */}
+                            {/* Enhanced Diamond-shaped glint animation */}
                             <motion.div
                               className="absolute inset-0"
                               initial={{ opacity: 0 }}
                               animate={{ opacity: [0, 1, 0] }}
                               transition={{ duration: 0.8 }}
                             >
-                              {/* Top facet */}
-                              <div className="absolute top-0 left-1/2 w-1.5 h-1.5 bg-white rounded-sm -translate-x-1/2 -translate-y-1/4 rotate-45 opacity-80 shadow-[0_0_5px_2px_rgba(255,255,255,0.8)]" />
+                              {/* Top facet - enhanced */}
+                              <div className="absolute top-0 left-1/2 w-2 h-2 bg-white rounded-sm -translate-x-1/2 -translate-y-1/4 rotate-45 opacity-90 shadow-[0_0_8px_3px_rgba(255,255,255,0.9)]" />
 
-                              {/* Right facet */}
-                              <div className="absolute top-1/2 right-0 w-1.5 h-1.5 bg-white rounded-sm -translate-y-1/2 translate-x-1/4 rotate-45 opacity-80 shadow-[0_0_5px_2px_rgba(255,255,255,0.8)]" />
+                              {/* Right facet - enhanced */}
+                              <div className="absolute top-1/2 right-0 w-2 h-2 bg-white rounded-sm -translate-y-1/2 translate-x-1/4 rotate-45 opacity-90 shadow-[0_0_8px_3px_rgba(255,255,255,0.9)]" />
 
-                              {/* Bottom facet */}
-                              <div className="absolute bottom-0 left-1/2 w-1.5 h-1.5 bg-white rounded-sm -translate-x-1/2 translate-y-1/4 rotate-45 opacity-80 shadow-[0_0_5px_2px_rgba(255,255,255,0.8)]" />
+                              {/* Bottom facet - enhanced */}
+                              <div className="absolute bottom-0 left-1/2 w-2 h-2 bg-white rounded-sm -translate-x-1/2 translate-y-1/4 rotate-45 opacity-90 shadow-[0_0_8px_3px_rgba(255,255,255,0.9)]" />
 
-                              {/* Left facet */}
-                              <div className="absolute top-1/2 left-0 w-1.5 h-1.5 bg-white rounded-sm -translate-y-1/2 -translate-x-1/4 rotate-45 opacity-80 shadow-[0_0_5px_2px_rgba(255,255,255,0.8)]" />
+                              {/* Left facet - enhanced */}
+                              <div className="absolute top-1/2 left-0 w-2 h-2 bg-white rounded-sm -translate-y-1/2 -translate-x-1/4 rotate-45 opacity-90 shadow-[0_0_8px_3px_rgba(255,255,255,0.9)]" />
 
-                              {/* Center sparkle */}
-                              <div className="absolute inset-0 m-auto w-1 h-1 bg-white rounded-full opacity-90 shadow-[0_0_8px_4px_rgba(255,255,255,0.9)]" />
+                              {/* Center sparkle - enhanced */}
+                              <div className="absolute inset-0 m-auto w-1.5 h-1.5 bg-white rounded-full opacity-100 shadow-[0_0_10px_5px_rgba(255,255,255,1)]" />
                             </motion.div>
                           </>
                         )}
                       </div>
                     </div>
                     <span className="text-sm font-medium text-black dark:text-white relative z-10">
-                      Lower fees than TaskRabbit
+                      Lower fees than Competitors!
                     </span>
                   </div>
                 </motion.div>
@@ -753,8 +752,8 @@ export function EnhancedHeroSection() {
                     </div>
 
                     <p className="text-sm text-black/80 dark:text-white/80">
-                      The world's first AI-powered skill development ecosystem that helps you earn while you learn and
-                      grow your freelance career exponentially.
+                      The world's first AI-powered gig ecosystem that helps you earn while you learn and grow your
+                      freelance career exponentially.
                     </p>
 
                     {/* Skill Progression Tabs */}
@@ -1471,11 +1470,11 @@ export function EnhancedHeroSection() {
                     <div className="grid grid-cols-2 gap-2 sm:gap-3">
                       <div className="flex items-start">
                         <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2 mt-0.5">
-                          <Brain className="h-3 w-3 text-primary" />
+                          <MessageSquare className="h-3 w-3 text-primary" />
                         </div>
                         <div>
-                          <h4 className="text-xs font-semibold text-black dark:text-white">AI Coaching</h4>
-                          <p className="text-xs text-black/60 dark:text-white/60">Personalized guidance</p>
+                          <h4 className="text-xs font-semibold text-black dark:text-white">Forum</h4>
+                          <p className="text-xs text-black/60 dark:text-white/60">Community support</p>
                         </div>
                       </div>
 
