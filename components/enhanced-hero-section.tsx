@@ -52,6 +52,37 @@ const scrollbarHideStyles = `
   }
 `
 
+// Custom founder icon component
+const FounderIcon = ({ className = "" }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    width="20"
+    height="20"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    {/* Professional person silhouette */}
+    <path d="M12 4a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z" />
+    <path d="M12 11c-3.5 0-7 1.5-7 5v3h14v-3c0-3.5-3.5-5-7-5z" />
+
+    {/* Business suit/tie */}
+    <path d="M12 11v9" />
+    <path d="M10.5 13L12 15l1.5-2" />
+
+    {/* Leadership crown */}
+    <path d="M9 4l1 1h4l1-1" />
+
+    {/* Growth chart */}
+    <path d="M18 8l1.5-1.5" />
+    <path d="M19.5 6.5v1.5h-1.5" />
+  </svg>
+)
+
 export function EnhancedHeroSection() {
   const router = useRouter()
   const { isAuthenticated } = useAuth()
@@ -348,6 +379,9 @@ export function EnhancedHeroSection() {
     return () => clearInterval(glintInterval)
   }, [])
 
+  // Medal glow effect
+  // Remove this useEffect
+
   // Animate progress bar when skill changes
   useEffect(() => {
     setProgress(0)
@@ -629,46 +663,58 @@ export function EnhancedHeroSection() {
                       transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY, repeatType: "reverse" }}
                     />
                   </div>
-                  <div
-                    className="inline-flex items-center mt-3 px-4 py-1.5 rounded-full bg-gradient-to-r from-primary/10 to-purple-500/10 backdrop-blur-sm border border-white/10 shadow-sm relative overflow-hidden group"
-                    onMouseEnter={() => setShowDiamondGlint(true)}
-                    onMouseLeave={() => setShowDiamondGlint(false)}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1500 ease-in-out"></div>
-                    <div className="relative">
+                  <div className="flex flex-wrap gap-3 mt-3">
+                    <div
+                      className="inline-flex items-center px-4 py-1.5 rounded-full bg-gradient-to-r from-primary/10 to-purple-500/10 backdrop-blur-sm border border-white/10 shadow-sm relative overflow-hidden group"
+                      onMouseEnter={() => setShowDiamondGlint(true)}
+                      onMouseLeave={() => setShowDiamondGlint(false)}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1500 ease-in-out"></div>
                       <div className="relative">
-                        <Gem className="h-4 w-4 mr-2 text-primary" />
-                        {showDiamondGlint && (
-                          <>
-                            {/* Enhanced Diamond-shaped glint animation */}
-                            <motion.div
-                              className="absolute inset-0"
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: [0, 1, 0] }}
-                              transition={{ duration: 0.8 }}
-                            >
-                              {/* Top facet - enhanced */}
-                              <div className="absolute top-0 left-1/2 w-2 h-2 bg-white rounded-sm -translate-x-1/2 -translate-y-1/4 rotate-45 opacity-90 shadow-[0_0_8px_3px_rgba(255,255,255,0.9)]" />
+                        <div className="relative">
+                          <Gem className="h-4 w-4 mr-2 text-primary" />
+                          {showDiamondGlint && (
+                            <>
+                              {/* Enhanced Diamond-shaped glint animation */}
+                              <motion.div
+                                className="absolute inset-0"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: [0, 1, 0] }}
+                                transition={{ duration: 0.8 }}
+                              >
+                                {/* Top facet - enhanced */}
+                                <div className="absolute top-0 left-1/2 w-2 h-2 bg-white rounded-sm -translate-x-1/2 -translate-y-1/4 rotate-45 opacity-90 shadow-[0_0_8px_3px_rgba(255,255,255,0.9)]" />
 
-                              {/* Right facet - enhanced */}
-                              <div className="absolute top-1/2 right-0 w-2 h-2 bg-white rounded-sm -translate-y-1/2 translate-x-1/4 rotate-45 opacity-90 shadow-[0_0_8px_3px_rgba(255,255,255,0.9)]" />
+                                {/* Right facet - enhanced */}
+                                <div className="absolute top-1/2 right-0 w-2 h-2 bg-white rounded-sm -translate-y-1/2 translate-x-1/4 rotate-45 opacity-90 shadow-[0_0_8px_3px_rgba(255,255,255,0.9)]" />
 
-                              {/* Bottom facet - enhanced */}
-                              <div className="absolute bottom-0 left-1/2 w-2 h-2 bg-white rounded-sm -translate-x-1/2 translate-y-1/4 rotate-45 opacity-90 shadow-[0_0_8px_3px_rgba(255,255,255,0.9)]" />
+                                {/* Bottom facet - enhanced */}
+                                <div className="absolute bottom-0 left-1/2 w-2 h-2 bg-white rounded-sm -translate-x-1/2 translate-y-1/4 rotate-45 opacity-90 shadow-[0_0_8px_3px_rgba(255,255,255,0.9)]" />
 
-                              {/* Left facet - enhanced */}
-                              <div className="absolute top-1/2 left-0 w-2 h-2 bg-white rounded-sm -translate-y-1/2 -translate-x-1/4 rotate-45 opacity-90 shadow-[0_0_8px_3px_rgba(255,255,255,0.9)]" />
+                                {/* Left facet - enhanced */}
+                                <div className="absolute top-1/2 left-0 w-2 h-2 bg-white rounded-sm -translate-y-1/2 -translate-x-1/4 rotate-45 opacity-90 shadow-[0_0_8px_3px_rgba(255,255,255,0.9)]" />
 
-                              {/* Center sparkle - enhanced */}
-                              <div className="absolute inset-0 m-auto w-1.5 h-1.5 bg-white rounded-full opacity-100 shadow-[0_0_10px_5px_rgba(255,255,255,1)]" />
-                            </motion.div>
-                          </>
-                        )}
+                                {/* Center sparkle - enhanced */}
+                                <div className="absolute inset-0 m-auto w-1.5 h-1.5 bg-white rounded-full opacity-100 shadow-[0_0_10px_5px_rgba(255,255,255,1)]" />
+                              </motion.div>
+                            </>
+                          )}
+                        </div>
                       </div>
+                      <span className="text-sm font-medium text-black dark:text-white relative z-10">
+                        Lower fees than Competitors!
+                      </span>
                     </div>
-                    <span className="text-sm font-medium text-black dark:text-white relative z-10">
-                      Lower fees than Competitors!
-                    </span>
+
+                    <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-gradient-to-r from-purple-500/10 to-violet-500/10 backdrop-blur-sm border border-white/10 shadow-sm relative overflow-hidden group">
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1500 ease-in-out"></div>
+                      <div className="relative">
+                        <FounderIcon className="mr-2 text-black dark:text-white" />
+                      </div>
+                      <span className="text-sm font-medium text-black dark:text-white relative z-10">
+                        Founder who's completed over 3k+ gig jobs
+                      </span>
+                    </div>
                   </div>
                 </motion.div>
                 <motion.p
@@ -719,6 +765,7 @@ export function EnhancedHeroSection() {
                     boxShadow: "0 10px 30px -10px rgba(var(--primary-rgb), 0.2)",
                   }}
                 >
+                  {/* Rest of the component continues... */}
                   {/* Glassmorphic effect */}
                   <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/5 dark:from-white/5 dark:to-transparent rounded-xl pointer-events-none"></div>
 
