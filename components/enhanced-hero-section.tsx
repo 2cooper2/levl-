@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { EnhancedButton } from "@/components/ui/enhanced-button"
+import { SkillAcceleratorSignup } from "@/components/skill-accelerator-signup"
 import {
   ArrowRight,
   Zap,
@@ -63,20 +64,15 @@ const detailedVisualStyles = `
   .detailed-card {
     position: relative;
     overflow: hidden;
+    isolation: isolate;
   }
   
   .grid-pattern {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: 
-      linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
-    background-size: 20px 20px;
-    pointer-events: none;
-    z-index: 1;
+    opacity: 0.7;
+  }
+
+  .tech-pattern {
+    opacity: 0.7;
   }
   
   .circuit-lines {
@@ -281,6 +277,7 @@ export function EnhancedHeroSection() {
   const [circuitDots, setCircuitDots] = useState<Array<{ top: number; left: number }>>([])
   const [glowDots, setGlowDots] = useState<Array<{ top: number; left: number; delay: number }>>([])
   const [dataFlows, setDataFlows] = useState<Array<{ top: number; left: number; delay: number }>>([])
+  const [showSignupModal, setShowSignupModal] = useState(false)
 
   // Forum discussion data
   const forumTopics = [
@@ -971,7 +968,7 @@ export function EnhancedHeroSection() {
             >
               <div className="relative w-full max-w-full">
                 <motion.div
-                  className="relative rounded-xl overflow-hidden border border-white/20 bg-white/10 dark:bg-black/10 backdrop-blur-md p-3 sm:p-4 md:p-5 shadow-lg detailed-card"
+                  className="relative rounded-xl overflow-hidden border border-white/20 bg-gradient-to-br from-white/15 to-white/10 dark:from-black/15 dark:to-black/10 backdrop-blur-md p-3 sm:p-4 md:p-5 shadow-lg detailed-card"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.6, delay: 0.4 }}
@@ -980,10 +977,13 @@ export function EnhancedHeroSection() {
                   }}
                 >
                   {/* Grid pattern overlay */}
-                  <div className="grid-pattern"></div>
+                  <div className="grid-pattern absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none z-1"></div>
 
                   {/* Tech pattern overlay */}
-                  <div className="tech-pattern"></div>
+                  <div className="tech-pattern absolute inset-0 bg-[radial-gradient(circle_at_10px_10px,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none z-1"></div>
+
+                  {/* Even background overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-purple-500/5 pointer-events-none"></div>
 
                   {/* Circuit lines */}
                   <div className="circuit-lines">
@@ -1149,7 +1149,7 @@ export function EnhancedHeroSection() {
                             <div className="flex justify-between items-start mb-3">
                               <div>
                                 <div className="flex items-center">
-                                  <div className="h-6 w-6 rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 flex items-center justify-center mr-2">
+                                  <div className="h-6 w-6 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center mr-2 relative group">
                                     {skills[activeSkill].icon}
                                   </div>
                                   <h4 className="font-bold text-black dark:text-white">{skills[activeSkill].name}</h4>
@@ -1905,7 +1905,7 @@ export function EnhancedHeroSection() {
                         variant="gradient"
                         size="sm"
                         className="w-full"
-                        onClick={() => router.push("/skill-accelerator")}
+                        onClick={() => setShowSignupModal(true)}
                       >
                         <Zap className="mr-2 h-4 w-4" />
                         Accelerate Your Skills
@@ -1925,6 +1925,7 @@ export function EnhancedHeroSection() {
           </div>
         </div>
       </section>
+      <SkillAcceleratorSignup isOpen={showSignupModal} onClose={() => setShowSignupModal(false)} />
     </>
   )
 }
