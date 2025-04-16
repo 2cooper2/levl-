@@ -21,7 +21,11 @@ export async function joinWaitlist(formData: FormData) {
 
     const name = formData.get("name") as string
     const email = formData.get("email") as string
-    const message = (formData.get("message") as string) || ""
+    const role = (formData.get("role") as string) || "client"
+    const userMessage = (formData.get("message") as string) || ""
+
+    // Combine role and message into a single message field
+    const message = `Role: ${role}\n\nFeedback: ${userMessage}`
 
     if (!name || !email) {
       return {
@@ -31,7 +35,6 @@ export async function joinWaitlist(formData: FormData) {
     }
 
     // Try to create the waitlist table if it doesn't exist
-    // Note: This requires postgres permissions and might fail with the anon key
     try {
       const { error: createTableError } = await supabase.rpc("exec", { query: createWaitlistTableSQL })
       if (createTableError) {
@@ -78,8 +81,8 @@ export async function joinWaitlist(formData: FormData) {
       }
     }
 
-    // Insert new waitlist entry
-    console.log("Inserting new waitlist entry:", { name, email })
+    // Insert new waitlist entry - only using the existing columns
+    console.log("Inserting new waitlist entry:", { name, email, message })
     const { error } = await supabase.from("waitlist").insert([{ name, email, message }])
 
     if (error) {

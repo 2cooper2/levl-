@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { joinWaitlist } from "@/app/actions/waitlist-actions"
 import { CheckCircle2, Loader2, AlertCircle } from "lucide-react"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Label } from "@/components/ui/label"
 
 interface WaitlistFormProps {
   onSuccess?: () => void
@@ -16,11 +18,15 @@ export function WaitlistForm({ onSuccess }: WaitlistFormProps) {
   const [isSuccess, setIsSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [debugInfo, setDebugInfo] = useState<string | null>(null)
+  const [role, setRole] = useState<string>("client")
 
   async function handleSubmit(formData: FormData) {
     setIsSubmitting(true)
     setError(null)
     setDebugInfo(null)
+
+    // Add the role to the form data
+    formData.append("role", role)
 
     try {
       const result = await joinWaitlist(formData)
@@ -71,12 +77,33 @@ export function WaitlistForm({ onSuccess }: WaitlistFormProps) {
       <div className="space-y-2">
         <Input name="email" type="email" placeholder="Your email" required className="w-full" />
       </div>
+
+      <div className="space-y-3">
+        <Label className="text-sm font-medium">I am interested in joining as:</Label>
+        <RadioGroup defaultValue="client" value={role} onValueChange={setRole} className="flex flex-col space-y-2">
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="client" id="client" />
+            <Label htmlFor="client" className="cursor-pointer">
+              Client - I want to hire talent
+            </Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="worker" id="worker" />
+            <Label htmlFor="worker" className="cursor-pointer">
+              Worker - I want to offer my skills
+            </Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="both" id="both" />
+            <Label htmlFor="both" className="cursor-pointer">
+              Both - I want to do both
+            </Label>
+          </div>
+        </RadioGroup>
+      </div>
+
       <div className="space-y-2">
-        <Textarea
-          name="message"
-          placeholder="Tell us what you're looking for (optional)"
-          className="min-h-[100px] w-full"
-        />
+        <Textarea name="message" placeholder="Give us feedback on the page!" className="min-h-[100px] w-full" />
       </div>
       {error && (
         <div className="flex items-start gap-2 text-sm text-red-500 mt-2 p-2 bg-red-50 rounded">
