@@ -29,6 +29,12 @@ import {
   Search,
   Filter,
   PenToolIcon as Tool,
+  Sparkles,
+  Lightbulb,
+  Compass,
+  BarChart,
+  Layers,
+  Cpu,
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
@@ -43,12 +49,181 @@ const shimmerAnimation = {
 
 // Add styles for hiding scrollbars
 const scrollbarHideStyles = `
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+`
+
+// Add detailed visual styles
+const detailedVisualStyles = `
+  .detailed-card {
+    position: relative;
+    overflow: hidden;
   }
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+  
+  .grid-pattern {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+    pointer-events: none;
+    z-index: 1;
+  }
+  
+  .circuit-lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+  }
+  
+  .circuit-line {
+    position: absolute;
+    background: linear-gradient(90deg, rgba(var(--primary-rgb), 0.1), rgba(var(--primary-rgb), 0.3), rgba(var(--primary-rgb), 0.1));
+    height: 1px;
+    opacity: 0.3;
+  }
+  
+  .circuit-dot {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: rgba(var(--primary-rgb), 0.5);
+    box-shadow: 0 0 5px rgba(var(--primary-rgb), 0.5);
+  }
+  
+  .glow-dot {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    background-color: white;
+    opacity: 0.6;
+    box-shadow: 0 0 5px 2px rgba(255, 255, 255, 0.3);
+    animation: pulse-glow 3s infinite;
+  }
+  
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 0.2; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.5); }
+  }
+  
+  .geometric-shape {
+    position: absolute;
+    opacity: 0.15;
+    pointer-events: none;
+    z-index: 1;
+  }
+  
+  .data-flow {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background-color: rgba(var(--primary-rgb), 0.8);
+    border-radius: 50%;
+    z-index: 1;
+    animation: data-flow-animation 4s linear infinite;
+  }
+  
+  @keyframes data-flow-animation {
+    0% { transform: translateY(0) translateX(0); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(100px) translateX(100px); opacity: 0; }
+  }
+  
+  .skill-card {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .skill-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 50% 0%, rgba(var(--primary-rgb), 0.1), transparent 70%);
+    pointer-events: none;
+    z-index: 1;
+  }
+  
+  .progress-track {
+    position: relative;
+    overflow: hidden;
+    border-radius: 9999px;
+  }
+  
+  .progress-track::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: linear-gradient(90deg, 
+      rgba(255,255,255,0) 0%, 
+      rgba(255,255,255,0.2) 20%, 
+      rgba(255,255,255,0.2) 80%, 
+      rgba(255,255,255,0) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+    pointer-events: none;
+  }
+  
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  
+  .detailed-tab {
+    position: relative;
+  }
+  
+  .detailed-tab::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, 
+      rgba(var(--primary-rgb), 0) 0%, 
+      rgba(var(--primary-rgb), 1) 50%, 
+      rgba(var(--primary-rgb), 0) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .detailed-tab.active::after {
+    opacity: 1;
+  }
+  
+  .tech-pattern {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: radial-gradient(circle at 10px 10px, rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+    pointer-events: none;
+    z-index: 1;
   }
 `
 
@@ -102,6 +277,10 @@ export function EnhancedHeroSection() {
   const [hoverSkill, setHoverSkill] = useState<number | null>(null)
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
   const [activeTopic, setActiveTopic] = useState<number | null>(null)
+  const [circuitLines, setCircuitLines] = useState<Array<{ top: number; width: number; left: number }>>([])
+  const [circuitDots, setCircuitDots] = useState<Array<{ top: number; left: number }>>([])
+  const [glowDots, setGlowDots] = useState<Array<{ top: number; left: number; delay: number }>>([])
+  const [dataFlows, setDataFlows] = useState<Array<{ top: number; left: number; delay: number }>>([])
 
   // Forum discussion data
   const forumTopics = [
@@ -358,6 +537,40 @@ export function EnhancedHeroSection() {
     },
   ]
 
+  // Generate decorative elements
+  useEffect(() => {
+    // Generate circuit lines
+    const lines = Array.from({ length: 8 }, (_, i) => ({
+      top: Math.random() * 100,
+      width: 50 + Math.random() * 150,
+      left: Math.random() * 100,
+    }))
+    setCircuitLines(lines)
+
+    // Generate circuit dots
+    const dots = Array.from({ length: 12 }, (_, i) => ({
+      top: Math.random() * 100,
+      left: Math.random() * 100,
+    }))
+    setCircuitDots(dots)
+
+    // Generate glow dots
+    const glows = Array.from({ length: 15 }, (_, i) => ({
+      top: Math.random() * 100,
+      left: Math.random() * 100,
+      delay: Math.random() * 5,
+    }))
+    setGlowDots(glows)
+
+    // Generate data flows
+    const flows = Array.from({ length: 10 }, (_, i) => ({
+      top: Math.random() * 100,
+      left: Math.random() * 100,
+      delay: Math.random() * 4,
+    }))
+    setDataFlows(flows)
+  }, [])
+
   // Auto-rotate through skills
   useEffect(() => {
     const interval = setInterval(() => {
@@ -456,6 +669,19 @@ export function EnhancedHeroSection() {
         const height = rect.height
 
         ctx.clearRect(0, 0, width, height)
+
+        // Draw grid lines
+        ctx.beginPath()
+        for (let i = 0; i < width; i += 20) {
+          ctx.moveTo(i, 0)
+          ctx.lineTo(i, height)
+        }
+        for (let i = 0; i < height; i += 20) {
+          ctx.moveTo(0, i)
+          ctx.lineTo(width, i)
+        }
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.05)"
+        ctx.stroke()
 
         // Generate earnings data - simulating growth over time
         const now = Date.now()
@@ -619,6 +845,9 @@ export function EnhancedHeroSection() {
       <style jsx global>
         {scrollbarHideStyles}
       </style>
+      <style jsx global>
+        {detailedVisualStyles}
+      </style>
       <section className="w-full py-6 md:py-10 lg:py-16 xl:py-24 relative overflow-hidden">
         {/* Animated background elements */}
         <div
@@ -742,7 +971,7 @@ export function EnhancedHeroSection() {
             >
               <div className="relative w-full max-w-full">
                 <motion.div
-                  className="relative rounded-xl overflow-hidden border border-white/20 bg-white/10 dark:bg-black/10 backdrop-blur-md p-3 sm:p-4 md:p-5 shadow-lg"
+                  className="relative rounded-xl overflow-hidden border border-white/20 bg-white/10 dark:bg-black/10 backdrop-blur-md p-3 sm:p-4 md:p-5 shadow-lg detailed-card"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.6, delay: 0.4 }}
@@ -750,9 +979,62 @@ export function EnhancedHeroSection() {
                     boxShadow: "0 10px 30px -10px rgba(var(--primary-rgb), 0.2)",
                   }}
                 >
-                  {/* Rest of the component continues... */}
-                  {/* Glassmorphic effect */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/5 dark:from-white/5 dark:to-transparent rounded-xl pointer-events-none"></div>
+                  {/* Grid pattern overlay */}
+                  <div className="grid-pattern"></div>
+
+                  {/* Tech pattern overlay */}
+                  <div className="tech-pattern"></div>
+
+                  {/* Circuit lines */}
+                  <div className="circuit-lines">
+                    {circuitLines.map((line, i) => (
+                      <div
+                        key={`line-${i}`}
+                        className="circuit-line"
+                        style={{
+                          top: `${line.top}%`,
+                          left: `${line.left}%`,
+                          width: `${line.width}px`,
+                        }}
+                      ></div>
+                    ))}
+                    {circuitDots.map((dot, i) => (
+                      <div
+                        key={`dot-${i}`}
+                        className="circuit-dot"
+                        style={{
+                          top: `${dot.top}%`,
+                          left: `${dot.left}%`,
+                        }}
+                      ></div>
+                    ))}
+                  </div>
+
+                  {/* Glow dots */}
+                  {glowDots.map((dot, i) => (
+                    <div
+                      key={`glow-${i}`}
+                      className="glow-dot"
+                      style={{
+                        top: `${dot.top}%`,
+                        left: `${dot.left}%`,
+                        animationDelay: `${dot.delay}s`,
+                      }}
+                    ></div>
+                  ))}
+
+                  {/* Data flow animations */}
+                  {dataFlows.map((flow, i) => (
+                    <div
+                      key={`flow-${i}`}
+                      className="data-flow"
+                      style={{
+                        top: `${flow.top}%`,
+                        left: `${flow.left}%`,
+                        animationDelay: `${flow.delay}s`,
+                      }}
+                    ></div>
+                  ))}
 
                   {/* Animated border glow */}
                   <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-primary/30 via-purple-500/30 to-primary/30 opacity-70 blur-sm"></div>
@@ -780,14 +1062,28 @@ export function EnhancedHeroSection() {
                           <Rocket className="h-5 w-5 text-white" />
                           <div className="absolute inset-0 rounded-full bg-white/30 scale-0 group-hover:scale-150" />
                           <div className="absolute inset-0 rounded-full bg-white/30 scale-0 group-hover:scale-150 opacity-0 transition-all duration-700"></div>
+                          {/* Orbital rings around the rocket icon */}
+                          <div className="absolute inset-0 rounded-full border border-white/20 scale-[1.3] animate-pulse"></div>
+                          <div
+                            className="absolute inset-0 rounded-full border border-white/10 scale-[1.6] animate-pulse"
+                            style={{ animationDelay: "0.5s" }}
+                          ></div>
                         </div>
-                        <h3 className="text-xl font-bold text-black dark:text-white">Skill Accelerator</h3>
+                        <h3 className="text-xl font-bold text-black dark:text-white">
+                          Skill Accelerator
+                          <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-medium bg-primary/20 text-primary">
+                            <Sparkles className="h-3 w-3 mr-1" /> AI-Powered
+                          </span>
+                        </h3>
                       </div>
                     </div>
 
                     <p className="text-sm text-black/80 dark:text-white/80 lg:col-span-12">
                       The world's first AI-powered gig ecosystem that helps you earn while you learn and grow your
                       freelance career exponentially.
+                      <span className="inline-flex items-center ml-2 text-primary">
+                        <Lightbulb className="h-3 w-3 mr-1" /> Smart matching technology
+                      </span>
                     </p>
 
                     <div className="flex flex-wrap gap-2 md:flex-nowrap overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide lg:col-span-12">
@@ -806,6 +1102,11 @@ export function EnhancedHeroSection() {
                           <span className="mr-1.5">{skill.icon}</span>
                           {skill.name}
                           {hoverSkill === index && <span className="ml-1.5 text-xs opacity-70">{skill.level}</span>}
+                          {activeSkill === index && (
+                            <span className="ml-1.5 flex items-center">
+                              <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span>
+                            </span>
+                          )}
                         </button>
                       ))}
                     </div>
@@ -814,14 +1115,23 @@ export function EnhancedHeroSection() {
                       {["overview", "learning", "projects", "forum", "analytics", "milestones"].map((tab) => (
                         <button
                           key={tab}
-                          className={`px-2 sm:px-3 py-2 text-xs font-medium capitalize whitespace-nowrap transition-all duration-300 ${
+                          className={`px-2 sm:px-3 py-2 text-xs font-medium capitalize whitespace-nowrap transition-all duration-300 detailed-tab ${
                             activeTab === tab
-                              ? "text-primary border-b-2 border-primary"
+                              ? "active text-primary"
                               : "text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white"
                           }`}
                           onClick={() => setActiveTab(tab)}
                         >
+                          {tab === "overview" && <Compass className="h-3 w-3 inline mr-1" />}
+                          {tab === "learning" && <BookOpen className="h-3 w-3 inline mr-1" />}
+                          {tab === "projects" && <Layers className="h-3 w-3 inline mr-1" />}
+                          {tab === "forum" && <MessageSquare className="h-3 w-3 inline mr-1" />}
+                          {tab === "analytics" && <BarChart className="h-3 w-3 inline mr-1" />}
+                          {tab === "milestones" && <Trophy className="h-3 w-3 inline mr-1" />}
                           {tab}
+                          {activeTab === tab && (
+                            <span className="ml-1 inline-block h-1 w-1 rounded-full bg-primary"></span>
+                          )}
                         </button>
                       ))}
                     </div>
@@ -833,14 +1143,17 @@ export function EnhancedHeroSection() {
                         <div className="space-y-4">
                           {/* Active Skill Card */}
                           <div
-                            className="bg-white/10 dark:bg-black/20 backdrop-blur-sm rounded-lg p-4 border border-white/10"
+                            className="bg-white/10 dark:bg-black/20 backdrop-blur-sm rounded-lg p-4 border border-white/10 skill-card"
                             style={{ borderLeft: `4px solid ${skills[activeSkill].color}` }}
                           >
                             <div className="flex justify-between items-start mb-3">
                               <div>
                                 <div className="flex items-center">
-                                  <span className="mr-2">{skills[activeSkill].icon}</span>
+                                  <div className="h-6 w-6 rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 flex items-center justify-center mr-2">
+                                    {skills[activeSkill].icon}
+                                  </div>
                                   <h4 className="font-bold text-black dark:text-white">{skills[activeSkill].name}</h4>
+                                  <div className="ml-2 h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></div>
                                 </div>
                                 <div className="flex items-center mt-1">
                                   <div className="px-2 py-0.5 rounded-full bg-white/10 dark:bg-black/30 text-xs">
@@ -865,6 +1178,9 @@ export function EnhancedHeroSection() {
 
                             <p className="text-xs text-black/80 dark:text-white/80 mb-3">
                               {skills[activeSkill].description}
+                              <span className="inline-flex items-center ml-2 text-xs text-primary">
+                                <Cpu className="h-3 w-3 mr-1" /> AI-optimized learning path
+                              </span>
                             </p>
 
                             {/* Progress Bar */}
@@ -875,7 +1191,7 @@ export function EnhancedHeroSection() {
                                 </span>
                                 <span className="font-medium text-black dark:text-white">{progress}%</span>
                               </div>
-                              <div className="h-2 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
+                              <div className="h-2 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden progress-track">
                                 <div
                                   className="h-full rounded-full bg-gradient-to-r from-primary to-purple-500 relative"
                                   style={{ width: `${progress}%`, transition: "width 0.5s ease-out" }}
@@ -884,30 +1200,38 @@ export function EnhancedHeroSection() {
                                     <div className="absolute top-0 right-0 h-full w-5 bg-white/30 animate-pulse"></div>
                                   )}
                                 </div>
+                                {/* Progress markers */}
+                                <div className="absolute top-0 left-1/4 h-full w-0.5 bg-white/20"></div>
+                                <div className="absolute top-0 left-1/2 h-full w-0.5 bg-white/20"></div>
+                                <div className="absolute top-0 left-3/4 h-full w-0.5 bg-white/20"></div>
                               </div>
                             </div>
 
                             {/* Stats */}
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-                              <div className="bg-white/5 dark:bg-black/10 rounded-md p-2">
+                              <div className="bg-white/5 dark:bg-black/10 rounded-md p-2 relative overflow-hidden">
+                                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent"></div>
                                 <div className="text-xs text-black/60 dark:text-white/60">Mentors</div>
                                 <div className="font-bold text-black dark:text-white">
                                   {skills[activeSkill].mentors}
                                 </div>
                               </div>
-                              <div className="bg-white/5 dark:bg-black/10 rounded-md p-2">
+                              <div className="bg-white/5 dark:bg-black/10 rounded-md p-2 relative overflow-hidden">
+                                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent"></div>
                                 <div className="text-xs text-black/60 dark:text-white/60">Projects</div>
                                 <div className="font-bold text-black dark:text-white">
                                   {skills[activeSkill].projects}
                                 </div>
                               </div>
-                              <div className="bg-white/5 dark:bg-black/10 rounded-md p-2">
+                              <div className="bg-white/5 dark:bg-black/10 rounded-md p-2 relative overflow-hidden">
+                                <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent"></div>
                                 <div className="text-xs text-black/60 dark:text-white/60">Rating</div>
                                 <div className="font-bold text-black dark:text-white flex items-center justify-center">
                                   4.8 <Star className="h-3 w-3 ml-0.5 text-yellow-400 fill-yellow-400" />
                                 </div>
                               </div>
-                              <div className="bg-white/5 dark:bg-black/10 rounded-md p-2">
+                              <div className="bg-white/5 dark:bg-black/10 rounded-md p-2 relative overflow-hidden">
+                                <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent"></div>
                                 <div className="text-xs text-black/60 dark:text-white/60">Clients</div>
                                 <div className="font-bold text-black dark:text-white flex items-center justify-center">
                                   {skills[activeSkill].stats.repeatClients}
@@ -917,7 +1241,11 @@ export function EnhancedHeroSection() {
                           </div>
 
                           {/* Testimonial */}
-                          <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3 border border-white/10">
+                          <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3 border border-white/10 relative overflow-hidden">
+                            {/* Quote marks */}
+                            <div className="absolute top-2 left-2 text-3xl text-primary/10 font-serif">"</div>
+                            <div className="absolute bottom-2 right-2 text-3xl text-primary/10 font-serif">"</div>
+
                             <div className="flex items-start">
                               <div className="h-8 w-8 rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 flex items-center justify-center mr-3 text-xs font-bold text-primary">
                                 {skills[activeSkill].testimonial.author.split(" ")[0][0]}
@@ -1014,8 +1342,11 @@ export function EnhancedHeroSection() {
                             {skills[activeSkill].learningPath.map((item, index) => (
                               <div
                                 key={index}
-                                className="flex items-center p-2 rounded-lg bg-white/5 dark:bg-black/10 border border-white/10 hover:border-primary/30 transition-all duration-300"
+                                className="flex items-center p-2 rounded-lg bg-white/5 dark:bg-black/10 border border-white/10 hover:border-primary/30 transition-all duration-300 relative overflow-hidden"
                               >
+                                {/* Background pattern */}
+                                <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_10px_10px,rgba(var(--primary-rgb),0.4)_1px,transparent_1px)] bg-[length:20px_20px] pointer-events-none"></div>
+
                                 <div
                                   className={`h-6 w-6 rounded-full flex items-center justify-center mr-3 ${
                                     item.status === "completed"
@@ -1062,11 +1393,15 @@ export function EnhancedHeroSection() {
                                     <span className="text-black dark:text-white">{skill.name}</span>
                                     <span className="text-black/60 dark:text-white/60">{skill.level}%</span>
                                   </div>
-                                  <div className="h-1.5 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
+                                  <div className="h-1.5 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden progress-track">
                                     <div
                                       className="h-full rounded-full bg-gradient-to-r from-primary to-purple-500"
                                       style={{ width: `${skill.level}%` }}
                                     ></div>
+                                    {/* Skill level markers */}
+                                    <div className="absolute top-0 left-1/4 h-full w-0.5 bg-white/10"></div>
+                                    <div className="absolute top-0 left-1/2 h-full w-0.5 bg-white/10"></div>
+                                    <div className="absolute top-0 left-3/4 h-full w-0.5 bg-white/10"></div>
                                   </div>
                                 </div>
                               ))}
@@ -1089,8 +1424,11 @@ export function EnhancedHeroSection() {
                             {skills[activeSkill].skillProjects.map((project, index) => (
                               <div
                                 key={index}
-                                className="p-3 rounded-lg bg-white/5 dark:bg-black/10 border border-white/10 hover:border-primary/30 transition-colors duration-300"
+                                className="p-3 rounded-lg bg-white/5 dark:bg-black/10 border border-white/10 hover:border-primary/30 transition-colors duration-300 relative overflow-hidden"
                               >
+                                {/* Project background pattern */}
+                                <div className="absolute inset-0 opacity-5 bg-[linear-gradient(45deg,rgba(var(--primary-rgb),0.4)_25%,transparent_25%,transparent_50%,rgba(var(--primary-rgb),0.4)_50%,rgba(var(--primaryrgb),0.4)_75%,transparent_75%,transparent)] bg-[length:10px_10px] pointer-events-none"></div>
+
                                 <div className="flex justify-between items-start mb-2">
                                   <h5 className="text-sm font-medium text-black dark:text-white">{project.name}</h5>
                                   <div
@@ -1181,9 +1519,12 @@ export function EnhancedHeroSection() {
                               forumTopics.map((topic, index) => (
                                 <div
                                   key={index}
-                                  className="p-3 rounded-lg bg-white/5 dark:bg-black/10 border border-white/10 hover:border-primary/30 transition-colors duration-300 cursor-pointer"
+                                  className="p-3 rounded-lg bg-white/5 dark:bg-black/10 border border-white/10 hover:border-primary/30 transition-colors duration-300 cursor-pointer relative overflow-hidden"
                                   onClick={() => setActiveTopic(index)}
                                 >
+                                  {/* Topic background pattern */}
+                                  <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_10px_10px,rgba(var(--primary-rgb),0.4)_1px,transparent_1px)] bg-[length:20px_20px] pointer-events-none"></div>
+
                                   <div className="flex justify-between items-start mb-2">
                                     <h5 className="text-sm font-medium text-black dark:text-white">{topic.title}</h5>
                                     <div className="text-xs text-black/40 dark:text-white/40">{topic.lastActive}</div>
@@ -1241,7 +1582,10 @@ export function EnhancedHeroSection() {
                                 </div>
 
                                 {/* Original post */}
-                                <div className="p-3 rounded-lg bg-white/5 dark:bg-black/10 border border-white/10">
+                                <div className="p-3 rounded-lg bg-white/5 dark:bg-black/10 border border-white/10 relative overflow-hidden">
+                                  {/* Post background pattern */}
+                                  <div className="absolute inset-0 opacity-5 bg-[linear-gradient(45deg,rgba(var(--primary-rgb),0.4)_25%,transparent_25%,transparent_50%,rgba(var(--primary-rgb),0.4)_50%,rgba(var(--primary-rgb),0.4)_75%,transparent_75%,transparent)] bg-[length:10px_10px] pointer-events-none"></div>
+
                                   <div className="flex items-center justify-between mb-2">
                                     <div className="flex items-center">
                                       <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-medium text-primary mr-2">
@@ -1357,12 +1701,14 @@ export function EnhancedHeroSection() {
                           </div>
 
                           {/* Earnings Chart */}
-                          <div className="h-[120px] w-full rounded-lg overflow-hidden bg-black/20 backdrop-blur-md">
+                          <div className="h-[120px] w-full rounded-lg overflow-hidden bg-black/20 backdrop-blur-md relative">
+                            <div className="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,transparent_49px,rgba(255,255,255,0.05)_49px,rgba(255,255,255,0.05)_51px,transparent_51px),linear-gradient(to_bottom,transparent_49px,rgba(255,255,255,0.05)_49px,rgba(255,255,255,0.05)_51px,transparent_51px)] bg-[length:50px_50px]"></div>
                             <canvas ref={chartRef} className="w-full h-full" />
                           </div>
 
                           <div className="grid grid-cols-2 gap-3">
-                            <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3">
+                            <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3 relative overflow-hidden">
+                              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent"></div>
                               <div className="text-xs text-black/60 dark:text-white/60 mb-1">Current Avg. Rate</div>
                               <div className="text-lg font-bold text-black dark:text-white">
                                 ${skills[activeSkill].earnings.split("-")[0].replace("$", "")}
@@ -1370,7 +1716,8 @@ export function EnhancedHeroSection() {
                               </div>
                             </div>
 
-                            <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3">
+                            <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3 relative overflow-hidden">
+                              <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent"></div>
                               <div className="text-xs text-black/60 dark:text-white/60 mb-1">Projected Rate</div>
                               <div className="text-lg font-bold text-green-500">
                                 ${skills[activeSkill].nextEarnings.split("-")[0].replace("$", "")}
@@ -1380,7 +1727,8 @@ export function EnhancedHeroSection() {
                           </div>
 
                           <div className="grid grid-cols-2 gap-3">
-                            <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3">
+                            <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3 relative overflow-hidden">
+                              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent"></div>
                               <div className="text-xs text-black/60 dark:text-white/60 mb-1 flex items-center">
                                 <Clock className="h-3 w-3 mr-1" /> Avg. Completion Time
                               </div>
@@ -1389,7 +1737,8 @@ export function EnhancedHeroSection() {
                               </div>
                             </div>
 
-                            <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3">
+                            <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3 relative overflow-hidden">
+                              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent"></div>
                               <div className="text-xs text-black/60 dark:text-white/60 mb-1 flex items-center">
                                 <Award className="h-3 w-3 mr-1" /> Top Earners
                               </div>
@@ -1399,10 +1748,11 @@ export function EnhancedHeroSection() {
                             </div>
                           </div>
 
-                          <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3">
+                          <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3 relative overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-transparent"></div>
                             <div className="text-xs text-black/60 dark:text-white/60 mb-2">Market Demand</div>
                             <div className="flex items-center">
-                              <div className="flex-1 h-2 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
+                              <div className="flex-1 h-2 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden progress-track">
                                 <div
                                   className="h-full rounded-full bg-gradient-to-r from-yellow-500 to-red-500"
                                   style={{ width: "85%" }}
@@ -1429,13 +1779,16 @@ export function EnhancedHeroSection() {
                             {skills[activeSkill].milestones.map((milestone, index) => (
                               <div
                                 key={index}
-                                className={`p-3 rounded-lg border transition-all duration-300 ${
+                                className={`p-3 rounded-lg border transition-all duration-300 relative overflow-hidden ${
                                   selectedMilestone === index
                                     ? "bg-white/10 dark:bg-black/20 border-primary/30"
                                     : "bg-white/5 dark:bg-black/10 border-white/10 hover:border-white/30"
                                 }`}
                                 onClick={() => setSelectedMilestone(index)}
                               >
+                                {/* Milestone background pattern */}
+                                <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_10px_10px,rgba(var(--primary-rgb),0.4)_1px,transparent_1px)] bg-[length:20px_20px] pointer-events-none"></div>
+
                                 <div className="flex justify-between items-start mb-2">
                                   <h5 className="text-sm font-medium text-black dark:text-white">{milestone.name}</h5>
                                   <div className="px-2 py-0.5 rounded-full bg-primary/20 text-primary text-xs">
@@ -1448,7 +1801,7 @@ export function EnhancedHeroSection() {
                                 </div>
 
                                 <div className="mb-2">
-                                  <div className="h-1.5 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
+                                  <div className="h-1.5 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden progress-track">
                                     <div
                                       className="h-full rounded-full bg-gradient-to-r from-primary to-purple-500"
                                       style={{
@@ -1458,6 +1811,10 @@ export function EnhancedHeroSection() {
                                             : "0%",
                                       }}
                                     ></div>
+                                    {/* Milestone progress markers */}
+                                    <div className="absolute top-0 left-1/4 h-full w-0.5 bg-white/10"></div>
+                                    <div className="absolute top-0 left-1/2 h-full w-0.5 bg-white/10"></div>
+                                    <div className="absolute top-0 left-3/4 h-full w-0.5 bg-white/10"></div>
                                   </div>
                                 </div>
 
@@ -1476,7 +1833,10 @@ export function EnhancedHeroSection() {
                             ))}
                           </div>
 
-                          <div className="bg-gradient-to-r from-primary/10 to-purple-500/10 rounded-lg p-3">
+                          <div className="bg-gradient-to-r from-primary/10 to-purple-500/10 rounded-lg p-3 relative overflow-hidden">
+                            {/* Certificate background pattern */}
+                            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_10px_10px,rgba(255,255,255,0.4)_1px,transparent_1px)] bg-[length:20px_20px] pointer-events-none"></div>
+
                             <div className="flex items-center mb-2">
                               <Shield className="h-4 w-4 text-primary mr-2" />
                               <h5 className="text-sm font-medium text-black dark:text-white">Skill Certification</h5>

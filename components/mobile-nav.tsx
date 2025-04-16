@@ -25,9 +25,9 @@ export function MobileNav() {
       </SheetTrigger>
       <SheetContent side="left" className="flex flex-col">
         <div className="flex items-center justify-between gap-2 border-b pb-4">
-          <div className="flex items-center gap-2">
-            <LevlLogo className="h-8 w-8" />
-            <span className="text-xl font-bold">LevL</span>
+          <div className="flex items-center relative">
+            <LevlLogo className="h-12 w-12" />
+            <span className="text-xl font-bold absolute left-12 bottom-2 z-10">LevL</span>
           </div>
         </div>
         {isAuthenticated && (

@@ -20,9 +20,9 @@ export function EnhancedMainNav() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between pl-2">
         <div className="flex items-center gap-2 -ml-2">
-          <Link href="/" className="flex items-center gap-0">
-            <LevlLogo className="h-12 w-12" />
-            <span className="text-3xl font-bold text-black dark:text-white -ml-1">LevL</span>
+          <Link href="/" className="flex items-center relative">
+            <LevlLogo className="h-16 w-16" />
+            <span className="text-3xl font-bold text-black dark:text-white absolute left-14 bottom-2 z-10">LevL</span>
           </Link>
         </div>
         <div className="flex items-center gap-4">
