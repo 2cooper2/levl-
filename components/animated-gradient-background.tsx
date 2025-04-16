@@ -1,370 +1,185 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { motion } from "framer-motion"
+import { useEffect, useRef } from "react"
 
 export function AnimatedGradientBackground() {
-  const [scrollY, setScrollY] = useState(0)
-  const [time, setTime] = useState(0)
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const canvasRef = useRef<HTMLCanvasElement>(null)
 
-  // Gentle animation timer
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTime((prev) => prev + 1)
-    }, 100)
+    const canvas = canvasRef.current
+    if (!canvas) return
 
-    return () => clearInterval(interval)
-  }, [])
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return
 
-  // Track scroll position
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrollY(window.scrollY)
+    // Set initial dimensions with significant extra width to prevent any gaps
+    let width = (canvas.width = window.innerWidth + 100)
+    let height = (canvas.height = window.innerHeight)
+
+    const resizeCanvas = () => {
+      width = canvas.width = window.innerWidth + 100 // Add extra width to prevent gaps
+      height = canvas.height = window.innerHeight
     }
 
-    window.addEventListener("scroll", handleScroll, { passive: true })
+    window.addEventListener("resize", resizeCanvas)
 
-    return () => {
-      window.removeEventListener("scroll", handleScroll)
-    }
-  }, [])
+    // Create gradient circles with improved aesthetics
+    const circles: Circle[] = []
 
-  // Track mouse position
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({
-        x: e.clientX,
-        y: e.clientY,
+    // Add more circles with varied sizes and speeds for a richer effect
+    for (let i = 0; i < 8; i++) {
+      circles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        radius: Math.random() * 400 + 200, // Larger radius range
+        vx: Math.random() * 0.15 - 0.075, // Slower, more subtle movement
+        vy: Math.random() * 0.15 - 0.075,
+        hue: Math.random() * 40 + 210, // More focused blue-purple palette
+        opacity: Math.random() * 0.15 + 0.05, // Varied opacity for depth
       })
     }
 
-    window.addEventListener("mousemove", handleMouseMove, { passive: true })
+    // Add a few accent circles with different colors
+    circles.push({
+      x: width * 0.2,
+      y: height * 0.8,
+      radius: 300,
+      vx: 0.05,
+      vy: -0.03,
+      hue: 180, // Teal accent
+      opacity: 0.07,
+    })
+
+    circles.push({
+      x: width * 0.8,
+      y: height * 0.2,
+      radius: 350,
+      vx: -0.04,
+      vy: 0.02,
+      hue: 270, // Purple accent
+      opacity: 0.08,
+    })
+
+    // Add extra circles specifically for the top-right area
+    circles.push({
+      x: width * 0.9,
+      y: height * 0.1,
+      radius: 400,
+      vx: -0.02,
+      vy: 0.01,
+      hue: 240, // Blue accent
+      opacity: 0.1,
+    })
+
+    circles.push({
+      x: width * 0.95,
+      y: height * 0.15,
+      radius: 350,
+      vx: -0.01,
+      vy: 0.02,
+      hue: 260, // Purple accent
+      opacity: 0.09,
+    })
+
+    const animate = () => {
+      // Clear canvas with a slight fade effect for smoother transitions
+      ctx.fillStyle = "rgba(var(--background), 0.03)"
+      ctx.fillRect(0, 0, width, height)
+
+      // Draw and update circles
+      for (const circle of circles) {
+        // Move circle with improved physics
+        circle.x += circle.vx
+        circle.y += circle.vy
+
+        // Bounce off edges with slight dampening for natural movement
+        if (circle.x < 0 || circle.x > width) {
+          circle.vx *= -0.98
+          circle.x = Math.max(0, Math.min(width, circle.x))
+        }
+        if (circle.y < 0 || circle.y > height) {
+          circle.vy *= -0.98
+          circle.y = Math.max(0, Math.min(height, circle.y))
+        }
+
+        // Create gradient with improved color blending
+        const gradient = ctx.createRadialGradient(circle.x, circle.y, 0, circle.x, circle.y, circle.radius)
+
+        gradient.addColorStop(0, `hsla(${circle.hue}, 85%, 65%, ${circle.opacity})`)
+        gradient.addColorStop(0.5, `hsla(${circle.hue}, 85%, 55%, ${circle.opacity * 0.5})`)
+        gradient.addColorStop(1, `hsla(${circle.hue}, 85%, 45%, 0)`)
+
+        // Draw circle
+        ctx.fillStyle = gradient
+        ctx.beginPath()
+        ctx.arc(circle.x, circle.y, circle.radius, 0, Math.PI * 2)
+        ctx.fill()
+      }
+
+      requestAnimationFrame(animate)
+    }
+
+    animate()
 
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove)
+      window.removeEventListener("resize", resizeCanvas)
     }
   }, [])
 
   return (
     <>
-      {/* Elegant color streaks */}
-      <ElegantColorStreaks scrollY={scrollY} mousePosition={mousePosition} time={time} />
-
-      {/* Soft gradient layers */}
-      <SoftGradientLayers scrollY={scrollY} mousePosition={mousePosition} />
-
-      {/* Subtle flowing lines */}
-      <SubtleFlowingLines scrollY={scrollY} time={time} />
-    </>
-  )
-}
-
-function ElegantColorStreaks({
-  scrollY,
-  mousePosition,
-  time,
-}: {
-  scrollY: number
-  mousePosition: { x: number; y: number }
-  time: number
-}) {
-  // Create elegant color streaks that flow across the screen
-  const streaks = [
-    {
-      startX: "-10%",
-      endX: "110%",
-      y: "20%",
-      color: "rgba(139, 92, 246, 0.04)", // Lavender
-      height: "15vh",
-      duration: 35,
-      delay: 0,
-    },
-    {
-      startX: "110%",
-      endX: "-10%",
-      y: "35%",
-      color: "rgba(124, 58, 237, 0.03)", // Purple
-      height: "10vh",
-      duration: 40,
-      delay: 5,
-    },
-    {
-      startX: "-10%",
-      endX: "110%",
-      y: "55%",
-      color: "rgba(167, 139, 250, 0.05)", // Light lavender
-      height: "12vh",
-      duration: 38,
-      delay: 12,
-    },
-    {
-      startX: "110%",
-      endX: "-10%",
-      y: "75%",
-      color: "rgba(99, 102, 241, 0.03)", // Indigo
-      height: "8vh",
-      duration: 42,
-      delay: 20,
-    },
-  ]
-
-  return (
-    <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-      {streaks.map((streak, index) => (
-        <motion.div
-          key={index}
-          className="absolute"
-          style={{
-            left: streak.startX,
-            top: streak.y,
-            height: streak.height,
-            width: "60%",
-            background: `linear-gradient(to right, transparent, ${streak.color} 30%, ${streak.color} 70%, transparent)`,
-            filter: "blur(40px)",
-            transform: `translateY(${scrollY * 0.02}px)`,
-          }}
-          animate={{
-            left: [streak.startX, streak.endX],
-          }}
-          transition={{
-            duration: streak.duration,
-            delay: streak.delay,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "linear",
-          }}
-        />
-      ))}
-
-      {/* Mouse-following subtle glow */}
-      <motion.div
-        className="absolute"
+      <canvas
+        ref={canvasRef}
+        className="fixed inset-0 -z-10 opacity-40 dark:opacity-25"
         style={{
-          width: "30vw",
-          height: "30vw",
-          borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(139, 92, 246, 0.05) 0%, transparent 70%)",
-          filter: "blur(50px)",
-          left: mousePosition.x,
-          top: mousePosition.y,
-          transform: "translate(-50%, -50%)",
-          opacity: 0,
-        }}
-        animate={{
-          opacity: [0, 0.5, 0],
-          scale: [0.8, 1.2, 0.8],
-        }}
-        transition={{
-          duration: 4,
-          repeat: Number.POSITIVE_INFINITY,
-          ease: "easeInOut",
+          width: "calc(100vw + 100px)",
+          height: "100vh",
+          left: "-50px",
+          right: "-50px",
         }}
       />
+      <div
+        className="fixed -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent pointer-events-none"
+        style={{
+          width: "calc(100vw + 100px)",
+          height: "100vh",
+          left: "-50px",
+          right: "-50px",
+          top: 0,
+        }}
+      ></div>
+      <div
+        className="fixed -z-10 bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-purple-500/5 via-transparent to-transparent pointer-events-none"
+        style={{
+          width: "calc(100vw + 100px)",
+          height: "100vh",
+          left: "-50px",
+          right: "-50px",
+          top: 0,
+        }}
+      ></div>
 
-      {/* Diagonal streaks */}
-      <DiagonalStreaks scrollY={scrollY} time={time} />
-    </div>
-  )
-}
-
-function DiagonalStreaks({ scrollY, time }: { scrollY: number; time: number }) {
-  // Create diagonal streaks that move slowly
-  const diagonals = [
-    {
-      angle: 45,
-      color: "rgba(139, 92, 246, 0.03)", // Lavender
-      duration: 50,
-      delay: 0,
-    },
-    {
-      angle: -30,
-      color: "rgba(124, 58, 237, 0.02)", // Purple
-      duration: 60,
-      delay: 10,
-    },
-    {
-      angle: 60,
-      color: "rgba(167, 139, 250, 0.04)", // Light lavender
-      duration: 55,
-      delay: 25,
-    },
-  ]
-
-  return (
-    <>
-      {diagonals.map((diagonal, index) => (
-        <motion.div
-          key={index}
-          className="absolute inset-0"
-          style={{
-            background: `linear-gradient(${diagonal.angle}deg, transparent, ${diagonal.color} 50%, transparent)`,
-            transform: `translateY(${scrollY * 0.01}px)`,
-            filter: "blur(60px)",
-          }}
-          animate={{
-            backgroundPosition: ["0% 0%", "100% 100%"],
-          }}
-          transition={{
-            duration: diagonal.duration,
-            delay: diagonal.delay,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "linear",
-          }}
-        />
-      ))}
+      {/* Additional full-width background to ensure coverage */}
+      <div
+        className="fixed -z-15 bg-background pointer-events-none"
+        style={{
+          width: "calc(100vw + 100px)",
+          height: "100vh",
+          left: "-50px",
+          right: "-50px",
+          top: 0,
+        }}
+      ></div>
     </>
   )
 }
 
-function SoftGradientLayers({
-  scrollY,
-  mousePosition,
-}: {
-  scrollY: number
-  mousePosition: { x: number; y: number }
-}) {
-  // Create soft gradient layers that move subtly
-  const gradients = [
-    {
-      position: "top left",
-      color: "rgba(139, 92, 246, 0.15)", // Lavender
-      size: "80%",
-      x: mousePosition.x * 0.01,
-      y: mousePosition.y * 0.01 - scrollY * 0.02,
-      duration: 30,
-    },
-    {
-      position: "bottom right",
-      color: "rgba(124, 58, 237, 0.12)", // Purple
-      size: "70%",
-      x: -mousePosition.x * 0.008,
-      y: -mousePosition.y * 0.008 - scrollY * 0.015,
-      duration: 35,
-    },
-    {
-      position: "center",
-      color: "rgba(167, 139, 250, 0.18)", // Light lavender
-      size: "60%",
-      x: mousePosition.x * 0.005,
-      y: mousePosition.y * 0.005 - scrollY * 0.01,
-      duration: 40,
-    },
-  ]
-
-  return (
-    <div className="fixed inset-0 -z-15 overflow-hidden pointer-events-none">
-      {gradients.map((gradient, index) => (
-        <motion.div
-          key={index}
-          className="absolute"
-          style={{
-            width: "100%",
-            height: "100%",
-            background: `radial-gradient(circle at ${gradient.position}, ${gradient.color} 0%, transparent ${gradient.size})`,
-            transform: `translate3d(${gradient.x}px, ${gradient.y}px, 0)`,
-            filter: "blur(80px)",
-          }}
-          animate={{
-            opacity: [0.6, 1, 0.6],
-          }}
-          transition={{
-            duration: gradient.duration,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "easeInOut",
-          }}
-        />
-      ))}
-    </div>
-  )
-}
-
-function SubtleFlowingLines({ scrollY, time }: { scrollY: number; time: number }) {
-  // Create subtle flowing lines
-  const horizontalLines = [
-    {
-      y: "25%",
-      color: "rgba(139, 92, 246, 0.02)", // Lavender
-      duration: 45,
-    },
-    {
-      y: "50%",
-      color: "rgba(124, 58, 237, 0.015)", // Purple
-      duration: 50,
-    },
-    {
-      y: "75%",
-      color: "rgba(167, 139, 250, 0.025)", // Light lavender
-      duration: 40,
-    },
-  ]
-
-  const verticalLines = [
-    {
-      x: "25%",
-      color: "rgba(139, 92, 246, 0.015)", // Lavender
-      duration: 48,
-    },
-    {
-      x: "50%",
-      color: "rgba(124, 58, 237, 0.01)", // Purple
-      duration: 52,
-    },
-    {
-      x: "75%",
-      color: "rgba(167, 139, 250, 0.02)", // Light lavender
-      duration: 44,
-    },
-  ]
-
-  return (
-    <div className="fixed inset-0 -z-20 overflow-hidden pointer-events-none">
-      {/* Horizontal lines */}
-      {horizontalLines.map((line, index) => (
-        <motion.div
-          key={`h-${index}`}
-          className="absolute w-full"
-          style={{
-            height: "1px",
-            top: line.y,
-            background: line.color,
-            boxShadow: `0 0 8px ${line.color}`,
-            transform: `translateY(${scrollY * 0.01}px)`,
-          }}
-          animate={{
-            opacity: [0.3, 0.7, 0.3],
-            filter: ["blur(0px)", "blur(1px)", "blur(0px)"],
-          }}
-          transition={{
-            duration: line.duration,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "easeInOut",
-          }}
-        />
-      ))}
-
-      {/* Vertical lines */}
-      {verticalLines.map((line, index) => (
-        <motion.div
-          key={`v-${index}`}
-          className="absolute h-full"
-          style={{
-            width: "1px",
-            left: line.x,
-            background: line.color,
-            boxShadow: `0 0 8px ${line.color}`,
-            transform: `translateX(${scrollY * 0.005}px)`,
-          }}
-          animate={{
-            opacity: [0.3, 0.7, 0.3],
-            filter: ["blur(0px)", "blur(1px)", "blur(0px)"],
-          }}
-          transition={{
-            duration: line.duration,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "easeInOut",
-          }}
-        />
-      ))}
-    </div>
-  )
+interface Circle {
+  x: number
+  y: number
+  radius: number
+  vx: number
+  vy: number
+  hue: number
+  opacity: number
 }

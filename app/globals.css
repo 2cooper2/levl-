@@ -29,7 +29,6 @@ body {
     --popover-foreground: 222.2 84% 4.9%;
 
     --primary: 222.2 47.4% 11.2%;
-    --primary-rgb: 28, 30, 39;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -75,7 +74,6 @@ body {
     --popover-foreground: 210 40% 98%;
 
     --primary: 210 40% 98%;
-    --primary-rgb: 250, 250, 250;
     --primary-foreground: 222.2 47.4% 11.2%;
 
     --secondary: 217.2 32.6% 17.5%;
@@ -124,7 +122,6 @@ body {
     isolation: isolate;
     margin: 0;
     padding: 0;
-    perspective: 1000px; /* Add perspective for 3D depth */
   }
 
   /* Improve scrolling performance */
@@ -149,52 +146,4 @@ body {
     width: 100vw;
     height: 100vh;
   }
-}
-
-/* Optimize the grid pattern for better performance and depth */
-.bg-grid-pattern {
-  background-image: linear-gradient(to right, currentColor 1px, transparent 1px),
-    linear-gradient(to bottom, currentColor 1px, transparent 1px);
-  background-size: 40px 40px;
-  background-attachment: fixed;
-  transform: translate3d(0, 0, 0);
-  will-change: transform;
-  width: 100vw;
-  height: 100vh;
-}
-
-/* Add depth to cards and interactive elements */
-.card,
-.button,
-.input,
-.dropdown {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.card:hover,
-.button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-/* Enhanced glass effect */
-.glass {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
-}
-
-/* Depth shadows for layered elements */
-.depth-shadow-sm {
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.04), 0 4px 8px rgba(0, 0, 0, 0.04);
-}
-
-.depth-shadow-md {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05), 0 4px 8px rgba(0, 0, 0, 0.05), 0 8px 16px rgba(0, 0, 0, 0.05);
-}
-
-.depth-shadow-lg {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06), 0 8px 16px rgba(0, 0, 0, 0.06), 0 16px 32px rgba(0, 0, 0, 0.06);
 }

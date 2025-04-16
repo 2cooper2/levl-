@@ -12,21 +12,40 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-        <meta name="color-scheme" content="light dark" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
         <style>{`
           html, body {
             overflow-x: hidden;
             width: 100%;
-            min-height: 100vh;
             margin: 0;
             padding: 0;
+            background-color: hsl(var(--background));
+          }
+          
+          /* Ensure all fixed elements cover the entire viewport */
+          .fixed {
+            width: 100vw;
+            min-height: 100vh;
           }
         `}</style>
       </head>
       <body>
         <AuthProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+            {/* Additional background color to ensure full coverage */}
+            <div
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                width: "100vw",
+                height: "100vh",
+                backgroundColor: "hsl(var(--background))",
+                zIndex: -30,
+              }}
+            />
             {children}
             <ToastProvider />
           </ThemeProvider>
