@@ -117,8 +117,6 @@ export default function CategoryPage() {
       <AnimatedGradientBackground />
       <EnhancedMainNav />
       <main className="flex-1">
-        {/* Hero Section - Reusing the EnhancedHeroSection component */}
-
         {/* Providers Section */}
         <section className="w-full py-12 md:py-16 bg-muted/50 relative">
           <BackgroundPattern className="opacity-50" />
