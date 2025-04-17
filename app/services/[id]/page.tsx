@@ -1,7 +1,5 @@
 "use client"
 
-import type React from "react"
-
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { EnhancedMainNav } from "@/components/enhanced-main-nav"
@@ -15,17 +13,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Star, Clock, MessageSquare, ArrowRight, DollarSign } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { useAuth } from "@/context/auth-context" // Import the custom auth context
 
 export default function ServicePage() {
   const params = useParams()
   const router = useRouter()
   const { toast } = useToast()
+  const { user, isAuthenticated } = useAuth()
   const [service, setService] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [selectedHours, setSelectedHours] = useState<number>(10)
-  const [customHours, setCustomHours] = useState<number>(10)
-  const [isAuthenticated, setIsAuthenticated] = useState(true) // Set to true to bypass authentication
 
   useEffect(() => {
     // In a real app, fetch service data from your API or database
@@ -142,35 +138,10 @@ export default function ServicePage() {
     router.push(`/messages?provider=${service.provider.id}`)
   }
 
-  const handleHire = () => {
-    setIsModalOpen(true)
-  }
-
-  const handleHoursSelect = (hours: string) => {
-    if (hours === "custom") {
-      // Do nothing here, we'll use the customHours state
-    } else {
-      setSelectedHours(Number.parseInt(hours))
-    }
-  }
-
-  const handleCustomHoursChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = Number.parseInt(e.target.value)
-    if (!isNaN(value) && value > 0) {
-      setCustomHours(value)
-      setSelectedHours(value)
-    }
-  }
-
-  const handleProceedToCheckout = () => {
-    const hours = selectedHours
-    const totalAmount = hours * service.provider.hourlyRate
-
-    // Navigate directly to the stripe checkout page
-    router.push(
-      `/stripe-checkout?providerId=${service.provider.id}&providerName=${encodeURIComponent(service.provider.name)}&hours=${hours}&amount=${totalAmount}&serviceTitle=${encodeURIComponent(service.title)}`,
-    )
-    setIsModalOpen(false)
+  const handleHireNow = () => {
+    // Remove the authentication check for testing
+    const checkoutUrl = `/checkout?serviceId=${service.id}&providerId=${service.provider.id}&hourlyRate=${service.provider.hourlyRate}`
+    router.push(checkoutUrl)
   }
 
   if (loading) {
@@ -259,7 +230,7 @@ export default function ServicePage() {
                   </p>
                   <Button
                     className="mt-4 w-full bg-purple-500/80 hover:bg-purple-600/90 backdrop-blur-sm border border-purple-300/30 shadow-sm hover:shadow-md transition-all duration-300"
-                    onClick={handleProceedToCheckout}
+                    onClick={handleHireNow}
                   >
                     Hire Now <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
@@ -331,7 +302,7 @@ export default function ServicePage() {
 
                 <Button
                   className="w-full bg-purple-500/80 hover:bg-purple-600/90 backdrop-blur-sm border border-purple-300/30 shadow-sm hover:shadow-md transition-all duration-300"
-                  onClick={handleProceedToCheckout}
+                  onClick={handleHireNow}
                 >
                   Hire Now <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>

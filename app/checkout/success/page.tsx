@@ -16,7 +16,7 @@ export default function CheckoutSuccessPage() {
   const [isLoading, setIsLoading] = useState(true)
 
   const serviceId = searchParams.get("serviceId")
-  const packageName = searchParams.get("package")
+  const hours = searchParams.get("hours")
 
   useEffect(() => {
     const fetchOrderDetails = async () => {
@@ -28,14 +28,14 @@ export default function CheckoutSuccessPage() {
         const mockOrderDetails = {
           id: "order-" + Math.random().toString(36).substring(2, 9),
           serviceId,
-          packageName,
+          hours,
           service: {
             title: "Professional Website Development",
             provider: {
               name: "Alex Morgan",
             },
           },
-          amount: packageName === "Basic" ? 499 : packageName === "Premium" ? 1299 : 799,
+          amount: Number(hours) * 85, // Assuming $85/hour
           date: new Date().toISOString(),
           deliveryDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toLocaleDateString(), // 10 days from now
         }
@@ -48,12 +48,12 @@ export default function CheckoutSuccessPage() {
       }
     }
 
-    if (serviceId && packageName) {
+    if (serviceId && hours) {
       fetchOrderDetails()
     } else {
       router.push("/")
     }
-  }, [serviceId, packageName, router])
+  }, [serviceId, hours, router])
 
   if (isLoading) {
     return (
@@ -102,8 +102,8 @@ export default function CheckoutSuccessPage() {
                   <span className="font-medium">{orderDetails.service.title}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Package:</span>
-                  <span className="font-medium">{orderDetails.packageName}</span>
+                  <span className="text-muted-foreground">Hours:</span>
+                  <span className="font-medium">{orderDetails.hours} hours</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Provider:</span>

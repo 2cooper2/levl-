@@ -1,6 +1,7 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
+import { useRouter } from "next/navigation" // Import useRouter
 
 type User = {
   id: string
@@ -24,6 +25,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const router = useRouter() // Initialize useRouter
 
   useEffect(() => {
     // Check if user is logged in from localStorage
@@ -52,9 +54,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       setUser(mockUser)
       localStorage.setItem("levl_user", JSON.stringify(mockUser))
+
+      // Resolve the promise after setting the user and local storage
+      return Promise.resolve()
     } catch (error) {
       console.error("Login failed:", error)
-      throw error
+      return Promise.reject(error)
     } finally {
       setIsLoading(false)
     }
@@ -92,6 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     setUser(null)
     localStorage.removeItem("levl_user")
+    router.push("/") // Redirect to home page after logout
   }
 
   return (

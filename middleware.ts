@@ -19,10 +19,10 @@ export function middleware(request: NextRequest) {
   const isAuthenticated = request.cookies.has("levl_user")
 
   // Redirect logic
-  if (!isPublicPath && !isAuthenticated) {
-    // Redirect to login if trying to access protected routes while not authenticated
-    return NextResponse.redirect(new URL("/auth/login", request.url))
-  }
+  // if (!isPublicPath && !isAuthenticated) {
+  //   // Redirect to login if trying to access protected routes while not authenticated
+  //   return NextResponse.redirect(new URL("/auth/login", request.url))
+  // }
 
   if ((path === "/auth/login" || path === "/auth/signup") && isAuthenticated) {
     // Redirect to dashboard if trying to access auth pages while already authenticated

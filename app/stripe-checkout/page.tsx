@@ -2,10 +2,10 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { EnhancedMainNav } from "@/components/enhanced-main-nav"
-import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js"
+import { CardElement, useStripe, useElements, Elements } from "@stripe/react-stripe-js"
 import { loadStripe } from "@stripe/stripe-js"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -15,6 +15,9 @@ import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/components/ui/use-toast"
 import { createPaymentIntent } from "@/app/actions/payment-actions"
 import { Loader2 } from "lucide-react"
+
+// Add this near the top of the component, after the imports
+console.log("Stripe Checkout Page Loading")
 
 // Initialize Stripe
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "")
@@ -54,6 +57,17 @@ function StripeCheckout() {
   const hours = Number(searchParams.get("hours") || "0")
   const amount = Number(searchParams.get("amount") || "0")
   const serviceTitle = searchParams.get("serviceTitle") || "Service"
+
+  // And add this inside the StripeCheckout component
+  useEffect(() => {
+    console.log("Stripe Checkout mounted with params:", {
+      providerId,
+      providerName,
+      hours,
+      amount,
+      serviceTitle,
+    })
+  }, [providerId, providerName, hours, amount, serviceTitle])
 
   const handleBillingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
