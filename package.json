@@ -59,8 +59,11 @@
     "vaul": "^0.9.6",
     "zod": "^3.24.1",
     "@emotion/is-prop-valid": "latest",
+    "@stripe/stripe-js": "latest",
     "framer-motion": "latest",
-    "@supabase/supabase-js": "latest"
+    "@stripe/react-stripe-js": "latest",
+    "@supabase/supabase-js": "latest",
+    "stripe": "latest"
   },
   "devDependencies": {
     "@types/node": "^22",

@@ -17,7 +17,7 @@ export function EnhancedMainNav() {
   const { setTheme, theme } = useTheme()
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/70 backdrop-blur-md shadow-sm">
       <div className="container flex h-16 items-center justify-between pl-2">
         <div className="flex items-center gap-2 -ml-2">
           <Link href="/" className="flex items-center relative">

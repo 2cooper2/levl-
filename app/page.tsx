@@ -73,7 +73,7 @@ export default function Home() {
               </div>
             </motion.div>
             <div className="grid gap-8 md:grid-cols-3 lg:gap-12 mt-8 relative">
-              <div className="hidden md:block absolute top-1/2 left-1/4 right-1/4 h-0.5 bg-gradient-to-r from-transparent via-primary/30 to-transparent -translate-y-1/2"></div>
+              <div className="hidden md:block absolute top-1/2 left-1/4 right-1/4 h-0.5 bg-gradient-to-r from-transparent via-purple-300/30 to-transparent -translate-y-1/2"></div>
               {[
                 {
                   step: "01",
@@ -102,9 +102,11 @@ export default function Home() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: index * 0.2 }}
                 >
-                  <div className="absolute -top-10 text-8xl font-bold text-primary/10">{item.step}</div>
+                  <div className="absolute -top-10 text-8xl font-bold bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent opacity-70">
+                    {item.step}
+                  </div>
                   <div className="relative z-10 mt-12">
-                    <div className="mb-4 rounded-full bg-primary/10 p-4 text-primary mx-auto w-16 h-16 flex items-center justify-center pt-6">
+                    <div className="mb-4 rounded-full bg-purple-400/20 backdrop-blur-sm border border-purple-300/30 p-4 text-purple-600 mx-auto w-16 h-16 flex items-center justify-center shadow-sm hover:shadow-md transition-all duration-300">
                       <item.icon className="h-8 w-8" />
                     </div>
                     <h3 className="text-xl font-bold">{item.title}</h3>

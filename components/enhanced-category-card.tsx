@@ -14,6 +14,9 @@ interface CategoryCardProps {
 }
 
 export function EnhancedCategoryCard({ icon: Icon, name, count, index, featured = false }: CategoryCardProps) {
+  // Convert the category name to a URL-friendly slug
+  const categorySlug = name.toLowerCase().replace(/\s+/g, "-")
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -23,7 +26,7 @@ export function EnhancedCategoryCard({ icon: Icon, name, count, index, featured 
       whileHover={{ y: -5, scale: 1.02, transition: { duration: 0.2 } }}
       className="h-full"
     >
-      <Link href="/explore" className="block h-full">
+      <Link href={`/category/${categorySlug}`} className="block h-full">
         <div
           className={`relative group overflow-hidden rounded-xl border ${
             featured ? "border-purple-300/40" : "border-purple-200/30"

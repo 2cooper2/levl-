@@ -15,20 +15,12 @@ import {
   BookOpen,
   CheckCircle,
   Clock,
-  Award,
   TrendingUp,
   Truck,
   Paintbrush,
   Hammer,
-  DollarSign,
-  Shield,
   Gem,
   MessageSquare,
-  ThumbsUp,
-  Reply,
-  Plus,
-  Search,
-  Filter,
   PenToolIcon as Tool,
   Sparkles,
   Lightbulb,
@@ -123,23 +115,6 @@ const detailedVisualStyles = `
     opacity: 0.15;
     pointer-events: none;
     z-index: 1;
-  }
-  
-  .data-flow {
-    position: absolute;
-    width: 2px;
-    height: 2px;
-    background-color: rgba(var(--primary-rgb), 0.8);
-    border-radius: 50%;
-    z-index: 1;
-    animation: data-flow-animation 4s linear infinite;
-  }
-  
-  @keyframes data-flow-animation {
-    0% { transform: translateY(0) translateX(0); opacity: 0; }
-    10% { opacity: 1; }
-    90% { opacity: 1; }
-    100% { transform: translateY(100px) translateX(100px); opacity: 0; }
   }
   
   .skill-card {
@@ -510,11 +485,6 @@ export function EnhancedHeroSection() {
         { name: "Problem Solving", level: 40 },
         { name: "Finishing Touches", level: 60 },
       ],
-      skillProjects: [
-        { name: "IKEA Bed Assembly", difficulty: "Beginner", earnings: "$65", status: "available" },
-        { name: "Bookshelf Setup", difficulty: "Beginner", earnings: "$45", status: "available" },
-        { name: "Desk with Drawers", difficulty: "Intermediate", earnings: "$85", status: "in-progress" },
-      ],
       milestones: [
         { name: "Assemble 10 Furniture Pieces", progress: 4, total: 10, reward: "Intermediate Badge" },
         { name: "Earn 5 Client Reviews", progress: 2, total: 5, reward: "$50 Bonus" },
@@ -675,7 +645,7 @@ export function EnhancedHeroSection() {
         }
         for (let i = 0; i < height; i += 20) {
           ctx.moveTo(0, i)
-          ctx.lineTo(width, i)
+          ctx.lineTo(width, height)
         }
         ctx.strokeStyle = "rgba(255, 255, 255, 0.05)"
         ctx.stroke()
@@ -709,7 +679,6 @@ export function EnhancedHeroSection() {
 
         // Draw area under projected earnings line
         ctx.beginPath()
-        ctx.moveTo(0, height)
         data.forEach((point) => {
           ctx.lineTo(point.x, point.projectedY)
         })
@@ -857,7 +826,10 @@ export function EnhancedHeroSection() {
         ></div>
 
         {/* Futuristic grid lines */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_49.5%,rgba(255,255,255,0.05)_49.5%,rgba(255,255,255,0.05)_50.5%,transparent_50.5%),linear-gradient(to_bottom,transparent_49.5%,rgba(255,255,255,0.05)_49.5%,rgba(255,255,255,0.05)_50.5%,transparent_50.5%)] bg-[length:50px_50px] opacity-20 pointer-events-none"></div>
+        <div
+          className="absolute inset-0 bg-[linear-gradient(to_right,transparent_49.5%,rgba(255,255,255,0.05)_49.5%,rgba(255,255,255,0.05)_5\`\`\`
+bg-[linear-gradient(to_right,transparent_49.5%,rgba(255,255,255,0.05)_49.5%,rgba(255,255,255,0.05)_50.5%,transparent_50.5%),linear-gradient(to_bottom,transparent_49.5%,rgba(2rgba(255,255,255,0.05)_49.5%,rgba(255,255,255,0.05)_50.5%,transparent_50.5%)] bg-[length:50px_50px] opacity-20 pointer-events-none"
+        ></div>
 
         <div className="container px-3 md:px-6 relative z-10">
           {/* Changed grid layout to be a flex column on all screen sizes */}
@@ -968,12 +940,12 @@ export function EnhancedHeroSection() {
             >
               <div className="relative w-full max-w-full">
                 <motion.div
-                  className="relative rounded-xl overflow-hidden border border-white/20 bg-gradient-to-br from-white/15 to-white/10 dark:from-black/15 dark:to-black/10 backdrop-blur-md p-3 sm:p-4 md:p-5 shadow-lg detailed-card"
+                  className="relative rounded-xl overflow-hidden bg-gradient-to-br from-purple-100/10 via-white/5 to-purple-50/10 dark:from-purple-900/10 dark:via-black/5 dark:to-purple-800/10 backdrop-blur-md p-3 sm:p-4 md:p-5 shadow-lg detailed-card"
                   initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
+                  animate={{ opacity: 1, scale: 1, y: 10 }}
                   transition={{ duration: 0.6, delay: 0.4 }}
                   style={{
-                    boxShadow: "0 10px 30px -10px rgba(var(--primary-rgb), 0.2)",
+                    boxShadow: "0 10px 30px -10px rgba(147, 51, 234, 0.3)",
                   }}
                 >
                   {/* Grid pattern overlay */}
@@ -983,7 +955,7 @@ export function EnhancedHeroSection() {
                   <div className="tech-pattern absolute inset-0 bg-[radial-gradient(circle_at_10px_10px,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none z-1"></div>
 
                   {/* Even background overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-purple-500/5 pointer-events-none"></div>
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-50/5 via-transparent to-purple-100/5 pointer-events-none"></div>
 
                   {/* Circuit lines */}
                   <div className="circuit-lines">
@@ -995,6 +967,8 @@ export function EnhancedHeroSection() {
                           top: `${line.top}%`,
                           left: `${line.left}%`,
                           width: `${line.width}px`,
+                          background:
+                            "linear-gradient(90deg, rgba(147, 51, 234, 0.05), rgba(147, 51, 234, 0.15), rgba(147, 51, 234, 0.05))",
                         }}
                       ></div>
                     ))}
@@ -1005,39 +979,12 @@ export function EnhancedHeroSection() {
                         style={{
                           top: `${dot.top}%`,
                           left: `${dot.left}%`,
+                          backgroundColor: "rgba(147, 51, 234, 0.2)",
+                          boxShadow: "0 0 5px rgba(147, 51, 234, 0.2)",
                         }}
                       ></div>
                     ))}
                   </div>
-
-                  {/* Glow dots */}
-                  {glowDots.map((dot, i) => (
-                    <div
-                      key={`glow-${i}`}
-                      className="glow-dot"
-                      style={{
-                        top: `${dot.top}%`,
-                        left: `${dot.left}%`,
-                        animationDelay: `${dot.delay}s`,
-                      }}
-                    ></div>
-                  ))}
-
-                  {/* Data flow animations */}
-                  {dataFlows.map((flow, i) => (
-                    <div
-                      key={`flow-${i}`}
-                      className="data-flow"
-                      style={{
-                        top: `${flow.top}%`,
-                        left: `${flow.left}%`,
-                        animationDelay: `${flow.delay}s`,
-                      }}
-                    ></div>
-                  ))}
-
-                  {/* Animated border glow */}
-                  <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-primary/30 via-purple-500/30 to-primary/30 opacity-70 blur-sm"></div>
 
                   {/* Success message toast */}
                   <AnimatePresence>
@@ -1066,7 +1013,7 @@ export function EnhancedHeroSection() {
                           <div className="absolute inset-0 rounded-full border border-white/20 scale-[1.3] animate-pulse"></div>
                           <div
                             className="absolute inset-0 rounded-full border border-white/10 scale-[1.6] animate-pulse"
-                            style={{ animationDelay: "0.5s" }}
+                            style={{ animationDuration: "0.5s" }}
                           ></div>
                         </div>
                         <h3 className="text-xl font-bold text-black dark:text-white">
@@ -1143,7 +1090,7 @@ export function EnhancedHeroSection() {
                         <div className="space-y-4">
                           {/* Active Skill Card */}
                           <div
-                            className="bg-white/10 dark:bg-black/20 backdrop-blur-sm rounded-lg p-4 border border-white/10 skill-card"
+                            className="bg-white/10 dark:bg-black/20 backdrop-blur-sm rounded-lg p-4 border border-purple-400/50 skill-card"
                             style={{ borderLeft: `4px solid ${skills[activeSkill].color}` }}
                           >
                             <div className="flex justify-between items-start mb-3">
@@ -1409,453 +1356,6 @@ export function EnhancedHeroSection() {
                           </div>
                         </div>
                       )}
-
-                      {/* Projects Tab */}
-                      {activeTab === "projects" && (
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="text-sm font-semibold text-black dark:text-white">
-                              Skill-Building Projects
-                            </h4>
-                            <div className="text-xs text-primary">Earn while you learn</div>
-                          </div>
-
-                          <div className="space-y-3">
-                            {skills[activeSkill].skillProjects.map((project, index) => (
-                              <div
-                                key={index}
-                                className="p-3 rounded-lg bg-white/5 dark:bg-black/10 border border-white/10 hover:border-primary/30 transition-colors duration-300 relative overflow-hidden"
-                              >
-                                {/* Project background pattern */}
-                                <div className="absolute inset-0 opacity-5 bg-[linear-gradient(45deg,rgba(var(--primary-rgb),0.4)_25%,transparent_25%,transparent_50%,rgba(var(--primary-rgb),0.4)_50%,rgba(var(--primaryrgb),0.4)_75%,transparent_75%,transparent)] bg-[length:10px_10px] pointer-events-none"></div>
-
-                                <div className="flex justify-between items-start mb-2">
-                                  <h5 className="text-sm font-medium text-black dark:text-white">{project.name}</h5>
-                                  <div
-                                    className={`px-2 py-0.5 rounded-full text-xs ${
-                                      project.status === "in-progress"
-                                        ? "bg-primary/20 text-primary"
-                                        : "bg-white/10 text-black/60 dark:text-white/60"
-                                    }`}
-                                  >
-                                    {project.status === "in-progress" ? "In Progress" : "Available"}
-                                  </div>
-                                </div>
-
-                                <div className="flex items-center justify-between text-xs text-black/60 dark:text-white/60 mb-3">
-                                  <div className="flex items-center">
-                                    <Target className="h-3 w-3 mr-1" />
-                                    <span>{project.difficulty} Level</span>
-                                  </div>
-                                  <div className="font-medium text-black dark:text-white flex items-center">
-                                    <DollarSign className="h-3 w-3 mr-0.5 text-green-500" />
-                                    {project.earnings}
-                                  </div>
-                                </div>
-
-                                <div className="flex justify-between items-center">
-                                  <div className="flex -space-x-2">
-                                    {[...Array(3)].map((_, i) => (
-                                      <div
-                                        key={i}
-                                        className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center border-2 border-white/10"
-                                      >
-                                        <Users className="h-3 w-3 text-primary" />
-                                      </div>
-                                    ))}
-                                    <div className="h-6 px-2 rounded-full bg-white/10 text-xs flex items-center ml-1 text-black/60 dark:text-white/60">
-                                      +2 mentors
-                                    </div>
-                                  </div>
-
-                                  <EnhancedButton
-                                    variant={project.status === "in-progress" ? "outline" : "default"}
-                                    size="sm"
-                                    className={`h-8 text-xs ${project.status === "in-progress" ? "border-primary/50 text-primary" : ""}`}
-                                    onClick={() => handleApplyForProject(project.name)}
-                                  >
-                                    {project.status === "in-progress" ? "Continue" : "Apply"}
-                                  </EnhancedButton>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-
-                          <div className="flex justify-center">
-                            <button className="text-xs text-primary flex items-center">
-                              View all available projects <ArrowRight className="h-3 w-3 ml-1" />
-                            </button>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Forum Tab */}
-                      {activeTab === "forum" && (
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="text-sm font-semibold text-black dark:text-white">Community Forum</h4>
-                            <div className="text-xs text-primary">Learn from peers</div>
-                          </div>
-
-                          {/* Search and filters */}
-                          <div className="flex gap-2 mb-3">
-                            <div className="relative flex-1">
-                              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-black/40 dark:text-white/40" />
-                              <input
-                                type="text"
-                                placeholder="Search discussions..."
-                                className="w-full h-8 pl-8 pr-3 text-xs rounded-md bg-white/10 dark:bg-black/20 border border-white/10 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/50"
-                              />
-                            </div>
-                            <button className="h-8 px-2 rounded-md bg-white/10 dark:bg-black/20 border border-white/10 text-xs flex items-center">
-                              <Filter className="h-3.5 w-3.5 mr-1" /> Filter
-                            </button>
-                          </div>
-
-                          {/* Topic list */}
-                          <div className="space-y-3 max-h-[250px] overflow-y-auto pr-1 -mr-1">
-                            {activeTopic === null ? (
-                              // Topic list view
-                              forumTopics.map((topic, index) => (
-                                <div
-                                  key={index}
-                                  className="p-3 rounded-lg bg-white/5 dark:bg-black/10 border border-white/10 hover:border-primary/30 transition-colors duration-300 cursor-pointer relative overflow-hidden"
-                                  onClick={() => setActiveTopic(index)}
-                                >
-                                  {/* Topic background pattern */}
-                                  <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_10px_10px,rgba(var(--primary-rgb),0.4)_1px,transparent_1px)] bg-[length:20px_20px] pointer-events-none"></div>
-
-                                  <div className="flex justify-between items-start mb-2">
-                                    <h5 className="text-sm font-medium text-black dark:text-white">{topic.title}</h5>
-                                    <div className="text-xs text-black/40 dark:text-white/40">{topic.lastActive}</div>
-                                  </div>
-
-                                  <p className="text-xs text-black/70 dark:text-white/70 mb-2 line-clamp-2">
-                                    {topic.preview}
-                                  </p>
-
-                                  <div className="flex items-center justify-between">
-                                    <div className="flex items-center space-x-3 text-xs text-black/60 dark:text-white/60">
-                                      <div className="flex items-center">
-                                        <MessageSquare className="h-3 w-3 mr-1" />
-                                        <span>{topic.replies}</span>
-                                      </div>
-                                      <div className="flex items-center">
-                                        <ThumbsUp className="h-3 w-3 mr-1" />
-                                        <span>{topic.likes}</span>
-                                      </div>
-                                    </div>
-
-                                    <div className="flex items-center">
-                                      <div className="h-5 w-5 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-medium text-primary mr-1">
-                                        {topic.author.substring(0, 2)}
-                                      </div>
-                                      <span className="text-xs text-black/60 dark:text-white/60">{topic.author}</span>
-                                    </div>
-                                  </div>
-
-                                  <div className="flex flex-wrap gap-1 mt-2">
-                                    {topic.tags.map((tag, i) => (
-                                      <span
-                                        key={i}
-                                        className="px-1.5 py-0.5 bg-white/5 dark:bg-black/20 rounded text-[10px] text-black/60 dark:text-white/60"
-                                      >
-                                        #{tag}
-                                      </span>
-                                    ))}
-                                  </div>
-                                </div>
-                              ))
-                            ) : (
-                              // Topic detail view
-                              <div className="space-y-3">
-                                <div className="flex items-center mb-2">
-                                  <button
-                                    className="text-xs flex items-center text-primary mr-3"
-                                    onClick={() => setActiveTopic(null)}
-                                  >
-                                    <ArrowRight className="h-3 w-3 mr-1 rotate-180" /> Back
-                                  </button>
-                                  <h4 className="text-sm font-semibold text-black dark:text-white">
-                                    {forumTopics[activeTopic].title}
-                                  </h4>
-                                </div>
-
-                                {/* Original post */}
-                                <div className="p-3 rounded-lg bg-white/5 dark:bg-black/10 border border-white/10 relative overflow-hidden">
-                                  {/* Post background pattern */}
-                                  <div className="absolute inset-0 opacity-5 bg-[linear-gradient(45deg,rgba(var(--primary-rgb),0.4)_25%,transparent_25%,transparent_50%,rgba(var(--primary-rgb),0.4)_50%,rgba(var(--primary-rgb),0.4)_75%,transparent_75%,transparent)] bg-[length:10px_10px] pointer-events-none"></div>
-
-                                  <div className="flex items-center justify-between mb-2">
-                                    <div className="flex items-center">
-                                      <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-medium text-primary mr-2">
-                                        {forumTopics[activeTopic].author.substring(0, 2)}
-                                      </div>
-                                      <span className="text-xs font-medium text-black dark:text-white">
-                                        {forumTopics[activeTopic].author}
-                                      </span>
-                                    </div>
-                                    <div className="text-xs text-black/40 dark:text-white/40">
-                                      {forumTopics[activeTopic].lastActive}
-                                    </div>
-                                  </div>
-
-                                  <p className="text-xs text-black/80 dark:text-white/80 mb-3">
-                                    {forumTopics[activeTopic].preview}
-                                  </p>
-
-                                  <div className="flex items-center space-x-3 text-xs">
-                                    <button className="flex items-center text-black/60 dark:text-white/60 hover:text-primary">
-                                      <ThumbsUp className="h-3 w-3 mr-1" />
-                                      <span>Like ({forumTopics[activeTopic].likes})</span>
-                                    </button>
-                                    <button className="flex items-center text-black/60 dark:text-white/60 hover:text-primary">
-                                      <Reply className="h-3 w-3 mr-1" />
-                                      <span>Reply</span>
-                                    </button>
-                                  </div>
-                                </div>
-
-                                {/* Responses */}
-                                {forumTopics[activeTopic].responses.length > 0 ? (
-                                  <div className="space-y-2 pl-4 border-l border-white/10">
-                                    {forumTopics[activeTopic].responses.map((response, i) => (
-                                      <div
-                                        key={i}
-                                        className="p-3 rounded-lg bg-white/5 dark:bg-black/10 border border-white/10"
-                                      >
-                                        <div className="flex items-center justify-between mb-2">
-                                          <div className="flex items-center">
-                                            <div className="h-5 w-5 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-medium text-black/70 dark:text-white/70 mr-2">
-                                              {response.author.substring(0, 2)}
-                                            </div>
-                                            <span className="text-xs font-medium text-black dark:text-white">
-                                              {response.author}
-                                            </span>
-                                          </div>
-                                          <div className="text-xs text-black/40 dark:text-white/40">
-                                            {response.time}
-                                          </div>
-                                        </div>
-
-                                        <p className="text-xs text-black/80 dark:text-white/80 mb-2">
-                                          {response.content}
-                                        </p>
-
-                                        <div className="flex items-center space-x-3 text-xs">
-                                          <button className="flex items-center text-black/60 dark:text-white/60 hover:text-primary">
-                                            <ThumbsUp className="h-3 w-3 mr-1" />
-                                            <span>Like ({response.likes})</span>
-                                          </button>
-                                          <button className="flex items-center text-black/60 dark:text-white/60 hover:text-primary">
-                                            <Reply className="h-3 w-3 mr-1" />
-                                            <span>Reply</span>
-                                          </button>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                ) : (
-                                  <div className="text-center py-4 text-xs text-black/50 dark:text-white/50">
-                                    No responses yet. Be the first to reply!
-                                  </div>
-                                )}
-
-                                {/* Reply input */}
-                                <div className="p-3 rounded-lg bg-white/5 dark:bg-black/10 border border-white/10">
-                                  <textarea
-                                    placeholder="Write your reply..."
-                                    className="w-full h-20 p-2 text-xs rounded-md bg-white/10 dark:bg-black/20 border border-white/10 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/50 mb-2"
-                                  ></textarea>
-                                  <div className="flex justify-end">
-                                    <EnhancedButton size="sm" className="h-7 text-xs">
-                                      Post Reply
-                                    </EnhancedButton>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-
-                          {activeTopic === null && (
-                            <div className="flex justify-between items-center">
-                              <button className="text-xs text-primary flex items-center">
-                                View all discussions <ArrowRight className="h-3 w-3 ml-1" />
-                              </button>
-                              <EnhancedButton size="sm" className="h-7 text-xs flex items-center">
-                                <Plus className="h-3 w-3 mr-1" /> New Topic
-                              </EnhancedButton>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Analytics Tab */}
-                      {activeTab === "analytics" && (
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="text-sm font-semibold text-black dark:text-white">Earnings Projection</h4>
-                            <div className="text-xs text-green-500 flex items-center">
-                              <TrendingUp className="h-3 w-3 mr-1" /> +45% with skill advancement
-                            </div>
-                          </div>
-
-                          {/* Earnings Chart */}
-                          <div className="h-[120px] w-full rounded-lg overflow-hidden bg-black/20 backdrop-blur-md relative">
-                            <div className="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,transparent_49px,rgba(255,255,255,0.05)_49px,rgba(255,255,255,0.05)_51px,transparent_51px),linear-gradient(to_bottom,transparent_49px,rgba(255,255,255,0.05)_49px,rgba(255,255,255,0.05)_51px,transparent_51px)] bg-[length:50px_50px]"></div>
-                            <canvas ref={chartRef} className="w-full h-full" />
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-3">
-                            <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3 relative overflow-hidden">
-                              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent"></div>
-                              <div className="text-xs text-black/60 dark:text-white/60 mb-1">Current Avg. Rate</div>
-                              <div className="text-lg font-bold text-black dark:text-white">
-                                ${skills[activeSkill].earnings.split("-")[0].replace("$", "")}
-                                <span className="text-xs ml-1 text-black/60 dark:text-white/60">/hr</span>
-                              </div>
-                            </div>
-
-                            <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3 relative overflow-hidden">
-                              <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent"></div>
-                              <div className="text-xs text-black/60 dark:text-white/60 mb-1">Projected Rate</div>
-                              <div className="text-lg font-bold text-green-500">
-                                ${skills[activeSkill].nextEarnings.split("-")[0].replace("$", "")}
-                                <span className="text-xs ml-1 text-black/60 dark:text-white/60">/hr</span>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-3">
-                            <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3 relative overflow-hidden">
-                              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent"></div>
-                              <div className="text-xs text-black/60 dark:text-white/60 mb-1 flex items-center">
-                                <Clock className="h-3 w-3 mr-1" /> Avg. Completion Time
-                              </div>
-                              <div className="text-sm font-bold text-black dark:text-white">
-                                {skills[activeSkill].stats.avgCompletionTime}
-                              </div>
-                            </div>
-
-                            <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3 relative overflow-hidden">
-                              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent"></div>
-                              <div className="text-xs text-black/60 dark:text-white/60 mb-1 flex items-center">
-                                <Award className="h-3 w-3 mr-1" /> Top Earners
-                              </div>
-                              <div className="text-sm font-bold text-black dark:text-white">
-                                {skills[activeSkill].stats.topEarners}
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3 relative overflow-hidden">
-                            <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-transparent"></div>
-                            <div className="text-xs text-black/60 dark:text-white/60 mb-2">Market Demand</div>
-                            <div className="flex items-center">
-                              <div className="flex-1 h-2 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden progress-track">
-                                <div
-                                  className="h-full rounded-full bg-gradient-to-r from-yellow-500 to-red-500"
-                                  style={{ width: "85%" }}
-                                ></div>
-                              </div>
-                              <span className="text-xs font-medium ml-2 text-black dark:text-white">Very High</span>
-                            </div>
-                            <div className="text-xs text-black/60 dark:text-white/60 mt-2">
-                              <span className="text-green-500">85% more</span> projects available compared to last month
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Milestones Tab */}
-                      {activeTab === "milestones" && (
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="text-sm font-semibold text-black dark:text-white">Achievement Milestones</h4>
-                            <div className="text-xs text-primary">Unlock rewards</div>
-                          </div>
-
-                          <div className="space-y-3">
-                            {skills[activeSkill].milestones.map((milestone, index) => (
-                              <div
-                                key={index}
-                                className={`p-3 rounded-lg border transition-all duration-300 relative overflow-hidden ${
-                                  selectedMilestone === index
-                                    ? "bg-white/10 dark:bg-black/20 border-primary/30"
-                                    : "bg-white/5 dark:bg-black/10 border-white/10 hover:border-white/30"
-                                }`}
-                                onClick={() => setSelectedMilestone(index)}
-                              >
-                                {/* Milestone background pattern */}
-                                <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_10px_10px,rgba(var(--primary-rgb),0.4)_1px,transparent_1px)] bg-[length:20px_20px] pointer-events-none"></div>
-
-                                <div className="flex justify-between items-start mb-2">
-                                  <h5 className="text-sm font-medium text-black dark:text-white">{milestone.name}</h5>
-                                  <div className="px-2 py-0.5 rounded-full bg-primary/20 text-primary text-xs">
-                                    {typeof milestone.progress === "number" && typeof milestone.total === "number"
-                                      ? `${Math.round((milestone.progress / milestone.total) * 100)}%`
-                                      : typeof milestone.progress === "object" || typeof milestone.total === "object"
-                                        ? "In Progress"
-                                        : `${milestone.progress}/${milestone.total}`}
-                                  </div>
-                                </div>
-
-                                <div className="mb-2">
-                                  <div className="h-1.5 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden progress-track">
-                                    <div
-                                      className="h-full rounded-full bg-gradient-to-r from-primary to-purple-500"
-                                      style={{
-                                        width:
-                                          typeof milestone.progress === "number" && typeof milestone.total === "number"
-                                            ? `${(milestone.progress / milestone.total) * 100}%`
-                                            : "0%",
-                                      }}
-                                    ></div>
-                                    {/* Milestone progress markers */}
-                                    <div className="absolute top-0 left-1/4 h-full w-0.5 bg-white/10"></div>
-                                    <div className="absolute top-0 left-1/2 h-full w-0.5 bg-white/10"></div>
-                                    <div className="absolute top-0 left-3/4 h-full w-0.5 bg-white/10"></div>
-                                  </div>
-                                </div>
-
-                                <div className="flex justify-between items-center text-xs">
-                                  <div className="text-black/60 dark:text-white/60 flex items-center">
-                                    <Award className="h-3 w-3 mr-1 text-yellow-500" />
-                                    <span className="text-black dark:text-white">{milestone.reward}</span>
-                                  </div>
-                                  {selectedMilestone === index && (
-                                    <button className="text-primary flex items-center">
-                                      View details <ArrowRight className="h-3 w-3 ml-1" />
-                                    </button>
-                                  )}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-
-                          <div className="bg-gradient-to-r from-primary/10 to-purple-500/10 rounded-lg p-3 relative overflow-hidden">
-                            {/* Certificate background pattern */}
-                            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_10px_10px,rgba(255,255,255,0.4)_1px,transparent_1px)] bg-[length:20px_20px] pointer-events-none"></div>
-
-                            <div className="flex items-center mb-2">
-                              <Shield className="h-4 w-4 text-primary mr-2" />
-                              <h5 className="text-sm font-medium text-black dark:text-white">Skill Certification</h5>
-                            </div>
-                            <p className="text-xs text-black/80 dark:text-white/80 mb-3">
-                              Complete all milestones to earn a verified skill certification that showcases your
-                              expertise to clients.
-                            </p>
-                            <div className="flex justify-between items-center">
-                              <div className="text-xs text-black/60 dark:text-white/60">
-                                Overall progress: <span className="text-black dark:text-white">42%</span>
-                              </div>
-                              <EnhancedButton variant="outline" size="sm" className="h-7 text-xs">
-                                View Certificate
-                              </EnhancedButton>
-                            </div>
-                          </div>
-                        </div>
-                      )}
                     </div>
 
                     <div className="lg:col-span-4 space-y-4">
@@ -1912,7 +1412,6 @@ export function EnhancedHeroSection() {
                       </EnhancedButton>
                     </div>
                   </div>
-
                   {/* Futuristic decorative elements */}
                   <div className="absolute top-1/4 right-6 w-2 h-2 rounded-full bg-primary/50 animate-pulse"></div>
                   <div

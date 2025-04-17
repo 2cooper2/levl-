@@ -151,8 +151,9 @@ export function SkillAcceleratorSignup({ isOpen, onClose }: SkillAcceleratorSign
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md overflow-hidden">
-        <DialogHeader className="pb-4 border-b">
+      <DialogContent className="sm:max-w-md overflow-hidden bg-white border border-purple-200 shadow-md shadow-purple-100/50">
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-white opacity-80 pointer-events-none"></div>
+        <DialogHeader className="pb-4 border-b border-purple-100 relative">
           <DialogTitle className="text-xl font-bold text-center">
             {isSuccess ? "Registration Complete!" : "Join Skill Accelerator"}
           </DialogTitle>
@@ -164,7 +165,7 @@ export function SkillAcceleratorSignup({ isOpen, onClose }: SkillAcceleratorSign
         </DialogHeader>
 
         {isSuccess ? (
-          <div className="flex flex-col items-center justify-center py-6">
+          <div className="flex flex-col items-center justify-center py-6 relative">
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -191,24 +192,24 @@ export function SkillAcceleratorSignup({ isOpen, onClose }: SkillAcceleratorSign
             <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }}>
               <Button
                 onClick={handleClose}
-                className="bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90"
+                className="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90"
               >
                 Return to Home
               </Button>
             </motion.div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-5 relative">
             <div className="flex justify-between mb-6">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="flex flex-col items-center">
                   <div
                     className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300 ${
                       step === i
-                        ? "bg-gradient-to-r from-primary to-purple-500 text-white shadow-md"
+                        ? "bg-gradient-to-r from-primary to-purple-600 text-white shadow-md"
                         : step > i
-                          ? "bg-green-100 text-green-600"
-                          : "bg-gray-100 text-gray-400"
+                          ? "bg-purple-100 text-purple-600"
+                          : "bg-purple-50 text-purple-400"
                     }`}
                   >
                     {step > i ? <CheckCircle className="h-4 w-4" /> : i}
@@ -240,7 +241,7 @@ export function SkillAcceleratorSignup({ isOpen, onClose }: SkillAcceleratorSign
                       placeholder="John Doe"
                       value={formData.name}
                       onChange={handleChange}
-                      className={`transition-all duration-200 ${errors.name ? "border-red-500 ring-1 ring-red-500" : "focus:border-primary focus:ring-1 focus:ring-primary"}`}
+                      className={`transition-all duration-200 ${errors.name ? "border-red-500 ring-1 ring-red-500" : "focus:border-purple-400 focus:ring-1 focus:ring-purple-400"}`}
                     />
                     {errors.name && (
                       <motion.p
@@ -262,7 +263,9 @@ export function SkillAcceleratorSignup({ isOpen, onClose }: SkillAcceleratorSign
                       placeholder="name@example.com"
                       value={formData.email}
                       onChange={handleChange}
-                      className={errors.email ? "border-red-500" : ""}
+                      className={
+                        errors.email ? "border-red-500" : "focus:border-purple-400 focus:ring-1 focus:ring-purple-400"
+                      }
                     />
                     {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
                   </div>
@@ -286,7 +289,9 @@ export function SkillAcceleratorSignup({ isOpen, onClose }: SkillAcceleratorSign
                       type="date"
                       value={formData.dob}
                       onChange={handleChange}
-                      className={errors.dob ? "border-red-500" : ""}
+                      className={
+                        errors.dob ? "border-red-500" : "focus:border-purple-400 focus:ring-1 focus:ring-purple-400"
+                      }
                     />
                     {errors.dob && <p className="text-sm text-red-500">{errors.dob}</p>}
                   </div>
@@ -299,7 +304,11 @@ export function SkillAcceleratorSignup({ isOpen, onClose }: SkillAcceleratorSign
                       placeholder="City, Country"
                       value={formData.location}
                       onChange={handleChange}
-                      className={errors.location ? "border-red-500" : ""}
+                      className={
+                        errors.location
+                          ? "border-red-500"
+                          : "focus:border-purple-400 focus:ring-1 focus:ring-purple-400"
+                      }
                     />
                     {errors.location && <p className="text-sm text-red-500">{errors.location}</p>}
                   </div>
@@ -322,26 +331,28 @@ export function SkillAcceleratorSignup({ isOpen, onClose }: SkillAcceleratorSign
                       onValueChange={handleRoleChange}
                       className="flex flex-col space-y-3"
                     >
-                      <div className="flex items-center space-x-2 rounded-lg border p-4 hover:bg-muted/50 transition-colors cursor-pointer group">
-                        <RadioGroupItem value="worker" id="worker" />
+                      <div className="flex items-center space-x-2 rounded-lg border border-purple-100 p-4 hover:bg-purple-50 transition-colors cursor-pointer group">
+                        <RadioGroupItem value="worker" id="worker" className="text-purple-600" />
                         <Label htmlFor="worker" className="font-normal cursor-pointer flex-1">
-                          <div className="font-medium group-hover:text-primary transition-colors">Service Provider</div>
+                          <div className="font-medium group-hover:text-purple-600 transition-colors">
+                            Service Provider
+                          </div>
                           <div className="text-sm text-muted-foreground">Offer your skills and earn money</div>
                         </Label>
                       </div>
 
-                      <div className="flex items-center space-x-2 rounded-lg border p-4 hover:bg-muted/50 transition-colors cursor-pointer group">
-                        <RadioGroupItem value="client" id="client" />
+                      <div className="flex items-center space-x-2 rounded-lg border border-purple-100 p-4 hover:bg-purple-50 transition-colors cursor-pointer group">
+                        <RadioGroupItem value="client" id="client" className="text-purple-600" />
                         <Label htmlFor="client" className="font-normal cursor-pointer flex-1">
-                          <div className="font-medium group-hover:text-primary transition-colors">Client</div>
+                          <div className="font-medium group-hover:text-purple-600 transition-colors">Client</div>
                           <div className="text-sm text-muted-foreground">Hire skilled professionals</div>
                         </Label>
                       </div>
 
-                      <div className="flex items-center space-x-2 rounded-lg border p-4 hover:bg-muted/50 transition-colors cursor-pointer group">
-                        <RadioGroupItem value="both" id="both" />
+                      <div className="flex items-center space-x-2 rounded-lg border border-purple-100 p-4 hover:bg-purple-50 transition-colors cursor-pointer group">
+                        <RadioGroupItem value="both" id="both" className="text-purple-600" />
                         <Label htmlFor="both" className="font-normal cursor-pointer flex-1">
-                          <div className="font-medium group-hover:text-primary transition-colors">Both</div>
+                          <div className="font-medium group-hover:text-purple-600 transition-colors">Both</div>
                           <div className="text-sm text-muted-foreground">I want to do both</div>
                         </Label>
                       </div>
@@ -352,7 +363,7 @@ export function SkillAcceleratorSignup({ isOpen, onClose }: SkillAcceleratorSign
                     <input
                       type="checkbox"
                       id="terms"
-                      className="rounded border-gray-300"
+                      className="rounded border-purple-300 text-purple-600 focus:ring-purple-500"
                       checked={termsAccepted}
                       onChange={(e) => setTermsAccepted(e.target.checked)}
                       required
@@ -367,19 +378,28 @@ export function SkillAcceleratorSignup({ isOpen, onClose }: SkillAcceleratorSign
 
             <DialogFooter className="flex justify-between mt-6 gap-2">
               {step > 1 && (
-                <Button type="button" variant="outline" onClick={handleBack}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleBack}
+                  className="border-purple-200 text-purple-700 hover:bg-purple-50"
+                >
                   Back
                 </Button>
               )}
 
               {step < 3 ? (
-                <Button type="button" onClick={handleNext} className="ml-auto">
+                <Button
+                  type="button"
+                  onClick={handleNext}
+                  className="ml-auto bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90"
+                >
                   Next
                 </Button>
               ) : (
                 <Button
                   type="submit"
-                  className="ml-auto bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90"
+                  className="ml-auto bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90"
                   disabled={isSubmitting || !termsAccepted}
                 >
                   {isSubmitting ? (

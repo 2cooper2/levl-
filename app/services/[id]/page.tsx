@@ -1,357 +1,353 @@
 "use client"
 
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
+import type React from "react"
+
+import { useState, useEffect } from "react"
+import { useParams, useRouter } from "next/navigation"
+import { EnhancedMainNav } from "@/components/enhanced-main-nav"
+import { ServiceGallery } from "@/components/services/service-gallery"
 import { ServiceReviews } from "@/components/services/service-reviews"
 import { ServiceFAQ } from "@/components/services/service-faq"
-import { ServiceGallery } from "@/components/services/service-gallery"
-import { Check, Clock, Heart, MessageSquare, Share2, Star } from "lucide-react"
-import { motion } from "framer-motion"
-import { useEffect, useState } from "react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Star, Clock, MessageSquare, ArrowRight, DollarSign } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 
-export default function ServiceDetailPage() {
-  const [isLoaded, setIsLoaded] = useState(false)
+export default function ServicePage() {
+  const params = useParams()
+  const router = useRouter()
+  const { toast } = useToast()
+  const [service, setService] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedHours, setSelectedHours] = useState<number>(10)
+  const [customHours, setCustomHours] = useState<number>(10)
+  const [isAuthenticated, setIsAuthenticated] = useState(true) // Set to true to bypass authentication
 
   useEffect(() => {
-    setIsLoaded(true)
-  }, [])
+    // In a real app, fetch service data from your API or database
+    const fetchService = async () => {
+      try {
+        // Simulate API call
+        await new Promise((resolve) => setTimeout(resolve, 1000))
 
-  const service = {
-    id: "web-development",
-    title: "Professional Website Development",
-    description:
-      "I will create a professional, responsive website for your business or personal brand. The website will be built using modern technologies and best practices to ensure it's fast, secure, and SEO-friendly.",
-    price: "From $499",
-    rating: 4.9,
-    reviews: 124,
-    deliveryTime: "7 days",
-    revisions: "Unlimited",
-    provider: {
-      name: "Alex Morgan",
-      avatar: "/placeholder.svg?height=80&width=80&text=AM",
-      level: "Top Rated",
-      memberSince: "Jan 2020",
-      responseTime: "Under 2 hours",
-      lastDelivery: "About 16 hours ago",
-      completedProjects: 87,
-      rating: 4.9,
-    },
-    tags: ["Web Design", "Responsive", "E-commerce", "WordPress", "Custom Code"],
-    features: [
-      "Responsive design for all devices",
-      "SEO optimization",
-      "Contact form integration",
-      "Social media integration",
-      "Google Analytics setup",
-      "Basic SEO setup",
-      "Cross-browser compatibility",
-      "Loading speed optimization",
-    ],
-    packages: [
-      {
-        name: "Basic",
-        price: "$499",
-        description: "Perfect for personal websites or small businesses just getting started online.",
-        deliveryTime: "7 days",
-        features: ["Up to 5 pages", "Responsive design", "Contact form", "Basic SEO setup", "Social media integration"],
-      },
-      {
-        name: "Standard",
-        price: "$799",
-        description: "Ideal for growing businesses that need more functionality and customization.",
-        deliveryTime: "10 days",
-        features: [
-          "Up to 10 pages",
-          "Responsive design",
-          "Contact form",
-          "Advanced SEO setup",
-          "Social media integration",
-          "Blog setup",
-          "Newsletter integration",
-          "Google Analytics",
-        ],
-        recommended: true,
-      },
-      {
-        name: "Premium",
-        price: "$1,299",
-        description: "Complete solution for established businesses requiring advanced features and e-commerce.",
-        deliveryTime: "14 days",
-        features: [
-          "Up to 15 pages",
-          "Responsive design",
-          "Contact form",
-          "Advanced SEO setup",
-          "Social media integration",
-          "Blog setup",
-          "Newsletter integration",
-          "Google Analytics",
-          "E-commerce functionality",
-          "Payment gateway integration",
-          "Product management system",
-          "Customer account area",
-        ],
-      },
-    ],
+        // Mock data with hourly rate instead of packages
+        setService({
+          id: params.id,
+          title: "Professional Website Development",
+          description:
+            "I will create a professional, responsive website tailored to your business needs. With over 5 years of experience in web development, I deliver high-quality websites that not only look great but also perform exceptionally well. My approach focuses on creating websites that are user-friendly, fast-loading, and optimized for search engines.",
+          provider: {
+            id: "alex-morgan",
+            name: "Alex Morgan",
+            title: "Senior Web Developer",
+            avatar: "/placeholder.svg?height=100&width=100&text=AM",
+            rating: 4.9,
+            reviews: 127,
+            responseTime: "Under 2 hours",
+            hourlyRate: 85, // Hourly rate in USD
+          },
+          gallery: [
+            "/placeholder.svg?height=600&width=800&text=Website+Preview+1",
+            "/placeholder.svg?height=600&width=800&text=Website+Preview+2",
+            "/placeholder.svg?height=600&width=800&text=Website+Preview+3",
+          ],
+          skills: [
+            "Web Development",
+            "React",
+            "UI/UX Design",
+            "Responsive Design",
+            "E-commerce",
+            "WordPress",
+            "JavaScript",
+            "HTML/CSS",
+          ],
+          reviews: [
+            {
+              id: "1",
+              user: {
+                name: "Sarah Johnson",
+                avatar: "/placeholder.svg?height=40&width=40&text=SJ",
+              },
+              rating: 5,
+              date: "2023-05-15",
+              comment:
+                "Alex created an amazing website for my small business. The design is beautiful and the functionality is exactly what I needed. Highly recommend!",
+            },
+            {
+              id: "2",
+              user: {
+                name: "Michael Chen",
+                avatar: "/placeholder.svg?height=40&width=40&text=MC",
+              },
+              rating: 5,
+              date: "2023-04-22",
+              comment:
+                "Great experience working with Alex. Very professional and delivered the project ahead of schedule. The website looks fantastic and has already helped increase my online sales.",
+            },
+            {
+              id: "3",
+              user: {
+                name: "Emily Rodriguez",
+                avatar: "/placeholder.svg?height=40&width=40&text=ER",
+              },
+              rating: 4,
+              date: "2023-03-10",
+              comment:
+                "Alex did a great job on our company website. The design is modern and the site is easy to navigate. Would definitely work with again.",
+            },
+          ],
+          faqs: [
+            {
+              question: "What information do you need to get started?",
+              answer:
+                "To get started, I'll need your business information, brand guidelines (if available), content for the website (text, images, videos), and any specific requirements or preferences you have for the design and functionality.",
+            },
+            {
+              question: "Do you provide website hosting?",
+              answer:
+                "I can help set up hosting for your website, but the hosting fees are not included in my service packages. I can recommend reliable hosting providers based on your needs and budget.",
+            },
+            {
+              question: "Can you help with domain registration?",
+              answer:
+                "Yes, I can assist with domain registration, but the domain registration fee is not included in my service packages. If you already have a domain, I can help you set it up with your new website.",
+            },
+            {
+              question: "Do you offer website maintenance services?",
+              answer:
+                "Yes, I offer website maintenance services for an additional fee. This includes regular updates, security patches, content updates, and technical support.",
+            },
+            {
+              question: "What if I need changes after the project is completed?",
+              answer:
+                "I charge my standard hourly rate for any changes or additions after the project is completed. I'm always happy to continue working with clients on ongoing improvements.",
+            },
+          ],
+        })
+      } catch (error) {
+        console.error("Error fetching service:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchService()
+  }, [params.id])
+
+  const handleContact = () => {
+    router.push(`/messages?provider=${service.provider.id}`)
+  }
+
+  const handleHire = () => {
+    setIsModalOpen(true)
+  }
+
+  const handleHoursSelect = (hours: string) => {
+    if (hours === "custom") {
+      // Do nothing here, we'll use the customHours state
+    } else {
+      setSelectedHours(Number.parseInt(hours))
+    }
+  }
+
+  const handleCustomHoursChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = Number.parseInt(e.target.value)
+    if (!isNaN(value) && value > 0) {
+      setCustomHours(value)
+      setSelectedHours(value)
+    }
+  }
+
+  const handleProceedToCheckout = () => {
+    const hours = selectedHours
+    const totalAmount = hours * service.provider.hourlyRate
+
+    // Navigate directly to the stripe checkout page
+    router.push(
+      `/stripe-checkout?providerId=${service.provider.id}&providerName=${encodeURIComponent(service.provider.name)}&hours=${hours}&amount=${totalAmount}&serviceTitle=${encodeURIComponent(service.title)}`,
+    )
+    setIsModalOpen(false)
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <EnhancedMainNav />
+        <main className="container py-8">
+          <div className="space-y-8">
+            <div className="flex flex-col md:flex-row gap-8">
+              <div className="md:w-2/3 space-y-4">
+                <Skeleton className="h-8 w-3/4" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="h-[400px] w-full" />
+              </div>
+              <div className="md:w-1/3 space-y-4">
+                <Skeleton className="h-[200px] w-full" />
+                <Skeleton className="h-[200px] w-full" />
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    )
   }
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Link href="/" className="flex items-center gap-2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-6 w-6"
-              >
-                <path d="M12 2L2 7l10 5 10-5-10-5z" fill="currentColor" strokeWidth="0" className="text-primary" />
-                <path d="M2 12l10 5 10-5" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M2 17l10 5 10-5" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="2 2" />
-              </svg>
-              <span className="text-xl font-bold bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
-                LevL
-              </span>
-            </Link>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="#" className="text-sm font-medium transition-colors hover:text-primary">
-              Explore
-            </Link>
-            <Link href="#" className="text-sm font-medium transition-colors hover:text-primary">
-              Messages
-            </Link>
-            <Link href="#" className="text-sm font-medium transition-colors hover:text-primary">
-              Dashboard
-            </Link>
-            <Avatar className="h-8 w-8">
-              <AvatarImage src="/placeholder.svg?height=32&width=32&text=JD" alt="@johndoe" />
-              <AvatarFallback>JD</AvatarFallback>
-            </Avatar>
-          </div>
-        </div>
-      </header>
+      <EnhancedMainNav />
       <main className="container py-8">
-        <div className="grid gap-8 lg:grid-cols-3">
-          <motion.div
-            className="lg:col-span-2"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="space-y-6">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight">{service.title}</h1>
-                <div className="mt-2 flex items-center gap-2">
-                  <div className="flex items-center">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="ml-1 text-sm font-medium">{service.rating}</span>
-                    <span className="ml-1 text-sm text-muted-foreground">({service.reviews} reviews)</span>
-                  </div>
-                  <Separator orientation="vertical" className="h-4" />
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">{service.deliveryTime}</span>
-                  </div>
-                  <Separator orientation="vertical" className="h-4" />
-                  <div className="flex items-center gap-1">
-                    <Check className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">{service.revisions} revisions</span>
-                  </div>
-                </div>
-              </div>
-
-              <ServiceGallery />
-
-              <div>
-                <h2 className="text-xl font-bold mb-4">About This Service</h2>
-                <p className="text-muted-foreground">{service.description}</p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {service.tags.map((tag) => (
-                    <Badge key={tag} variant="outline" className="text-xs font-normal">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <h2 className="text-xl font-bold mb-4">What's Included</h2>
-                <ul className="grid gap-2 sm:grid-cols-2">
-                  {service.features.map((feature) => (
-                    <li key={feature} className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-primary" />
-                      <span className="text-sm">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <Tabs defaultValue="description" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="description">Description</TabsTrigger>
-                  <TabsTrigger value="reviews">Reviews</TabsTrigger>
-                  <TabsTrigger value="faq">FAQ</TabsTrigger>
-                </TabsList>
-                <TabsContent value="description" className="pt-4">
-                  <div className="space-y-4">
-                    <p>
-                      I specialize in creating modern, responsive websites that not only look great but also perform
-                      exceptionally well. With over 5 years of experience in web development, I've helped businesses of
-                      all sizes establish a strong online presence.
-                    </p>
-                    <p>
-                      My approach focuses on creating websites that are not just visually appealing but also
-                      user-friendly, fast-loading, and optimized for search engines. I use the latest technologies and
-                      best practices to ensure your website stands out from the competition.
-                    </p>
-                    <p>
-                      Whether you need a simple portfolio website, a blog, a business website, or an e-commerce store, I
-                      can create a custom solution tailored to your specific needs and goals.
-                    </p>
-                    <h3 className="text-lg font-bold mt-6">My Process</h3>
-                    <ol className="list-decimal list-inside space-y-2 pl-4">
-                      <li>Initial consultation to understand your requirements and goals</li>
-                      <li>Research and planning to create a strategy for your website</li>
-                      <li>Design mockups for your approval</li>
-                      <li>Development of the website</li>
-                      <li>Testing and quality assurance</li>
-                      <li>Launch and post-launch support</li>
-                    </ol>
-                  </div>
-                </TabsContent>
-                <TabsContent value="reviews" className="pt-4">
-                  <ServiceReviews />
-                </TabsContent>
-                <TabsContent value="faq" className="pt-4">
-                  <ServiceFAQ />
-                </TabsContent>
-              </Tabs>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="md:col-span-2 space-y-8">
+            <div>
+              <h1 className="text-3xl font-bold mb-4">{service.title}</h1>
+              <p className="text-muted-foreground">{service.description}</p>
             </div>
-          </motion.div>
+
+            <ServiceGallery images={service.gallery} />
+
+            <Tabs defaultValue="about">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="about">About</TabsTrigger>
+                <TabsTrigger value="reviews">Reviews</TabsTrigger>
+                <TabsTrigger value="faq">FAQ</TabsTrigger>
+              </TabsList>
+              <TabsContent value="about" className="space-y-6 pt-4">
+                <div className="prose max-w-none">
+                  <h3>My Expertise</h3>
+                  <p>
+                    With over 5 years of experience in web development, I specialize in creating modern, responsive
+                    websites that not only look great but also perform exceptionally well. My approach focuses on
+                    creating websites that are user-friendly, fast-loading, and optimized for search engines.
+                  </p>
+
+                  <h3>My Process</h3>
+                  <ol>
+                    <li>Initial consultation to understand your requirements and goals</li>
+                    <li>Research and planning to create a strategy for your website</li>
+                    <li>Design mockups for your approval</li>
+                    <li>Development of the website</li>
+                    <li>Testing and quality assurance</li>
+                    <li>Launch and post-launch support</li>
+                  </ol>
+
+                  <h3>What You Can Expect</h3>
+                  <ul>
+                    <li>Professional, responsive communication</li>
+                    <li>High-quality work delivered on time</li>
+                    <li>Attention to detail and focus on your specific needs</li>
+                    <li>Transparent pricing with no hidden fees</li>
+                    <li>Ongoing support after project completion</li>
+                  </ul>
+                </div>
+
+                <div className="bg-purple-50 dark:bg-purple-950/20 p-6 rounded-lg border border-purple-100 dark:border-purple-800/30">
+                  <h3 className="text-lg font-semibold mb-2 text-purple-700 dark:text-purple-300">Hourly Rate</h3>
+                  <div className="flex items-center">
+                    <span className="text-3xl font-bold text-purple-700 dark:text-purple-300">
+                      ${service.provider.hourlyRate}
+                    </span>
+                    <span className="text-sm text-purple-600 dark:text-purple-400 ml-1">/hour</span>
+                  </div>
+                  <p className="text-sm text-purple-600 dark:text-purple-400 mt-2">
+                    Typical projects range from 10-40 hours depending on complexity.
+                  </p>
+                  <Button
+                    className="mt-4 w-full bg-purple-500/80 hover:bg-purple-600/90 backdrop-blur-sm border border-purple-300/30 shadow-sm hover:shadow-md transition-all duration-300"
+                    onClick={handleProceedToCheckout}
+                  >
+                    Hire Now <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
+              </TabsContent>
+              <TabsContent value="reviews">
+                <ServiceReviews reviews={service.reviews} />
+              </TabsContent>
+              <TabsContent value="faq">
+                <ServiceFAQ faqs={service.faqs} />
+              </TabsContent>
+            </Tabs>
+          </div>
 
           <div className="space-y-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <Card className="sticky top-24">
-                <CardContent className="p-6">
-                  <Tabs defaultValue="standard" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3 mb-4">
-                      <TabsTrigger value="basic">Basic</TabsTrigger>
-                      <TabsTrigger value="standard">Standard</TabsTrigger>
-                      <TabsTrigger value="premium">Premium</TabsTrigger>
-                    </TabsList>
-                    {service.packages.map((pkg) => (
-                      <TabsContent key={pkg.name.toLowerCase()} value={pkg.name.toLowerCase()} className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <h3 className="text-lg font-bold">{pkg.name}</h3>
-                          <p className="text-xl font-bold">{pkg.price}</p>
-                        </div>
-                        <p className="text-sm text-muted-foreground">{pkg.description}</p>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span>{pkg.deliveryTime} delivery</span>
-                        </div>
-                        <Separator />
-                        <div className="space-y-2">
-                          <h4 className="text-sm font-medium">What's included:</h4>
-                          <ul className="space-y-2">
-                            {pkg.features.map((feature) => (
-                              <li key={feature} className="flex items-start gap-2 text-sm">
-                                <Check className="h-4 w-4 text-primary mt-0.5" />
-                                <span>{feature}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        <Button className="w-full bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90">
-                          Continue ({pkg.price})
-                        </Button>
-                        <Button variant="outline" className="w-full">
-                          Contact Seller
-                        </Button>
-                      </TabsContent>
-                    ))}
-                  </Tabs>
-                  <div className="mt-6 flex justify-between">
-                    <Button variant="ghost" size="sm" className="gap-1">
-                      <Heart className="h-4 w-4" />
-                      <span className="sr-only md:not-sr-only">Save</span>
-                    </Button>
-                    <Button variant="ghost" size="sm" className="gap-1">
-                      <Share2 className="h-4 w-4" />
-                      <span className="sr-only md:not-sr-only">Share</span>
-                    </Button>
-                    <Button variant="ghost" size="sm" className="gap-1">
-                      <MessageSquare className="h-4 w-4" />
-                      <span className="sr-only md:not-sr-only">Message</span>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+            <div className="border rounded-lg p-6 space-y-4">
+              <div className="flex items-center space-x-4">
+                <Avatar className="h-12 w-12">
+                  <AvatarImage src={service.provider.avatar || "/placeholder.svg"} alt={service.provider.name} />
+                  <AvatarFallback>
+                    {service.provider.name
+                      .split(" ")
+                      .map((n: string) => n[0])
+                      .join("")}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h3 className="font-semibold">{service.provider.name}</h3>
+                  <p className="text-sm text-muted-foreground">{service.provider.title}</p>
+                </div>
+              </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="hidden lg:block"
-            >
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4">
-                    <Avatar className="h-16 w-16">
-                      <AvatarImage src={service.provider.avatar || "/placeholder.svg"} alt={service.provider.name} />
-                      <AvatarFallback>{service.provider.name[0]}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <h3 className="font-bold">{service.provider.name}</h3>
-                      <p className="text-sm text-muted-foreground">Web Developer</p>
-                      <div className="mt-1 flex items-center">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        <span className="ml-1 text-sm">{service.provider.rating}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <Separator className="my-4" />
-                  <div className="space-y-3 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Member since</span>
-                      <span>{service.provider.memberSince}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Response time</span>
-                      <span>{service.provider.responseTime}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Last delivery</span>
-                      <span>{service.provider.lastDelivery}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Completed projects</span>
-                      <span>{service.provider.completedProjects}</span>
-                    </div>
-                  </div>
-                  <Button variant="outline" className="mt-4 w-full">
-                    Contact Me
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
+              <div className="flex items-center space-x-2">
+                <div className="flex">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`h-4 w-4 ${
+                        i < Math.floor(service.provider.rating)
+                          ? "fill-yellow-400 text-yellow-400"
+                          : "text-muted-foreground"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <span className="text-sm font-medium">{service.provider.rating}</span>
+                <span className="text-sm text-muted-foreground">({service.provider.reviews} reviews)</span>
+              </div>
+
+              <div className="flex items-center text-sm">
+                <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+                <span>Response time: {service.provider.responseTime}</span>
+              </div>
+
+              <div className="bg-purple-50 dark:bg-purple-950/20 p-4 rounded-lg border border-purple-100 dark:border-purple-800/30">
+                <div className="flex items-center">
+                  <DollarSign className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                  <span className="text-xl font-bold text-purple-700 dark:text-purple-300">
+                    ${service.provider.hourlyRate}
+                  </span>
+                  <span className="text-sm text-purple-600 dark:text-purple-400 ml-1">/hour</span>
+                </div>
+              </div>
+
+              <div className="flex flex-col space-y-3">
+                <Button variant="outline" className="w-full" onClick={handleContact}>
+                  <MessageSquare className="h-4 w-4 mr-2" /> Contact
+                </Button>
+
+                <Button
+                  className="w-full bg-purple-500/80 hover:bg-purple-600/90 backdrop-blur-sm border border-purple-300/30 shadow-sm hover:shadow-md transition-all duration-300"
+                  onClick={handleProceedToCheckout}
+                >
+                  Hire Now <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="border rounded-lg p-6">
+              <h3 className="font-semibold mb-4">Skills</h3>
+              <div className="flex flex-wrap gap-2">
+                {service.skills.map((skill: string) => (
+                  <Badge key={skill} variant="secondary" className="text-xs">
+                    {skill}
+                  </Badge>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </main>
