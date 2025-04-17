@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useParams, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { EnhancedMainNav } from "@/components/enhanced-main-nav"
 import { AnimatedGradientBackground } from "@/components/animated-gradient-background"
 import { BackgroundPattern } from "@/components/background-pattern"
@@ -17,8 +17,7 @@ import { Star, Filter, ArrowUpDown, MapPin, Clock, Check } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-export default function CategoryPage() {
-  const params = useParams()
+export default function CategoryPage({ params }: { params: { slug: string } }) {
   const router = useRouter()
   const [isLoaded, setIsLoaded] = useState(false)
   const [selectedFilter, setSelectedFilter] = useState("all")
