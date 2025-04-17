@@ -3,12 +3,11 @@
 import type React from "react"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js"
+import { useStripe, useElements, PaymentElement, AddressElement } from "@stripe/react-stripe-js"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { createServicePayment } from "@/app/actions/stripe-actions"
-import { useToast } from "@/hooks/use-toast"
+import { useRouter } from "next/navigation"
+import { Loader2, Lock } from "lucide-react"
 
 interface CheckoutFormProps {
   serviceId: string
@@ -21,12 +20,12 @@ interface CheckoutFormProps {
 export function CheckoutForm({ serviceId, clientId, amount, serviceName, providerName }: CheckoutFormProps) {
   const stripe = useStripe()
   const elements = useElements()
+  const router = useRouter()
+
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const router = useRouter()
-  const { toast } = useToast()
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     if (!stripe || !elements) {
@@ -38,109 +37,75 @@ export function CheckoutForm({ serviceId, clientId, amount, serviceName, provide
     setErrorMessage(null)
 
     try {
-      // Create payment intent on the server
-      const { success, clientSecret, error } = await createServicePayment(serviceId, clientId, amount)
-
-      if (!success || !clientSecret) {
-        throw new Error(error?.message || "Failed to create payment intent")
-      }
-
-      // Confirm card payment
-      const cardElement = elements.getElement(CardElement)
-      if (!cardElement) {
-        throw new Error("Card element not found")
-      }
-
-      const { error: stripeError } = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: {
-          card: cardElement,
-          billing_details: {
-            // You can collect billing details here if needed
-          },
+      // Confirm the payment
+      const { error } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: `${window.location.origin}/services/payment/success`,
         },
       })
 
-      if (stripeError) {
-        throw new Error(stripeError.message || "Payment failed")
+      if (error) {
+        // Show error to customer
+        setErrorMessage(error.message || "An unexpected error occurred.")
+        setIsLoading(false)
       }
-
-      // Payment succeeded
-      toast({
-        title: "Payment successful!",
-        description: `You have successfully booked ${serviceName}`,
-      })
-
-      // Redirect to success page
-      router.push("/dashboard/bookings")
-    } catch (error: any) {
-      setErrorMessage(error.message || "Something went wrong")
-      toast({
-        title: "Payment failed",
-        description: error.message || "Something went wrong",
-        variant: "destructive",
-      })
-    } finally {
+      // Otherwise PaymentIntent was confirmed and customer is redirected
+    } catch (err: any) {
+      console.error("Payment confirmation error:", err)
+      setErrorMessage(err.message || "An unexpected error occurred.")
       setIsLoading(false)
     }
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="w-full">
       <CardHeader>
-        <CardTitle>Complete your booking</CardTitle>
+        <CardTitle>Payment Details</CardTitle>
         <CardDescription>
-          You are booking {serviceName} with {providerName}
+          Complete your payment for {serviceName} with {providerName}
         </CardDescription>
       </CardHeader>
-      <form onSubmit={handleSubmit}>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <div className="text-sm font-medium">Card Information</div>
-            <div className="border rounded-md p-3">
-              <CardElement
-                options={{
-                  style: {
-                    base: {
-                      fontSize: "16px",
-                      color: "#424770",
-                      "::placeholder": {
-                        color: "#aab7c4",
-                      },
-                    },
-                    invalid: {
-                      color: "#9e2146",
-                    },
-                  },
-                }}
-              />
+      <CardContent>
+        <form id="payment-form" onSubmit={handleSubmit}>
+          <div className="space-y-6">
+            <PaymentElement id="payment-element" />
+
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Billing Address</p>
+              <AddressElement options={{ mode: "billing" }} />
+            </div>
+
+            {errorMessage && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-md text-red-600 text-sm">{errorMessage}</div>
+            )}
+
+            <div className="flex flex-col space-y-2">
+              <Button
+                disabled={isLoading || !stripe || !elements}
+                id="submit"
+                className="w-full bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>Pay ${(amount / 100).toFixed(2)}</>
+                )}
+              </Button>
+              <div className="text-xs text-center text-muted-foreground flex items-center justify-center">
+                <Lock className="h-3 w-3 mr-1" /> Secure payment processing by Stripe
+              </div>
             </div>
           </div>
-
-          <div className="flex justify-between text-sm">
-            <span>Subtotal</span>
-            <span>${(amount / 100).toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span>Platform fee</span>
-            <span>${((amount * 0.1) / 100).toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between font-medium">
-            <span>Total</span>
-            <span>${(amount / 100).toFixed(2)}</span>
-          </div>
-
-          {errorMessage && <div className="text-sm text-red-500">{errorMessage}</div>}
-        </CardContent>
-        <CardFooter>
-          <Button
-            type="submit"
-            className="w-full bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90"
-            disabled={!stripe || isLoading}
-          >
-            {isLoading ? "Processing..." : `Pay $${(amount / 100).toFixed(2)}`}
-          </Button>
-        </CardFooter>
-      </form>
+        </form>
+      </CardContent>
+      <CardFooter className="flex flex-col space-y-2 text-xs text-muted-foreground border-t pt-4">
+        <p>By completing this payment, you agree to our Terms of Service and Payment Policy.</p>
+        <p>You will receive an email confirmation once your payment is processed.</p>
+      </CardFooter>
     </Card>
   )
 }

@@ -25,20 +25,24 @@ export function ServiceCheckoutButton({
   const handleCheckout = () => {
     if (!user) {
       toast({
-        title: "Please log in",
-        description: "You need to be logged in to book this service",
+        title: "Please sign in",
+        description: "You need to be signed in to checkout",
         variant: "destructive",
       })
-      router.push(`/auth/login?redirect=/services/${serviceId}`)
+      router.push(`/auth/login?redirect=/checkout?serviceId=${serviceId}&package=${packageName}`)
       return
     }
 
-    router.push(`/checkout/${serviceId}?package=${packageName}`)
+    router.push(`/checkout?serviceId=${serviceId}&package=${packageName}`)
   }
 
   return (
-    <Button onClick={handleCheckout} {...props}>
-      {children || `Continue with ${packageName} ($${price.toFixed(2)})`}
+    <Button
+      onClick={handleCheckout}
+      className="w-full bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90"
+      {...props}
+    >
+      {children || `Continue with ${packageName} (${price})`}
     </Button>
   )
 }

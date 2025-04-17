@@ -1,165 +1,60 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useSearchParams, useRouter } from "next/navigation"
-import Link from "next/link"
 import { EnhancedMainNav } from "@/components/enhanced-main-nav"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { AnimatedGradientBackground } from "@/components/animated-gradient-background"
 import { Button } from "@/components/ui/button"
-import { CheckCircle, Calendar, MessageSquare, ArrowRight } from "lucide-react"
-import { motion } from "framer-motion"
+import { CheckCircle } from "lucide-react"
+import Link from "next/link"
 
 export default function CheckoutSuccessPage() {
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const [orderDetails, setOrderDetails] = useState<any>(null)
-  const [isLoading, setIsLoading] = useState(true)
-
-  const serviceId = searchParams.get("serviceId")
-  const hours = searchParams.get("hours")
-
-  useEffect(() => {
-    const fetchOrderDetails = async () => {
-      try {
-        setIsLoading(true)
-
-        // In a real app, you would fetch the actual order details from your database
-        // For now, we'll use mock data
-        const mockOrderDetails = {
-          id: "order-" + Math.random().toString(36).substring(2, 9),
-          serviceId,
-          hours,
-          service: {
-            title: "Professional Website Development",
-            provider: {
-              name: "Alex Morgan",
-            },
-          },
-          amount: Number(hours) * 85, // Assuming $85/hour
-          date: new Date().toISOString(),
-          deliveryDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toLocaleDateString(), // 10 days from now
-        }
-
-        setOrderDetails(mockOrderDetails)
-      } catch (error) {
-        console.error("Error fetching order details:", error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    if (serviceId && hours) {
-      fetchOrderDetails()
-    } else {
-      router.push("/")
-    }
-  }, [serviceId, hours, router])
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <EnhancedMainNav />
-        <main className="container py-10">
-          <div className="max-w-md mx-auto text-center">
-            <p>Loading order details...</p>
-          </div>
-        </main>
-      </div>
-    )
-  }
-
   return (
     <div className="min-h-screen bg-background">
       <EnhancedMainNav />
-      <main className="container py-10">
-        <motion.div
-          className="max-w-md mx-auto"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Card className="border-green-200">
-            <CardHeader className="text-center pb-4">
-              <motion.div
-                className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100"
-                initial={{ scale: 0.8 }}
-                animate={{ scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-              >
-                <CheckCircle className="h-10 w-10 text-green-600" />
-              </motion.div>
-              <CardTitle className="text-2xl">Payment Successful!</CardTitle>
-              <CardDescription>Your booking has been confirmed</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="rounded-lg border p-4 space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Order ID:</span>
-                  <span className="font-medium">{orderDetails.id}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Service:</span>
-                  <span className="font-medium">{orderDetails.service.title}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Hours:</span>
-                  <span className="font-medium">{orderDetails.hours} hours</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Provider:</span>
-                  <span className="font-medium">{orderDetails.service.provider.name}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Amount:</span>
-                  <span className="font-medium">${orderDetails.amount.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Date:</span>
-                  <span className="font-medium">{new Date(orderDetails.date).toLocaleDateString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Expected Delivery:</span>
-                  <span className="font-medium">{orderDetails.deliveryDate}</span>
-                </div>
-              </div>
+      <AnimatedGradientBackground />
+      <div className="container py-20">
+        <div className="max-w-lg mx-auto text-center">
+          <div className="rounded-full bg-green-100 p-6 mx-auto w-24 h-24 flex items-center justify-center mb-6">
+            <CheckCircle className="h-12 w-12 text-green-600" />
+          </div>
+          <h1 className="text-3xl font-bold mb-4">Payment Successful!</h1>
+          <p className="text-lg text-muted-foreground mb-8">
+            Thank you for your payment. Your order has been successfully processed and confirmed.
+          </p>
 
-              <div className="space-y-3 pt-2">
-                <div className="flex items-start gap-2 text-sm">
-                  <Calendar className="h-4 w-4 mt-0.5 text-muted-foreground" />
-                  <div>
-                    <span className="font-medium">What's Next?</span>
-                    <p className="text-muted-foreground">
-                      The service provider will contact you shortly to discuss your project details.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 text-sm">
-                  <MessageSquare className="h-4 w-4 mt-0.5 text-muted-foreground" />
-                  <div>
-                    <span className="font-medium">Communication</span>
-                    <p className="text-muted-foreground">
-                      All communication and file sharing will happen through our platform.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter className="flex flex-col space-y-2">
-              <Button
-                asChild
-                className="w-full bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90"
-              >
-                <Link href="/dashboard/bookings">
-                  View My Bookings <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-              <Button asChild variant="outline" className="w-full">
-                <Link href="/explore">Browse More Services</Link>
-              </Button>
-            </CardFooter>
-          </Card>
-        </motion.div>
-      </main>
+          <div className="bg-muted p-6 rounded-lg border mb-8">
+            <h2 className="font-semibold mb-4">What happens next?</h2>
+            <ul className="text-left space-y-2">
+              <li className="flex items-start">
+                <span className="bg-primary/10 rounded-full p-1 mr-2 mt-0.5">
+                  <CheckCircle className="h-3 w-3 text-primary" />
+                </span>
+                <span>You'll receive a confirmation email with your order details.</span>
+              </li>
+              <li className="flex items-start">
+                <span className="bg-primary/10 rounded-full p-1 mr-2 mt-0.5">
+                  <CheckCircle className="h-3 w-3 text-primary" />
+                </span>
+                <span>The service provider will contact you to discuss project details.</span>
+              </li>
+              <li className="flex items-start">
+                <span className="bg-primary/10 rounded-full p-1 mr-2 mt-0.5">
+                  <CheckCircle className="h-3 w-3 text-primary" />
+                </span>
+                <span>You can track your order status in your dashboard.</span>
+              </li>
+            </ul>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button asChild>
+              <Link href="/dashboard">View Your Orders</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href="/explore">Continue Shopping</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
