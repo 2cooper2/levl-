@@ -52,22 +52,24 @@ function StripeCheckout() {
   const [projectDetails, setProjectDetails] = useState("")
 
   // Get parameters from URL
+  const serviceId = searchParams.get("serviceId") || ""
   const providerId = searchParams.get("providerId") || ""
-  const providerName = searchParams.get("providerName") || "Provider"
-  const hours = Number(searchParams.get("hours") || "0")
+  const hourlyRate = Number(searchParams.get("hourlyRate") || "0")
   const amount = Number(searchParams.get("amount") || "0")
   const serviceTitle = searchParams.get("serviceTitle") || "Service"
+  const providerName = searchParams.get("providerName") || "Provider"
+  const hours = hourlyRate
 
   // And add this inside the StripeCheckout component
   useEffect(() => {
     console.log("Stripe Checkout mounted with params:", {
+      serviceId,
       providerId,
-      providerName,
-      hours,
+      hourlyRate,
       amount,
       serviceTitle,
     })
-  }, [providerId, providerName, hours, amount, serviceTitle])
+  }, [serviceId, providerId, hourlyRate, amount, serviceTitle])
 
   const handleBillingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -94,8 +96,9 @@ function StripeCheckout() {
       // Create payment intent on the server
       const { clientSecret, error: paymentError } = await createPaymentIntent({
         amount,
+        serviceId,
         providerId,
-        hours,
+        hours: hourlyRate,
         projectDetails,
       })
 
@@ -126,12 +129,12 @@ function StripeCheckout() {
         throw new Error(stripeError.message || "Payment failed")
       }
 
-      if (paymentIntent.status === "succeeded") {
+      if (paymentIntent?.status === "succeeded") {
         // Payment succeeded
         setIsSuccess(true)
         toast({
           title: "Payment successful!",
-          description: `You have successfully booked ${hours} hours with ${providerName}.`,
+          description: `You have successfully booked ${hourlyRate} hours with ${providerName}.`,
         })
         router.push("/dashboard/bookings")
       }
@@ -160,7 +163,7 @@ function StripeCheckout() {
               <CardHeader>
                 <CardTitle>Payment Details</CardTitle>
                 <CardDescription>
-                  Enter your payment information to book {hours} hours with {providerName}
+                  Enter your payment information to book {hourlyRate} hours with {providerName}
                 </CardDescription>
               </CardHeader>
               <form onSubmit={handleSubmit}>
@@ -321,14 +324,14 @@ function StripeCheckout() {
                 </div>
                 <div className="space-y-1">
                   <p className="text-sm font-medium">Hours</p>
-                  <p>{hours} hours</p>
+                  <p>{hourlyRate} hours</p>
                 </div>
 
                 <Separator />
 
                 <div className="flex justify-between">
                   <span>Hourly Rate</span>
-                  <span>${(amount / hours).toFixed(2)}</span>
+                  <span>${hourlyRate.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Hours</span>

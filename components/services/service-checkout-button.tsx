@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation"
 import { Button, type ButtonProps } from "@/components/ui/button"
 import { useAuth } from "@/context/auth-context"
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/components/ui/use-toast"
 
 interface ServiceCheckoutButtonProps extends ButtonProps {
   serviceId: string
