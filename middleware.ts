@@ -13,7 +13,8 @@ export function middleware(request: NextRequest) {
     path === "/about" ||
     path === "/how-it-works" ||
     path.startsWith("/services/") ||
-    path.startsWith("/category/")
+    path.startsWith("/category/") ||
+    path.startsWith("/checkout")
 
   // Check if user is logged in
   const isAuthenticated = request.cookies.has("levl_user")
