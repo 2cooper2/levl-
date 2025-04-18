@@ -32,6 +32,8 @@ export function WaitlistForm({ onSuccess, showName = true }: WaitlistFormProps) 
     setError(null)
     setDebugInfo(null)
 
+    console.log("handleSubmit called")
+
     try {
       // Create FormData object
       const formData = new FormData()
