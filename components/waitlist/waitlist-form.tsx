@@ -30,7 +30,9 @@ export function WaitlistForm({ onSuccess, showName = true }: WaitlistFormProps) 
     formData.append("role", role)
 
     try {
+      console.log("Submitting waitlist form...")
       const result = await joinWaitlist(formData)
+      console.log("Waitlist submission result:", result)
 
       if (result.success) {
         setIsSuccess(true)
@@ -41,8 +43,6 @@ export function WaitlistForm({ onSuccess, showName = true }: WaitlistFormProps) 
         }
       } else {
         setError(result.message || "Something went wrong. Please try again.")
-
-        // Check console logs for more information
         setDebugInfo(
           "Check browser console for more details. The issue might be that the waitlist table doesn't exist in your Supabase database or there are permission issues.",
         )

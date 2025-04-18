@@ -1,23 +1,27 @@
 "use server"
 
-import { createServerClient } from "@/lib/supabase"
+import { createClient } from "@supabase/supabase-js"
 import { revalidatePath } from "next/cache"
+
+// Create a direct Supabase client with environment variables
+const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || ""
+const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
 
 // SQL to create the waitlist table if it doesn't exist
 const createWaitlistTableSQL = `
 CREATE TABLE IF NOT EXISTS waitlist (
- id SERIAL PRIMARY KEY,
- name TEXT NOT NULL,
- email TEXT NOT NULL UNIQUE,
- message TEXT,
- created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL UNIQUE,
+  message TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 `
 
 export async function joinWaitlist(formData: FormData) {
   try {
-    // Create Supabase client (will return mock client if credentials are missing)
-    const supabase = createServerClient()
+    // Create Supabase client directly to avoid any issues with the wrapper
+    const supabase = createClient(supabaseUrl, supabaseKey)
 
     const name = formData.get("name") as string
     const email = formData.get("email") as string
@@ -25,9 +29,7 @@ export async function joinWaitlist(formData: FormData) {
     const userMessage = (formData.get("message") as string) || ""
 
     // Combine role and message into a single message field
-    const message = `Role: ${role}
-
-Feedback: ${userMessage}`
+    const message = `Role: ${role}\nFeedback: ${userMessage}`
 
     if (!name || !email) {
       return {
@@ -36,59 +38,34 @@ Feedback: ${userMessage}`
       }
     }
 
+    console.log("Attempting to join waitlist with:", { name, email, role })
+    console.log("Using Supabase URL:", supabaseUrl.substring(0, 15) + "...")
+
     // Try to create the waitlist table if it doesn't exist
     try {
       const { error: createTableError } = await supabase.rpc("exec", { query: createWaitlistTableSQL })
       if (createTableError) {
-        console.log(
-          "Note: Could not create waitlist table. This is expected if using anon key:",
-          createTableError.message,
-        )
+        console.log("Note: Could not create waitlist table:", createTableError.message)
       }
     } catch (err) {
       console.log("Note: RPC exec not available. This is expected in some environments.")
     }
 
-    // Check if email already exists
-    console.log("Checking if email already exists:", email)
-    const { data: existingUser, error: lookupError } = await supabase
-      .from("waitlist")
-      .select("email")
-      .eq("email", email)
-      .single()
-
-    if (lookupError && lookupError.code !== "PGRST116") {
-      console.error("Error checking existing user:", lookupError)
-
-      // If the error is about the relation not existing, the table might not exist
-      if (lookupError.message?.includes("relation") && lookupError.message?.includes("does not exist")) {
-        console.log("The waitlist table might not exist in your Supabase database.")
-        return {
-          success: false,
-          message: "Database setup issue. Please contact support.",
-        }
-      }
-
-      return {
-        success: false,
-        message: "Error checking waitlist. Please try again.",
-      }
-    }
-
-    if (existingUser) {
-      console.log("Email already exists in waitlist:", email)
-      return {
-        success: false,
-        message: "This email is already on our waitlist",
-      }
-    }
-
-    // Insert new waitlist entry - only using the existing columns
-    console.log("Inserting new waitlist entry:", { name, email, message })
+    // Insert new waitlist entry directly without checking for duplicates first
+    // Let Supabase handle the unique constraint
+    console.log("Inserting new waitlist entry:", { name, email })
     const { error } = await supabase.from("waitlist").insert([{ name, email, message }])
 
     if (error) {
       console.error("Error inserting waitlist entry:", error)
+
+      // If it's a unique violation, the email already exists
+      if (error.code === "23505") {
+        return {
+          success: false,
+          message: "This email is already on our waitlist",
+        }
+      }
 
       // If the error is about the relation not existing, the table might not exist
       if (error.message?.includes("relation") && error.message?.includes("does not exist")) {
@@ -99,17 +76,9 @@ Feedback: ${userMessage}`
         }
       }
 
-      // If it's a unique violation, the email already exists
-      if (error.code === "23505") {
-        return {
-          success: false,
-          message: "This email is already on our waitlist",
-        }
-      }
-
       return {
         success: false,
-        message: "Failed to join waitlist. Please try again.",
+        message: `Failed to join waitlist: ${error.message}`,
       }
     }
 
@@ -120,19 +89,19 @@ Feedback: ${userMessage}`
       success: true,
       message: "Successfully joined the waitlist!",
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error in joinWaitlist:", error)
     return {
       success: false,
-      message: "An unexpected error occurred. Please try again later.",
+      message: `An unexpected error occurred: ${error.message}`,
     }
   }
 }
 
 export async function getWaitlistEntries() {
   try {
-    // Create Supabase client (will return mock client if credentials are missing)
-    const supabase = createServerClient()
+    // Create Supabase client directly
+    const supabase = createClient(supabaseUrl, supabaseKey)
 
     const { data, error } = await supabase.from("waitlist").select("*").order("created_at", { ascending: false })
 
@@ -150,12 +119,12 @@ export async function getWaitlistEntries() {
       data: data || [],
       message: "Successfully fetched waitlist entries",
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error in getWaitlistEntries:", error)
     return {
       success: false,
       data: [],
-      message: "An unexpected error occurred",
+      message: `An unexpected error occurred: ${error.message}`,
     }
   }
 }
