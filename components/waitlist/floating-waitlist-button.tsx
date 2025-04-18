@@ -14,8 +14,8 @@ export function FloatingWaitlistButton({ inHeader = false }: FloatingWaitlistBut
 
   // Styles for the button when in header vs floating
   const buttonClasses = inHeader
-    ? "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium relative"
-    : "rounded-full shadow-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium px-6 py-3 h-auto fixed bottom-6 right-6 z-50"
+    ? "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium relative px-4 py-2.5 text-base"
+    : "rounded-full shadow-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium px-6 py-3.5 h-auto fixed bottom-6 right-6 z-50 text-base"
 
   return (
     <>
@@ -34,10 +34,10 @@ export function FloatingWaitlistButton({ inHeader = false }: FloatingWaitlistBut
       )}
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] p-4 sm:p-6 max-w-[95vw] mx-auto">
           <DialogHeader>
-            <DialogTitle>Join our Waitlist</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-xl">Join our Waitlist</DialogTitle>
+            <DialogDescription className="text-sm sm:text-base">
               Be the first to know when LevL launches. Enter your details below to join our exclusive waitlist.
             </DialogDescription>
           </DialogHeader>

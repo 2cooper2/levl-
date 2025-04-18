@@ -12,17 +12,17 @@ export function WaitlistButton() {
     <>
       <EnhancedButton
         variant="gradient"
-        className="rounded-full shadow-lg relative z-10"
+        className="rounded-full shadow-lg relative z-10 px-5 py-2.5 text-base font-medium"
         onClick={() => setIsOpen(true)}
       >
         Join Waitlist
       </EnhancedButton>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] p-4 sm:p-6 max-w-[95vw] mx-auto">
           <DialogHeader>
-            <DialogTitle>Join our Waitlist</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-xl">Join our Waitlist</DialogTitle>
+            <DialogDescription className="text-sm sm:text-base">
               Be the first to know when LevL launches. Enter your details below to join our exclusive waitlist.
             </DialogDescription>
           </DialogHeader>

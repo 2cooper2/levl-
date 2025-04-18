@@ -46,15 +46,27 @@ async function ensureWaitlistTable(supabase: any) {
   }
 }
 
-export async function joinWaitlist(formData: FormData) {
+export async function joinWaitlist(
+  formData: FormData | { name: string; email: string; role?: string; message?: string },
+) {
   try {
     // Create Supabase client (will return mock client if credentials are missing)
     const supabase = createServerClient()
 
-    const name = formData.get("name") as string
-    const email = formData.get("email") as string
-    const role = (formData.get("role") as string) || "client"
-    const userMessage = (formData.get("message") as string) || ""
+    // Handle both FormData objects and plain objects
+    let name, email, role, userMessage
+
+    if (formData instanceof FormData) {
+      name = formData.get("name") as string
+      email = formData.get("email") as string
+      role = (formData.get("role") as string) || "client"
+      userMessage = (formData.get("message") as string) || ""
+    } else {
+      name = formData.name
+      email = formData.email
+      role = formData.role || "client"
+      userMessage = formData.message || ""
+    }
 
     // Combine role and message into a single message field
     const message = `Role: ${role}

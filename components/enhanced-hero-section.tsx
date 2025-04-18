@@ -997,7 +997,7 @@ export function EnhancedHeroSection() {
                 >
                   <div className="relative">
                     <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none text-black dark:text-white leading-relaxed pb-1">
-                      Redefining The Gig Economy
+                      Learn. Earn. Grow Your Business.
                     </h1>
                     <motion.div
                       className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-purple-500/20 blur-xl opacity-0"

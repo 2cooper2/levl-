@@ -25,10 +25,10 @@ export function WaitlistForm({ onSuccess }: WaitlistFormProps) {
     setError(null)
     setDebugInfo(null)
 
-    // Add the role to the form data
-    formData.append("role", role)
-
     try {
+      // Add the role to the form data
+      formData.append("role", role)
+
       const result = await joinWaitlist(formData)
 
       if (result.success) {
@@ -42,8 +42,9 @@ export function WaitlistForm({ onSuccess }: WaitlistFormProps) {
         setError(result.message || "Something went wrong. Please try again.")
 
         // Check console logs for more information
+        console.error("Waitlist submission error:", result.message)
         setDebugInfo(
-          "Check browser console for more details. The issue might be that the waitlist table doesn't exist in your Supabase database or there are permission issues.",
+          "The issue might be that the waitlist table doesn't exist in your Supabase database or there are permission issues.",
         )
       }
     } catch (err) {
@@ -72,30 +73,43 @@ export function WaitlistForm({ onSuccess }: WaitlistFormProps) {
   return (
     <form action={handleSubmit} className="space-y-4 py-4">
       <div className="space-y-2">
-        <Input name="name" placeholder="Your name" required className="w-full" />
+        <Input
+          name="name"
+          placeholder="Your name"
+          required
+          className="w-full px-4 py-2 text-base"
+          autoComplete="name"
+        />
       </div>
       <div className="space-y-2">
-        <Input name="email" type="email" placeholder="Your email" required className="w-full" />
+        <Input
+          name="email"
+          type="email"
+          placeholder="Your email"
+          required
+          className="w-full px-4 py-2 text-base"
+          autoComplete="email"
+        />
       </div>
 
       <div className="space-y-3">
         <Label className="text-sm font-medium">I am interested in joining as:</Label>
-        <RadioGroup defaultValue="client" value={role} onValueChange={setRole} className="flex flex-col space-y-2">
+        <RadioGroup defaultValue="client" value={role} onValueChange={setRole} className="flex flex-col space-y-3">
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="client" id="client" />
-            <Label htmlFor="client" className="cursor-pointer">
+            <Label htmlFor="client" className="cursor-pointer text-base">
               Client - I want to hire talent
             </Label>
           </div>
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="worker" id="worker" />
-            <Label htmlFor="worker" className="cursor-pointer">
+            <Label htmlFor="worker" className="cursor-pointer text-base">
               Worker - I want to offer my skills
             </Label>
           </div>
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="both" id="both" />
-            <Label htmlFor="both" className="cursor-pointer">
+            <Label htmlFor="both" className="cursor-pointer text-base">
               Both - I want to do both
             </Label>
           </div>
@@ -103,10 +117,14 @@ export function WaitlistForm({ onSuccess }: WaitlistFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Textarea name="message" placeholder="Give us feedback on the page!" className="min-h-[100px] w-full" />
+        <Textarea
+          name="message"
+          placeholder="Give us feedback on the page!"
+          className="min-h-[100px] w-full px-4 py-2 text-base"
+        />
       </div>
       {error && (
-        <div className="flex items-start gap-2 text-sm text-red-500 mt-2 p-2 bg-red-50 rounded">
+        <div className="flex items-start gap-2 text-sm text-red-500 mt-2 p-3 bg-red-50 rounded">
           <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
           <div>
             <p>{error}</p>
@@ -116,12 +134,12 @@ export function WaitlistForm({ onSuccess }: WaitlistFormProps) {
       )}
       <Button
         type="submit"
-        className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+        className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 py-3 text-base font-medium"
         disabled={isSubmitting}
       >
         {isSubmitting ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
             Joining...
           </>
         ) : (
