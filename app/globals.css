@@ -78,12 +78,13 @@ body {
     }
   }
 
+  /* Remove the shimmer animation that creates streaks */
   @keyframes shimmer {
     0% {
-      transform: translateX(-100%);
+      background-position: -1000px 0;
     }
     100% {
-      transform: translateX(100%);
+      background-position: 1000px 0;
     }
   }
 
@@ -119,6 +120,35 @@ body {
     right: 0;
     height: 1px;
     background: linear-gradient(90deg, transparent, rgba(var(--primary), 0.2), transparent);
+  }
+
+  /* Remove or modify the glass effect styles */
+
+  /* Glass morphism effects - REMOVE OR MODIFY */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+
+  .dark .glass-card {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  /* Remove the shimmer animation that creates streaks */
+
+  .shimmer {
+    /* Remove the shimmer effect */
+    background: none;
+    animation: none;
+  }
+
+  /* Remove the progress track shimmer */
+  .progress-track::after {
+    content: none; /* Remove the shimmer effect */
   }
 
   /* Glass effect */

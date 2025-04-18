@@ -1077,49 +1077,20 @@ export function EnhancedHeroSection() {
             >
               <div className="relative w-full max-w-full">
                 <motion.div
-                  className="relative rounded-xl overflow-hidden bg-gradient-to-br from-purple-100/10 via-white/5 to-purple-50/10 dark:from-purple-900/10 dark:via-black/5 dark:to-purple-800/10 backdrop-blur-md p-3 sm:p-4 md:p-5 shadow-lg detailed-card"
+                  className="relative rounded-xl overflow-hidden bg-white/5 dark:bg-black/5 p-3 sm:p-4 md:p-5 shadow-md detailed-card"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1, y: 10 }}
                   transition={{ duration: 0.6, delay: 0.4 }}
                   style={{
-                    boxShadow: "0 0 40px 5px rgba(147, 51, 234, 0.25)",
+                    boxShadow: "0 0 20px 2px rgba(147, 51, 234, 0.15)",
                     border: "1px solid rgba(147, 51, 234, 0.2)",
                   }}
                 >
-                  {/* Tech pattern overlay */}
-                  <div className="tech-pattern absolute inset-0 bg-[radial-gradient(circle_at_10px_10px,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none z-1"></div>
+                  {/* Remove tech pattern overlay */}
 
-                  {/* Even background overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-50/5 via-transparent to-purple-100/5 pointer-events-none"></div>
+                  {/* Remove background overlay */}
 
-                  {/* Circuit lines */}
-                  <div className="circuit-lines">
-                    {circuitLines.map((line, i) => (
-                      <div
-                        key={`line-${i}`}
-                        className="circuit-line"
-                        style={{
-                          top: `${line.top}%`,
-                          left: `${line.left}%`,
-                          width: `${line.width}px`,
-                          background:
-                            "linear-gradient(90deg, rgba(147, 51, 234, 0.05), rgba(147, 51, 234, 0.15), rgba(147, 51, 234, 0.05))",
-                        }}
-                      ></div>
-                    ))}
-                    {circuitDots.map((dot, i) => (
-                      <div
-                        key={`dot-${i}`}
-                        className="circuit-dot"
-                        style={{
-                          top: `${dot.top}%`,
-                          left: `${dot.left}%`,
-                          backgroundColor: "rgba(147, 51, 234, 0.2)",
-                          boxShadow: "0 0 5px rgba(147, 51, 234, 0.2)",
-                        }}
-                      ></div>
-                    ))}
-                  </div>
+                  {/* Remove circuit lines */}
 
                   {/* Success message toast */}
                   <AnimatePresence>
@@ -1229,7 +1200,7 @@ export function EnhancedHeroSection() {
                         <div className="space-y-4">
                           {/* Active Skill Card */}
                           <div
-                            className="bg-white/10 dark:bg-black/20 backdrop-blur-sm rounded-lg p-4 border border-purple-400/50 skill-card"
+                            className="bg-white/10 dark:bg-black/20 backdrop-blur-sm rounded-lg p-4 border border-purple-400/50"
                             style={{ borderLeft: `4px solid ${skills[activeSkill].color}` }}
                           >
                             <div className="flex justify-between items-start mb-3">
@@ -1277,7 +1248,7 @@ export function EnhancedHeroSection() {
                                 </span>
                                 <span className="font-medium text-black dark:text-white">{progress}%</span>
                               </div>
-                              <div className="h-2 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden progress-track">
+                              <div className="h-2 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
                                 <div
                                   className="h-full rounded-full bg-gradient-to-r from-primary to-purple-500 relative"
                                   style={{ width: `${progress}%`, transition: "width 0.5s ease-out" }}
@@ -1291,29 +1262,25 @@ export function EnhancedHeroSection() {
 
                             {/* Stats */}
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-                              <div className="bg-white/5 dark:bg-black/10 rounded-md p-2 relative overflow-hidden">
-                                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent"></div>
+                              <div className="bg-white/5 dark:bg-black/10 rounded-md p-2">
                                 <div className="text-xs text-black/60 dark:text-white/60">Mentors</div>
                                 <div className="font-bold text-black dark:text-white">
                                   {skills[activeSkill].mentors}
                                 </div>
                               </div>
-                              <div className="bg-white/5 dark:bg-black/10 rounded-md p-2 relative overflow-hidden">
-                                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent"></div>
+                              <div className="bg-white/5 dark:bg-black/10 rounded-md p-2">
                                 <div className="text-xs text-black/60 dark:text-white/60">Projects</div>
                                 <div className="font-bold text-black dark:text-white">
                                   {skills[activeSkill].projects}
                                 </div>
                               </div>
-                              <div className="bg-white/5 dark:bg-black/10 rounded-md p-2 relative overflow-hidden">
-                                <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent"></div>
+                              <div className="bg-white/5 dark:bg-black/10 rounded-md p-2">
                                 <div className="text-xs text-black/60 dark:text-white/60">Rating</div>
                                 <div className="font-bold text-black dark:text-white flex items-center justify-center">
                                   4.8 <Star className="h-4 w-4 ml-0.5 text-yellow-400 fill-yellow-400" />
                                 </div>
                               </div>
-                              <div className="bg-white/5 dark:bg-black/10 rounded-md p-2 relative overflow-hidden">
-                                <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent"></div>
+                              <div className="bg-white/5 dark:bg-black/10 rounded-md p-2">
                                 <div className="text-xs text-black/60 dark:text-white/60">Clients</div>
                                 <div className="font-bold text-black dark:text-white flex items-center justify-center">
                                   {skills[activeSkill].stats.repeatClients}
