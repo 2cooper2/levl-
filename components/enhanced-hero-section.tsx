@@ -28,11 +28,15 @@ import {
   BarChart,
   Layers,
   Cpu,
+  ThumbsUp,
+  Reply,
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/context/auth-context"
 import { useState, useEffect, useRef } from "react"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 
 // Add keyframes for the shimmer animation
 const shimmerAnimation = {
@@ -120,6 +124,7 @@ const detailedVisualStyles = `
   .skill-card {
     position: relative;
     overflow: hidden;
+    isolation: isolate;
   }
   
   .skill-card::before {
@@ -196,6 +201,13 @@ const detailedVisualStyles = `
     pointer-events: none;
     z-index: 1;
   }
+
+  .bg-grid-pattern {
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
 `
 
 // Custom founder icon component
@@ -229,6 +241,206 @@ const FounderIcon = ({ className = "" }: { className?: string }) => (
   </svg>
 )
 
+const forumTopics = [
+  {
+    id: 1,
+    title: "Best way to find studs without a stud finder?",
+    author: "MountingPro",
+    replies: 12,
+    likes: 8,
+    lastActive: "2 hours ago",
+    tags: ["mounting", "beginner", "tools"],
+    preview: "I'm trying to mount a TV but don't have a stud finder. Any reliable methods to locate studs?",
+    responses: [
+      {
+        author: "HandyHelper",
+        content: "Try the knock test - tap along the wall and listen for a less hollow sound. That's usually a stud!",
+        likes: 5,
+        time: "1 hour ago",
+      },
+      {
+        author: "MountMaster",
+        content:
+          "Look for outlets - they're typically attached to studs. Measure 16 inches from there for the next one.",
+        likes: 3,
+        time: "45 min ago",
+      },
+    ],
+  },
+  {
+    id: 2,
+    title: "TV mounting height recommendations?",
+    author: "DesignSavvy",
+    replies: 8,
+    likes: 15,
+    lastActive: "1 day ago",
+    tags: ["mounting", "tv", "ergonomics"],
+    preview: "What's the ideal height to mount a TV in a living room? Is eye level when seated the best approach?",
+    responses: [
+      {
+        author: "ErgoExpert",
+        content:
+          "Eye level when seated is ideal. For most living rooms, that's about 42-48 inches from the floor to the center of the TV.",
+        likes: 7,
+        time: "20 hours ago",
+      },
+    ],
+  },
+  {
+    id: 3,
+    title: "Cable management tips for wall-mounted TVs",
+    author: "CleanSetup",
+    replies: 6,
+    likes: 10,
+    lastActive: "3 days ago",
+    tags: ["mounting", "cables", "organization"],
+    preview: "Just mounted my TV but the cables look messy. Any tips for clean cable management?",
+    responses: [],
+  },
+]
+
+// Custom function to format the last active time
+const formatLastActive = (lastActive: string): string => {
+  // Implement your formatting logic here
+  return lastActive
+}
+
+// Forum Tab
+const ForumTab = () => {
+  const [searchQuery, setSearchQuery] = useState("")
+  const [activeTopic, setActiveTopic] = useState<number | null>(null)
+  const [topics, setTopics] = useState(forumTopics)
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value)
+  }
+
+  const filteredTopics = topics.filter((topic) => topic.title.toLowerCase().includes(searchQuery.toLowerCase()))
+
+  const loadMoreTopics = () => {
+    setIsLoading(true)
+    setTimeout(() => {
+      // Simulate loading more topics
+      const newTopics = [
+        {
+          id: 4,
+          title: "How to choose the right drill bit for mounting?",
+          author: "DrillMaster",
+          replies: 4,
+          likes: 6,
+          lastActive: "5 days ago",
+          tags: ["mounting", "tools", "drilling"],
+          preview: "What type of drill bit should I use for different wall materials?",
+          responses: [],
+        },
+      ]
+      setTopics([...topics, ...newTopics])
+      setIsLoading(false)
+    }, 1000)
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between mb-2">
+        <h4 className="text-sm font-semibold text-black dark:text-white">Community Discussions</h4>
+        <div className="flex items-center space-x-2">
+          <Input
+            type="search"
+            placeholder="Search topics..."
+            className="h-8 text-xs"
+            value={searchQuery}
+            onChange={handleSearch}
+          />
+          <EnhancedButton variant="outline" size="sm" className="h-8 text-xs">
+            New Topic
+          </EnhancedButton>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        {filteredTopics.map((topic) => (
+          <div
+            key={topic.id}
+            className={`p-3 rounded-lg bg-white/5 dark:bg-black/10 border hover:border-primary/30 transition-all duration-300 relative overflow-hidden cursor-pointer ${
+              activeTopic === topic.id ? "border-primary/30" : "border-white/10"
+            }`}
+            onClick={() => setActiveTopic(activeTopic === topic.id ? null : topic.id)}
+          >
+            <div className="flex justify-between items-start">
+              <div>
+                <div className="text-sm font-medium text-black dark:text-white">{topic.title}</div>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {topic.tags.map((tag) => (
+                    <div key={tag} className="px-2 py-0.5 rounded-full bg-white/10 dark:bg-black/30 text-xs">
+                      {tag}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="text-right text-xs">
+                <div className="text-black/60 dark:text-white/60">{formatLastActive(topic.lastActive)}</div>
+                <div className="flex items-center justify-end mt-1">
+                  <MessageSquare className="h-3 w-3 mr-1 text-primary" />
+                  <span>{topic.replies}</span>
+                </div>
+              </div>
+            </div>
+
+            {activeTopic === topic.id && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="mt-3 pt-3 border-t border-white/10"
+              >
+                <p className="text-xs text-black/80 dark:text-white/80 mb-3">{topic.preview}</p>
+
+                {topic.responses.length > 0 ? (
+                  <div className="space-y-2">
+                    {topic.responses.map((response, i) => (
+                      <div key={i} className="bg-white/5 dark:bg-black/20 rounded-md p-2 text-xs">
+                        <div className="flex justify-between items-center mb-1">
+                          <div className="font-medium text-black dark:text-white">{response.author}</div>
+                          <div className="text-black/60 dark:text-white/60">{response.time}</div>
+                        </div>
+                        <p className="text-black/80 dark:text-white/80">{response.content}</p>
+                        <div className="flex items-center justify-end mt-1">
+                          <Button variant="ghost" size="icon" className="h-6 w-6 text-xs">
+                            <ThumbsUp className="h-3 w-3 mr-1" /> {response.likes}
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-6 w-6 text-xs">
+                            <Reply className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-white/5 dark:bg-black/20 rounded-md p-2 text-xs text-center text-black/60 dark:text-white/60">
+                    No responses yet. Be the first to reply!
+                  </div>
+                )}
+
+                <div className="mt-2 flex gap-2">
+                  <Input placeholder="Add your response..." className="text-xs h-8" />
+                  <EnhancedButton variant="outline" size="sm" className="h-8 text-xs bg-white/5">
+                    Reply
+                  </EnhancedButton>
+                </div>
+              </motion.div>
+            )}
+          </div>
+        ))}
+        <Button variant="outline" size="sm" className="w-full" onClick={loadMoreTopics} disabled={isLoading}>
+          {isLoading ? "Loading..." : "Load More"}
+        </Button>
+      </div>
+    </div>
+  )
+}
+
 export function EnhancedHeroSection() {
   const router = useRouter()
   const { isAuthenticated } = useAuth()
@@ -247,71 +459,11 @@ export function EnhancedHeroSection() {
   const [showDiamondGlint, setShowDiamondGlint] = useState(false)
   const [hoverSkill, setHoverSkill] = useState<number | null>(null)
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
-  const [activeTopic, setActiveTopic] = useState<number | null>(null)
+  const [showSignupModal, setShowSignupModal] = useState(false)
   const [circuitLines, setCircuitLines] = useState<Array<{ top: number; width: number; left: number }>>([])
   const [circuitDots, setCircuitDots] = useState<Array<{ top: number; left: number }>>([])
   const [glowDots, setGlowDots] = useState<Array<{ top: number; left: number; delay: number }>>([])
   const [dataFlows, setDataFlows] = useState<Array<{ top: number; left: number; delay: number }>>([])
-  const [showSignupModal, setShowSignupModal] = useState(false)
-
-  // Forum discussion data
-  const forumTopics = [
-    {
-      id: 1,
-      title: "Best way to find studs without a stud finder?",
-      author: "MountingPro",
-      replies: 12,
-      likes: 8,
-      lastActive: "2 hours ago",
-      tags: ["mounting", "beginner", "tools"],
-      preview: "I'm trying to mount a TV but don't have a stud finder. Any reliable methods to locate studs?",
-      responses: [
-        {
-          author: "HandyHelper",
-          content: "Try the knock test - tap along the wall and listen for a less hollow sound. That's usually a stud!",
-          likes: 5,
-          time: "1 hour ago",
-        },
-        {
-          author: "MountMaster",
-          content:
-            "Look for outlets - they're typically attached to studs. Measure 16 inches from there for the next one.",
-          likes: 3,
-          time: "45 min ago",
-        },
-      ],
-    },
-    {
-      id: 2,
-      title: "TV mounting height recommendations?",
-      author: "DesignSavvy",
-      replies: 8,
-      likes: 15,
-      lastActive: "1 day ago",
-      tags: ["mounting", "tv", "ergonomics"],
-      preview: "What's the ideal height to mount a TV in a living room? Is eye level when seated the best approach?",
-      responses: [
-        {
-          author: "ErgoExpert",
-          content:
-            "Eye level when seated is ideal. For most living rooms, that's about 42-48 inches from the floor to the center of the TV.",
-          likes: 7,
-          time: "20 hours ago",
-        },
-      ],
-    },
-    {
-      id: 3,
-      title: "Cable management tips for wall-mounted TVs",
-      author: "CleanSetup",
-      replies: 6,
-      likes: 10,
-      lastActive: "3 days ago",
-      tags: ["mounting", "cables", "organization"],
-      preview: "Just mounted my TV but the cables look messy. Any tips for clean cable management?",
-      responses: [],
-    },
-  ]
 
   // Updated skills data with home service categories
   const skills = [
@@ -585,7 +737,7 @@ export function EnhancedHeroSection() {
         clearInterval(progressInterval.current)
       }
     }
-  }, [activeSkill])
+  }, [activeSkill, skills])
 
   // Animate the skill path visualization
   useEffect(() => {
@@ -826,11 +978,7 @@ export function EnhancedHeroSection() {
         ></div>
 
         {/* Futuristic grid lines */}
-        <div
-          className="absolute inset-0 bg-[linear-gradient(to_right,transparent_49.5%,rgba(255,255,255,0.05)_49.5%,rgba(255,255,255,0.05)_5\`\`\`
-bg-[linear-gradient(to_right,transparent_49.5%,rgba(255,255,255,0.05)_49.5%,rgba(255,255,255,0.05)_50.5%,transparent_50.5%),linear-gradient(to_bottom,transparent_49.5%,rgba(2\`\`\`
-rgba(255,255,255,0.05)_49.5%,rgba(255,255,255,0.05)_50.5%,transparent_50.5%)] bg-[length:50px_50px] opacity-20 pointer-events-none"
-        ></div>
+        <div className="absolute inset-0 bg-grid-pattern opacity-20 pointer-events-none"></div>
 
         <div className="container px-3 md:px-6 relative z-10">
           {/* Changed grid layout to be a flex column on all screen sizes */}
@@ -1030,34 +1178,38 @@ rgba(255,255,255,0.05)_49.5%,rgba(255,255,255,0.05)_50.5%,transparent_50.5%)] bg
                     <p className="text-sm text-black/80 dark:text-white/80 lg:col-span-12">
                       The world's first AI-powered gig ecosystem that helps you earn while you learn and grow your
                       freelance career exponentially.
-                      <span className="inline-flex items-center ml-2 text-primary">
+                      <span className="inline-flex items-center ml-2 text-xs text-primary">
                         <Lightbulb className="h-3 w-3 mr-1" /> Smart matching technology
                       </span>
                     </p>
 
                     <div className="flex flex-wrap gap-2 md:flex-nowrap overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide lg:col-span-12">
-                      {skills.map((skill, index) => (
-                        <button
-                          key={index}
-                          className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 flex items-center ${
-                            activeSkill === index
-                              ? "bg-gradient-to-r from-primary to-purple-500 text-white"
-                              : "bg-white/10 dark:bg-black/20 text-black dark:text-white hover:bg-white/20 dark:hover:bg-black/30"
-                          }`}
-                          onClick={() => setActiveSkill(index)}
-                          onMouseEnter={() => setHoverSkill(index)}
-                          onMouseLeave={() => setHoverSkill(null)}
-                        >
-                          <span className="mr-1.5">{skill.icon}</span>
-                          {skill.name}
-                          {hoverSkill === index && <span className="ml-1.5 text-xs opacity-70">{skill.level}</span>}
-                          {activeSkill === index && (
-                            <span className="ml-1.5 flex items-center">
-                              <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span>
-                            </span>
-                          )}
-                        </button>
-                      ))}
+                      {skills && skills.length > 0 ? (
+                        skills.map((skill, index) => (
+                          <button
+                            key={index}
+                            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 flex items-center ${
+                              activeSkill === index
+                                ? "bg-gradient-to-r from-primary to-purple-500 text-white"
+                                : "bg-white/10 dark:bg-black/20 text-black dark:text-white hover:bg-white/20 dark:hover:bg-black/30"
+                            }`}
+                            onClick={() => setActiveSkill(index)}
+                            onMouseEnter={() => setHoverSkill(index)}
+                            onMouseLeave={() => setHoverSkill(null)}
+                          >
+                            <span className="mr-1.5">{skill.icon}</span>
+                            {skill.name}
+                            {hoverSkill === index && <span className="ml-1.5 text-xs opacity-70">{skill.level}</span>}
+                            {activeSkill === index && (
+                              <span className="ml-1.5 flex items-center">
+                                <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span>
+                              </span>
+                            )}
+                          </button>
+                        ))
+                      ) : (
+                        <div>No skills available.</div>
+                      )}
                     </div>
 
                     <div className="flex border-b border-white/10 overflow-x-auto -mx-1 px-1 scrollbar-hide md:justify-start lg:col-span-12">
@@ -1144,11 +1296,7 @@ rgba(255,255,255,0.05)_49.5%,rgba(255,255,255,0.05)_50.5%,transparent_50.5%)] bg
                                 <div
                                   className="h-full rounded-full bg-gradient-to-r from-primary to-purple-500 relative"
                                   style={{ width: `${progress}%`, transition: "width 0.5s ease-out" }}
-                                >
-                                  {progress > 30 && (
-                                    <div className="absolute top-0 right-0 h-full w-5 bg-white/30 animate-pulse"></div>
-                                  )}
-                                </div>
+                                ></div>
                                 {/* Progress markers */}
                                 <div className="absolute top-0 left-1/4 h-full w-0.5 bg-white/20"></div>
                                 <div className="absolute top-0 left-1/2 h-full w-0.5 bg-white/20"></div>
@@ -1176,7 +1324,7 @@ rgba(255,255,255,0.05)_49.5%,rgba(255,255,255,0.05)_50.5%,transparent_50.5%)] bg
                                 <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent"></div>
                                 <div className="text-xs text-black/60 dark:text-white/60">Rating</div>
                                 <div className="font-bold text-black dark:text-white flex items-center justify-center">
-                                  4.8 <Star className="h-3 w-3 ml-0.5 text-yellow-400 fill-yellow-400" />
+                                  4.8 <Star className="h-4 w-4 ml-0.5 text-yellow-400 fill-yellow-400" />
                                 </div>
                               </div>
                               <div className="bg-white/5 dark:bg-black/10 rounded-md p-2 relative overflow-hidden">
@@ -1219,59 +1367,6 @@ rgba(255,255,255,0.05)_49.5%,rgba(255,255,255,0.05)_50.5%,transparent_50.5%)] bg
                                 </p>
                               </div>
                             </div>
-                          </div>
-
-                          {/* Skill Path Visualization */}
-                          <div className="relative h-[80px]" ref={skillsRef}>
-                            <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-white/20 -translate-y-1/2"></div>
-
-                            {/* Skill nodes */}
-                            {["Beginner", "Intermediate", "Advanced", "Expert", "Master"].map((level, i) => {
-                              const isActive =
-                                i <=
-                                ["Beginner", "Intermediate", "Advanced", "Expert", "Master"].indexOf(
-                                  skills[activeSkill].nextLevel,
-                                )
-                              return (
-                                <div
-                                  key={i}
-                                  className={`skill-node absolute top-1/2 -translate-y-1/2 -translate-x-1/2 transition-all duration-500 ${isActive ? "opacity-100" : "opacity-50"}`}
-                                  style={{ left: `${(i / 4) * 100}%` }}
-                                  onMouseEnter={(e) => handleNodeHover(i, e)}
-                                  onMouseLeave={handleNodeLeave}
-                                >
-                                  <div
-                                    className={`h-4 w-4 rounded-full ${
-                                      isActive
-                                        ? "bg-gradient-to-r from-primary to-purple-500"
-                                        : "bg-white/20 dark:bg-black/40"
-                                    }`}
-                                  ></div>
-                                  <div className="absolute top-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-medium text-black dark:text-white">
-                                    {level}
-                                  </div>
-                                  {i < 4 && (
-                                    <div className="absolute top-1/2 left-[8px] -translate-y-1/2 h-0.5 bg-white/20 w-[calc(25vw-32px)]"></div>
-                                  )}
-                                </div>
-                              )
-                            })}
-
-                            {/* Tooltip */}
-                            {showTooltip && (
-                              <div
-                                className="absolute z-20 w-48 p-2 bg-black/80 backdrop-blur-md text-white rounded-md text-xs"
-                                style={{
-                                  left: "50%",
-                                  top: "-40px",
-                                  transform: "translateX(-50%)",
-                                  pointerEvents: "none",
-                                }}
-                              >
-                                <div className="font-bold mb-1">{tooltipContent.title}</div>
-                                <div>{tooltipContent.description}</div>
-                              </div>
-                            )}
                           </div>
                         </div>
                       )}
@@ -1347,13 +1442,267 @@ rgba(255,255,255,0.05)_49.5%,rgba(255,255,255,0.05)_50.5%,transparent_50.5%)] bg
                                       className="h-full rounded-full bg-gradient-to-r from-primary to-purple-500"
                                       style={{ width: `${skill.level}%` }}
                                     ></div>
-                                    {/* Skill level markers */}
-                                    <div className="absolute top-0 left-1/4 h-full w-0.5 bg-white/10"></div>
-                                    <div className="absolute top-0 left-1/2 h-full w-0.5 bg-white/10"></div>
-                                    <div className="absolute top-0 left-3/4 h-full w-0.5 bg-white/10"></div>
                                   </div>
                                 </div>
                               ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Projects Tab */}
+                      {activeTab === "projects" && (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="text-sm font-semibold text-black dark:text-white">Available Projects</h4>
+                            <div className="text-xs text-primary">Earn while you learn</div>
+                          </div>
+
+                          <div className="space-y-2">
+                            {skills[activeSkill].skillProjects.map((project, index) => (
+                              <div
+                                key={index}
+                                className="p-3 rounded-lg bg-white/5 dark:bg-black/10 border border-white/10 hover:border-primary/30 transition-all duration-300 relative overflow-hidden"
+                              >
+                                <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_10px_10px,rgba(var(--primary-rgb),0.4)_1px,transparent_1px)] bg-[length:20px_20px] pointer-events-none"></div>
+
+                                <div className="flex justify-between items-start">
+                                  <div>
+                                    <div className="text-sm font-medium text-black dark:text-white">{project.name}</div>
+                                    <div className="flex items-center mt-1">
+                                      <div className="px-2 py-0.5 rounded-full bg-white/10 dark:bg-black/30 text-xs mr-2">
+                                        {project.difficulty}
+                                      </div>
+                                      <div className="text-xs text-black/60 dark:text-white/60">
+                                        Est. earnings: {project.earnings}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <EnhancedButton
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 text-xs bg-white/5"
+                                    onClick={() => handleApplyForProject(project.name)}
+                                  >
+                                    {project.status === "in-progress" ? "Continue" : "Apply"}
+                                  </EnhancedButton>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+
+                          <div className="mt-4 p-3 rounded-lg bg-primary/10 border border-primary/20">
+                            <div className="flex items-start">
+                              <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center mr-3 text-primary">
+                                <Lightbulb className="h-4 w-4" />
+                              </div>
+                              <div>
+                                <h4 className="text-sm font-semibold text-black dark:text-white">
+                                  AI-Matched Projects
+                                </h4>
+                                <p className="text-xs text-black/80 dark:text-white/80">
+                                  Projects are matched to your skill level to maximize learning and earning potential.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Forum Tab */}
+                      {activeTab === "forum" && <ForumTab />}
+
+                      {/* Analytics Tab */}
+                      {activeTab === "analytics" && (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="text-sm font-semibold text-black dark:text-white">Skill Analytics</h4>
+                            <div className="text-xs text-primary">Track your progress</div>
+                          </div>
+
+                          <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3 border border-white/10">
+                            <div className="flex justify-between items-center mb-3">
+                              <h5 className="text-xs font-medium text-black dark:text-white">Earnings Projection</h5>
+                              <div className="text-xs text-black/60 dark:text-white/60">Based on skill advancement</div>
+                            </div>
+
+                            <div className="relative h-40 w-full">
+                              <canvas ref={chartRef} className="w-full h-full"></canvas>
+                            </div>
+
+                            <div className="flex justify-between mt-2 text-xs">
+                              <div className="text-black/60 dark:text-white/60">Current</div>
+                              <div className="text-black/60 dark:text-white/60">After advancement</div>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2">
+                            <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3 border border-white/10">
+                              <h5 className="text-xs font-medium text-black dark:text-white mb-2">Completion Time</h5>
+                              <div className="text-lg font-bold text-black dark:text-white">
+                                {skills[activeSkill].stats.avgCompletionTime}
+                              </div>
+                              <div className="text-xs text-black/60 dark:text-white/60">Average per project</div>
+                            </div>
+
+                            <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3 border border-white/10">
+                              <h5 className="text-xs font-medium text-black dark:text-white mb-2">
+                                Client Satisfaction
+                              </h5>
+                              <div className="text-lg font-bold text-black dark:text-white flex items-center">
+                                {skills[activeSkill].stats.clientSatisfaction}
+                                <Star className="h-4 w-4 ml-1 text-yellow-400 fill-yellow-400" />
+                              </div>
+                              <div className="text-xs text-black/60 dark:text-white/60">Based on reviews</div>
+                            </div>
+                          </div>
+
+                          <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3 border border-white/10">
+                            <h5 className="text-xs font-medium text-black dark:text-white mb-2">Top Earners</h5>
+                            <div className="text-lg font-bold text-black dark:text-white">
+                              {skills[activeSkill].stats.topEarners}
+                            </div>
+                            <div className="text-xs text-black/60 dark:text-white/60">In this skill category</div>
+                            <div className="mt-2 text-xs text-primary">
+                              You're in the top 40% of earners in this category
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Milestones Tab */}
+                      {activeTab === "milestones" && (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="text-sm font-semibold text-black dark:text-white">Skill Milestones</h4>
+                            <div className="text-xs text-primary">Unlock rewards</div>
+                          </div>
+
+                          <div className="space-y-3">
+                            {skills[activeSkill].milestones.map((milestone, index) => (
+                              <div
+                                key={index}
+                                className={`p-3 rounded-lg bg-white/5 dark:bg-black/10 border ${
+                                  selectedMilestone === index ? "border-primary/30" : "border-white/10"
+                                } hover:border-primary/30 transition-all duration-300 relative overflow-hidden cursor-pointer`}
+                                onClick={() => setSelectedMilestone(selectedMilestone === index ? -1 : index)}
+                              >
+                                <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_10px_10px,rgba(var(--primary-rgb),0.4)_1px,transparent_1px)] bg-[length:20px_20px] pointer-events-none"></div>
+
+                                <div className="flex justify-between items-start">
+                                  <div>
+                                    <div className="text-sm font-medium text-black dark:text-white">
+                                      {milestone.name}
+                                    </div>
+                                    <div className="flex items-center mt-1">
+                                      <div className="text-xs text-black/60 dark:text-white/60">
+                                        Progress: {milestone.progress}/{milestone.total}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <div className="text-xs text-primary">Reward:</div>
+                                    <div className="text-xs font-medium text-black dark:text-white">
+                                      {milestone.reward}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="mt-2 h-1.5 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden progress-track">
+                                  <div
+                                    className="h-full rounded-full bg-gradient-to-r from-primary to-purple-500"
+                                    style={{ width: `${(milestone.progress / milestone.total) * 100}%` }}
+                                  ></div>
+                                </div>
+
+                                {selectedMilestone === index && (
+                                  <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: "auto" }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="mt-3 pt-3 border-t border-white/10"
+                                  >
+                                    <div className="text-xs text-black/80 dark:text-white/80">
+                                      {milestone.name === "Complete 5 TV Mounts" && (
+                                        <p>
+                                          Complete 5 TV mounting projects to earn the Intermediate Badge, which will
+                                          increase your visibility to clients and allow you to charge higher rates.
+                                        </p>
+                                      )}
+                                      {milestone.name === "Earn 5 Client Reviews" && (
+                                        <p>
+                                          Receive 5 positive client reviews to earn a $50 bonus. Quality reviews help
+                                          build your reputation and attract more clients.
+                                        </p>
+                                      )}
+                                      {milestone.name === "Complete Hardware Course" && (
+                                        <p>
+                                          Finish the Hardware Course to earn a certificate that you can display on your
+                                          profile, demonstrating your expertise to potential clients.
+                                        </p>
+                                      )}
+                                      {milestone.name === "Complete 3 Full Moves" && (
+                                        <p>
+                                          Successfully complete 3 full moving projects to earn the Advanced Badge, which
+                                          will boost your ranking in search results.
+                                        </p>
+                                      )}
+                                      {milestone.name === "Zero Damage Reports" && (
+                                        <p>
+                                          Maintain a perfect record with no damage reports across 3 consecutive projects
+                                          to get featured on our homepage.
+                                        </p>
+                                      )}
+                                      {milestone.name === "Complete Safety Course" && (
+                                        <p>
+                                          Complete the Safety Course to earn a certificate that demonstrates your
+                                          commitment to safe moving practices.
+                                        </p>
+                                      )}
+                                      {milestone.name === "Complete 5 Room Paints" && (
+                                        <p>
+                                          Complete 5 room painting projects to earn the Expert Badge, which will allow
+                                          you to access premium clients and projects.
+                                        </p>
+                                      )}
+                                      {milestone.name === "Generate $2K in Revenue" && (
+                                        <p>
+                                          Earn $2,000 in painting projects to receive a $200 bonus as a reward for your
+                                          success and client satisfaction.
+                                        </p>
+                                      )}
+                                      {milestone.name === "Complete Finishes Course" && (
+                                        <p>
+                                          Finish the Specialty Finishes Course to earn a certificate that will help you
+                                          command premium rates for specialty painting services.
+                                        </p>
+                                      )}
+                                      {milestone.name === "Assemble 10 Furniture Pieces" && (
+                                        <p>
+                                          Successfully assemble 10 furniture pieces to earn the Intermediate Badge,
+                                          which will increase your visibility to clients.
+                                        </p>
+                                      )}
+                                    </div>
+                                  </motion.div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+
+                          <div className="mt-4 p-3 rounded-lg bg-primary/10 border border-primary/20">
+                            <div className="flex items-start">
+                              <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center mr-3 text-primary">
+                                <Trophy className="h-4 w-4" />
+                              </div>
+                              <div>
+                                <h4 className="text-sm font-semibold text-black dark:text-white">Milestone Rewards</h4>
+                                <p className="text-xs text-black/80 dark:text-white/80">
+                                  Complete milestones to earn badges, certificates, and bonuses that boost your earning
+                                  potential.
+                                </p>
+                              </div>
                             </div>
                           </div>
                         </div>
