@@ -3,16 +3,48 @@
 import { createServerClient } from "@/lib/supabase"
 import { revalidatePath } from "next/cache"
 
-// SQL to create the waitlist table if it doesn't exist
-const createWaitlistTableSQL = `
-CREATE TABLE IF NOT EXISTS waitlist (
-  id SERIAL PRIMARY KEY,
-  name TEXT NOT NULL,
-  email TEXT NOT NULL UNIQUE,
-  message TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-`
+// Make sure the waitlist table exists and has the correct structure
+// This function should be called before attempting to insert data
+async function ensureWaitlistTable(supabase: any) {
+  try {
+    // Try to create the waitlist table if it doesn't exist
+    const { error: createTableError } = await supabase.rpc("exec", {
+      query: `
+        CREATE TABLE IF NOT EXISTS waitlist (
+          id SERIAL PRIMARY KEY,
+          name TEXT NOT NULL,
+          email TEXT NOT NULL UNIQUE,
+          message TEXT,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        );
+      `,
+    })
+
+    if (createTableError) {
+      console.log(
+        "Note: Could not create waitlist table via RPC. This is expected if using anon key:",
+        createTableError.message,
+      )
+
+      // Try direct SQL query as fallback
+      const { error: directQueryError } = await supabase.from("waitlist").select("count(*)").limit(1)
+
+      if (
+        directQueryError &&
+        directQueryError.message?.includes("relation") &&
+        directQueryError.message?.includes("does not exist")
+      ) {
+        console.log("Waitlist table doesn't exist. Please create it manually in your Supabase dashboard.")
+        return false
+      }
+    }
+
+    return true
+  } catch (err) {
+    console.log("Error checking waitlist table:", err)
+    return false
+  }
+}
 
 export async function joinWaitlist(formData: FormData) {
   try {
@@ -25,7 +57,9 @@ export async function joinWaitlist(formData: FormData) {
     const userMessage = (formData.get("message") as string) || ""
 
     // Combine role and message into a single message field
-    const message = `Role: ${role}\n\nFeedback: ${userMessage}`
+    const message = `Role: ${role}
+
+Feedback: ${userMessage}`
 
     if (!name || !email) {
       return {
@@ -34,17 +68,13 @@ export async function joinWaitlist(formData: FormData) {
       }
     }
 
-    // Try to create the waitlist table if it doesn't exist
-    try {
-      const { error: createTableError } = await supabase.rpc("exec", { query: createWaitlistTableSQL })
-      if (createTableError) {
-        console.log(
-          "Note: Could not create waitlist table. This is expected if using anon key:",
-          createTableError.message,
-        )
+    // Ensure the waitlist table exists
+    const tableExists = await ensureWaitlistTable(supabase)
+    if (!tableExists) {
+      return {
+        success: false,
+        message: "Database setup issue. Please contact support.",
       }
-    } catch (err) {
-      console.log("Note: RPC exec not available. This is expected in some environments.")
     }
 
     // Check if email already exists
