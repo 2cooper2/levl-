@@ -1097,9 +1097,6 @@ export function EnhancedHeroSection() {
                     border: "1px solid rgba(147, 51, 234, 0.2)",
                   }}
                 >
-                  {/* Grid pattern overlay */}
-                  <div className="grid-pattern absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none z-1"></div>
-
                   {/* Tech pattern overlay */}
                   <div className="tech-pattern absolute inset-0 bg-[radial-gradient(circle_at_10px_10px,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none z-1"></div>
 
