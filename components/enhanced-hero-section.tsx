@@ -63,10 +63,6 @@ const detailedVisualStyles = `
     isolation: isolate;
   }
   
-  .grid-pattern {
-    opacity: 0.7;
-  }
-
   .tech-pattern {
     opacity: 0.7;
   }
@@ -202,12 +198,7 @@ const detailedVisualStyles = `
     z-index: 1;
   }
 
-  .bg-grid-pattern {
-    background-image:
-      linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-    background-size: 50px 50px;
-  }
+  
 `
 
 // Custom founder icon component
@@ -977,9 +968,6 @@ export function EnhancedHeroSection() {
           style={{ animationDuration: "20s" }}
         ></div>
 
-        {/* Futuristic grid lines */}
-        <div className="absolute inset-0 bg-grid-pattern opacity-20 pointer-events-none"></div>
-
         <div className="container px-3 md:px-6 relative z-10">
           {/* Changed grid layout to be a flex column on all screen sizes */}
           <div className="flex flex-col gap-6 md:gap-10 lg:gap-12">
@@ -1098,9 +1086,6 @@ export function EnhancedHeroSection() {
                     border: "1px solid rgba(147, 51, 234, 0.2)",
                   }}
                 >
-                  {/* Grid pattern overlay */}
-                  <div className="grid-pattern absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none z-1"></div>
-
                   {/* Tech pattern overlay */}
                   <div className="tech-pattern absolute inset-0 bg-[radial-gradient(circle_at_10px_10px,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none z-1"></div>
 
