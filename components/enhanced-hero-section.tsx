@@ -828,7 +828,8 @@ export function EnhancedHeroSection() {
         {/* Futuristic grid lines */}
         <div
           className="absolute inset-0 bg-[linear-gradient(to_right,transparent_49.5%,rgba(255,255,255,0.05)_49.5%,rgba(255,255,255,0.05)_5\`\`\`
-bg-[linear-gradient(to_right,transparent_49.5%,rgba(255,255,255,0.05)_49.5%,rgba(255,255,255,0.05)_50.5%,transparent_50.5%),linear-gradient(to_bottom,transparent_49.5%,rgba(2rgba(255,255,255,0.05)_49.5%,rgba(255,255,255,0.05)_50.5%,transparent_50.5%)] bg-[length:50px_50px] opacity-20 pointer-events-none"
+bg-[linear-gradient(to_right,transparent_49.5%,rgba(255,255,255,0.05)_49.5%,rgba(255,255,255,0.05)_50.5%,transparent_50.5%),linear-gradient(to_bottom,transparent_49.5%,rgba(2\`\`\`
+rgba(255,255,255,0.05)_49.5%,rgba(255,255,255,0.05)_50.5%,transparent_50.5%)] bg-[length:50px_50px] opacity-20 pointer-events-none"
         ></div>
 
         <div className="container px-3 md:px-6 relative z-10">
@@ -945,7 +946,8 @@ bg-[linear-gradient(to_right,transparent_49.5%,rgba(255,255,255,0.05)_49.5%,rgba
                   animate={{ opacity: 1, scale: 1, y: 10 }}
                   transition={{ duration: 0.6, delay: 0.4 }}
                   style={{
-                    boxShadow: "0 10px 30px -10px rgba(147, 51, 234, 0.3)",
+                    boxShadow: "0 0 40px 5px rgba(147, 51, 234, 0.25)",
+                    border: "1px solid rgba(147, 51, 234, 0.2)",
                   }}
                 >
                   {/* Grid pattern overlay */}
