@@ -6,10 +6,7 @@ import { EnhancedButton } from "@/components/ui/enhanced-button"
 import { SkillAcceleratorSignup } from "@/components/skill-accelerator-signup"
 import {
   ArrowRight,
-  Zap,
   Trophy,
-  Users,
-  Target,
   Rocket,
   Star,
   BookOpen,
@@ -19,7 +16,6 @@ import {
   Truck,
   Paintbrush,
   Hammer,
-  Gem,
   MessageSquare,
   PenToolIcon as Tool,
   Sparkles,
@@ -30,6 +26,9 @@ import {
   Cpu,
   ThumbsUp,
   Reply,
+  Users,
+  Target,
+  Zap,
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
@@ -37,6 +36,7 @@ import { useAuth } from "@/context/auth-context"
 import { useState, useEffect, useRef } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { AnimatedTextDivider } from "@/components/animated-text-divider"
 
 // Add keyframes for the shimmer animation
 const shimmerAnimation = {
@@ -47,159 +47,160 @@ const shimmerAnimation = {
 // Add styles for hiding scrollbars
 const scrollbarHideStyles = `
 .scrollbar-hide::-webkit-scrollbar {
-  display: none;
+ display: none;
 }
 .scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+ -ms-overflow-style: none;
+ scrollbar-width: none;
 }
 `
 
 // Add detailed visual styles
 const detailedVisualStyles = `
-  .detailed-card {
-    position: relative;
-    overflow: hidden;
-    isolation: isolate;
-  }
-  
-  .grid-pattern {
-    opacity: 0.7;
-  }
+ .detailed-card {
+   position: relative;
+   overflow: hidden;
+   isolation: isolate;
+ }
+ 
+ .grid-pattern {
+   opacity: 0.7;
+ }
 
-  .tech-pattern {
-    opacity: 0.7;
-  }
-  
-  .circuit-lines {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    overflow: hidden;
-    pointer-events: none;
-    z-index: 1;
-  }
-  
-  .circuit-line {
-    position: absolute;
-    background: linear-gradient(90deg, rgba(var(--primary-rgb), 0.1), rgba(var(--primary-rgb), 0.3), rgba(var(--primary-rgb), 0.1));
-    height: 1px;
-    opacity: 0.3;
-  }
-  
-  .circuit-dot {
-    position: absolute;
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background-color: rgba(var(--primary-rgb), 0.5);
-    box-shadow: 0 0 5px rgba(var(--primary-rgb), 0.5);
-  }
-  
-  .glow-dot {
-    position: absolute;
-    width: 2px;
-    height: 2px;
-    border-radius: 50%;
-    background-color: white;
-    opacity: 0.6;
-    box-shadow: 0 0 5px 2px rgba(255, 255, 255, 0.3);
-    animation: pulse-glow 3s infinite;
-  }
-  
-  @keyframes pulse-glow {
-    0%, 100% { opacity: 0.2; transform: scale(1); }
-    50% { opacity: 0.8; transform: scale(1.5); }
-  }
-  
-  .geometric-shape {
-    position: absolute;
-    opacity: 0.15;
-    pointer-events: none;
-    z-index: 1;
-  }
-  
-  .skill-card {
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .skill-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle at 50% 0%, rgba(var(--primary-rgb), 0.1), transparent 70%);
-    pointer-events: none;
-    z-index: 1;
-  }
-  
-  .progress-track {
-    position: relative;
-    overflow: hidden;
-    border-radius: 9999px;
-  }
-  
-  .progress-track::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: linear-gradient(90deg, 
-      rgba(255,255,255,0) 0%, 
-      rgba(255,255,255,0.2) 20%, 
-      rgba(255,255,255,0.2) 80%, 
-      rgba(255,255,255,0) 100%);
-    background-size: 200% 100%;
-    animation: shimmer 2s infinite;
-    pointer-events: none;
-  }
-  
-  @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
-  }
-  
-  .detailed-tab {
-    position: relative;
-  }
-  
-  .detailed-tab::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, 
-      rgba(var(--primary-rgb), 0) 0%, 
-      rgba(var(--primary-rgb), 1) 50%, 
-      rgba(var(--primary-rgb), 0) 100%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-  
-  .detailed-tab.active::after {
-    opacity: 1;
-  }
-  
-  .tech-pattern {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: radial-gradient(circle at 10px 10px, rgba(255,255,255,0.05) 1px, transparent 1px);
-    background-size: 20px 20px;
-    pointer-events: none;
-    z-index: 1;
-  }
+ .tech-pattern {
+   opacity: 0.7;
+   
+ }
+ 
+ .circuit-lines {
+   position: absolute;
+   top: 0;
+   left: 0;
+   right: 0;
+   bottom: 0;
+   overflow: hidden;
+   pointer-events: none;
+   z-index: 1;
+ }
+ 
+ .circuit-line {
+   position: absolute;
+   background: linear-gradient(90deg, rgba(var(--primary-rgb), 0.1), rgba(var(--primary-rgb), 0.3), rgba(var(--primary-rgb), 0.1));
+   height: 1px;
+   opacity: 0.3;
+ }
+ 
+ .circuit-dot {
+   position: absolute;
+   width: 4px;
+   height: 4px;
+   border-radius: 50%;
+   background-color: rgba(var(--primary-rgb), 0.5);
+   box-shadow: 0 0 5px rgba(var(--primary-rgb), 0.5);
+ }
+ 
+ .glow-dot {
+   position: absolute;
+   width: 2px;
+   height: 2px;
+   border-radius: 50%;
+   background-color: white;
+   opacity: 0.6;
+   box-shadow: 0 0 5px 2px rgba(255, 255, 255, 0.3);
+   animation: pulse-glow 3s infinite;
+ }
+ 
+ @keyframes pulse-glow {
+   0%, 100% { opacity: 0.2; transform: scale(1); }
+   50% { opacity: 0.8; transform: scale(1.5); }
+ }
+ 
+ .geometric-shape {
+   position: absolute;
+   opacity: 0.15;
+   pointer-events: none;
+   z-index: 1;
+ }
+ 
+ .skill-card {
+   position: relative;
+   overflow: hidden;
+ }
+ 
+ .skill-card::before {
+   content: '';
+   position: absolute;
+   top: 0;
+   left: 0;
+   right: 0;
+   bottom: 0;
+   background: radial-gradient(circle at 50% 0%, rgba(var(--primary-rgb), 0.1), transparent 70%);
+   pointer-events: none;
+   z-index: 1;
+ }
+ 
+ .progress-track {
+   position: relative;
+   overflow: hidden;
+   border-radius: 9999px;
+ }
+ 
+ .progress-track::after {
+   content: '';
+   position: absolute;
+   top: 0;
+   left: 0;
+   right: 0;
+   bottom: 0;
+   background-image: linear-gradient(90deg, 
+     rgba(255,255,255,0) 0%, 
+     rgba(255,255,255,0.2) 20%, 
+     rgba(255,255,255,0.2) 80%, 
+     rgba(255,255,255,0) 100%);
+   background-size: 200% 100%;
+   animation: shimmer 2s infinite;
+   pointer-events: none;
+ }
+ 
+ @keyframes shimmer {
+   0% { background-position: -200% 0; }
+   100% { background-position: 200% 0; }
+ }
+ 
+ .detailed-tab {
+   position: relative;
+ }
+ 
+ .detailed-tab::after {
+   content: '';
+   position: absolute;
+   bottom: -2px;
+   left: 0;
+   right: 0;
+   height: 2px;
+   background: linear-gradient(90deg, 
+     rgba(var(--primary-rgb), 0) 0%, 
+     rgba(var(--primary-rgb), 1) 50%, 
+     rgba(var(--primary-rgb), 0) 100%);
+   opacity: 0;
+   transition: opacity 0.3s ease;
+ }
+ 
+ .detailed-tab.active::after {
+   opacity: 1;
+ }
+ 
+ .tech-pattern {
+   position: absolute;
+   top: 0;
+   left: 0;
+   right: 0;
+   bottom: 0;
+   background-image: radial-gradient(circle at 10px 10px, rgba(255,255,255,0.05) 1px, transparent 1px);
+   background-size: 20px 20px;
+   pointer-events: none;
+   z-index: 1;
+ }
 
   .bg-grid-pattern {
     background-image:
@@ -209,100 +210,98 @@ const detailedVisualStyles = `
   }
 `
 
-// Custom founder icon component
-const FounderIcon = ({ className = "" }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    width="20"
-    height="20"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    {/* Professional person silhouette */}
-    <path d="M12 4a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z" />
-    <path d="M12 11c-3.5 0-7 1.5-7 5v3h14v-3c0-3.5-3.5-5-7-5z" />
-
-    {/* Business suit/tie */}
-    <path d="M12 11v9" />
-    <path d="M10.5 13L12 15l1.5-2" />
-
-    {/* Leadership crown */}
-    <path d="M9 4l1 1h4l1-1" />
-
-    {/* Growth chart */}
-    <path d="M18 8l1.5-1.5" />
-    <path d="M19.5 6.5v1.5h-1.5" />
-  </svg>
-)
-
-const forumTopics = [
-  {
-    id: 1,
-    title: "Best way to find studs without a stud finder?",
-    author: "MountingPro",
-    replies: 12,
-    likes: 8,
-    lastActive: "2 hours ago",
-    tags: ["mounting", "beginner", "tools"],
-    preview: "I'm trying to mount a TV but don't have a stud finder. Any reliable methods to locate studs?",
-    responses: [
-      {
-        author: "HandyHelper",
-        content: "Try the knock test - tap along the wall and listen for a less hollow sound. That's usually a stud!",
-        likes: 5,
-        time: "1 hour ago",
-      },
-      {
-        author: "MountMaster",
-        content:
-          "Look for outlets - they're typically attached to studs. Measure 16 inches from there for the next one.",
-        likes: 3,
-        time: "45 min ago",
-      },
-    ],
-  },
-  {
-    id: 2,
-    title: "TV mounting height recommendations?",
-    author: "DesignSavvy",
-    replies: 8,
-    likes: 15,
-    lastActive: "1 day ago",
-    tags: ["mounting", "tv", "ergonomics"],
-    preview: "What's the ideal height to mount a TV in a living room? Is eye level when seated the best approach?",
-    responses: [
-      {
-        author: "ErgoExpert",
-        content:
-          "Eye level when seated is ideal. For most living rooms, that's about 42-48 inches from the floor to the center of the TV.",
-        likes: 7,
-        time: "20 hours ago",
-      },
-    ],
-  },
-  {
-    id: 3,
-    title: "Cable management tips for wall-mounted TVs",
-    author: "CleanSetup",
-    replies: 6,
-    likes: 10,
-    lastActive: "3 days ago",
-    tags: ["mounting", "cables", "organization"],
-    preview: "Just mounted my TV but the cables look messy. Any tips for clean cable management?",
-    responses: [],
-  },
-]
-
 // Custom function to format the last active time
 const formatLastActive = (lastActive: string): string => {
   // Implement your formatting logic here
   return lastActive
 }
+
+// Define the FounderIcon component
+const FounderIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M10 0C4.48 0 0 4.48 0 10C0 15.52 4.48 20 10 20C15.52 20 20 15.52 20 10C20 4.48 15.52 0 10 0ZM10 4C11.6569 4 13 5.34315 13 7C13 8.65685 11.6569 10 10 10C8.34315 10 7 8.65685 7 7C7 5.34315 8.34315 4 10 4ZM10 16.5C7.94 16.5 6.04 15.41 5.06 13.6H14.94C13.96 15.41 12.06 16.5 10 16.5Z"
+      fill="currentColor"
+    />
+  </svg>
+)
+
+// Define forumTopics
+const forumTopics = [
+  {
+    id: 1,
+    title: "Best drill for mounting?",
+    author: "ToolLover",
+    replies: 12,
+    likes: 25,
+    lastActive: "1 day ago",
+    tags: ["mounting", "tools", "drilling"],
+    preview: "I'm looking for a reliable drill for mounting shelves and TVs. Any recommendations?",
+    responses: [
+      {
+        author: "HandyMan",
+        time: "1 day ago",
+        content: "I recommend the Dewalt DCD791D2. It's powerful and versatile.",
+        likes: 5,
+      },
+      {
+        author: "DrillMaster",
+        time: "1 day ago",
+        content: "I prefer the Milwaukee M18. It's a bit more expensive, but it's worth it.",
+        likes: 3,
+      },
+    ],
+  },
+  {
+    id: 2,
+    title: "How to find studs in a wall?",
+    author: "DIYNewbie",
+    replies: 8,
+    likes: 15,
+    lastActive: "3 days ago",
+    tags: ["studs", "walls", "mounting"],
+    preview: "What's the best way to locate studs behind drywall?",
+    responses: [
+      {
+        author: "WallExpert",
+        time: "3 days ago",
+        content:
+          "A stud finder is the easiest way. You can also try tapping on the wall and listening for a solid sound.",
+        likes: 7,
+      },
+      {
+        author: "DIYPro",
+        time: "3 days ago",
+        content: "Don't forget to check for electrical wires before drilling!",
+        likes: 2,
+      },
+    ],
+  },
+  {
+    id: 3,
+    title: "Best way to hide cables?",
+    author: "CableGuy",
+    replies: 5,
+    likes: 10,
+    lastActive: "1 week ago",
+    tags: ["cables", "tv", "mounting"],
+    preview: "What are some creative ways to hide TV cables after mounting?",
+    responses: [
+      {
+        author: "HomeTheaterPro",
+        time: "1 week ago",
+        content: "You can use cable sleeves or in-wall cable management kits.",
+        likes: 4,
+      },
+      {
+        author: "TechGuru",
+        time: "1 week ago",
+        content: "Consider using a power bridge to safely run cables behind the wall.",
+        likes: 1,
+      },
+    ],
+  },
+]
 
 // Forum Tab
 const ForumTab = () => {
@@ -438,6 +437,24 @@ const ForumTab = () => {
       </div>
     </div>
   )
+}
+
+// Define fadeIn animation
+const fadeIn = {
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: "easeInOut",
+    },
+  },
+}
+
+const handleApplyForProject = (projectName: string) => {
+  alert(`Applying for project: ${projectName}`)
+  // Add your logic here to handle the project application
 }
 
 export function EnhancedHeroSection() {
@@ -864,6 +881,7 @@ export function EnhancedHeroSection() {
         ctx.fillText("Current Earnings", 10, 15)
 
         ctx.fillStyle = "#7950F2"
+        ctx.font = "10px Arial"
         ctx.fillText("Projected Earnings", 10, 30)
 
         // Add data points with hover effect
@@ -900,63 +918,6 @@ export function EnhancedHeroSection() {
     router.push("/waitlist")
   }
 
-  const handleNodeHover = (index: number, event: React.MouseEvent) => {
-    const levels = ["Beginner", "Intermediate", "Advanced", "Expert", "Master"]
-    const tooltips = [
-      {
-        title: levels[0],
-        description: "Learn fundamentals and complete basic projects",
-      },
-      {
-        title: levels[1],
-        description: "Apply skills to real-world projects with guidance",
-      },
-      {
-        title: levels[2],
-        description: "Handle complex projects independently",
-      },
-      {
-        title: levels[3],
-        description: "Mentor others and tackle challenging projects",
-      },
-      {
-        title: levels[4],
-        description: "Industry leader with exceptional expertise",
-      },
-    ]
-
-    setTooltipContent(tooltips[index])
-
-    // Use safer positioning that doesn't depend on client coordinates
-    const rect = event.currentTarget.getBoundingClientRect()
-    setTooltipPosition({
-      x: rect.left + rect.width / 2,
-      y: rect.top - 10,
-    })
-
-    setShowTooltip(true)
-  }
-
-  const handleNodeLeave = () => {
-    setShowTooltip(false)
-  }
-
-  const handleApplyForProject = (projectName: string) => {
-    setShowSuccessMessage(true)
-    setTimeout(() => {
-      setShowSuccessMessage(false)
-    }, 3000)
-  }
-
-  const fadeIn = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.6 },
-    },
-  }
-
   return (
     <>
       <style jsx global>
@@ -965,7 +926,8 @@ export function EnhancedHeroSection() {
       <style jsx global>
         {detailedVisualStyles}
       </style>
-      <section className="w-full py-6 md:py-10 lg:py-16 xl:py-24 relative overflow-hidden">
+      <section className="w-full relative overflow-hidden">
+        <AnimatedTextDivider firstText="Learn. Earn." secondText="Grow Your Business" className="mb-12 text-white" />
         {/* Animated background elements */}
         <div
           className="absolute -left-64 -top-64 h-[500px] w-[500px] rounded-full bg-primary/10 blur-3xl opacity-50 animate-pulse"
@@ -983,100 +945,6 @@ export function EnhancedHeroSection() {
           {/* Changed grid layout to be a flex column on all screen sizes */}
           <div className="flex flex-col gap-6 md:gap-10 lg:gap-12">
             {/* Hero content */}
-            <motion.div
-              className="flex flex-col justify-center space-y-4 max-w-3xl"
-              variants={fadeIn}
-              initial="hidden"
-              animate="visible"
-            >
-              <div className="space-y-2">
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
-                >
-                  <div className="relative">
-                    <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none text-black dark:text-white leading-relaxed pb-1">
-                      Learn. Earn. Grow Your Business.
-                    </h1>
-                    <motion.div
-                      className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-purple-500/20 blur-xl opacity-0"
-                      animate={{ opacity: [0, 0.3, 0] }}
-                      transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY, repeatType: "reverse" }}
-                    />
-                  </div>
-                  <div className="flex flex-wrap gap-3 mt-3">
-                    <div
-                      className="inline-flex items-center px-4 py-1.5 rounded-full bg-gradient-to-r from-primary/10 to-purple-500/10 backdrop-blur-sm border border-white/10 shadow-sm relative overflow-hidden group"
-                      onMouseEnter={() => setShowDiamondGlint(true)}
-                      onMouseLeave={() => setShowDiamondGlint(false)}
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1500 ease-in-out"></div>
-                      <div className="relative">
-                        <div className="relative">
-                          <Gem className="h-4 w-4 mr-2 text-primary" />
-                          {showDiamondGlint && (
-                            <>
-                              {/* Enhanced Diamond-shaped glint animation */}
-                              <motion.div
-                                className="absolute inset-0"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: [0, 1, 0] }}
-                                transition={{ duration: 0.8 }}
-                              >
-                                {/* Top facet - enhanced */}
-                                <div className="absolute top-0 left-1/2 w-2 h-2 bg-white rounded-sm -translate-x-1/2 -translate-y-1/4 rotate-45 opacity-90 shadow-[0_0_8px_3px_rgba(255,255,255,0.9)]" />
-
-                                {/* Right facet - enhanced */}
-                                <div className="absolute top-1/2 right-0 w-2 h-2 bg-white rounded-sm -translate-y-1/2 translate-x-1/4 rotate-45 opacity-90 shadow-[0_0_8px_3px_rgba(255,255,255,0.9)]" />
-
-                                {/* Bottom facet - enhanced */}
-                                <div className="absolute bottom-0 left-1/2 w-2 h-2 bg-white rounded-sm -translate-x-1/2 translate-y-1/4 rotate-45 opacity-90 shadow-[0_0_8px_3px_rgba(255,255,255,0.9)]" />
-
-                                {/* Left facet - enhanced */}
-                                <div className="absolute top-1/2 left-0 w-2 h-2 bg-white rounded-sm -translate-y-1/2 -translate-x-1/4 rotate-45 opacity-90 shadow-[0_0_8px_3px_rgba(255,255,255,0.9)]" />
-
-                                {/* Center sparkle - enhanced */}
-                                <div className="absolute inset-0 m-auto w-1.5 h-1.5 bg-white rounded-full opacity-100 shadow-[0_0_10px_5px_rgba(255,255,255,1)]" />
-                              </motion.div>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                      <span className="text-sm font-medium text-black dark:text-white relative z-10">
-                        Lower fees than Competitors!
-                      </span>
-                    </div>
-
-                    <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-gradient-to-r from-purple-500/10 to-violet-500/10 backdrop-blur-sm border border-white/10 shadow-sm relative overflow-hidden group">
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1500 ease-in-out"></div>
-                      <div className="relative">
-                        <FounderIcon className="mr-2 text-black dark:text-white" />
-                      </div>
-                      <span className="text-sm font-medium text-black dark:text-white relative z-10">
-                        Founder who's completed over 3k+ gig jobs
-                      </span>
-                    </div>
-                  </div>
-                </motion.div>
-                <motion.p
-                  className="max-w-[600px] md:text-xl leading-relaxed text-black dark:text-white"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.4 }}
-                >
-                  Empowering limitless connections, shaping the future of work.
-                </motion.p>
-              </div>
-              <motion.div
-                className="flex flex-col gap-3 min-[400px]:flex-row"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.6 }}
-              >
-                {/* Hero buttons removed */}
-              </motion.div>
-            </motion.div>
 
             {/* Enhanced Skill Accelerator UI - Now below the hero content and more horizontal */}
             <motion.div
@@ -1089,12 +957,21 @@ export function EnhancedHeroSection() {
               <div className="relative w-full max-w-full">
                 <motion.div
                   className="relative rounded-xl overflow-hidden bg-gradient-to-br from-purple-100/10 via-white/5 to-purple-50/10 dark:from-purple-900/10 dark:via-black/5 dark:to-purple-800/10 backdrop-blur-md p-3 sm:p-4 md:p-5 shadow-lg detailed-card"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1, y: 10 }}
-                  transition={{ duration: 0.6, delay: 0.4 }}
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{
+                    duration: 0.8,
+                    ease: [0.16, 1, 0.3, 1],
+                    delay: 0.4,
+                  }}
                   style={{
                     boxShadow: "0 0 40px 5px rgba(147, 51, 234, 0.25)",
                     border: "1px solid rgba(147, 51, 234, 0.2)",
+                  }}
+                  whileHover={{
+                    boxShadow: "0 0 60px 10px rgba(147, 51, 234, 0.3)",
+                    y: -5,
+                    transition: { duration: 0.5 },
                   }}
                 >
                   {/* Tech pattern overlay */}
@@ -1152,15 +1029,51 @@ export function EnhancedHeroSection() {
                     <div className="flex items-center justify-between lg:col-span-12">
                       <div className="flex items-center">
                         <div className="h-10 w-10 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center mr-3 relative group">
-                          <Rocket className="h-5 w-5 text-white" />
-                          <div className="absolute inset-0 rounded-full bg-white/30 scale-0 group-hover:scale-150" />
-                          <div className="absolute inset-0 rounded-full bg-white/30 scale-0 group-hover:scale-150 opacity-0 transition-all duration-700"></div>
+                          <motion.div
+                            animate={{
+                              y: [0, -3, 0],
+                              rotate: [0, 2, -2, 0],
+                            }}
+                            transition={{
+                              duration: 4,
+                              repeat: Number.POSITIVE_INFINITY,
+                              repeatType: "reverse",
+                              ease: "easeInOut",
+                            }}
+                          >
+                            <Rocket className="h-5 w-5 text-white" />
+                          </motion.div>
+                          <motion.div
+                            className="absolute inset-0 rounded-full bg-white/30 scale-0"
+                            whileHover={{ scale: 1.5, opacity: [0, 0.5, 0] }}
+                            transition={{ duration: 1 }}
+                          />
                           {/* Orbital rings around the rocket icon */}
-                          <div className="absolute inset-0 rounded-full border border-white/20 scale-[1.3] animate-pulse"></div>
-                          <div
-                            className="absolute inset-0 rounded-full border border-white/10 scale-[1.6] animate-pulse"
-                            style={{ animationDuration: "0.5s" }}
-                          ></div>
+                          <motion.div
+                            className="absolute inset-0 rounded-full border border-white/20"
+                            animate={{
+                              scale: [1.1, 1.3, 1.1],
+                              opacity: [0.7, 1, 0.7],
+                            }}
+                            transition={{
+                              duration: 3,
+                              repeat: Number.POSITIVE_INFINITY,
+                              ease: "easeInOut",
+                            }}
+                          />
+                          <motion.div
+                            className="absolute inset-0 rounded-full border border-white/10"
+                            animate={{
+                              scale: [1.4, 1.6, 1.4],
+                              opacity: [0.5, 0.8, 0.5],
+                            }}
+                            transition={{
+                              duration: 3.5,
+                              repeat: Number.POSITIVE_INFINITY,
+                              ease: "easeInOut",
+                              delay: 0.2,
+                            }}
+                          />
                         </div>
                         <h3 className="text-xl font-bold text-black dark:text-white">
                           Skill Accelerator
@@ -1181,39 +1094,58 @@ export function EnhancedHeroSection() {
 
                     <div className="flex flex-wrap gap-2 md:flex-nowrap overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide lg:col-span-12">
                       {skills.map((skill, index) => (
-                        <button
+                        <motion.button
                           key={index}
                           className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 flex items-center ${
                             activeSkill === index
-                              ? "bg-gradient-to-r from-primary to-purple-500 text-white"
+                              ? "bg-gradient-to-r from-primary to-purple-500 text-white shadow-lg shadow-primary/20"
                               : "bg-white/10 dark:bg-black/20 text-black dark:text-white hover:bg-white/20 dark:hover:bg-black/30"
                           }`}
                           onClick={() => setActiveSkill(index)}
                           onMouseEnter={() => setHoverSkill(index)}
                           onMouseLeave={() => setHoverSkill(null)}
+                          whileHover={{
+                            scale: 1.05,
+                            boxShadow: "0 10px 25px -5px rgba(147, 51, 234, 0.3)",
+                          }}
+                          whileTap={{ scale: 0.98 }}
                         >
                           <span className="mr-1.5">{skill.icon}</span>
                           {skill.name}
-                          {hoverSkill === index && <span className="ml-1.5 text-xs opacity-70">{skill.level}</span>}
+                          {hoverSkill === index && (
+                            <motion.span
+                              className="ml-1.5 text-xs opacity-0"
+                              animate={{ opacity: 0.7 }}
+                              transition={{ duration: 0.2 }}
+                            >
+                              {skill.level}
+                            </motion.span>
+                          )}
                           {activeSkill === index && (
                             <span className="ml-1.5 flex items-center">
-                              <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span>
+                              <motion.div
+                                className="h-1.5 w-1.5 rounded-full bg-white"
+                                animate={{ scale: [1, 1.5, 1] }}
+                                transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
+                              />
                             </span>
                           )}
-                        </button>
+                        </motion.button>
                       ))}
                     </div>
 
                     <div className="flex border-b border-white/10 overflow-x-auto -mx-1 px-1 scrollbar-hide md:justify-start lg:col-span-12">
                       {["overview", "learning", "projects", "forum", "analytics", "milestones"].map((tab) => (
-                        <button
+                        <motion.button
                           key={tab}
                           className={`px-2 sm:px-3 py-2 text-xs font-medium capitalize whitespace-nowrap transition-all duration-300 detailed-tab ${
                             activeTab === tab
-                              ? "active text-primary"
+                              ? "active text-primary relative"
                               : "text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white"
                           }`}
                           onClick={() => setActiveTab(tab)}
+                          whileHover={{ y: -1 }}
+                          whileTap={{ y: 0 }}
                         >
                           {tab === "overview" && <Compass className="h-3 w-3 inline mr-1" />}
                           {tab === "learning" && <BookOpen className="h-3 w-3 inline mr-1" />}
@@ -1223,9 +1155,17 @@ export function EnhancedHeroSection() {
                           {tab === "milestones" && <Trophy className="h-3 w-3 inline mr-1" />}
                           {tab}
                           {activeTab === tab && (
-                            <span className="ml-1 inline-block h-1 w-1 rounded-full bg-primary"></span>
+                            <motion.span
+                              className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/50 via-primary to-primary/50"
+                              layoutId="activeTabLine"
+                              transition={{
+                                type: "spring",
+                                stiffness: 500,
+                                damping: 30,
+                              }}
+                            />
                           )}
-                        </button>
+                        </motion.button>
                       ))}
                     </div>
 
@@ -1285,14 +1225,35 @@ export function EnhancedHeroSection() {
                                 <span className="font-medium text-black dark:text-white">{progress}%</span>
                               </div>
                               <div className="h-2 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden progress-track">
-                                <div
-                                  className="h-full rounded-full bg-gradient-to-r from-primary to-purple-500 relative"
-                                  style={{ width: `${progress}%`, transition: "width 0.5s ease-out" }}
-                                ></div>
+                                <motion.div
+                                  className="h-full rounded-full bg-gradient-to-r from-primary via-primary/80 to-purple-500 relative"
+                                  style={{ width: `${progress}%` }}
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${progress}%` }}
+                                  transition={{
+                                    duration: 1.5,
+                                    ease: [0.34, 1.56, 0.64, 1],
+                                  }}
+                                >
+                                  {/* Add animated shine effect */}
+                                  <motion.div
+                                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                                    animate={{
+                                      x: ["-100%", "100%"],
+                                    }}
+                                    transition={{
+                                      repeat: Number.POSITIVE_INFINITY,
+                                      repeatType: "loop",
+                                      duration: 2,
+                                      ease: "easeInOut",
+                                      delay: 0.5,
+                                    }}
+                                  />
+                                </motion.div>
                                 {/* Progress markers */}
-                                <div className="absolute top-0 left-1/4 h-full w-0.5 bg-white/20"></div>
-                                <div className="absolute top-0 left-1/2 h-full w-0.5 bg-white/20"></div>
-                                <div className="absolute top-0 left-3/4 h-full w-0.5 bg-white/20"></div>
+                                <div className="absolute top-0 left-1/4 h-full w-0.5 bg-white/10"></div>
+                                <div className="absolute top-0 left-1/2 h-full w-0.5 bg-white/10"></div>
+                                <div className="absolute top-0 left-3/4 h-full w-0.5 bg-white/10"></div>
                               </div>
                             </div>
 
@@ -1316,7 +1277,7 @@ export function EnhancedHeroSection() {
                                 <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent"></div>
                                 <div className="text-xs text-black/60 dark:text-white/60">Rating</div>
                                 <div className="font-bold text-black dark:text-white flex items-center justify-center">
-                                  4.8 <Star className="h-3 w-3 ml-0.5 text-yellow-400 fill-yellow-400" />
+                                  4.8 <Star className="h-4 w-4 ml-0.5 text-yellow-400 fill-yellow-400" />
                                 </div>
                               </div>
                               <div className="bg-white/5 dark:bg-black/10 rounded-md p-2 relative overflow-hidden">
@@ -1466,7 +1427,7 @@ export function EnhancedHeroSection() {
                                   <div>
                                     <div className="text-sm font-medium text-black dark:text-white">{project.name}</div>
                                     <div className="flex items-center mt-1">
-                                      <div className="px-2 py-0.5 rounded-full bg-white/10 dark:bg-black/30 text-xs mr-2">
+                                      <div className="px-2 py-0.5 rounded-full bg-white/10 dark:bg-black/30 text-xs">
                                         {project.difficulty}
                                       </div>
                                       <div className="text-xs text-black/60 dark:text-white/60">
@@ -1511,77 +1472,25 @@ export function EnhancedHeroSection() {
                       {/* Analytics Tab */}
                       {activeTab === "analytics" && (
                         <div className="space-y-4">
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="text-sm font-semibold text-black dark:text-white">Skill Analytics</h4>
-                            <div className="text-xs text-primary">Track your progress</div>
+                          <h4 className="text-sm font-semibold text-black dark:text-white">Earnings Growth</h4>
+                          <div className="relative h-52">
+                            <canvas ref={chartRef} className="w-full h-full" />
                           </div>
-
-                          <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3 border border-white/10">
-                            <div className="flex justify-between items-center mb-3">
-                              <h5 className="text-xs font-medium text-black dark:text-white">Earnings Projection</h5>
-                              <div className="text-xs text-black/60 dark:text-white/60">Based on skill advancement</div>
-                            </div>
-
-                            <div className="relative h-40 w-full">
-                              <canvas ref={chartRef} className="w-full h-full"></canvas>
-                            </div>
-
-                            <div className="flex justify-between mt-2 text-xs">
-                              <div className="text-black/60 dark:text-white/60">Current</div>
-                              <div className="text-black/60 dark:text-white/60">After advancement</div>
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-2">
-                            <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3 border border-white/10">
-                              <h5 className="text-xs font-medium text-black dark:text-white mb-2">Completion Time</h5>
-                              <div className="text-lg font-bold text-black dark:text-white">
-                                {skills[activeSkill].stats.avgCompletionTime}
-                              </div>
-                              <div className="text-xs text-black/60 dark:text-white/60">Average per project</div>
-                            </div>
-
-                            <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3 border border-white/10">
-                              <h5 className="text-xs font-medium text-black dark:text-white mb-2">
-                                Client Satisfaction
-                              </h5>
-                              <div className="text-lg font-bold text-black dark:text-white flex items-center">
-                                {skills[activeSkill].stats.clientSatisfaction}
-                                <Star className="h-4 w-4 ml-1 text-yellow-400 fill-yellow-400" />
-                              </div>
-                              <div className="text-xs text-black/60 dark:text-white/60">Based on reviews</div>
-                            </div>
-                          </div>
-
-                          <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3 border border-white/10">
-                            <h5 className="text-xs font-medium text-black dark:text-white mb-2">Top Earners</h5>
-                            <div className="text-lg font-bold text-black dark:text-white">
-                              {skills[activeSkill].stats.topEarners}
-                            </div>
-                            <div className="text-xs text-black/60 dark:text-white/60">In this skill category</div>
-                            <div className="mt-2 text-xs text-primary">
-                              You're in the top 40% of earners in this category
-                            </div>
-                          </div>
+                          <p className="text-xs text-black/60 dark:text-white/60">
+                            Track your earnings and see how your skills are growing over time.
+                          </p>
                         </div>
                       )}
 
                       {/* Milestones Tab */}
                       {activeTab === "milestones" && (
                         <div className="space-y-4">
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="text-sm font-semibold text-black dark:text-white">Skill Milestones</h4>
-                            <div className="text-xs text-primary">Unlock rewards</div>
-                          </div>
-
+                          <h4 className="text-sm font-semibold text-black dark:text-white">Skill Milestones</h4>
                           <div className="space-y-3">
                             {skills[activeSkill].milestones.map((milestone, index) => (
                               <div
                                 key={index}
-                                className={`p-3 rounded-lg bg-white/5 dark:bg-black/10 border ${
-                                  selectedMilestone === index ? "border-primary/30" : "border-white/10"
-                                } hover:border-primary/30 transition-all duration-300 relative overflow-hidden cursor-pointer`}
-                                onClick={() => setSelectedMilestone(selectedMilestone === index ? -1 : index)}
+                                className="p-3 rounded-lg bg-white/5 dark:bg-black/10 border border-white/10 hover:border-primary/30 transition-all duration-300 relative overflow-hidden"
                               >
                                 <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_10px_10px,rgba(var(--primary-rgb),0.4)_1px,transparent_1px)] bg-[length:20px_20px] pointer-events-none"></div>
 
@@ -1590,116 +1499,16 @@ export function EnhancedHeroSection() {
                                     <div className="text-sm font-medium text-black dark:text-white">
                                       {milestone.name}
                                     </div>
-                                    <div className="flex items-center mt-1">
-                                      <div className="text-xs text-black/60 dark:text-white/60">
-                                        Progress: {milestone.progress}/{milestone.total}
-                                      </div>
+                                    <div className="text-xs text-black/60 dark:text-white/60">
+                                      Progress: {milestone.progress} / {milestone.total}
                                     </div>
                                   </div>
-                                  <div className="text-right">
-                                    <div className="text-xs text-primary">Reward:</div>
-                                    <div className="text-xs font-medium text-black dark:text-white">
-                                      {milestone.reward}
-                                    </div>
-                                  </div>
+                                  <EnhancedButton variant="outline" size="sm" className="h-8 text-xs bg-white/5">
+                                    View
+                                  </EnhancedButton>
                                 </div>
-
-                                <div className="mt-2 h-1.5 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden progress-track">
-                                  <div
-                                    className="h-full rounded-full bg-gradient-to-r from-primary to-purple-500"
-                                    style={{ width: `${(milestone.progress / milestone.total) * 100}%` }}
-                                  ></div>
-                                </div>
-
-                                {selectedMilestone === index && (
-                                  <motion.div
-                                    initial={{ opacity: 0, height: 0 }}
-                                    animate={{ opacity: 1, height: "auto" }}
-                                    exit={{ opacity: 0, height: 0 }}
-                                    transition={{ duration: 0.3 }}
-                                    className="mt-3 pt-3 border-t border-white/10"
-                                  >
-                                    <div className="text-xs text-black/80 dark:text-white/80">
-                                      {milestone.name === "Complete 5 TV Mounts" && (
-                                        <p>
-                                          Complete 5 TV mounting projects to earn the Intermediate Badge, which will
-                                          increase your visibility to clients and allow you to charge higher rates.
-                                        </p>
-                                      )}
-                                      {milestone.name === "Earn 5 Client Reviews" && (
-                                        <p>
-                                          Receive 5 positive client reviews to earn a $50 bonus. Quality reviews help
-                                          build your reputation and attract more clients.
-                                        </p>
-                                      )}
-                                      {milestone.name === "Complete Hardware Course" && (
-                                        <p>
-                                          Finish the Hardware Course to earn a certificate that you can display on your
-                                          profile, demonstrating your expertise to potential clients.
-                                        </p>
-                                      )}
-                                      {milestone.name === "Complete 3 Full Moves" && (
-                                        <p>
-                                          Successfully complete 3 full moving projects to earn the Advanced Badge, which
-                                          will boost your ranking in search results.
-                                        </p>
-                                      )}
-                                      {milestone.name === "Zero Damage Reports" && (
-                                        <p>
-                                          Maintain a perfect record with no damage reports across 3 consecutive projects
-                                          to get featured on our homepage.
-                                        </p>
-                                      )}
-                                      {milestone.name === "Complete Safety Course" && (
-                                        <p>
-                                          Complete the Safety Course to earn a certificate that demonstrates your
-                                          commitment to safe moving practices.
-                                        </p>
-                                      )}
-                                      {milestone.name === "Complete 5 Room Paints" && (
-                                        <p>
-                                          Complete 5 room painting projects to earn the Expert Badge, which will allow
-                                          you to access premium clients and projects.
-                                        </p>
-                                      )}
-                                      {milestone.name === "Generate $2K in Revenue" && (
-                                        <p>
-                                          Earn $2,000 in painting projects to receive a $200 bonus as a reward for your
-                                          success and client satisfaction.
-                                        </p>
-                                      )}
-                                      {milestone.name === "Complete Finishes Course" && (
-                                        <p>
-                                          Finish the Specialty Finishes Course to earn a certificate that will help you
-                                          command premium rates for specialty painting services.
-                                        </p>
-                                      )}
-                                      {milestone.name === "Assemble 10 Furniture Pieces" && (
-                                        <p>
-                                          Successfully assemble 10 furniture pieces to earn the Intermediate Badge,
-                                          which will increase your visibility to clients.
-                                        </p>
-                                      )}
-                                    </div>
-                                  </motion.div>
-                                )}
                               </div>
                             ))}
-                          </div>
-
-                          <div className="mt-4 p-3 rounded-lg bg-primary/10 border border-primary/20">
-                            <div className="flex items-start">
-                              <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center mr-3 text-primary">
-                                <Trophy className="h-4 w-4" />
-                              </div>
-                              <div>
-                                <h4 className="text-sm font-semibold text-black dark:text-white">Milestone Rewards</h4>
-                                <p className="text-xs text-black/80 dark:text-white/80">
-                                  Complete milestones to earn badges, certificates, and bonuses that boost your earning
-                                  potential.
-                                </p>
-                              </div>
-                            </div>
                           </div>
                         </div>
                       )}

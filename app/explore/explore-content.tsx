@@ -1,31 +1,46 @@
 "use client"
 
-import type React from "react"
-
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
+import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Slider } from "@/components/ui/slider"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { ServiceCard } from "@/components/service-card"
-import { Filter, Search, SlidersHorizontal, X, Star, ChevronDown } from "lucide-react"
-import { motion } from "framer-motion"
+import { Filter, Search, SlidersHorizontal, X, Star, ArrowUpDown, Tag, Globe } from "lucide-react"
+import { MobileFilterModal, type FilterState } from "@/components/explore/mobile-filter-modal"
+import { FilterDropdown } from "@/components/explore/filter-dropdown"
 
 export default function ExploreContent() {
   const [isLoaded, setIsLoaded] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
-  const [priceRange, setPriceRange] = useState([0, 1000])
+  const [filters, setFilters] = useState<FilterState>({
+    categories: [
+      { id: "technology", name: "Technology", checked: false },
+      { id: "creative", name: "Creative", checked: false },
+      { id: "writing", name: "Writing", checked: false },
+      { id: "marketing", name: "Marketing", checked: false },
+      { id: "business", name: "Business", checked: false },
+    ],
+    priceRange: [0, 1000],
+    ratings: [
+      { id: "4.5", name: "4.5 & up", checked: false },
+      { id: "4.0", name: "4.0 & up", checked: false },
+      { id: "3.5", name: "3.5 & up", checked: false },
+      { id: "3.0", name: "3.0 & up", checked: false },
+    ],
+    locations: [
+      { id: "worldwide", name: "Worldwide", checked: false },
+      { id: "north-america", name: "North America", checked: false },
+      { id: "europe", name: "Europe", checked: false },
+      { id: "asia", name: "Asia", checked: false },
+      { id: "australia", name: "Australia", checked: false },
+    ],
+  })
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [selectedRating, setSelectedRating] = useState<string | null>(null)
-  const [sortOption, setSortOption] = useState("relevance")
-  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false)
-  const [sortDropdownOpen, setSortDropdownOpen] = useState(false)
-
-  const categoryDropdownRef = useRef<HTMLDivElement>(null)
-  const sortDropdownRef = useRef<HTMLDivElement>(null)
+  const [selectedLocation, setSelectedLocation] = useState<string | null>(null)
+  const [sortOption, setSortOption] = useState<string | null>("relevance")
 
   useEffect(() => {
     setIsLoaded(true)
@@ -46,6 +61,7 @@ export default function ExploreContent() {
       },
       tags: ["Web Design", "Responsive", "E-commerce"],
       category: "Technology",
+      location: "North America",
     },
     {
       id: "logo-design",
@@ -61,6 +77,7 @@ export default function ExploreContent() {
       },
       tags: ["Logo", "Branding", "Identity"],
       category: "Creative",
+      location: "Asia",
     },
     {
       id: "content-writing",
@@ -76,6 +93,7 @@ export default function ExploreContent() {
       },
       tags: ["SEO", "Content", "Copywriting"],
       category: "Writing",
+      location: "Europe",
     },
     {
       id: "social-media",
@@ -91,6 +109,7 @@ export default function ExploreContent() {
       },
       tags: ["Social Media", "Marketing", "Strategy"],
       category: "Marketing",
+      location: "North America",
     },
     {
       id: "app-development",
@@ -106,6 +125,7 @@ export default function ExploreContent() {
       },
       tags: ["iOS", "Android", "React Native"],
       category: "Technology",
+      location: "Asia",
     },
     {
       id: "video-editing",
@@ -121,6 +141,7 @@ export default function ExploreContent() {
       },
       tags: ["Video", "Editing", "Animation"],
       category: "Creative",
+      location: "Europe",
     },
     {
       id: "accounting",
@@ -136,6 +157,7 @@ export default function ExploreContent() {
       },
       tags: ["Accounting", "Bookkeeping", "Finance"],
       category: "Business",
+      location: "North America",
     },
     {
       id: "translation",
@@ -151,6 +173,7 @@ export default function ExploreContent() {
       },
       tags: ["Translation", "Localization", "Proofreading"],
       category: "Writing",
+      location: "Asia",
     },
     {
       id: "voice-over",
@@ -166,8 +189,64 @@ export default function ExploreContent() {
       },
       tags: ["Voice Over", "Narration", "Commercial"],
       category: "Creative",
+      location: "Europe",
     },
   ]
+
+  const filteredServices = services.filter((service) => {
+    // Filter by search query
+    const matchesSearch =
+      service.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      service.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+
+    // Filter by category
+    const matchesCategory = !selectedCategory || service.category === selectedCategory
+
+    // Filter by rating
+    const matchesRating = !selectedRating || service.rating >= Number.parseFloat(selectedRating)
+
+    // Filter by location
+    const matchesLocation = !selectedLocation || service.location === selectedLocation
+
+    // Filter by price range
+    const servicePrice = Number.parseInt(service.price.replace(/\D/g, ""))
+    const matchesPrice = servicePrice >= filters.priceRange[0] && servicePrice <= filters.priceRange[1]
+
+    return matchesSearch && matchesCategory && matchesRating && matchesLocation && matchesPrice
+  })
+
+  const resetFilters = () => {
+    setSearchQuery("")
+    setSelectedCategory(null)
+    setSelectedRating(null)
+    setSelectedLocation(null)
+    setFilters({
+      ...filters,
+      priceRange: [0, 1000],
+      categories: filters.categories.map((cat) => ({ ...cat, checked: false })),
+      ratings: filters.ratings.map((rating) => ({ ...rating, checked: false })),
+      locations: filters.locations.map((location) => ({ ...location, checked: false })),
+    })
+    setSortOption("relevance")
+  }
+
+  const countActiveFilters = () => {
+    let count = 0
+
+    if (selectedCategory) count++
+    if (selectedRating) count++
+    if (selectedLocation) count++
+
+    // Count checked categories, ratings, locations
+    count += filters.categories.filter((c) => c.checked).length
+    count += filters.ratings.filter((r) => r.checked).length
+    count += filters.locations.filter((l) => l.checked).length
+
+    // Count if price range is not default
+    if (filters.priceRange[0] > 0 || filters.priceRange[1] < 1000) count++
+
+    return count
+  }
 
   const categories = [
     { id: "all", name: "All Categories" },
@@ -186,54 +265,22 @@ export default function ExploreContent() {
     { id: "newest", name: "Newest" },
   ]
 
+  const locations = [
+    { id: "all", name: "All Locations" },
+    { id: "worldwide", name: "Worldwide" },
+    { id: "north-america", name: "North America" },
+    { id: "europe", name: "Europe" },
+    { id: "asia", name: "Asia" },
+    { id: "australia", name: "Australia" },
+  ]
+
   const ratings = [
+    { id: "all", name: "Any Rating" },
     { id: "4.5", name: "4.5 & up" },
     { id: "4.0", name: "4.0 & up" },
     { id: "3.5", name: "3.5 & up" },
     { id: "3.0", name: "3.0 & up" },
   ]
-
-  const filteredServices = services.filter((service) => {
-    // Filter by search query
-    const matchesSearch =
-      service.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      service.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-
-    // Filter by category
-    const matchesCategory = !selectedCategory || service.category === selectedCategory
-
-    // Filter by rating
-    const matchesRating = !selectedRating || service.rating >= Number.parseFloat(selectedRating)
-
-    // Filter by price range
-    const servicePrice = Number.parseInt(service.price.replace(/\D/g, ""))
-    const matchesPrice = servicePrice >= priceRange[0] && servicePrice <= priceRange[1]
-
-    return matchesSearch && matchesCategory && matchesRating && matchesPrice
-  })
-
-  const resetFilters = () => {
-    setSearchQuery("")
-    setPriceRange([0, 1000])
-    setSelectedCategory(null)
-    setSelectedRating(null)
-  }
-
-  // Close dropdowns when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target as Node)) {
-        setCategoryDropdownOpen(false)
-      }
-
-      if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target as Node)) {
-        setSortDropdownOpen(false)
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
 
   const FiltersContent = () => (
     <div className="space-y-6">
@@ -246,16 +293,30 @@ export default function ExploreContent() {
       <div className="space-y-4">
         <h4 className="font-medium">Category</h4>
         <div className="space-y-2">
-          {categories.slice(1).map((category) => (
+          {filters.categories.map((category) => (
             <div key={category.id} className="flex items-center space-x-2">
-              <Checkbox
+              <input
+                type="checkbox"
                 id={`category-${category.id}`}
-                checked={selectedCategory === category.name}
-                onCheckedChange={() => {
-                  setSelectedCategory(selectedCategory === category.name ? null : category.name)
+                checked={category.checked}
+                onChange={() => {
+                  setFilters((prev) => ({
+                    ...prev,
+                    categories: prev.categories.map((cat) =>
+                      cat.id === category.id ? { ...cat, checked: !cat.checked } : cat,
+                    ),
+                  }))
+
+                  // Also update the dropdown selection if needed
+                  if (!category.checked) {
+                    setSelectedCategory(category.name)
+                  } else if (category.name === selectedCategory) {
+                    setSelectedCategory(null)
+                  }
                 }}
+                className="rounded border-gray-300"
               />
-              <Label htmlFor={`category-${category.id}`}>{category.name}</Label>
+              <label htmlFor={`category-${category.id}`}>{category.name}</label>
             </div>
           ))}
         </div>
@@ -264,10 +325,23 @@ export default function ExploreContent() {
       <div className="space-y-4">
         <h4 className="font-medium">Price Range</h4>
         <div className="space-y-4">
-          <Slider defaultValue={[0, 1000]} max={1000} step={10} value={priceRange} onValueChange={setPriceRange} />
+          <input
+            type="range"
+            min={0}
+            max={1000}
+            step={10}
+            value={filters.priceRange[1]}
+            onChange={(e) =>
+              setFilters((prev) => ({
+                ...prev,
+                priceRange: [prev.priceRange[0], Number.parseInt(e.target.value)],
+              }))
+            }
+            className="w-full"
+          />
           <div className="flex items-center justify-between">
-            <span>${priceRange[0]}</span>
-            <span>${priceRange[1]}</span>
+            <span>${filters.priceRange[0]}</span>
+            <span>${filters.priceRange[1]}</span>
           </div>
         </div>
       </div>
@@ -275,19 +349,31 @@ export default function ExploreContent() {
       <div className="space-y-4">
         <h4 className="font-medium">Rating</h4>
         <div className="space-y-2">
-          {ratings.map((rating) => (
+          {filters.ratings.map((rating) => (
             <div key={rating.id} className="flex items-center space-x-2">
-              <Checkbox
+              <input
+                type="checkbox"
                 id={`rating-${rating.id}`}
-                checked={selectedRating === rating.id}
-                onCheckedChange={() => {
-                  setSelectedRating(selectedRating === rating.id ? null : rating.id)
+                checked={rating.checked}
+                onChange={() => {
+                  setFilters((prev) => ({
+                    ...prev,
+                    ratings: prev.ratings.map((r) => (r.id === rating.id ? { ...r, checked: !r.checked } : r)),
+                  }))
+
+                  // Also update the dropdown selection if needed
+                  if (!rating.checked) {
+                    setSelectedRating(rating.id)
+                  } else if (rating.id === selectedRating) {
+                    setSelectedRating(null)
+                  }
                 }}
+                className="rounded border-gray-300"
               />
-              <Label htmlFor={`rating-${rating.id}`} className="flex items-center gap-1">
+              <label htmlFor={`rating-${rating.id}`} className="flex items-center">
                 {rating.name}
-                <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-              </Label>
+                <Star className="h-3 w-3 ml-1 fill-yellow-400 text-yellow-400" />
+              </label>
             </div>
           ))}
         </div>
@@ -295,112 +381,49 @@ export default function ExploreContent() {
     </div>
   )
 
-  // Simple dropdown component that doesn't use any shadcn components
-  const SimpleDropdown = ({
-    options,
-    value,
-    onChange,
-    placeholder,
-    isOpen,
-    setIsOpen,
-    dropdownRef,
-  }: {
-    options: { id: string; name: string }[]
-    value: string | null
-    onChange: (value: string | null) => void
-    placeholder: string
-    isOpen: boolean
-    setIsOpen: (isOpen: boolean) => void
-    dropdownRef: React.RefObject<HTMLDivElement>
-  }) => {
-    const handleClick = (e: React.MouseEvent) => {
-      e.stopPropagation()
-      setIsOpen(!isOpen)
-    }
-
-    const selectedOption = value ? options.find((option) => option.id === value || option.name === value) : options[0]
-
-    return (
-      <div className="relative" ref={dropdownRef}>
-        <button
-          type="button"
-          className="flex items-center justify-between w-full px-3 py-2 text-sm border rounded-md shadow-sm bg-background hover:bg-accent"
-          onClick={handleClick}
-        >
-          <span>{value ? selectedOption?.name : placeholder}</span>
-          <ChevronDown className="w-4 h-4 ml-2" />
-        </button>
-
-        {isOpen && (
-          <div className="absolute z-10 w-full mt-1 bg-background border rounded-md shadow-lg">
-            <div className="py-1">
-              {options.map((option) => (
-                <button
-                  key={option.id}
-                  type="button"
-                  className={`block w-full px-4 py-2 text-left text-sm hover:bg-accent ${
-                    value === option.id || value === option.name ? "bg-accent/50" : ""
-                  }`}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onChange(option.id === "all" ? null : option.name)
-                    setIsOpen(false)
-                  }}
-                >
-                  {option.name}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    )
-  }
-
-  // Simple modal for mobile filters
-  const MobileFiltersModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
-    if (!isOpen) return null
-
-    return (
-      <div className="fixed inset-0 z-50 flex items-start justify-center sm:items-center">
-        <div className="fixed inset-0 bg-black/50" onClick={onClose}></div>
-        <div className="z-50 w-full max-w-md p-6 mx-auto bg-background rounded-lg shadow-lg max-h-[90vh] overflow-auto">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">Filters</h2>
-            <Button variant="ghost" size="icon" onClick={onClose}>
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-          <FiltersContent />
-          <div className="mt-6 flex justify-end">
-            <Button onClick={onClose}>Apply Filters</Button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <main className="flex-1 py-8">
       <div className="container px-4 md:px-6">
-        <div className="mb-8">
+        <motion.div
+          className="mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
           <h1 className="text-3xl font-bold tracking-tight mb-2">Explore Services</h1>
           <p className="text-muted-foreground">Find the perfect service for your needs from our talented providers.</p>
-        </div>
+        </motion.div>
         <div className="flex flex-col md:flex-row gap-8">
           {/* Desktop Filters */}
-          <div className="hidden md:block w-64 shrink-0">
+          <motion.div
+            className="hidden md:block w-64 shrink-0"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
             <FiltersContent />
-          </div>
+          </motion.div>
 
           {/* Mobile Filters Modal */}
-          <MobileFiltersModal isOpen={mobileFiltersOpen} onClose={() => setMobileFiltersOpen(false)} />
+          <MobileFilterModal
+            isOpen={mobileFiltersOpen}
+            onOpenChange={setMobileFiltersOpen}
+            filters={filters}
+            setFilters={setFilters}
+            onResetFilters={resetFilters}
+            countActiveFilters={countActiveFilters}
+          />
 
           <div className="flex-1">
-            <div className="flex flex-col gap-4 mb-6">
+            <motion.div
+              className="flex flex-col gap-4 mb-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
               <div className="flex items-center gap-2">
                 <div className="relative flex-1">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     type="search"
                     placeholder="Search for services..."
@@ -410,16 +433,25 @@ export default function ExploreContent() {
                   />
                 </div>
 
-                {/* Simple dropdown for categories */}
-                <div className="w-[180px]">
-                  <SimpleDropdown
+                {/* Category Dropdown */}
+                <div className="w-[180px] hidden md:block">
+                  <FilterDropdown
+                    label="All Categories"
                     options={categories}
                     value={selectedCategory}
                     onChange={setSelectedCategory}
-                    placeholder="All Categories"
-                    isOpen={categoryDropdownOpen}
-                    setIsOpen={setCategoryDropdownOpen}
-                    dropdownRef={categoryDropdownRef}
+                    icon={<Tag className="h-4 w-4" />}
+                  />
+                </div>
+
+                {/* Location Dropdown (desktop only) */}
+                <div className="w-[180px] hidden lg:block">
+                  <FilterDropdown
+                    label="All Locations"
+                    options={locations}
+                    value={selectedLocation}
+                    onChange={setSelectedLocation}
+                    icon={<Globe className="h-4 w-4" />}
                   />
                 </div>
 
@@ -429,7 +461,14 @@ export default function ExploreContent() {
                 </Button>
               </div>
               <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">Showing {filteredServices.length} results</p>
+                <p className="text-sm text-muted-foreground">
+                  Showing {filteredServices.length} results
+                  {countActiveFilters() > 0 && (
+                    <Button variant="ghost" size="sm" className="ml-2 h-7 px-2 text-xs" onClick={resetFilters}>
+                      <X className="h-3 w-3 mr-1" /> Clear filters
+                    </Button>
+                  )}
+                </p>
                 <div className="flex items-center gap-2">
                   <Button
                     variant="ghost"
@@ -437,24 +476,28 @@ export default function ExploreContent() {
                     className="md:hidden gap-1"
                     onClick={() => setMobileFiltersOpen(true)}
                   >
-                    <Filter className="h-4 w-4" /> Filters
+                    <Filter className="h-4 w-4" />
+                    Filters
+                    {countActiveFilters() > 0 && (
+                      <span className="ml-1 w-5 h-5 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center">
+                        {countActiveFilters()}
+                      </span>
+                    )}
                   </Button>
 
-                  {/* Simple dropdown for sort options */}
-                  <div className="w-[140px]">
-                    <SimpleDropdown
+                  {/* Sort Dropdown */}
+                  <div className="w-[160px]">
+                    <FilterDropdown
+                      label="Sort by"
                       options={sortOptions}
                       value={sortOption}
                       onChange={(value) => setSortOption(value || "relevance")}
-                      placeholder="Sort by"
-                      isOpen={sortDropdownOpen}
-                      setIsOpen={setSortDropdownOpen}
-                      dropdownRef={sortDropdownRef}
+                      icon={<ArrowUpDown className="h-4 w-4" />}
                     />
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {filteredServices.length > 0 ? (
               <motion.div
@@ -466,22 +509,33 @@ export default function ExploreContent() {
                 }}
               >
                 {filteredServices.map((service, index) => (
-                  <ServiceCard
+                  <motion.div
                     key={service.id}
-                    id={service.id}
-                    image={service.image}
-                    title={service.title}
-                    price={service.price}
-                    rating={service.rating}
-                    reviews={service.reviews}
-                    provider={service.provider}
-                    tags={service.tags}
-                    delay={index}
-                  />
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.05 }}
+                  >
+                    <ServiceCard
+                      id={service.id}
+                      image={service.image}
+                      title={service.title}
+                      price={service.price}
+                      rating={service.rating}
+                      reviews={service.reviews}
+                      provider={service.provider}
+                      tags={service.tags}
+                      delay={index}
+                    />
+                  </motion.div>
                 ))}
               </motion.div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
+              <motion.div
+                className="flex flex-col items-center justify-center py-12 text-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+              >
                 <div className="rounded-full bg-muted p-6 mb-4">
                   <Search className="h-10 w-10 text-muted-foreground" />
                 </div>
@@ -490,7 +544,20 @@ export default function ExploreContent() {
                   We couldn't find any services matching your search criteria.
                 </p>
                 <Button onClick={resetFilters}>Clear Filters</Button>
-              </div>
+              </motion.div>
+            )}
+
+            {filteredServices.length > 0 && (
+              <motion.div
+                className="mt-8 flex justify-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
+                <Button variant="outline" className="gap-2">
+                  Load More <ArrowUpDown className="h-4 w-4" />
+                </Button>
+              </motion.div>
             )}
           </div>
         </div>
