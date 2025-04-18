@@ -7,41 +7,54 @@ import { revalidatePath } from "next/cache"
 // This function should be called before attempting to insert data
 async function ensureWaitlistTable(supabase: any) {
   try {
-    // Try to create the waitlist table if it doesn't exist
-    const { error: createTableError } = await supabase.rpc("exec", {
-      query: `
-        CREATE TABLE IF NOT EXISTS waitlist (
-          id SERIAL PRIMARY KEY,
-          name TEXT NOT NULL,
-          email TEXT NOT NULL UNIQUE,
-          message TEXT,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-        );
-      `,
-    })
+    // Check if the table exists by attempting a simple query
+    const { error: checkError } = await supabase.from("waitlist").select("count(*)").limit(1).single()
 
-    if (createTableError) {
-      console.log(
-        "Note: Could not create waitlist table via RPC. This is expected if using anon key:",
-        createTableError.message,
-      )
+    // If the table doesn't exist, log it
+    if (checkError && checkError.message?.includes("relation") && checkError.message?.includes("does not exist")) {
+      console.log("Waitlist table doesn't exist. Creating it now...")
 
-      // Try direct SQL query as fallback
-      const { error: directQueryError } = await supabase.from("waitlist").select("count(*)").limit(1)
+      // Try to create the table
+      const { error: createError } = await supabase.rpc("exec", {
+        query: `
+          CREATE TABLE IF NOT EXISTS waitlist (
+            id SERIAL PRIMARY KEY,
+            name TEXT NOT NULL,
+            email TEXT NOT NULL UNIQUE,
+            message TEXT,
+            role TEXT,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+          );
+        `,
+      })
 
-      if (
-        directQueryError &&
-        directQueryError.message?.includes("relation") &&
-        directQueryError.message?.includes("does not exist")
-      ) {
-        console.log("Waitlist table doesn't exist. Please create it manually in your Supabase dashboard.")
+      if (createError) {
+        console.error("Error creating waitlist table:", createError)
+        return false
+      }
+
+      return true
+    }
+
+    // Check if the 'role' column exists
+    const { data: columnData, error: columnError } = await supabase.from("waitlist").select("role").limit(1)
+
+    if (columnError && columnError.message?.includes('column "role" does not exist')) {
+      console.log("Role column does not exist. Adding it now...")
+
+      const { error: alterError } = await supabase.rpc("exec", {
+        query: `ALTER TABLE waitlist ADD COLUMN role TEXT;`,
+      })
+
+      if (alterError) {
+        console.error("Error adding 'role' column:", alterError)
         return false
       }
     }
 
     return true
   } catch (err) {
-    console.log("Error checking waitlist table:", err)
+    console.error("Error checking waitlist table:", err)
     return false
   }
 }
@@ -50,8 +63,17 @@ export async function joinWaitlist(
   formData: FormData | { name: string; email: string; role?: string; message?: string },
 ) {
   try {
-    // Create Supabase client (will return mock client if credentials are missing)
+    console.log("Starting waitlist submission process...")
+
+    // Create Supabase client
     const supabase = createServerClient()
+    if (!supabase) {
+      console.error("Failed to create Supabase client")
+      return {
+        success: false,
+        message: "Database connection error. Please try again later.",
+      }
+    }
 
     // Handle both FormData objects and plain objects
     let name, email, role, userMessage
@@ -68,21 +90,31 @@ export async function joinWaitlist(
       userMessage = formData.message || ""
     }
 
-    // Combine role and message into a single message field
-    const message = `Role: ${role}
+    console.log("Form data extracted:", { name, email, role })
 
-Feedback: ${userMessage}`
-
+    // Validate inputs
     if (!name || !email) {
+      console.log("Missing required fields")
       return {
         success: false,
         message: "Name and email are required",
       }
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      console.log("Invalid email format:", email)
+      return {
+        success: false,
+        message: "Please enter a valid email address",
+      }
+    }
+
     // Ensure the waitlist table exists
     const tableExists = await ensureWaitlistTable(supabase)
     if (!tableExists) {
+      console.error("Table does not exist and could not be created")
       return {
         success: false,
         message: "Database setup issue. Please contact support.",
@@ -95,20 +127,10 @@ Feedback: ${userMessage}`
       .from("waitlist")
       .select("email")
       .eq("email", email)
-      .single()
+      .maybeSingle()
 
     if (lookupError && lookupError.code !== "PGRST116") {
       console.error("Error checking existing user:", lookupError)
-
-      // If the error is about the relation not existing, the table might not exist
-      if (lookupError.message?.includes("relation") && lookupError.message?.includes("does not exist")) {
-        console.log("The waitlist table might not exist in your Supabase database.")
-        return {
-          success: false,
-          message: "Database setup issue. Please contact support.",
-        }
-      }
-
       return {
         success: false,
         message: "Error checking waitlist. Please try again.",
@@ -123,42 +145,76 @@ Feedback: ${userMessage}`
       }
     }
 
-    // Insert new waitlist entry - only using the existing columns
-    console.log("Inserting new waitlist entry:", { name, email, message })
-    const { error } = await supabase.from("waitlist").insert([{ name, email, message }])
+    // Insert new waitlist entry
+    console.log("Inserting new waitlist entry:", { name, email, role, message: userMessage })
 
-    if (error) {
-      console.error("Error inserting waitlist entry:", error)
-
-      // If the error is about the relation not existing, the table might not exist
-      if (error.message?.includes("relation") && error.message?.includes("does not exist")) {
-        console.log("The waitlist table might not exist in your Supabase database.")
-        return {
-          success: false,
-          message: "Database setup issue. Please contact support.",
-        }
-      }
-
-      // If it's a unique violation, the email already exists
-      if (error.code === "23505") {
-        return {
-          success: false,
-          message: "This email is already on our waitlist",
-        }
-      }
-
-      return {
-        success: false,
-        message: "Failed to join waitlist. Please try again.",
-      }
+    // Create a base object without the role field
+    const insertData = {
+      name,
+      email,
+      message: userMessage,
     }
 
-    console.log("Successfully added to waitlist:", email)
-    revalidatePath("/admin/waitlist")
+    // Try to insert with role field first
+    try {
+      const { error } = await supabase.from("waitlist").insert([
+        {
+          ...insertData,
+          role: role,
+        },
+      ])
 
-    return {
-      success: true,
-      message: "Successfully joined the waitlist!",
+      // If there's an error about the role column, try again without it
+      if (error && error.message && error.message.includes("role")) {
+        console.log("Role column not found, trying without role field")
+        const { error: retryError } = await supabase.from("waitlist").insert([insertData])
+
+        if (retryError) {
+          console.error("Error inserting waitlist entry (retry):", retryError)
+
+          // If it's a unique violation, the email already exists
+          if (retryError.code === "23505") {
+            return {
+              success: false,
+              message: "This email is already on our waitlist",
+            }
+          }
+
+          return {
+            success: false,
+            message: "Failed to join waitlist. Please try again.",
+          }
+        }
+      } else if (error) {
+        console.error("Error inserting waitlist entry:", error)
+
+        // If it's a unique violation, the email already exists
+        if (error.code === "23505") {
+          return {
+            success: false,
+            message: "This email is already on our waitlist",
+          }
+        }
+
+        return {
+          success: false,
+          message: "Failed to join waitlist. Please try again.",
+        }
+      }
+
+      console.log("Successfully added to waitlist:", email)
+      revalidatePath("/admin/waitlist")
+
+      return {
+        success: true,
+        message: "Successfully joined the waitlist!",
+      }
+    } catch (error) {
+      console.error("Error in joinWaitlist insert operation:", error)
+      return {
+        success: false,
+        message: "An unexpected error occurred. Please try again later.",
+      }
     }
   } catch (error) {
     console.error("Error in joinWaitlist:", error)
@@ -171,7 +227,7 @@ Feedback: ${userMessage}`
 
 export async function getWaitlistEntries() {
   try {
-    // Create Supabase client (will return mock client if credentials are missing)
+    // Create Supabase client
     const supabase = createServerClient()
 
     const { data, error } = await supabase.from("waitlist").select("*").order("created_at", { ascending: false })

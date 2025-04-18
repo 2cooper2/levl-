@@ -3,13 +3,13 @@
 import { motion, useAnimation } from "framer-motion"
 import { useEffect, useRef, useState } from "react"
 
-interface AnimatedTextDividerProps {
+interface MountainDividerProps {
   firstText: string
   secondText: string
   className?: string
 }
 
-export function AnimatedTextDivider({ firstText, secondText, className = "" }: AnimatedTextDividerProps) {
+export function MountainDivider({ firstText, secondText, className = "" }: MountainDividerProps) {
   const dividerRef = useRef<HTMLDivElement>(null)
   const controls = useAnimation()
   const [hovered, setHovered] = useState(false)
@@ -18,16 +18,6 @@ export function AnimatedTextDivider({ firstText, secondText, className = "" }: A
   useEffect(() => {
     controls.start("visible")
   }, [controls])
-
-  // Generate particles for background effect
-  const particles = Array.from({ length: 20 }).map((_, i) => ({
-    id: i,
-    size: Math.random() * 4 + 2,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    duration: Math.random() * 20 + 10,
-    delay: Math.random() * 5,
-  }))
 
   return (
     <div
@@ -42,76 +32,16 @@ export function AnimatedTextDivider({ firstText, secondText, className = "" }: A
       {/* Subtle grid pattern overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:20px_20px] opacity-30"></div>
 
-      {/* No animated particles */}
-
-      {/* Enhanced wave effect with multiple detailed layers for depth */}
+      {/* Mountain range silhouette */}
       <div className="absolute bottom-0 left-0 right-0 h-24 overflow-hidden">
-        {/* First wave layer - most detailed with ripples */}
         <svg className="absolute bottom-0 left-0 right-0 w-full h-24" viewBox="0 0 1440 120" preserveAspectRatio="none">
           <motion.path
-            d="M0,64 C48,74 96,84 144,80 C192,76 240,58 288,58 C336,58 384,76 432,80 C480,84 528,74 576,69 C624,64 672,64 720,69 C768,74 816,84 864,80 C912,76 960,58 1008,53 C1056,48 1104,56 1152,64 C1200,72 1248,80 1296,80 C1344,80 1392,72 1440,64 L1440,120 L0,120 Z"
-            fill="url(#gradient1)"
+            d="M0,120 L60,110 L120,90 L180,100 L240,80 L300,95 L360,85 L420,100 L480,70 L540,90 L600,80 L660,95 L720,75 L780,85 L840,65 L900,80 L960,60 L1020,85 L1080,70 L1140,90 L1200,75 L1260,95 L1320,80 L1380,100 L1440,90 L1440,120 L0,120 Z"
+            fill="url(#mountainGradient1)"
             animate={{
               d: [
-                "M0,64 C48,74 96,84 144,80 C192,76 240,58 288,58 C336,58 384,76 432,80 C480,84 528,74 576,69 C624,64 672,64 720,69 C768,74 816,84 864,80 C912,76 960,58 1008,53 C1056,48 1104,56 1152,64 C1200,72 1248,80 1296,80 C1344,80 1392,72 1440,64 L1440,120 L0,120 Z",
-                "M0,80 C48,69 96,58 144,64 C192,69 240,90 288,90 C336,90 384,69 432,64 C480,58 528,69 576,74 C624,80 672,80 720,74 C768,69 816,58 864,64 C912,69 960,90 1008,96 C1056,101 1104,90 1152,80 C1200,69 1248,58 1296,58 C1344,58 1392,69 1440,80 L1440,120 L0,120 Z",
-                "M0,64 C48,74 96,84 144,80 C192,76 240,58 288,58 C336,58 384,76 432,80 C480,84 528,74 576,69 C624,64 672,64 720,69 C768,74 816,84 864,80 C912,76 960,58 1008,53 C1056,48 1104,56 1152,64 C1200,72 1248,80 1296,80 C1344,80 1392,72 1440,64 L1440,120 L0,120 Z",
-              ],
-            }}
-            transition={{
-              duration: 15,
-              repeat: Number.POSITIVE_INFINITY,
-              repeatType: "mirror",
-              ease: "easeInOut",
-            }}
-          />
-          <defs>
-            <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="rgba(96, 165, 250, 0.6)" />
-              <stop offset="50%" stopColor="rgba(168, 85, 247, 0.6)" />
-              <stop offset="100%" stopColor="rgba(96, 165, 250, 0.6)" />
-            </linearGradient>
-          </defs>
-        </svg>
-
-        {/* Second wave layer - medium detail with different phase */}
-        <svg className="absolute bottom-0 left-0 right-0 w-full h-20" viewBox="0 0 1440 120" preserveAspectRatio="none">
-          <motion.path
-            d="M0,96 C240,56 480,136 720,96 C960,56 1200,136 1440,96 L1440,120 L0,120 Z"
-            fill="url(#gradient2)"
-            animate={{
-              d: [
-                "M0,96 C240,56 480,136 720,96 C960,56 1200,136 1440,96 L1440,120 L0,120 Z",
-                "M0,80 C240,120 480,40 720,80 C960,120 1200,40 1440,80 L1440,120 L0,120 Z",
-                "M0,96 C240,56 480,136 720,96 C960,56 1200,136 1440,96 L1440,120 L0,120 Z",
-              ],
-            }}
-            transition={{
-              duration: 18,
-              repeat: Number.POSITIVE_INFINITY,
-              repeatType: "mirror",
-              ease: "easeInOut",
-            }}
-          />
-          <defs>
-            <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="rgba(96, 165, 250, 0.4)" />
-              <stop offset="50%" stopColor="rgba(168, 85, 247, 0.4)" />
-              <stop offset="100%" stopColor="rgba(96, 165, 250, 0.4)" />
-            </linearGradient>
-          </defs>
-        </svg>
-
-        {/* Third wave layer - subtle background waves */}
-        <svg className="absolute bottom-0 left-0 right-0 w-full h-16" viewBox="0 0 1440 120" preserveAspectRatio="none">
-          <motion.path
-            d="M0,105 C160,90 320,120 480,105 C640,90 800,75 960,90 C1120,105 1280,120 1440,105 L1440,120 L0,120 Z"
-            fill="url(#gradient3)"
-            animate={{
-              d: [
-                "M0,105 C160,90 320,120 480,105 C640,90 800,75 960,90 C1120,105 1280,120 1440,105 L1440,120 L0,120 Z",
-                "M0,90 C160,105 320,75 480,90 C640,105 800,120 960,105 C1120,90 1280,75 1440,90 L1440,120 L0,120 Z",
-                "M0,105 C160,90 320,120 480,105 C640,90 800,75 960,90 C1120,105 1280,120 1440,105 L1440,120 L0,120 Z",
+                "M0,120 L60,110 L120,90 L180,100 L240,80 L300,95 L360,85 L420,100 L480,70 L540,90 L600,80 L660,95 L720,75 L780,85 L840,65 L900,80 L960,60 L1020,85 L1080,70 L1140,90 L1200,75 L1260,95 L1320,80 L1380,100 L1440,90 L1440,120 L0,120 Z",
+                "M0,120 L60,105 L120,95 L180,90 L240,85 L300,90 L360,80 L420,95 L480,75 L540,85 L600,75 L660,90 L720,70 L780,80 L840,60 L900,75 L960,65 L1020,80 L1080,65 L1140,85 L1200,70 L1260,90 L1320,75 L1380,95 L1440,85 L1440,120 L0,120 Z",
               ],
             }}
             transition={{
@@ -122,17 +52,44 @@ export function AnimatedTextDivider({ firstText, secondText, className = "" }: A
             }}
           />
           <defs>
-            <linearGradient id="gradient3" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="rgba(96, 165, 250, 0.2)" />
-              <stop offset="50%" stopColor="rgba(168, 85, 247, 0.2)" />
-              <stop offset="100%" stopColor="rgba(96, 165, 250, 0.2)" />
+            <linearGradient id="mountainGradient1" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="rgba(96, 165, 250, 0.8)" />
+              <stop offset="50%" stopColor="rgba(168, 85, 247, 0.8)" />
+              <stop offset="100%" stopColor="rgba(96, 165, 250, 0.8)" />
             </linearGradient>
           </defs>
         </svg>
 
-        {/* Shimmer effect across waves */}
+        {/* Second mountain range (darker, further back) */}
+        <svg className="absolute bottom-0 left-0 right-0 w-full h-20" viewBox="0 0 1440 120" preserveAspectRatio="none">
+          <motion.path
+            d="M0,120 L120,100 L240,110 L360,90 L480,105 L600,95 L720,110 L840,90 L960,105 L1080,85 L1200,100 L1320,90 L1440,105 L1440,120 L0,120 Z"
+            fill="url(#mountainGradient2)"
+            animate={{
+              d: [
+                "M0,120 L120,100 L240,110 L360,90 L480,105 L600,95 L720,110 L840,90 L960,105 L1080,85 L1200,100 L1320,90 L1440,105 L1440,120 L0,120 Z",
+                "M0,120 L120,105 L240,100 L360,95 L480,100 L600,90 L720,105 L840,95 L960,100 L1080,90 L1200,105 L1320,95 L1440,100 L1440,120 L0,120 Z",
+              ],
+            }}
+            transition={{
+              duration: 25,
+              repeat: Number.POSITIVE_INFINITY,
+              repeatType: "mirror",
+              ease: "easeInOut",
+            }}
+          />
+          <defs>
+            <linearGradient id="mountainGradient2" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="rgba(96, 165, 250, 0.5)" />
+              <stop offset="50%" stopColor="rgba(168, 85, 247, 0.5)" />
+              <stop offset="100%" stopColor="rgba(96, 165, 250, 0.5)" />
+            </linearGradient>
+          </defs>
+        </svg>
+
+        {/* Shimmer effect across mountains */}
         <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
           animate={{
             x: ["-100%", "100%"],
           }}

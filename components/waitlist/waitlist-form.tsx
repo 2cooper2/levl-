@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,38 +13,53 @@ import { Label } from "@/components/ui/label"
 
 interface WaitlistFormProps {
   onSuccess?: () => void
+  showName?: boolean
 }
 
-export function WaitlistForm({ onSuccess }: WaitlistFormProps) {
+export function WaitlistForm({ onSuccess, showName = true }: WaitlistFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [debugInfo, setDebugInfo] = useState<string | null>(null)
   const [role, setRole] = useState<string>("client")
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [message, setMessage] = useState("")
 
-  async function handleSubmit(formData: FormData) {
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
     setIsSubmitting(true)
     setError(null)
     setDebugInfo(null)
 
     try {
-      // Add the role to the form data
+      // Create FormData object
+      const formData = new FormData()
+      formData.append("name", name)
+      formData.append("email", email)
       formData.append("role", role)
+      formData.append("message", message)
+
+      console.log("Submitting waitlist form:", { name, email, role, message })
 
       const result = await joinWaitlist(formData)
 
       if (result.success) {
+        console.log("Waitlist submission successful")
         setIsSuccess(true)
+        // Clear form
+        setName("")
+        setEmail("")
+        setMessage("")
+
         if (onSuccess) {
           setTimeout(() => {
             onSuccess()
           }, 2000)
         }
       } else {
+        console.error("Waitlist submission failed:", result.message)
         setError(result.message || "Something went wrong. Please try again.")
-
-        // Check console logs for more information
-        console.error("Waitlist submission error:", result.message)
         setDebugInfo(
           "The issue might be that the waitlist table doesn't exist in your Supabase database or there are permission issues.",
         )
@@ -71,19 +88,24 @@ export function WaitlistForm({ onSuccess }: WaitlistFormProps) {
   }
 
   return (
-    <form action={handleSubmit} className="space-y-4 py-4">
+    <form onSubmit={handleSubmit} className="space-y-4 py-4">
+      {showName && (
+        <div className="space-y-2">
+          <Input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Your name"
+            required
+            className="w-full px-4 py-2 text-base"
+            autoComplete="name"
+          />
+        </div>
+      )}
+
       <div className="space-y-2">
         <Input
-          name="name"
-          placeholder="Your name"
-          required
-          className="w-full px-4 py-2 text-base"
-          autoComplete="name"
-        />
-      </div>
-      <div className="space-y-2">
-        <Input
-          name="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           type="email"
           placeholder="Your email"
           required
@@ -94,7 +116,7 @@ export function WaitlistForm({ onSuccess }: WaitlistFormProps) {
 
       <div className="space-y-3">
         <Label className="text-sm font-medium">I am interested in joining as:</Label>
-        <RadioGroup defaultValue="client" value={role} onValueChange={setRole} className="flex flex-col space-y-3">
+        <RadioGroup value={role} onValueChange={setRole} className="flex flex-col space-y-3">
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="client" id="client" />
             <Label htmlFor="client" className="cursor-pointer text-base">
@@ -118,11 +140,13 @@ export function WaitlistForm({ onSuccess }: WaitlistFormProps) {
 
       <div className="space-y-2">
         <Textarea
-          name="message"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
           placeholder="Give us feedback on the page!"
           className="min-h-[100px] w-full px-4 py-2 text-base"
         />
       </div>
+
       {error && (
         <div className="flex items-start gap-2 text-sm text-red-500 mt-2 p-3 bg-red-50 rounded">
           <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
@@ -132,6 +156,7 @@ export function WaitlistForm({ onSuccess }: WaitlistFormProps) {
           </div>
         </div>
       )}
+
       <Button
         type="submit"
         className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 py-3 text-base font-medium"
@@ -146,6 +171,7 @@ export function WaitlistForm({ onSuccess }: WaitlistFormProps) {
           "Join Waitlist"
         )}
       </Button>
+
       <p className="text-xs text-center text-muted-foreground mt-4">
         We'll notify you when we launch. No spam, we promise!
       </p>
