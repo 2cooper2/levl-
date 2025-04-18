@@ -22,12 +22,11 @@ export function WaitlistDemo() {
     setStatus({})
 
     try {
-      const formData = new FormData()
-      formData.append("name", name)
-      formData.append("email", email)
-      formData.append("message", "Submitted from demo page")
-
-      const result = await joinWaitlist(formData)
+      const result = await joinWaitlist({
+        email,
+        name,
+        message: "Submitted from demo page",
+      })
 
       setStatus({
         success: result.success,

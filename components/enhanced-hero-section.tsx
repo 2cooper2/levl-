@@ -63,6 +63,10 @@ const detailedVisualStyles = `
     isolation: isolate;
   }
   
+  .grid-pattern {
+    opacity: 0.7;
+  }
+
   .tech-pattern {
     opacity: 0.7;
   }
@@ -120,7 +124,6 @@ const detailedVisualStyles = `
   .skill-card {
     position: relative;
     overflow: hidden;
-    isolation: isolate;
   }
   
   .skill-card::before {
@@ -198,7 +201,12 @@ const detailedVisualStyles = `
     z-index: 1;
   }
 
-  
+  .bg-grid-pattern {
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
 `
 
 // Custom founder icon component
@@ -728,7 +736,7 @@ export function EnhancedHeroSection() {
         clearInterval(progressInterval.current)
       }
     }
-  }, [activeSkill, skills])
+  }, [activeSkill])
 
   // Animate the skill path visualization
   useEffect(() => {
@@ -968,6 +976,9 @@ export function EnhancedHeroSection() {
           style={{ animationDuration: "20s" }}
         ></div>
 
+        {/* Futuristic grid lines */}
+        <div className="absolute inset-0 bg-grid-pattern opacity-20 pointer-events-none"></div>
+
         <div className="container px-3 md:px-6 relative z-10">
           {/* Changed grid layout to be a flex column on all screen sizes */}
           <div className="flex flex-col gap-6 md:gap-10 lg:gap-12">
@@ -1077,20 +1088,52 @@ export function EnhancedHeroSection() {
             >
               <div className="relative w-full max-w-full">
                 <motion.div
-                  className="relative rounded-xl overflow-hidden bg-white/5 dark:bg-black/5 p-3 sm:p-4 md:p-5 shadow-md detailed-card"
+                  className="relative rounded-xl overflow-hidden bg-gradient-to-br from-purple-100/10 via-white/5 to-purple-50/10 dark:from-purple-900/10 dark:via-black/5 dark:to-purple-800/10 backdrop-blur-md p-3 sm:p-4 md:p-5 shadow-lg detailed-card"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1, y: 10 }}
                   transition={{ duration: 0.6, delay: 0.4 }}
                   style={{
-                    boxShadow: "0 0 20px 2px rgba(147, 51, 234, 0.15)",
+                    boxShadow: "0 0 40px 5px rgba(147, 51, 234, 0.25)",
                     border: "1px solid rgba(147, 51, 234, 0.2)",
                   }}
                 >
-                  {/* Remove tech pattern overlay */}
+                  {/* Grid pattern overlay */}
+                  <div className="grid-pattern absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none z-1"></div>
 
-                  {/* Remove background overlay */}
+                  {/* Tech pattern overlay */}
+                  <div className="tech-pattern absolute inset-0 bg-[radial-gradient(circle_at_10px_10px,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none z-1"></div>
 
-                  {/* Remove circuit lines */}
+                  {/* Even background overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-50/5 via-transparent to-purple-100/5 pointer-events-none"></div>
+
+                  {/* Circuit lines */}
+                  <div className="circuit-lines">
+                    {circuitLines.map((line, i) => (
+                      <div
+                        key={`line-${i}`}
+                        className="circuit-line"
+                        style={{
+                          top: `${line.top}%`,
+                          left: `${line.left}%`,
+                          width: `${line.width}px`,
+                          background:
+                            "linear-gradient(90deg, rgba(147, 51, 234, 0.05), rgba(147, 51, 234, 0.15), rgba(147, 51, 234, 0.05))",
+                        }}
+                      ></div>
+                    ))}
+                    {circuitDots.map((dot, i) => (
+                      <div
+                        key={`dot-${i}`}
+                        className="circuit-dot"
+                        style={{
+                          top: `${dot.top}%`,
+                          left: `${dot.left}%`,
+                          backgroundColor: "rgba(147, 51, 234, 0.2)",
+                          boxShadow: "0 0 5px rgba(147, 51, 234, 0.2)",
+                        }}
+                      ></div>
+                    ))}
+                  </div>
 
                   {/* Success message toast */}
                   <AnimatePresence>
@@ -1134,38 +1177,34 @@ export function EnhancedHeroSection() {
                     <p className="text-sm text-black/80 dark:text-white/80 lg:col-span-12">
                       The world's first AI-powered gig ecosystem that helps you earn while you learn and grow your
                       freelance career exponentially.
-                      <span className="inline-flex items-center ml-2 text-xs text-primary">
+                      <span className="inline-flex items-center ml-2 text-primary">
                         <Lightbulb className="h-3 w-3 mr-1" /> Smart matching technology
                       </span>
                     </p>
 
                     <div className="flex flex-wrap gap-2 md:flex-nowrap overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide lg:col-span-12">
-                      {skills && skills.length > 0 ? (
-                        skills.map((skill, index) => (
-                          <button
-                            key={index}
-                            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 flex items-center ${
-                              activeSkill === index
-                                ? "bg-gradient-to-r from-primary to-purple-500 text-white"
-                                : "bg-white/10 dark:bg-black/20 text-black dark:text-white hover:bg-white/20 dark:hover:bg-black/30"
-                            }`}
-                            onClick={() => setActiveSkill(index)}
-                            onMouseEnter={() => setHoverSkill(index)}
-                            onMouseLeave={() => setHoverSkill(null)}
-                          >
-                            <span className="mr-1.5">{skill.icon}</span>
-                            {skill.name}
-                            {hoverSkill === index && <span className="ml-1.5 text-xs opacity-70">{skill.level}</span>}
-                            {activeSkill === index && (
-                              <span className="ml-1.5 flex items-center">
-                                <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span>
-                              </span>
-                            )}
-                          </button>
-                        ))
-                      ) : (
-                        <div>No skills available.</div>
-                      )}
+                      {skills.map((skill, index) => (
+                        <button
+                          key={index}
+                          className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 flex items-center ${
+                            activeSkill === index
+                              ? "bg-gradient-to-r from-primary to-purple-500 text-white"
+                              : "bg-white/10 dark:bg-black/20 text-black dark:text-white hover:bg-white/20 dark:hover:bg-black/30"
+                          }`}
+                          onClick={() => setActiveSkill(index)}
+                          onMouseEnter={() => setHoverSkill(index)}
+                          onMouseLeave={() => setHoverSkill(null)}
+                        >
+                          <span className="mr-1.5">{skill.icon}</span>
+                          {skill.name}
+                          {hoverSkill === index && <span className="ml-1.5 text-xs opacity-70">{skill.level}</span>}
+                          {activeSkill === index && (
+                            <span className="ml-1.5 flex items-center">
+                              <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span>
+                            </span>
+                          )}
+                        </button>
+                      ))}
                     </div>
 
                     <div className="flex border-b border-white/10 overflow-x-auto -mx-1 px-1 scrollbar-hide md:justify-start lg:col-span-12">
@@ -1200,7 +1239,7 @@ export function EnhancedHeroSection() {
                         <div className="space-y-4">
                           {/* Active Skill Card */}
                           <div
-                            className="bg-white/10 dark:bg-black/20 backdrop-blur-sm rounded-lg p-4 border border-purple-400/50"
+                            className="bg-white/10 dark:bg-black/20 backdrop-blur-sm rounded-lg p-4 border border-purple-400/50 skill-card"
                             style={{ borderLeft: `4px solid ${skills[activeSkill].color}` }}
                           >
                             <div className="flex justify-between items-start mb-3">
@@ -1248,7 +1287,7 @@ export function EnhancedHeroSection() {
                                 </span>
                                 <span className="font-medium text-black dark:text-white">{progress}%</span>
                               </div>
-                              <div className="h-2 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
+                              <div className="h-2 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden progress-track">
                                 <div
                                   className="h-full rounded-full bg-gradient-to-r from-primary to-purple-500 relative"
                                   style={{ width: `${progress}%`, transition: "width 0.5s ease-out" }}
@@ -1262,25 +1301,29 @@ export function EnhancedHeroSection() {
 
                             {/* Stats */}
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-                              <div className="bg-white/5 dark:bg-black/10 rounded-md p-2">
+                              <div className="bg-white/5 dark:bg-black/10 rounded-md p-2 relative overflow-hidden">
+                                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent"></div>
                                 <div className="text-xs text-black/60 dark:text-white/60">Mentors</div>
                                 <div className="font-bold text-black dark:text-white">
                                   {skills[activeSkill].mentors}
                                 </div>
                               </div>
-                              <div className="bg-white/5 dark:bg-black/10 rounded-md p-2">
+                              <div className="bg-white/5 dark:bg-black/10 rounded-md p-2 relative overflow-hidden">
+                                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent"></div>
                                 <div className="text-xs text-black/60 dark:text-white/60">Projects</div>
                                 <div className="font-bold text-black dark:text-white">
                                   {skills[activeSkill].projects}
                                 </div>
                               </div>
-                              <div className="bg-white/5 dark:bg-black/10 rounded-md p-2">
+                              <div className="bg-white/5 dark:bg-black/10 rounded-md p-2 relative overflow-hidden">
+                                <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent"></div>
                                 <div className="text-xs text-black/60 dark:text-white/60">Rating</div>
                                 <div className="font-bold text-black dark:text-white flex items-center justify-center">
-                                  4.8 <Star className="h-4 w-4 ml-0.5 text-yellow-400 fill-yellow-400" />
+                                  4.8 <Star className="h-3 w-3 ml-0.5 text-yellow-400 fill-yellow-400" />
                                 </div>
                               </div>
-                              <div className="bg-white/5 dark:bg-black/10 rounded-md p-2">
+                              <div className="bg-white/5 dark:bg-black/10 rounded-md p-2 relative overflow-hidden">
+                                <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent"></div>
                                 <div className="text-xs text-black/60 dark:text-white/60">Clients</div>
                                 <div className="font-bold text-black dark:text-white flex items-center justify-center">
                                   {skills[activeSkill].stats.repeatClients}
@@ -1394,6 +1437,10 @@ export function EnhancedHeroSection() {
                                       className="h-full rounded-full bg-gradient-to-r from-primary to-purple-500"
                                       style={{ width: `${skill.level}%` }}
                                     ></div>
+                                    {/* Skill level markers */}
+                                    <div className="absolute top-0 left-1/4 h-full w-0.5 bg-white/10"></div>
+                                    <div className="absolute top-0 left-1/2 h-full w-0.5 bg-white/10"></div>
+                                    <div className="absolute top-0 left-3/4 h-full w-0.5 bg-white/10"></div>
                                   </div>
                                 </div>
                               ))}

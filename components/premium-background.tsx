@@ -202,11 +202,9 @@ export function WaveDivider({ className = "", inverted = false }: { className?: 
 export function GlassCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
     <div
-      className={`relative rounded-xl overflow-hidden bg-white/5 dark:bg-black/5 border border-white/10 dark:border-white/5 shadow-lg ${className}`}
+      className={`relative rounded-xl overflow-hidden backdrop-blur-md bg-white/5 dark:bg-black/5 border border-white/10 dark:border-white/5 shadow-xl ${className}`}
     >
-      {/* Remove the glossy top highlight */}
-      {/* Remove the side glossy highlight */}
-      {/* Keep only the content */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/5 dark:from-white/5 dark:to-transparent pointer-events-none" />
       <div className="relative z-10">{children}</div>
     </div>
   )
