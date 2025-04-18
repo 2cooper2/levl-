@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
-import { createClientComponentClient } from "@supabase/supabase-js"
+import { createClient } from "@/lib/supabase"
 import { StripeProvider } from "@/components/payments/stripe-provider"
 import { CheckoutForm } from "@/components/payments/checkout-form"
 import { useAuth } from "@/context/auth-context"
@@ -14,7 +14,7 @@ export default function CheckoutPage() {
   const [service, setService] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   useEffect(() => {
     async function fetchService() {
@@ -24,13 +24,13 @@ export default function CheckoutPage() {
         const { data, error } = await supabase
           .from("services")
           .select(`
-            *,
-            provider:provider_id(
-              id,
-              name,
-              avatar_url
-            )
-          `)
+           *,
+           provider:provider_id(
+             id,
+             name,
+             avatar_url
+           )
+         `)
           .eq("id", id)
           .single()
 
