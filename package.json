@@ -61,9 +61,9 @@
     "@emotion/is-prop-valid": "latest",
     "@stripe/stripe-js": "latest",
     "framer-motion": "latest",
-    "@supabase/supabase-js": "latest",
     "@stripe/react-stripe-js": "latest",
-    "stripe": "latest"
+    "stripe": "latest",
+    "@supabase/supabase-js": "latest"
   },
   "devDependencies": {
     "@types/node": "^22",
