@@ -11,9 +11,10 @@ import { Label } from "@/components/ui/label"
 
 interface WaitlistFormProps {
   onSuccess?: () => void
+  showName?: boolean
 }
 
-export function WaitlistForm({ onSuccess }: WaitlistFormProps) {
+export function WaitlistForm({ onSuccess, showName = true }: WaitlistFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -71,9 +72,11 @@ export function WaitlistForm({ onSuccess }: WaitlistFormProps) {
 
   return (
     <form action={handleSubmit} className="space-y-4 py-4">
-      <div className="space-y-2">
-        <Input name="name" placeholder="Your name" required className="w-full" />
-      </div>
+      {showName && (
+        <div className="space-y-2">
+          <Input name="name" placeholder="Your name" required className="w-full" />
+        </div>
+      )}
       <div className="space-y-2">
         <Input name="email" type="email" placeholder="Your email" required className="w-full" />
       </div>

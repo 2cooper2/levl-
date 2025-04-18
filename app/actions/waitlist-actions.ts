@@ -6,11 +6,11 @@ import { revalidatePath } from "next/cache"
 // SQL to create the waitlist table if it doesn't exist
 const createWaitlistTableSQL = `
 CREATE TABLE IF NOT EXISTS waitlist (
-  id SERIAL PRIMARY KEY,
-  name TEXT NOT NULL,
-  email TEXT NOT NULL UNIQUE,
-  message TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+ id SERIAL PRIMARY KEY,
+ name TEXT NOT NULL,
+ email TEXT NOT NULL UNIQUE,
+ message TEXT,
+ created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 `
 
@@ -25,7 +25,9 @@ export async function joinWaitlist(formData: FormData) {
     const userMessage = (formData.get("message") as string) || ""
 
     // Combine role and message into a single message field
-    const message = `Role: ${role}\n\nFeedback: ${userMessage}`
+    const message = `Role: ${role}
+
+Feedback: ${userMessage}`
 
     if (!name || !email) {
       return {
