@@ -1,11 +1,17 @@
 "use client"
 
+import { Button } from "@/components/ui/button"
+
 import type React from "react"
 
+import { useState, useEffect, useRef } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import { EnhancedButton } from "@/components/ui/enhanced-button"
+import { Input } from "@/components/ui/input"
+import { ArrowRight, Sparkles } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { SkillAcceleratorSignup } from "@/components/skill-accelerator-signup"
 import {
-  ArrowRight,
   Trophy,
   Rocket,
   Star,
@@ -18,7 +24,6 @@ import {
   Hammer,
   MessageSquare,
   PenToolIcon as Tool,
-  Sparkles,
   Lightbulb,
   Compass,
   BarChart,
@@ -30,13 +35,9 @@ import {
   Target,
   Zap,
 } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
-import { useRouter } from "next/navigation"
-import { useAuth } from "@/context/auth-context"
-import { useState, useEffect, useRef } from "react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
 import { AnimatedTextDivider } from "@/components/animated-text-divider"
+import wave from "@/public/wave.png"
+import { useAuth } from "@/context/auth-context"
 
 // Add keyframes for the shimmer animation
 const shimmerAnimation = {
@@ -480,6 +481,15 @@ export function EnhancedHeroSection() {
   const [circuitDots, setCircuitDots] = useState<Array<{ top: number; left: number }>>([])
   const [glowDots, setGlowDots] = useState<Array<{ top: number; left: number; delay: number }>>([])
   const [dataFlows, setDataFlows] = useState<Array<{ top: number; left: number; delay: number }>>([])
+  const [particles, setParticles] = useState(
+    Array.from({ length: 20 }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 3 + 1,
+      duration: Math.random() * 6 + 4,
+    })),
+  )
 
   // Updated skills data with home service categories
   const skills = [
@@ -926,7 +936,58 @@ export function EnhancedHeroSection() {
       <style jsx global>
         {detailedVisualStyles}
       </style>
-      <section className="w-full relative overflow-hidden">
+      <section
+        className="w-full relative overflow-hidden"
+        style={{
+          backgroundImage: `url(${wave})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        {/* Animated background elements */}
+        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5 z-0" />
+
+        {/* Subtle noise texture */}
+        <div className="absolute inset-0 bg-noise opacity-5 dark:opacity-10 z-0"></div>
+
+        {/* Enhanced gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-purple-500/10 z-0"></div>
+
+        {/* Particle system */}
+        {particles.map((particle) => (
+          <motion.div
+            key={particle.id}
+            className="absolute rounded-full bg-primary/10 z-0"
+            style={{
+              left: `${particle.x}%`,
+              top: `${particle.y}%`,
+              width: particle.size,
+              height: particle.size,
+            }}
+            animate={{
+              x: [0, Math.random() * 100 - 50],
+              y: [0, Math.random() * 100 - 50],
+              opacity: [0, 0.5, 0],
+            }}
+            transition={{
+              duration: particle.duration,
+              repeat: Number.POSITIVE_INFINITY,
+              repeatType: "reverse",
+            }}
+          />
+        ))}
+
+        {/* 3D perspective container */}
+        <div
+          className="absolute inset-0 opacity-20 pointer-events-none"
+          style={{
+            backgroundImage: `url(${wave})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            filter: "hue-rotate(240deg)", // Adjust hue for purple
+          }}
+        />
+
         <AnimatedTextDivider firstText="Learn. Earn." secondText="Grow Your Business" className="mb-12 text-white" />
         {/* Animated background elements */}
         <div
@@ -1557,12 +1618,7 @@ export function EnhancedHeroSection() {
                         </div>
                       </div>
 
-                      <EnhancedButton
-                        variant="gradient"
-                        size="sm"
-                        className="w-full"
-                        onClick={() => setShowSignupModal(true)}
-                      >
+                      <EnhancedButton variant="gradient" size="sm" className="w-full" onClick={handleHireNow}>
                         <Zap className="mr-2 h-4 w-4" />
                         Accelerate Your Skills
                       </EnhancedButton>
@@ -1583,4 +1639,8 @@ export function EnhancedHeroSection() {
       <SkillAcceleratorSignup isOpen={showSignupModal} onClose={() => setShowSignupModal(false)} />
     </>
   )
+}
+
+const handleHireNow = () => {
+  router.push("/stripe-checkout")
 }

@@ -32,8 +32,6 @@ export function AnimatedTextDivider({ firstText, secondText, className = "" }: A
       {/* Subtle grid pattern overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:20px_20px] opacity-30"></div>
 
-      {/* Enhanced wave effect with multiple detailed layers for depth */}
-
       {/* Top subtle highlight */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-300/50 to-transparent"></div>
 
@@ -72,38 +70,7 @@ export function AnimatedTextDivider({ firstText, secondText, className = "" }: A
             />
           </motion.div>
 
-          {/* Enhanced divider with animation */}
-          <div className="relative h-16 md:h-20 w-px hidden md:block">
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-500 to-transparent"
-              animate={{
-                opacity: [0.5, 1, 0.5],
-                height: ["80%", "90%", "80%"],
-              }}
-              transition={{
-                duration: 3,
-                repeat: Number.POSITIVE_INFINITY,
-                repeatType: "mirror",
-              }}
-            />
-
-            {/* Glowing dot in the middle */}
-            <motion.div
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-purple-400"
-              animate={{
-                boxShadow: [
-                  "0 0 4px 1px rgba(168, 85, 247, 0.4)",
-                  "0 0 8px 2px rgba(168, 85, 247, 0.6)",
-                  "0 0 4px 1px rgba(168, 85, 247, 0.4)",
-                ],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Number.POSITIVE_INFINITY,
-                repeatType: "mirror",
-              }}
-            />
-          </div>
+          {/* Morphing Blob Divider */}
 
           {/* Second text with enhanced animation */}
           <motion.div

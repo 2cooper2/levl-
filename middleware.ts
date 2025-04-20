@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
 
   // Define public paths that don't require authentication
@@ -14,7 +14,8 @@ export function middleware(request: NextRequest) {
     path === "/how-it-works" ||
     path.startsWith("/services/") ||
     path.startsWith("/category/") ||
-    path.startsWith("/checkout")
+    path.startsWith("/checkout") ||
+    path === "/api/webhooks/stripe" // Allow unauthenticated access to the webhook
 
   // Check if user is logged in
   const isAuthenticated = request.cookies.has("levl_user")
@@ -42,5 +43,6 @@ export const config = {
     "/bookings/:path*",
     "/settings/:path*",
     "/auth/:path*",
+    "/api/webhooks/stripe", // Protect the webhook route
   ],
 }

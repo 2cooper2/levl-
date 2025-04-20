@@ -26,8 +26,41 @@ export function WaitlistForm({ onSuccess, showName = true }: WaitlistFormProps) 
   const [email, setEmail] = useState("")
   const [message, setMessage] = useState("")
 
+  // Client-side validation function
+  const validateForm = () => {
+    let isValid = true
+    const newErrors: { name?: string; email?: string } = {}
+
+    if (showName && !name) {
+      newErrors.name = "Name is required"
+      isValid = false
+    }
+
+    if (!email) {
+      newErrors.email = "Email is required"
+      isValid = false
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = "Invalid email format"
+      isValid = false
+    }
+
+    // Set errors to state, so it can be rendered
+    setErrors(newErrors)
+
+    return isValid
+  }
+
+  // Define state for name and email errors
+  const [errors, setErrors] = useState<{ name?: string; email?: string }>({})
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+
+    // Perform client-side validation
+    if (!validateForm()) {
+      return
+    }
+
     setIsSubmitting(true)
     setError(null)
     setDebugInfo(null)
@@ -53,6 +86,7 @@ export function WaitlistForm({ onSuccess, showName = true }: WaitlistFormProps) 
         setName("")
         setEmail("")
         setMessage("")
+        setErrors({}) // Clear any previous errors on success
 
         if (onSuccess) {
           setTimeout(() => {
@@ -93,27 +127,47 @@ export function WaitlistForm({ onSuccess, showName = true }: WaitlistFormProps) 
     <form onSubmit={handleSubmit} className="space-y-4 py-4">
       {showName && (
         <div className="space-y-2">
+          <Label htmlFor="name" className="text-sm font-medium">
+            Your name
+          </Label>
           <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Your name"
             required
-            className="w-full px-4 py-2 text-base"
+            aria-required="true"
+            aria-invalid={!!errors.name}
+            className={`w-full px-4 py-2 text-base ${errors.name ? "border-red-500" : ""}`}
             autoComplete="name"
           />
+          {errors.name && (
+            <p className="text-sm text-red-500" role="alert">
+              {errors.name}
+            </p>
+          )}
         </div>
       )}
 
       <div className="space-y-2">
+        <Label htmlFor="email" className="text-sm font-medium">
+          Your email
+        </Label>
         <Input
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           type="email"
           placeholder="Your email"
           required
-          className="w-full px-4 py-2 text-base"
+          aria-required="true"
+          aria-invalid={!!errors.email}
+          className={`w-full px-4 py-2 text-base ${errors.email ? "border-red-500" : ""}`}
           autoComplete="email"
         />
+        {errors.email && (
+          <p className="text-sm text-red-500" role="alert">
+            {errors.email}
+          </p>
+        )}
       </div>
 
       <div className="space-y-3">
@@ -141,16 +195,20 @@ export function WaitlistForm({ onSuccess, showName = true }: WaitlistFormProps) 
       </div>
 
       <div className="space-y-2">
+        <Label htmlFor="message" className="text-sm font-medium">
+          Feedback
+        </Label>
         <Textarea
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Give us feedback on the page!"
+          id="message"
           className="min-h-[100px] w-full px-4 py-2 text-base"
         />
       </div>
 
       {error && (
-        <div className="flex items-start gap-2 text-sm text-red-500 mt-2 p-3 bg-red-50 rounded">
+        <div className="flex items-start gap-2 text-sm text-red-500 mt-2 p-3 bg-red-50 rounded" role="alert">
           <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
           <div>
             <p>{error}</p>

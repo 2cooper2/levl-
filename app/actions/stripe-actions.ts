@@ -1,12 +1,24 @@
 "use server"
 
-// Simplified version to avoid build errors
+import { stripe } from "@/lib/stripe"
+
 export async function createServicePayment(serviceId: string, userId: string, amount: number) {
   try {
-    // Mock successful response
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: amount,
+      currency: "usd",
+      automatic_payment_methods: {
+        enabled: true,
+      },
+      metadata: {
+        serviceId: serviceId,
+        userId: userId,
+      },
+    })
+
     return {
       success: true,
-      clientSecret: "mock_client_secret",
+      clientSecret: paymentIntent.client_secret,
     }
   } catch (error: any) {
     console.error("Error creating service payment:", error)
@@ -19,10 +31,27 @@ export async function createServicePayment(serviceId: string, userId: string, am
 
 export async function generateOnboardingLink(userId: string, returnUrl: string) {
   try {
-    // Mock successful response
+    const account = await stripe.accounts.create({
+      type: "express",
+      country: "US",
+      email: userId, // Use the user ID as the email for now
+      capabilities: {
+        card_payments: { requested: true },
+        transfers: { requested: true },
+      },
+      metadata: { userId: userId },
+    })
+
+    const accountLink = await stripe.accountLinks.create({
+      account: account.id,
+      refresh_url: `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/payments/connect`,
+      return_url: returnUrl,
+      type: "account_onboarding",
+    })
+
     return {
       success: true,
-      url: "https://example.com/onboarding",
+      url: accountLink.url,
     }
   } catch (error: any) {
     console.error("Error generating onboarding link:", error)
@@ -35,10 +64,20 @@ export async function generateOnboardingLink(userId: string, returnUrl: string) 
 
 export async function createProviderConnectAccount(userId: string, email: string, name: string) {
   try {
-    // Mock successful response
+    const account = await stripe.accounts.create({
+      type: "express",
+      country: "US",
+      email: email,
+      capabilities: {
+        card_payments: { requested: true },
+        transfers: { requested: true },
+      },
+      metadata: { userId: userId },
+    })
+
     return {
       success: true,
-      accountId: "mock_account_id",
+      accountId: account.id,
     }
   } catch (error: any) {
     console.error("Error creating connect account:", error)
@@ -49,14 +88,14 @@ export async function createProviderConnectAccount(userId: string, email: string
   }
 }
 
-export async function getConnectAccountStatus(userId: string) {
+export async function getConnectAccountStatus(accountId: string) {
   try {
-    // Mock successful response
+    const account = await stripe.accounts.retrieve(accountId)
     return {
       exists: true,
-      charges_enabled: true,
-      payouts_enabled: true,
-      details_submitted: true,
+      charges_enabled: account.charges_enabled,
+      payouts_enabled: account.payouts_enabled,
+      details_submitted: account.details_submitted,
     }
   } catch (error: any) {
     console.error("Error getting account status:", error)

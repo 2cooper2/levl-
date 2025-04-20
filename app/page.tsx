@@ -9,7 +9,6 @@ import { EnhancedCategoryCard } from "@/components/enhanced-category-card"
 import { EnhancedHeroSection } from "@/components/enhanced-hero-section"
 import {
   Briefcase,
-  CheckCircle,
   Code,
   CreditCard,
   Headphones,
@@ -32,6 +31,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { LevlLogo } from "@/components/levl-logo"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { ValueProposition } from "@/components/value-proposition"
 
 export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -49,9 +49,10 @@ export default function Home() {
       <main className="flex-1">
         <EnhancedHeroSection />
 
-        {/* Simple steps to get started section - moved up */}
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-muted/50 relative">
-          <BackgroundPattern />
+        {/* Journey Section */}
+        <section className="w-full py-16 md:py-24 lg:py-32 bg-muted/50 relative">
+          <BackgroundPattern className="opacity-50" />
+          <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
           <div className="container px-4 md:px-6 relative z-10">
             <motion.div
               className="flex flex-col items-center justify-center space-y-4 text-center mb-12"
@@ -62,18 +63,19 @@ export default function Home() {
             >
               <div className="space-y-2">
                 <div className="inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
-                  How It Works
+                  Your Path to Success
                 </div>
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                  Simple steps to get started
+                  Transform Your Career with LevL
                 </h2>
                 <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  Whether you're looking to hire or offer services, LevL makes it easy
+                  Discover the steps to unlock your full potential and achieve your goals
                 </p>
               </div>
             </motion.div>
+
             <div className="grid gap-8 md:grid-cols-3 lg:gap-12 mt-8 relative">
-              <div className="hidden md:block absolute top-1/2 left-1/4 right-1/4 h-0.5 bg-gradient-to-r from-transparent via-purple-300/30 to-transparent -translate-y-1/2"></div>
+              <div className="hidden md:block absolute top-1/4 left-1/4 right-1/4 h-0.5 bg-gradient-to-r from-transparent via-purple-300/30 to-transparent -translate-y-1/2"></div>
               {[
                 {
                   step: "01",
@@ -119,8 +121,11 @@ export default function Home() {
           <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent"></div>
         </section>
 
+        {/* Value Proposition */}
+        <ValueProposition />
+
         {/* Find the perfect service section - enhanced with matching background */}
-        <section className="w-full py-16 md:py-24 lg:py-32 bg-muted/50 relative">
+        <section className="w-full py-16 md:py-24 lg-py-32 bg-muted/50 relative">
           <BackgroundPattern className="opacity-50" />
           <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
           <div className="container px-4 md:px-6 relative z-10">
@@ -131,7 +136,7 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
             >
-              <div className="inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary mb-4">
+              <div className="inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
                 Popular Categories
               </div>
               <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl max-w-[800px]">
@@ -260,62 +265,6 @@ export default function Home() {
             </motion.div>
           </div>
           <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent"></div>
-        </section>
-
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-br from-primary/90 to-purple-400 text-primary-foreground relative overflow-hidden">
-          <div className="absolute inset-0 bg-[url('/placeholder.svg?height=200&width=200')] opacity-[0.03] bg-repeat"></div>
-          <div className="absolute top-0 left-0 right-0 h-px bg-white/10"></div>
-          <div className="absolute bottom-0 left-0 right-0 h-px bg-black/10"></div>
-          <div className="container px-4 md:px-6 relative z-10">
-            <motion.div
-              className="flex flex-col items-center justify-center space-y-4 text-center"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-            >
-              <div className="space-y-2">
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-                  Ready to level up your career or project?
-                </h2>
-                <p className="max-w-[900px] md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  Join LevL today and connect with thousands of professionals and clients
-                </p>
-              </div>
-              <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                <EnhancedButton
-                  size="lg"
-                  variant="outline"
-                  className="bg-transparent text-primary-foreground border-primary-foreground hover:bg-primary-foreground/10"
-                >
-                  Learn More
-                </EnhancedButton>
-              </div>
-              <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-8 pt-8">
-                {[
-                  { icon: Zap, label: "Fast Matching", value: "2 min avg" },
-                  { icon: Users, label: "All-in-One", value: "Hire & Work" },
-                  { icon: CheckCircle, label: "Quality Talent", value: "Verified Pros" },
-                  { icon: Headphones, label: "Support", value: "24/7" },
-                ].map((stat, index) => (
-                  <motion.div
-                    key={index}
-                    className="flex flex-col items-center"
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                  >
-                    <div className="rounded-full bg-white/20 p-3 mb-3 shadow-lg backdrop-blur-sm">
-                      <stat.icon className="h-6 w-6" />
-                    </div>
-                    <div className="text-2xl font-bold text-white drop-shadow-sm">{stat.value}</div>
-                    <div className="text-sm text-white/90">{stat.label}</div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          </div>
         </section>
       </main>
       <footer className="w-full border-t bg-background py-6 md:py-12 relative">

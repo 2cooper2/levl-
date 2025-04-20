@@ -13,6 +13,7 @@ import { MessagesList } from "@/components/dashboard/messages-list"
 import { BookingsList } from "@/components/dashboard/bookings-list"
 import { ArrowRight, Plus } from "lucide-react"
 import { useEffect, useState } from "react"
+import { DynamicPricingAssistant } from "@/components/dashboard/dynamic-pricing-assistant"
 
 export default function DashboardPage() {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -51,23 +52,26 @@ export default function DashboardPage() {
                 <RecentActivity />
               </CardContent>
             </Card>
-            <Card className="col-span-3">
-              <CardHeader>
-                <CardTitle>Upcoming Bookings</CardTitle>
-                <CardDescription>Your scheduled bookings for the next 7 days.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <BookingsList limit={5} />
-              </CardContent>
-              <CardFooter>
-                <Button variant="ghost" className="w-full" asChild>
-                  <Link href="/dashboard/bookings">
-                    View all bookings
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-              </CardFooter>
-            </Card>
+            <div className="col-span-3 flex flex-col gap-4">
+              <DynamicPricingAssistant />
+              <Card>
+                <CardHeader>
+                  <CardTitle>Upcoming Bookings</CardTitle>
+                  <CardDescription>Your scheduled bookings for the next 7 days.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <BookingsList limit={5} />
+                </CardContent>
+                <CardFooter>
+                  <Button variant="ghost" className="w-full" asChild>
+                    <Link href="/dashboard/bookings">
+                      View all bookings
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+            </div>
           </div>
         </TabsContent>
         <TabsContent value="services" className="space-y-4">

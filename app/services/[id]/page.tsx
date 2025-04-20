@@ -139,9 +139,7 @@ export default function ServicePage() {
   }
 
   const handleHireNow = () => {
-    // Remove the authentication check for testing
-    const checkoutUrl = `/checkout?serviceId=${service.id}&providerId=${service.provider.id}&hourlyRate=${service.provider.hourlyRate}`
-    router.push(checkoutUrl)
+    router.push(`/checkout/${service.id}`)
   }
 
   if (loading) {
@@ -232,7 +230,7 @@ export default function ServicePage() {
                     className="mt-4 w-full bg-purple-500/80 hover:bg-purple-600/90 backdrop-blur-sm border border-purple-300/30 shadow-sm hover:shadow-md transition-all duration-300"
                     onClick={handleHireNow}
                   >
-                    Hire Now <ArrowRight className="ml-2 h-4 w-4" />
+                    Book <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </div>
               </TabsContent>
@@ -304,7 +302,7 @@ export default function ServicePage() {
                   className="w-full bg-purple-500/80 hover:bg-purple-600/90 backdrop-blur-sm border border-purple-300/30 shadow-sm hover:shadow-md transition-all duration-300"
                   onClick={handleHireNow}
                 >
-                  Hire Now <ArrowRight className="ml-2 h-4 w-4" />
+                  Book <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
             </div>
