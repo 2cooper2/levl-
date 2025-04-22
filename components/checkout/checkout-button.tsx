@@ -2,8 +2,9 @@
 
 import type React from "react"
 
+import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Button, type ButtonProps } from "@/components/ui/button"
-import { useToast } from "@/components/ui/use-toast"
 
 interface CheckoutButtonProps extends ButtonProps {
   providerId: string
@@ -13,18 +14,27 @@ interface CheckoutButtonProps extends ButtonProps {
 }
 
 export function CheckoutButton({ providerId, packageName, amount, children, ...props }: CheckoutButtonProps) {
-  const { toast } = useToast()
+  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleCheckout = () => {
-    toast({
-      title: "Checkout coming soon",
-      description: "Our payment system is currently being updated. Please try again later.",
-    })
+  const handleCheckout = async () => {
+    setIsLoading(true)
+
+    try {
+      // In a real implementation, this would prepare the checkout session
+      // and redirect to the checkout page
+
+      router.push(`/checkout/${providerId}?package=${packageName || "standard"}`)
+    } catch (error) {
+      console.error("Error initiating checkout:", error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
-    <Button onClick={handleCheckout} {...props}>
-      {children || "Hire Now"}
+    <Button onClick={handleCheckout} disabled={isLoading} {...props}>
+      {isLoading ? "Loading..." : children || "Hire Now"}
     </Button>
   )
 }

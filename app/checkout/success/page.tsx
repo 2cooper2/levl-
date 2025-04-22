@@ -1,27 +1,95 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { EnhancedMainNav } from "@/components/enhanced-main-nav"
-import { AnimatedGradientBackground } from "@/components/animated-gradient-background"
 import { Button } from "@/components/ui/button"
-import { CheckCircle } from "lucide-react"
+import { CheckCircle, ArrowRight } from "lucide-react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
+import { motion } from "framer-motion"
 
 export default function CheckoutSuccessPage() {
+  const searchParams = useSearchParams()
+  const [orderDetails, setOrderDetails] = useState<{
+    serviceName: string
+    providerName: string
+    amount: string
+  } | null>(null)
+
+  useEffect(() => {
+    // In a real app, you would fetch the order details from your database
+    // based on the payment_intent parameter in the URL
+    const paymentIntentId = searchParams.get("payment_intent")
+
+    if (paymentIntentId) {
+      // Simulate fetching order details
+      setOrderDetails({
+        serviceName: "Professional Website Development",
+        providerName: "Alex Morgan",
+        amount: "$99.00",
+      })
+    }
+  }, [searchParams])
+
   return (
     <div className="min-h-screen bg-background">
       <EnhancedMainNav />
-      <AnimatedGradientBackground />
-      <div className="container py-20">
+      <main className="container py-12">
         <div className="max-w-lg mx-auto text-center">
-          <div className="rounded-full bg-green-100 p-6 mx-auto w-24 h-24 flex items-center justify-center mb-6">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="rounded-full bg-green-100 p-6 mx-auto w-24 h-24 flex items-center justify-center mb-6"
+          >
             <CheckCircle className="h-12 w-12 text-green-600" />
-          </div>
-          <h1 className="text-3xl font-bold mb-4">Payment Successful!</h1>
-          <p className="text-lg text-muted-foreground mb-8">
-            Thank you for your payment. Your order has been successfully processed and confirmed.
-          </p>
+          </motion.div>
 
-          <div className="bg-muted p-6 rounded-lg border mb-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <h1 className="text-3xl font-bold mb-4">Payment Successful!</h1>
+            <p className="text-lg text-muted-foreground mb-8">
+              Thank you for your payment. Your booking has been confirmed and you'll receive a confirmation email
+              shortly.
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="bg-muted p-6 rounded-lg border mb-8 text-left"
+          >
+            <h2 className="font-semibold mb-4">Order Details</h2>
+            {orderDetails ? (
+              <ul className="space-y-2">
+                <li className="flex justify-between">
+                  <span className="text-muted-foreground">Service:</span>
+                  <span className="font-medium">{orderDetails.serviceName}</span>
+                </li>
+                <li className="flex justify-between">
+                  <span className="text-muted-foreground">Provider:</span>
+                  <span className="font-medium">{orderDetails.providerName}</span>
+                </li>
+                <li className="flex justify-between">
+                  <span className="text-muted-foreground">Amount:</span>
+                  <span className="font-medium">{orderDetails.amount}</span>
+                </li>
+              </ul>
+            ) : (
+              <p className="text-muted-foreground">Loading order details...</p>
+            )}
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+            className="bg-muted p-6 rounded-lg border mb-8"
+          >
             <h2 className="font-semibold mb-4">What happens next?</h2>
             <ul className="text-left space-y-2">
               <li className="flex items-start">
@@ -43,18 +111,25 @@ export default function CheckoutSuccessPage() {
                 <span>You can track your order status in your dashboard.</span>
               </li>
             </ul>
-          </div>
+          </motion.div>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.8 }}
+            className="flex flex-col sm:flex-row gap-4 justify-center"
+          >
             <Button asChild>
-              <Link href="/dashboard">View Your Orders</Link>
+              <Link href="/dashboard">
+                View Your Orders <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
             </Button>
             <Button variant="outline" asChild>
               <Link href="/explore">Continue Shopping</Link>
             </Button>
-          </div>
+          </motion.div>
         </div>
-      </div>
+      </main>
     </div>
   )
 }

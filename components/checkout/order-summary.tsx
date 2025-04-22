@@ -12,7 +12,7 @@ interface OrderSummaryProps {
 export function OrderSummary({ service, packageName }: OrderSummaryProps) {
   const selectedPackage = service.packages[packageName]
   const price = selectedPackage.price
-  const platformFee = Math.round(price * 0.05) // 5% platform fee
+  const platformFee = Math.round(price * 0.1) // 10% platform fee
   const total = price + platformFee
 
   return (

@@ -44,7 +44,7 @@ export default function ServicePage() {
             rating: 4.9,
             reviews: 127,
             responseTime: "Under 2 hours",
-            hourlyRate: 85, // Hourly rate in USD
+            hourlyRate: 2, // Hourly rate in USD
           },
           gallery: [
             "/placeholder.svg?height=600&width=800&text=Website+Preview+1",

@@ -4,6 +4,7 @@ import { useState } from "react"
 import { loadStripe } from "@stripe/stripe-js"
 import { CardElement, Elements, useStripe, useElements } from "@stripe/react-stripe-js"
 import { Button } from "@/components/ui/button"
+import { createPaymentIntent } from "@/app/actions/payment-actions"
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "")
 
@@ -17,52 +18,64 @@ const CheckoutForm = () => {
     event.preventDefault()
 
     if (!stripe || !elements) {
+      console.log("Stripe or Elements not initialized")
       return
     }
 
     setIsProcessing(true)
     setErrorMessage(null)
 
-    const { error, paymentMethod } = await stripe.createPaymentMethod({
-      type: "card",
-      card: elements.getElement(CardElement) as any,
-    })
+    try {
+      const amount = 1000 // Replace with the actual amount
+      const currency = "usd" // Replace with the actual currency
+      const metadata = {
+        providerId: "provider123", // Replace with the actual provider ID
+        hours: 10, // Replace with the actual number of hours
+        projectDetails: "Project details", // Replace with the actual project details
+      }
 
-    if (error) {
-      setErrorMessage(error.message)
-      setIsProcessing(false)
-      return
-    }
+      const { clientSecret, error: paymentIntentError } = await createPaymentIntent({
+        amount,
+        currency,
+        metadata,
+      })
 
-    const response = await fetch("/api/create-payment-intent", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        paymentMethodId: paymentMethod?.id,
-        amount: 1000, // Replace with the actual amount
-      }),
-    })
+      if (paymentIntentError) {
+        setErrorMessage(paymentIntentError)
+        setIsProcessing(false)
+        console.error("Payment intent creation error:", paymentIntentError)
+        return
+      }
 
-    const data = await response.json()
+      const { error: stripeError, paymentMethod } = await stripe.createPaymentMethod({
+        type: "card",
+        card: elements.getElement(CardElement) as any,
+      })
 
-    if (data.error) {
-      setErrorMessage(data.error)
-    } else {
-      const confirm = await stripe.confirmCardPayment(data.clientSecret, {
+      if (stripeError) {
+        setErrorMessage(stripeError.message)
+        setIsProcessing(false)
+        console.error("Payment method creation error:", stripeError)
+        return
+      }
+
+      const { error: confirmError, paymentIntent } = await stripe.confirmCardPayment(clientSecret!, {
         payment_method: paymentMethod?.id,
         receipt_email: "test@example.com",
       })
 
-      if (confirm.error) {
-        setErrorMessage(confirm.error.message)
+      if (confirmError) {
+        setErrorMessage(confirmError.message)
+        console.error("Payment confirmation error:", confirmError)
       } else {
-        console.log("Payment successful!")
+        console.log("Payment successful!", paymentIntent)
       }
+    } catch (err: any) {
+      setErrorMessage(err.message)
+      console.error("Payment processing error:", err)
+    } finally {
+      setIsProcessing(false)
     }
-
-    setIsProcessing(false)
   }
 
   return (

@@ -3,6 +3,7 @@ import "@/app/globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider } from "@/context/auth-context"
 import { ToastProvider } from "@/components/ui/toast-provider"
+import { StripeProvider } from "@/components/payments/stripe-provider"
 
 export default function RootLayout({
   children,
@@ -14,20 +15,20 @@ export default function RootLayout({
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
         <style>{`
-          html, body {
-            overflow-x: hidden;
-            width: 100%;
-            margin: 0;
-            padding: 0;
-            background-color: hsl(var(--background));
-          }
-          
-          /* Ensure all fixed elements cover the entire viewport */
-          .fixed {
-            width: 100vw;
-            min-height: 100vh;
-          }
-        `}</style>
+         html, body {
+           overflow-x: hidden;
+           width: 100%;
+           margin: 0;
+           padding: 0;
+           background-color: hsl(var(--background));
+         }
+         
+         /* Ensure all fixed elements cover the entire viewport */
+         .fixed {
+           width: 100vw;
+           min-height: 100vh;
+         }
+       `}</style>
       </head>
       <body>
         <AuthProvider>
@@ -46,7 +47,7 @@ export default function RootLayout({
                 zIndex: -30,
               }}
             />
-            {children}
+            <StripeProvider>{children}</StripeProvider>
             <ToastProvider />
           </ThemeProvider>
         </AuthProvider>
