@@ -6,7 +6,8 @@ import { Elements } from "@stripe/react-stripe-js"
 import { PaymentForm } from "@/components/checkout/payment-form"
 import { EnhancedMainNav } from "@/components/enhanced-main-nav"
 import { Skeleton } from "@/components/ui/skeleton"
-import { AlertCircle } from "lucide-react"
+import { AlertCircle, ArrowLeft } from "lucide-react"
+import Link from "next/link"
 
 // Initialize Stripe with the publishable key
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "")
@@ -90,12 +91,27 @@ export default function CheckoutPage({ params }: { params: { serviceId: string }
     <div className="min-h-screen bg-background">
       <EnhancedMainNav />
       <main className="container py-12">
+        <div className="mb-6">
+          <Link
+            href={`/services/${params.serviceId}`}
+            className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to service details
+          </Link>
+        </div>
+
         <div className="max-w-md mx-auto">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold">Secure Checkout</h1>
+            <p className="text-muted-foreground mt-2">Complete your booking in just a few steps</p>
+          </div>
+
           {isLoading ? (
             <div className="space-y-4">
               <Skeleton className="h-8 w-3/4 mx-auto" />
               <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-[400px] w-full rounded-lg" />
+              <Skeleton className="h-[600px] w-full rounded-lg" />
             </div>
           ) : error ? (
             <div className="bg-red-50 border border-red-200 text-red-700 p-6 rounded-lg flex items-start gap-3">

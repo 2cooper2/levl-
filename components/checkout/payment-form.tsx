@@ -7,6 +7,9 @@ import { useRouter } from "next/navigation"
 import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
+import { CheckCircle, Shield, Lock, CreditCard, Info } from "lucide-react"
 
 interface PaymentFormProps {
   clientSecret: string
@@ -21,6 +24,10 @@ export function PaymentForm({ clientSecret, amount, serviceId }: PaymentFormProp
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [cardError, setCardError] = useState<string | null>(null)
+
+  // Calculate service fee (10%)
+  const serviceFee = Math.round(amount * 0.1)
+  const total = amount + serviceFee
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -67,31 +74,136 @@ export function PaymentForm({ clientSecret, amount, serviceId }: PaymentFormProp
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="p-4 border rounded-md">
-        <CardElement
-          options={{
-            style: {
-              base: {
-                fontSize: "16px",
-                color: "#424770",
-                "::placeholder": {
-                  color: "#aab7c4",
+    <Card className="w-full shadow-lg border-2 border-muted">
+      <CardHeader className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 rounded-t-lg border-b">
+        <CardTitle className="text-2xl">Complete your booking</CardTitle>
+        <CardDescription>Secure payment for Professional Website Development</CardDescription>
+      </CardHeader>
+
+      <CardContent className="space-y-6 pt-6">
+        {/* Order Summary */}
+        <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+          <h3 className="font-medium text-lg flex items-center gap-2">
+            <Info className="h-4 w-4 text-muted-foreground" /> Order Summary
+          </h3>
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>Service Fee</span>
+              <span className="font-medium">${(amount / 100).toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span>Platform Fee (10%)</span>
+              <span className="font-medium">${(serviceFee / 100).toFixed(2)}</span>
+            </div>
+            <Separator className="my-2" />
+            <div className="flex justify-between font-semibold">
+              <span>Total</span>
+              <span className="text-primary">${(total / 100).toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Payment Information */}
+        <div className="space-y-4">
+          <h3 className="font-medium text-lg flex items-center gap-2">
+            <CreditCard className="h-4 w-4 text-muted-foreground" /> Payment Information
+          </h3>
+          <div className="border-2 rounded-md p-4 bg-white dark:bg-black">
+            <CardElement
+              options={{
+                style: {
+                  base: {
+                    fontSize: "16px",
+                    color: "#424770",
+                    "::placeholder": {
+                      color: "#aab7c4",
+                    },
+                    iconColor: "#7c3aed",
+                  },
+                  invalid: {
+                    color: "#9e2146",
+                    iconColor: "#ef4444",
+                  },
                 },
-              },
-              invalid: {
-                color: "#9e2146",
-              },
-            },
-          }}
-        />
-      </div>
+                hidePostalCode: true,
+              }}
+            />
+          </div>
 
-      {cardError && <div className="text-sm text-red-500">{cardError}</div>}
+          {cardError && (
+            <div className="text-sm text-red-500 bg-red-50 dark:bg-red-950/30 p-3 rounded-md flex items-start gap-2">
+              <Shield className="h-4 w-4 mt-0.5 flex-shrink-0" />
+              <p>{cardError}</p>
+            </div>
+          )}
+        </div>
 
-      <Button type="submit" disabled={!stripe || isLoading} className="w-full">
-        {isLoading ? "Processing..." : `Pay $${(amount / 100).toFixed(2)}`}
-      </Button>
-    </form>
+        {/* Security Information */}
+        <div className="space-y-3 bg-green-50 dark:bg-green-950/20 p-4 rounded-lg">
+          <h3 className="font-medium flex items-center gap-2">
+            <Lock className="h-4 w-4 text-green-600 dark:text-green-400" /> Secure Payment
+          </h3>
+          <div className="space-y-2 text-sm text-muted-foreground">
+            <div className="flex items-start gap-2">
+              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400 mt-0.5" />
+              <p>Your payment information is encrypted and secure</p>
+            </div>
+            <div className="flex items-start gap-2">
+              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400 mt-0.5" />
+              <p>We use Stripe, a PCI-DSS Level 1 certified payment processor</p>
+            </div>
+            <div className="flex items-start gap-2">
+              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400 mt-0.5" />
+              <p>Your card details are never stored on our servers</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Service Details */}
+        <div className="space-y-3 border rounded-lg p-4">
+          <h3 className="font-medium">What's included:</h3>
+          <div className="space-y-2 text-sm">
+            <div className="flex items-start gap-2">
+              <CheckCircle className="h-4 w-4 text-primary mt-0.5" />
+              <p>Professional website development by Alex Morgan</p>
+            </div>
+            <div className="flex items-start gap-2">
+              <CheckCircle className="h-4 w-4 text-primary mt-0.5" />
+              <p>Unlimited revisions during the development period</p>
+            </div>
+            <div className="flex items-start gap-2">
+              <CheckCircle className="h-4 w-4 text-primary mt-0.5" />
+              <p>30-day support after project completion</p>
+            </div>
+            <div className="flex items-start gap-2">
+              <CheckCircle className="h-4 w-4 text-primary mt-0.5" />
+              <p>Full source code and documentation</p>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+
+      <CardFooter className="flex-col gap-4 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 rounded-b-lg border-t p-6">
+        <Button
+          type="submit"
+          onClick={handleSubmit}
+          disabled={!stripe || isLoading}
+          className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white py-6 text-lg"
+        >
+          {isLoading ? "Processing payment..." : `Pay $${(total / 100).toFixed(2)}`}
+        </Button>
+        <p className="text-xs text-center text-muted-foreground">
+          By clicking "Pay", you agree to our{" "}
+          <a href="#" className="underline hover:text-primary">
+            Terms of Service
+          </a>{" "}
+          and{" "}
+          <a href="#" className="underline hover:text-primary">
+            Privacy Policy
+          </a>
+          .
+        </p>
+      </CardFooter>
+    </Card>
   )
 }
