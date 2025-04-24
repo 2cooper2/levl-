@@ -925,7 +925,6 @@ export function EnhancedHeroSection() {
 
   return (
     <>
-      <style jsx global></style>
       <style jsx global>
         {detailedVisualStyles}
       </style>
