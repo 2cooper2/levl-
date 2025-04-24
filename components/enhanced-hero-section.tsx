@@ -48,6 +48,7 @@ import { useAuth } from "@/context/auth-context"
 import Link from "next/link"
 import { BackgroundPattern } from "@/components/background-pattern"
 import { EnhancedCategoryCard } from "@/components/enhanced-category-card"
+import { useMobile } from "@/hooks/use-mobile"
 
 // Add keyframes for the shimmer animation
 const shimmerAnimation = {
@@ -679,6 +680,7 @@ export function EnhancedHeroSection() {
 
   // Initialize skills state with the skillsData
   const [skills, setSkills] = useState(skillsData)
+  const isMobile = useMobile()
 
   // Generate decorative elements
   useEffect(() => {
@@ -925,9 +927,6 @@ export function EnhancedHeroSection() {
 
   return (
     <>
-      <style jsx global>
-        {detailedVisualStyles}
-      </style>
       <section
         className="w-full relative overflow-hidden"
         style={{
@@ -1010,7 +1009,7 @@ export function EnhancedHeroSection() {
             >
               <div className="relative w-full max-w-full">
                 <motion.div
-                  className="relative rounded-xl overflow-hidden bg-gradient-to-br from-purple-100/10 via-white/5 to-purple-50/10 dark:from-purple-900/10 dark:via-black/5 dark:to-purple-800/10 backdrop-blur-md p-3 sm:p-4 md:p-5 shadow-lg detailed-card"
+                  className={`relative rounded-xl overflow-hidden bg-gradient-to-br from-purple-100/10 via-white/5 to-purple-50/10 dark:from-purple-900/10 dark:via-black/5 dark:to-purple-800/10 backdrop-blur-md p-3 sm:p-4 md:p-5 shadow-lg detailed-card ${isMobile ? "simple-card" : ""}`}
                   initial={{ opacity: 0, scale: 0.9, y: 20 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   transition={{
@@ -1022,11 +1021,15 @@ export function EnhancedHeroSection() {
                     boxShadow: "0 0 40px 5px rgba(147, 51, 234, 0.25)",
                     border: "1px solid rgba(147, 51, 234, 0.2)",
                   }}
-                  whileHover={{
-                    boxShadow: "0 0 60px 10px rgba(147, 51, 234, 0.3)",
-                    y: -5,
-                    transition: { duration: 0.5 },
-                  }}
+                  whileHover={
+                    !isMobile
+                      ? {
+                          boxShadow: "0 0 60px 10px rgba(147, 51, 234, 0.3)",
+                          y: -5,
+                          transition: { duration: 0.5 },
+                        }
+                      : {}
+                  }
                 >
                   {/* Tech pattern overlay */}
                   <div className="tech-pattern absolute inset-0 bg-[radial-gradient(circle_at_10px_10px,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none z-1"></div>
@@ -1084,10 +1087,14 @@ export function EnhancedHeroSection() {
                       <div className="flex items-center">
                         <div className="h-10 w-10 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center mr-3 relative group">
                           <motion.div
-                            animate={{
-                              y: [0, -3, 0],
-                              rotate: [0, 2, -2, 0],
-                            }}
+                            animate={
+                              !isMobile
+                                ? {
+                                    y: [0, -3, 0],
+                                    rotate: [0, 2, -2, 0],
+                                  }
+                                : {}
+                            }
                             transition={{
                               duration: 4,
                               repeat: Number.POSITIVE_INFINITY,
@@ -1099,16 +1106,20 @@ export function EnhancedHeroSection() {
                           </motion.div>
                           <motion.div
                             className="absolute inset-0 rounded-full bg-white/30 scale-0"
-                            whileHover={{ scale: 1.5, opacity: [0, 0.5, 0] }}
+                            whileHover={!isMobile ? { scale: 1.5, opacity: [0, 0.5, 0] } : {}}
                             transition={{ duration: 1 }}
                           />
                           {/* Orbital rings around the rocket icon */}
                           <motion.div
                             className="absolute inset-0 rounded-full border border-white/20"
-                            animate={{
-                              scale: [1.1, 1.3, 1.1],
-                              opacity: [0.7, 1, 0.7],
-                            }}
+                            animate={
+                              !isMobile
+                                ? {
+                                    scale: [1.1, 1.3, 1.1],
+                                    opacity: [0.7, 1, 0.7],
+                                  }
+                                : {}
+                            }
                             transition={{
                               duration: 3,
                               repeat: Number.POSITIVE_INFINITY,
@@ -1117,10 +1128,14 @@ export function EnhancedHeroSection() {
                           />
                           <motion.div
                             className="absolute inset-0 rounded-full border border-white/10"
-                            animate={{
-                              scale: [1.4, 1.6, 1.4],
-                              opacity: [0.5, 0.8, 0.5],
-                            }}
+                            animate={
+                              !isMobile
+                                ? {
+                                    scale: [1.4, 1.6, 1.4],
+                                    opacity: [0.5, 0.8, 0.5],
+                                  }
+                                : {}
+                            }
                             transition={{
                               duration: 3.5,
                               repeat: Number.POSITIVE_INFINITY,
@@ -1158,10 +1173,14 @@ export function EnhancedHeroSection() {
                           onClick={() => setActiveSkill(index)}
                           onMouseEnter={() => setHoverSkill(index)}
                           onMouseLeave={() => setHoverSkill(null)}
-                          whileHover={{
-                            scale: 1.05,
-                            boxShadow: "0 10px 25px -5px rgba(147, 51, 234, 0.3)",
-                          }}
+                          whileHover={
+                            !isMobile
+                              ? {
+                                  scale: 1.05,
+                                  boxShadow: "0 10px 25px -5px rgba(147, 51, 234, 0.3)",
+                                }
+                              : {}
+                          }
                           whileTap={{ scale: 0.98 }}
                         >
                           <span className="mr-1.5">{skill.icon}</span>
