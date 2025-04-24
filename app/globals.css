@@ -293,7 +293,7 @@
   /* Ensure all fixed elements cover the entire viewport */
   .fixed {
     width: 100vw;
-    height: 100vh;
+    min-height: 100vh;
   }
 
   h1,
