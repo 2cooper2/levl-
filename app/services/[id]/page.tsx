@@ -37,10 +37,10 @@ export default function ServicePage() {
           description:
             "I will create a professional, responsive website tailored to your business needs. With over 5 years of experience in web development, I deliver high-quality websites that not only look great but also perform exceptionally well. My approach focuses on creating websites that are user-friendly, fast-loading, and optimized for search engines.",
           provider: {
-            id: "alex-morgan",
-            name: "Alex Morgan",
+            id: "caydon-cooper",
+            name: "Caydon Cooper",
             title: "Senior Web Developer",
-            avatar: "/placeholder.svg?height=100&width=100&text=AM",
+            avatar: "/placeholder.svg?height=100&width=100&text=CC",
             rating: 4.9,
             reviews: 127,
             responseTime: "Under 2 hours",

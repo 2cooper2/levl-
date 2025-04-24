@@ -36,10 +36,10 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
   // Mock data for providers in this category
   const providers = [
     {
-      id: "alex-morgan",
-      name: "Alex Morgan",
+      id: "caydon-cooper",
+      name: "Caydon Cooper",
       title: "Senior Web Developer",
-      avatar: "/placeholder.svg?height=80&width=80&text=AM",
+      avatar: "/placeholder.svg?height=80&width=80&text=CC",
       rating: 4.9,
       reviews: 124,
       location: "New York, USA",
@@ -47,67 +47,6 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
       responseTime: "Under 2 hours",
       tags: ["React", "Next.js", "TypeScript", "UI/UX"],
       featured: true,
-    },
-    {
-      id: "sarah-chen",
-      name: "Sarah Chen",
-      title: "Full Stack Developer",
-      avatar: "/placeholder.svg?height=80&width=80&text=SC",
-      rating: 4.8,
-      reviews: 89,
-      location: "San Francisco, USA",
-      hourlyRate: "$75",
-      responseTime: "Under 1 hour",
-      tags: ["Node.js", "React", "MongoDB", "AWS"],
-      featured: true,
-    },
-    {
-      id: "james-wilson",
-      name: "James Wilson",
-      title: "WordPress Expert",
-      avatar: "/placeholder.svg?height=80&width=80&text=JW",
-      rating: 4.7,
-      reviews: 56,
-      location: "London, UK",
-      hourlyRate: "$55",
-      responseTime: "Under 3 hours",
-      tags: ["WordPress", "PHP", "SEO", "E-commerce"],
-    },
-    {
-      id: "emma-davis",
-      name: "Emma Davis",
-      title: "Frontend Developer",
-      avatar: "/placeholder.svg?height=80&width=80&text=ED",
-      rating: 4.8,
-      reviews: 72,
-      location: "Berlin, Germany",
-      hourlyRate: "$60",
-      responseTime: "Under 2 hours",
-      tags: ["HTML/CSS", "JavaScript", "React", "Vue.js"],
-    },
-    {
-      id: "michael-zhang",
-      name: "Michael Zhang",
-      title: "Mobile App Developer",
-      avatar: "/placeholder.svg?height=80&width=80&text=MZ",
-      rating: 4.9,
-      reviews: 48,
-      location: "Toronto, Canada",
-      hourlyRate: "$80",
-      responseTime: "Under 4 hours",
-      tags: ["React Native", "iOS", "Android", "Flutter"],
-    },
-    {
-      id: "olivia-johnson",
-      name: "Olivia Johnson",
-      title: "UI/UX Designer & Developer",
-      avatar: "/placeholder.svg?height=80&width=80&text=OJ",
-      rating: 4.7,
-      reviews: 63,
-      location: "Sydney, Australia",
-      hourlyRate: "$70",
-      responseTime: "Under 3 hours",
-      tags: ["Figma", "Adobe XD", "React", "CSS"],
     },
   ]
 
@@ -251,7 +190,9 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                       animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
                       transition={{ duration: 0.5, delay: index * 0.1 }}
                     >
-                      <Card className={`overflow-hidden ${provider.featured ? "border-primary/50 bg-primary/5" : ""}`}>
+                      <Card
+                        className={`overflow-hidden ${provider.featured ? "border-purple-500/50 bg-purple-50/5" : ""}`}
+                      >
                         <div className="p-6">
                           <div className="flex flex-col md:flex-row gap-6">
                             {/* Provider Info */}

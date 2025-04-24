@@ -1,37 +1,18 @@
 "use client"
 
 import Link from "next/link"
-import { EnhancedButton } from "@/components/ui/enhanced-button"
 import { EnhancedMainNav } from "@/components/enhanced-main-nav"
 import { AnimatedGradientBackground } from "@/components/animated-gradient-background"
 import { BackgroundPattern } from "@/components/background-pattern"
-import { EnhancedCategoryCard } from "@/components/enhanced-category-card"
 import { EnhancedHeroSection } from "@/components/enhanced-hero-section"
-import {
-  Briefcase,
-  Code,
-  CreditCard,
-  Headphones,
-  Heart,
-  HomeIcon,
-  Lightbulb,
-  MessageSquare,
-  Palette,
-  Shield,
-  Star,
-  Users,
-  Zap,
-  Search,
-  ArrowRight,
-  TrendingUp,
-  Sparkles,
-} from "lucide-react"
+import { MessageSquare, Users, Search } from "lucide-react"
 import { motion } from "framer-motion"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { LevlLogo } from "@/components/levl-logo"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { ValueProposition } from "@/components/value-proposition"
+// REMOVE THIS IMPORT
+// import { ValueProposition } from "@/components/value-proposition"
 
 export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -75,7 +56,7 @@ export default function Home() {
             </motion.div>
 
             <div className="grid gap-8 md:grid-cols-3 lg:gap-12 mt-8 relative">
-              <div className="hidden md:block absolute top-1/4 left-1/4 right-1/4 h-0.5 bg-gradient-to-r from-transparent via-purple-300/30 to-transparent -translate-y-1/2"></div>
+              <div className="hidden md:block absolute top-1/4 left-1/4 right-1/4 h-0.5 bg-gradient-to-r from-transparent via-primary/30 to-transparent -translate-y-1/2"></div>
               {[
                 {
                   step: "01",
@@ -121,151 +102,9 @@ export default function Home() {
           <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent"></div>
         </section>
 
+        {/* REMOVE THIS SECTION */}
         {/* Value Proposition */}
-        <ValueProposition />
-
-        {/* Find the perfect service section - enhanced with matching background */}
-        <section className="w-full py-16 md:py-24 lg-py-32 bg-muted/50 relative">
-          <BackgroundPattern className="opacity-50" />
-          <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
-          <div className="container px-4 md:px-6 relative z-10">
-            <motion.div
-              className="flex flex-col items-center justify-center space-y-4 text-center mb-12"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-            >
-              <div className="inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
-                Popular Categories
-              </div>
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl max-w-[800px]">
-                Find the perfect service for your needs
-              </h2>
-              <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed mt-4">
-                Browse through thousands of services across various categories
-              </p>
-
-              <div className="w-full max-w-md mx-auto mt-8 relative">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <input
-                    type="search"
-                    placeholder="Search categories or services..."
-                    className="w-full rounded-full border border-input bg-background/80 backdrop-blur-sm px-10 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  />
-                </div>
-              </div>
-
-              {/* Category tabs */}
-              <div className="flex flex-wrap justify-center gap-2 mt-8">
-                {["all", "trending", "popular", "new"].map((tab) => (
-                  <motion.button
-                    key={tab}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                      activeTab === tab
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-background/80 backdrop-blur-sm hover:bg-background"
-                    }`}
-                    onClick={() => setActiveTab(tab)}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    {tab === "all" && "All Categories"}
-                    {tab === "trending" && (
-                      <span className="flex items-center">
-                        <TrendingUp className="mr-1 h-3 w-3" /> Trending
-                      </span>
-                    )}
-                    {tab === "popular" && (
-                      <span className="flex items-center">
-                        <Star className="mr-1 h-3 w-3" /> Popular
-                      </span>
-                    )}
-                    {tab === "new" && (
-                      <span className="flex items-center">
-                        <Sparkles className="mr-1 h-3 w-3" /> New
-                      </span>
-                    )}
-                  </motion.button>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Featured categories */}
-            <motion.div
-              className="mb-12"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-semibold">Featured Categories</h3>
-                <Link href="/explore" className="text-primary text-sm font-medium flex items-center hover:underline">
-                  View all <ArrowRight className="ml-1 h-3 w-3" />
-                </Link>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {[
-                  { icon: Code, name: "Development", count: 1680, featured: true },
-                  { icon: Palette, name: "Design", count: 1450, featured: true },
-                  { icon: Users, name: "Marketing", count: 1120, featured: true },
-                  { icon: Briefcase, name: "Business", count: 1240, featured: true },
-                ].map((category, index) => (
-                  <EnhancedCategoryCard
-                    key={index}
-                    icon={category.icon}
-                    name={category.name}
-                    count={category.count}
-                    index={index}
-                  />
-                ))}
-              </div>
-            </motion.div>
-
-            {/* All categories */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-              {[
-                { icon: CreditCard, name: "Finance", count: 840 },
-                { icon: Shield, name: "Legal", count: 560 },
-                { icon: HomeIcon, name: "Lifestyle", count: 980 },
-                { icon: Heart, name: "Health", count: 760 },
-                { icon: MessageSquare, name: "Writing", count: 920 },
-                { icon: Headphones, name: "Music", count: 540 },
-                { icon: Zap, name: "Video", count: 680 },
-                { icon: Lightbulb, name: "Education", count: 890 },
-              ].map((category, index) => (
-                <EnhancedCategoryCard
-                  key={index}
-                  icon={category.icon}
-                  name={category.name}
-                  count={category.count}
-                  index={index + 4} // Offset for animation delay
-                />
-              ))}
-            </div>
-
-            <motion.div
-              className="flex justify-center mt-12"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-            >
-              <EnhancedButton
-                variant="gradient"
-                size="lg"
-                className="font-medium"
-                onClick={() => router.push("/explore")}
-              >
-                Explore All Categories
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </EnhancedButton>
-            </motion.div>
-          </div>
-          <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent"></div>
-        </section>
+        {/* <ValueProposition /> */}
       </main>
       <footer className="w-full border-t bg-background py-6 md:py-12 relative">
         <BackgroundPattern className="opacity-30" />
@@ -308,7 +147,6 @@ export default function Home() {
                     height="24"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="currentColor"
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"

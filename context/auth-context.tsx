@@ -1,14 +1,23 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
-import { useRouter } from "next/navigation" // Import useRouter
+import { useRouter } from "next/navigation"
+import { createClient, createServerClient } from "@/lib/supabase"
 
+// Update the User type to include all the fields from our database
 type User = {
   id: string
   name: string
   email: string
   avatar: string
   role: "client" | "provider" | "admin"
+  phone?: string
+  bio?: string
+  location?: string
+  website?: string
+  is_verified?: boolean
+  is_active?: boolean
+  last_login_at?: string
 }
 
 type AuthContextType = {
@@ -16,8 +25,9 @@ type AuthContextType = {
   isLoading: boolean
   isAuthenticated: boolean
   login: (email: string, password: string) => Promise<void>
-  signup: (name: string, email: string, password: string, role: "client" | "provider") => Promise<void>
+  signup: (name: string, email: string, password: string, role: "client" | "provider" | "admin") => Promise<void>
   logout: () => void
+  checkEmailExists: (email: string) => Promise<boolean>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -25,39 +35,271 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const router = useRouter() // Initialize useRouter
+  const router = useRouter()
+  const supabase = createClient()
+  const serverSupabase = createServerClient()
 
   useEffect(() => {
-    // Check if user is logged in from localStorage
-    const storedUser = localStorage.getItem("levl_user")
-    if (storedUser) {
-      setUser(JSON.parse(storedUser))
-    }
-    setIsLoading(false)
-  }, [])
+    // Check if user is logged in from Supabase session
+    const checkSession = async () => {
+      try {
+        if (!supabase) {
+          console.error("Supabase client not initialized")
+          setIsLoading(false)
+          return
+        }
 
+        const {
+          data: { session },
+        } = await supabase.auth.getSession()
+
+        console.log("Session check:", session ? "Found session" : "No session")
+
+        if (session) {
+          // Get user profile from users table
+          const { data: userData, error } = await serverSupabase
+            .from("users")
+            .select("*")
+            .eq("id", session.user.id)
+            .single()
+
+          if (userData && !error) {
+            const userObj = {
+              id: userData.id,
+              name: userData.name || "",
+              email: userData.email || "",
+              avatar:
+                userData.avatar_url || `/placeholder.svg?height=200&width=200&text=${userData.name?.charAt(0) || "U"}`,
+              role: (userData.role as "client" | "provider" | "admin") || "client",
+              phone: userData.phone,
+              bio: userData.bio,
+              location: userData.location,
+              website: userData.website,
+              is_verified: userData.is_verified,
+              is_active: userData.is_active,
+              last_login_at: userData.last_login_at,
+            }
+            console.log("Setting user from session:", userObj.email)
+            setUser(userObj)
+
+            // Also store in localStorage as a fallback
+            localStorage.setItem("levl_user", JSON.stringify(userObj))
+          } else if (error) {
+            console.error("Error fetching user data:", error)
+          }
+        } else {
+          // Check localStorage as fallback
+          const storedUser = localStorage.getItem("levl_user")
+          if (storedUser) {
+            try {
+              const parsedUser = JSON.parse(storedUser)
+              console.log("Setting user from localStorage:", parsedUser.email)
+              setUser(parsedUser)
+            } catch (e) {
+              console.error("Error parsing stored user:", e)
+              localStorage.removeItem("levl_user")
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error checking session:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    checkSession()
+
+    // Set up auth state change listener
+    let subscription: { unsubscribe: () => void } | null = null
+
+    if (supabase) {
+      const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
+        console.log("Auth state changed:", event, session?.user?.id)
+
+        if (session?.user) {
+          // Get user profile when auth state changes
+          // Use service role client to bypass RLS
+          const serviceSupabase = createServerClient()
+          const { data: userData, error } = await serviceSupabase
+            .from("users")
+            .select("*")
+            .eq("id", session.user.id)
+            .single()
+
+          if (userData && !error) {
+            const userObj = {
+              id: userData.id,
+              name: userData.name || "",
+              email: userData.email || "",
+              avatar:
+                userData.avatar_url || `/placeholder.svg?height=200&width=200&text=${userData.name?.charAt(0) || "U"}`,
+              role: (userData.role as "client" | "provider" | "admin") || "client",
+              phone: userData.phone,
+              bio: userData.bio,
+              location: userData.location,
+              website: userData.website,
+              is_verified: userData.is_verified,
+              is_active: userData.is_active,
+              last_login_at: userData.last_login_at,
+            }
+
+            console.log("Setting user from auth change:", userObj.email)
+            setUser(userObj)
+
+            // Also store in localStorage as a fallback
+            localStorage.setItem("levl_user", JSON.stringify(userObj))
+          } else if (error) {
+            console.error("Error fetching user data on auth change:", error)
+          }
+        } else if (event === "SIGNED_OUT") {
+          console.log("User signed out, clearing user state")
+          setUser(null)
+          localStorage.removeItem("levl_user")
+        }
+      })
+
+      subscription = data.subscription
+    }
+
+    return () => {
+      if (subscription) {
+        subscription.unsubscribe()
+      }
+    }
+  }, [supabase, serverSupabase])
+
+  // Add a function to check if an email already exists
+  const checkEmailExists = async (email: string): Promise<boolean> => {
+    try {
+      if (!serverSupabase) return false
+
+      const { data, error, count } = await serverSupabase
+        .from("users")
+        .select("email", { count: "exact" })
+        .eq("email", email)
+
+      if (error) {
+        console.error("Error checking email:", error)
+        return false
+      }
+
+      return count ? count > 0 : false
+    } catch (error) {
+      console.error("Error checking email:", error)
+      return false
+    }
+  }
+
+  // Update the login function to record sessions
   const login = async (email: string, password: string) => {
     setIsLoading(true)
     try {
-      // In a real app, this would be an API call
-      // Simulating API call with timeout
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      // Mock user data
-      const mockUser: User = {
-        id: "user_123",
-        name: "John Doe",
-        email,
-        avatar: "/placeholder.svg?height=200&width=200&text=JD",
-        role: "provider",
+      if (!supabase) {
+        throw new Error("Supabase client not initialized")
       }
 
-      setUser(mockUser)
-      localStorage.setItem("levl_user", JSON.stringify(mockUser))
+      console.log("Attempting login with email:", email)
 
-      // Resolve the promise after setting the user and local storage
+      // For testing purposes, let's try a mock login if we're in development
+      if (process.env.NODE_ENV === "development" && email === "test@example.com" && password === "password") {
+        console.log("Using mock login for development")
+
+        // Create a mock user
+        const mockUser = {
+          id: "mock-user-id",
+          name: "Test User",
+          email: "test@example.com",
+          avatar: `/placeholder.svg?height=200&width=200&text=TU`,
+          role: "client" as const,
+          is_active: true,
+          is_verified: true,
+        }
+
+        setUser(mockUser)
+        localStorage.setItem("levl_user", JSON.stringify(mockUser))
+        return Promise.resolve()
+      }
+
+      // Real Supabase authentication
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      console.log("Login response:", data?.user?.id, error?.message)
+
+      if (error) {
+        console.error("Supabase login failed:", error)
+        let errorMessage = "Invalid login credentials"
+        if (error.message?.includes("Invalid login credentials")) {
+          errorMessage = "Invalid email or password. Please check your credentials and try again."
+        } else if (error.message?.includes("Email not confirmed")) {
+          errorMessage = "Please confirm your email address before logging in."
+        }
+        throw new Error(errorMessage) // Re-throw the error with a more specific message
+      }
+
+      // Get user profile after login
+      if (data.user) {
+        const { data: userData, error: profileError } = await serverSupabase
+          .from("users")
+          .select("*")
+          .eq("id", data.user.id)
+          .single()
+
+        if (profileError) {
+          console.error("Error fetching user profile:", profileError)
+          throw profileError
+        }
+
+        if (userData) {
+          const userObj = {
+            id: userData.id,
+            name: userData.name || "",
+            email: userData.email || "",
+            avatar:
+              userData.avatar_url || `/placeholder.svg?height=200&width=200&text=${userData.name?.charAt(0) || "U"}`,
+            role: (userData.role as "client" | "provider" | "admin") || "client",
+            phone: userData.phone,
+            bio: userData.bio,
+            location: userData.location,
+            website: userData.website,
+            is_verified: userData.is_verified,
+            is_active: userData.is_active,
+            last_login_at: userData.last_login_at,
+          }
+
+          console.log("Setting user after login:", userObj.email)
+          setUser(userObj)
+
+          // Also store in localStorage as a fallback
+          localStorage.setItem("levl_user", JSON.stringify(userObj))
+
+          // Create a session record
+          try {
+            const userAgent = navigator.userAgent
+            await serverSupabase.from("sessions").insert([
+              {
+                user_id: data.user.id,
+                device_info: { userAgent },
+                ip_address: "client-side", // We can't get the real IP on client side
+                user_agent: userAgent,
+                expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
+              },
+            ])
+          } catch (sessionError) {
+            console.error("Error creating session:", sessionError)
+            // Non-critical error, don't throw
+          }
+        } else {
+          console.error("No user data found after login")
+          throw new Error("User profile not found")
+        }
+      }
+
       return Promise.resolve()
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login failed:", error)
       return Promise.reject(error)
     } finally {
@@ -65,27 +307,110 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const signup = async (name: string, email: string, password: string, role: "client" | "provider") => {
+  // Update the signup function to include the additional fields
+  const signup = async (name: string, email: string, password: string, role: "client" | "provider" | "admin") => {
     setIsLoading(true)
     try {
-      // In a real app, this would be an API call
-      // Simulating API call with timeout
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      // Mock user data
-      const mockUser: User = {
-        id: "user_" + Math.random().toString(36).substr(2, 9),
-        name,
-        email,
-        avatar: `/placeholder.svg?height=200&width=200&text=${name
-          .split(" ")
-          .map((n) => n[0])
-          .join("")}`,
-        role,
+      if (!supabase) {
+        throw new Error("Supabase client not initialized")
       }
 
-      setUser(mockUser)
-      localStorage.setItem("levl_user", JSON.stringify(mockUser))
+      // First check if email already exists
+      const emailExists = await checkEmailExists(email)
+      if (emailExists) {
+        throw new Error("Email already in use. Please use a different email or try logging in.")
+      }
+
+      console.log("Creating new user with email:", email)
+
+      // 1. Create auth user with email confirmation disabled
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: {
+            name: name,
+            role: role,
+          },
+        },
+      })
+
+      if (error) {
+        console.error("Signup auth error:", error)
+        throw error
+      }
+
+      console.log("Auth signup response:", data?.user?.id)
+
+      if (data.user) {
+        // 2. Create user profile in users table
+        const { error: profileError } = await serverSupabase.from("users").insert([
+          {
+            id: data.user.id, // Use the user ID from auth.users
+            name: name,
+            email: email,
+            avatar_url: `/placeholder.svg?height=200&width=200&text=${name.charAt(0)}`,
+            role: role,
+            is_active: true,
+            is_verified: false,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+        ])
+
+        if (profileError) {
+          console.error("Error creating user profile:", profileError)
+          throw profileError
+        }
+
+        // 3. Set user in state
+        const userObj = {
+          id: data.user.id,
+          name: name,
+          email: email,
+          avatar: `/placeholder.svg?height=200&width=200&text=${name.charAt(0)}`,
+          role: role,
+          is_active: true,
+          is_verified: false,
+        }
+
+        console.log("Setting user after signup:", userObj.email)
+        setUser(userObj)
+
+        // Also store in localStorage as a fallback
+        localStorage.setItem("levl_user", JSON.stringify(userObj))
+
+        // 4. Sign in the user immediately after signup
+        if (data.session === null) {
+          console.log("No session after signup, signing in manually")
+          const { error: signInError } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          })
+
+          if (signInError) {
+            console.error("Error signing in after signup:", signInError)
+          }
+        }
+
+        // 5. Create a session record
+        try {
+          const userAgent = navigator.userAgent
+          await serverSupabase.from("sessions").insert([
+            {
+              user_id: data.user.id,
+              device_info: { userAgent },
+              ip_address: "client-side", // We can't get the real IP on client side
+              user_agent: userAgent,
+              expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
+            },
+          ])
+        } catch (sessionError) {
+          console.error("Error creating session:", sessionError)
+          // Non-critical error, don't throw
+        }
+      }
     } catch (error) {
       console.error("Signup failed:", error)
       throw error
@@ -94,10 +419,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const logout = () => {
+  // Update the logout function to clean up sessions
+  const logout = async () => {
+    console.log("Logging out user")
+    if (supabase && user) {
+      try {
+        // Delete the current session
+        await supabase.from("sessions").delete().eq("user_id", user.id).gt("expires_at", new Date().toISOString())
+      } catch (error) {
+        console.error("Error deleting session:", error)
+      }
+
+      await supabase.auth.signOut()
+    }
     setUser(null)
     localStorage.removeItem("levl_user")
-    router.push("/") // Redirect to home page after logout
+    router.push("/")
   }
 
   return (
@@ -109,6 +446,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         signup,
         logout,
+        checkEmailExists,
       }}
     >
       {children}

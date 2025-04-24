@@ -87,6 +87,18 @@ body {
     }
   }
 
+  @keyframes loading {
+    0% {
+      width: 0%;
+    }
+    50% {
+      width: 70%;
+    }
+    100% {
+      width: 100%;
+    }
+  }
+
   /* Background patterns */
   .bg-grid-pattern {
     /* Remove the background-image property that creates the grid */
@@ -131,6 +143,11 @@ body {
   .dark .glass-effect {
     background: rgba(0, 0, 0, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  /* Add perspective utility class */
+  .perspective-1000 {
+    perspective: 1000px;
   }
 }
 

@@ -12,8 +12,8 @@ export function FeaturedSkillsCarousel() {
 
   const skills = [
     {
-      title: "Web Development",
-      icon: "💻",
+      title: "Mounting",
+      icon: "🔧",
       color: "bg-blue-500",
       count: "2,500+ professionals",
     },

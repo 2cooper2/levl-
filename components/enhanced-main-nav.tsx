@@ -9,7 +9,6 @@ import { useAuth } from "@/context/auth-context"
 import { Menu, Moon, Sun } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useTheme } from "next-themes"
-import { FloatingWaitlistButton } from "@/components/waitlist/floating-waitlist-button"
 
 export function EnhancedMainNav() {
   const pathname = usePathname()
@@ -19,7 +18,7 @@ export function EnhancedMainNav() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/70 backdrop-blur-md shadow-sm">
       <div className="container flex h-16 items-center justify-between pl-2">
-        <div className="flex items-center gap-2 -ml-2">
+        <div className="flex items-center gap-2">
           <Link href="/" className="flex items-center relative">
             <LevlLogo className="h-16 w-16" />
             <span className="text-3xl font-bold text-black dark:text-white absolute left-14 bottom-2 z-10">LevL</span>
@@ -47,8 +46,17 @@ export function EnhancedMainNav() {
               </>
             ) : (
               <>
-                <div className="mr-2">
-                  <FloatingWaitlistButton inHeader={true} />
+                <div className="flex items-center gap-3">
+                  <Link href="/auth/signup">
+                    <Button className="bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90 text-white backdrop-blur-sm rounded-md">
+                      Sign Up
+                    </Button>
+                  </Link>
+                  <Link href="/auth/login">
+                    <Button variant="outline" className="border-primary text-primary hover:bg-primary/10">
+                      Log In
+                    </Button>
+                  </Link>
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -95,8 +103,20 @@ export function EnhancedMainNav() {
             )}
           </div>
           {!isAuthenticated && (
-            <div className="md:hidden mr-2">
-              <FloatingWaitlistButton inHeader={true} />
+            <div className="md:hidden flex items-center gap-2">
+              <Link href="/auth/signup">
+                <Button
+                  size="sm"
+                  className="bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90 text-white backdrop-blur-sm rounded-md"
+                >
+                  Sign Up
+                </Button>
+              </Link>
+              <Link href="/auth/login">
+                <Button size="sm" variant="outline" className="border-primary text-primary hover:bg-primary/10">
+                  Log In
+                </Button>
+              </Link>
             </div>
           )}
           <MobileNav />

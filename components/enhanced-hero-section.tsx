@@ -1,9 +1,8 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-
 import type React from "react"
 
+import { Button } from "@/components/ui/button"
 import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { EnhancedButton } from "@/components/ui/enhanced-button"
@@ -19,9 +18,6 @@ import {
   CheckCircle,
   Clock,
   TrendingUp,
-  Truck,
-  Paintbrush,
-  Hammer,
   MessageSquare,
   PenToolIcon as Tool,
   Lightbulb,
@@ -34,10 +30,24 @@ import {
   Users,
   Target,
   Zap,
+  Search,
+  Code,
+  CreditCard,
+  Shield,
+  HomeIcon,
+  Heart,
+  Headphones,
+  BrushIcon as Broom,
+  WrenchIcon as ScrewDriver,
+  Hammer,
+  Paintbrush,
 } from "lucide-react"
 import { AnimatedTextDivider } from "@/components/animated-text-divider"
 import wave from "@/public/wave.png"
 import { useAuth } from "@/context/auth-context"
+import Link from "next/link"
+import { BackgroundPattern } from "@/components/background-pattern"
+import { EnhancedCategoryCard } from "@/components/enhanced-category-card"
 
 // Add keyframes for the shimmer animation
 const shimmerAnimation = {
@@ -396,7 +406,7 @@ const ForumTab = () => {
               >
                 <p className="text-xs text-black/80 dark:text-white/80 mb-3">{topic.preview}</p>
 
-                {topic.responses.length > 0 ? (
+                {topic.responses && topic.responses.length > 0 ? (
                   <div className="space-y-2">
                     {topic.responses.map((response, i) => (
                       <div key={i} className="bg-white/5 dark:bg-black/20 rounded-md p-2 text-xs">
@@ -458,6 +468,180 @@ const handleApplyForProject = (projectName: string) => {
   // Add your logic here to handle the project application
 }
 
+// Mock skills data
+const skillsData = [
+  {
+    name: "UI/UX Design",
+    icon: <Tool className="h-5 w-5 text-white" />,
+    level: "Intermediate",
+    nextLevel: "Advanced",
+    earnings: "$2,500/month",
+    nextEarnings: "+$1,000/month",
+    description:
+      "Master the art of creating intuitive and visually appealing user interfaces. Learn design principles, wireframing, prototyping, and user testing.",
+    progress: 60,
+    color: "#4C6EF5",
+    mentors: 12,
+    projects: 25,
+    stats: {
+      repeatClients: 15,
+    },
+    learningPath: [
+      { name: "UI Design Fundamentals", duration: "4h 30m", status: "completed" },
+      { name: "UX Research Methods", duration: "3h 15m", status: "completed" },
+      { name: "Prototyping with Figma", duration: "5h 00m", status: "in-progress" },
+      { name: "User Testing and Feedback", duration: "4h 45m", status: "upcoming" },
+    ],
+    skills: [
+      { name: "Visual Design", level: 75 },
+      { name: "Interaction Design", level: 60 },
+      { name: "User Research", level: 50 },
+      { name: "Prototyping", level: 80 },
+    ],
+    skillProjects: [
+      {
+        name: "Design a mobile app for a local business",
+        difficulty: "Intermediate",
+        earnings: "$500",
+        status: "completed",
+      },
+      {
+        name: "Redesign a website for a non-profit organization",
+        difficulty: "Advanced",
+        earnings: "$800",
+        status: "in-progress",
+      },
+      {
+        name: "Create a design system for a startup",
+        difficulty: "Intermediate",
+        earnings: "$600",
+        status: "available",
+      },
+    ],
+    testimonial: {
+      author: "Jane Doe",
+      rating: 5,
+      text: "The UI/UX Design skill accelerator helped me land my dream job as a UX designer. The learning path was comprehensive and the projects were challenging and rewarding.",
+    },
+    milestones: [
+      { name: "Complete UI Design Fundamentals", progress: 100, total: 100 },
+      { name: "Complete UX Research Methods", progress: 100, total: 100 },
+      { name: "Complete Prototyping with Figma", progress: 75, total: 100 },
+      { name: "Complete User Testing and Feedback", progress: 0, total: 100 },
+    ],
+  },
+  {
+    name: "Web Development",
+    icon: <Code className="h-5 w-5 text-white" />,
+    level: "Beginner",
+    nextLevel: "Intermediate",
+    earnings: "$1,200/month",
+    nextEarnings: "+$800/month",
+    description:
+      "Build dynamic and responsive websites using HTML, CSS, and JavaScript. Learn front-end and back-end development, and deploy your projects to the web.",
+    progress: 30,
+    color: "#7950F2",
+    mentors: 8,
+    projects: 15,
+    stats: {
+      repeatClients: 8,
+    },
+    learningPath: [
+      { name: "HTML and CSS Basics", duration: "3h 00m", status: "completed" },
+      { name: "JavaScript Fundamentals", duration: "4h 00m", status: "in-progress" },
+      { name: "Front-End Frameworks (React)", duration: "6h 00m", status: "upcoming" },
+      { name: "Back-End Development (Node.js)", duration: "5h 30m", status: "upcoming" },
+    ],
+    skills: [
+      { name: "HTML", level: 80 },
+      { name: "CSS", level: 70 },
+      { name: "JavaScript", level: 40 },
+      { name: "React", level: 20 },
+    ],
+    skillProjects: [
+      { name: "Build a personal portfolio website", difficulty: "Beginner", earnings: "$300", status: "completed" },
+      {
+        name: "Create a landing page for a local business",
+        difficulty: "Intermediate",
+        earnings: "$500",
+        status: "available",
+      },
+      { name: "Develop a simple e-commerce website", difficulty: "Advanced", earnings: "$700", status: "available" },
+    ],
+    testimonial: {
+      author: "John Smith",
+      rating: 4,
+      text: "The Web Development skill accelerator gave me the foundation I needed to start my career as a web developer. The instructors were knowledgeable and the projects were practical.",
+    },
+    milestones: [
+      { name: "Complete HTML and CSS Basics", progress: 100, total: 100 },
+      { name: "Complete JavaScript Fundamentals", progress: 50, total: 100 },
+      { name: "Complete Front-End Frameworks (React)", progress: 0, total: 100 },
+      { name: "Complete Back-End Development (Node.js)", progress: 0, total: 100 },
+    ],
+  },
+  {
+    name: "Digital Marketing",
+    icon: <TrendingUp className="h-5 w-5 text-white" />,
+    level: "Intermediate",
+    nextLevel: "Advanced",
+    earnings: "$3,000/month",
+    nextEarnings: "+$1,200/month",
+    description:
+      "Drive traffic and generate leads for businesses using SEO, social media marketing, email marketing, and content marketing. Learn how to analyze data and optimize your campaigns for maximum ROI.",
+    progress: 70,
+    color: "#6741D9",
+    mentors: 10,
+    projects: 20,
+    stats: {
+      repeatClients: 12,
+    },
+    learningPath: [
+      { name: "SEO Fundamentals", duration: "4h 00m", status: "completed" },
+      { name: "Social Media Marketing", duration: "3h 30m", status: "completed" },
+      { name: "Email Marketing Strategies", duration: "5h 00m", status: "completed" },
+      { name: "Content Marketing and Blogging", duration: "4h 30m", status: "in-progress" },
+    ],
+    skills: [
+      { name: "SEO", level: 85 },
+      { name: "Social Media", level: 75 },
+      { name: "Email Marketing", level: 65 },
+      { name: "Content Marketing", level: 55 },
+    ],
+    skillProjects: [
+      {
+        name: "Develop an SEO strategy for a local business",
+        difficulty: "Intermediate",
+        earnings: "$600",
+        status: "completed",
+      },
+      {
+        name: "Manage social media accounts for a startup",
+        difficulty: "Advanced",
+        earnings: "$900",
+        status: "available",
+      },
+      {
+        name: "Create an email marketing campaign for a non-profit organization",
+        difficulty: "Intermediate",
+        earnings: "$700",
+        status: "available",
+      },
+    ],
+    testimonial: {
+      author: "Emily Brown",
+      rating: 5,
+      text: "The Digital Marketing skill accelerator helped me grow my freelance business exponentially. The strategies I learned were effective and the support from the mentors was invaluable.",
+    },
+    milestones: [
+      { name: "Complete SEO Fundamentals", progress: 100, total: 100 },
+      { name: "Complete Social Media Marketing", progress: 100, total: 100 },
+      { name: "Complete Email Marketing Strategies", progress: 100, total: 100 },
+      { name: "Complete Content Marketing and Blogging", progress: 60, total: 100 },
+    ],
+  },
+]
+
 export function EnhancedHeroSection() {
   const router = useRouter()
   const { isAuthenticated } = useAuth()
@@ -481,7 +665,9 @@ export function EnhancedHeroSection() {
   const [circuitDots, setCircuitDots] = useState<Array<{ top: number; left: number }>>([])
   const [glowDots, setGlowDots] = useState<Array<{ top: number; left: number; delay: number }>>([])
   const [dataFlows, setDataFlows] = useState<Array<{ top: number; left: number; delay: number }>>([])
-  const [particles, setParticles] = useState(
+  const [particles, setParticles] = useState<
+    Array<{ id: number; x: number; y: number; size: number; duration: number }>
+  >(
     Array.from({ length: 20 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
@@ -491,196 +677,8 @@ export function EnhancedHeroSection() {
     })),
   )
 
-  // Updated skills data with home service categories
-  const skills = [
-    {
-      name: "Mounting",
-      level: "Beginner",
-      nextLevel: "Intermediate",
-      progress: 68,
-      mentors: 24,
-      projects: 156,
-      earnings: "$25-45/hr",
-      nextEarnings: "$50-75/hr",
-      color: "#4C6EF5",
-      icon: <Tool className="h-4 w-4" />,
-      description: "Learn to mount TVs, shelves, artwork, and other items securely on walls",
-      learningPath: [
-        { name: "Wall Types & Materials", status: "completed", duration: "2 weeks" },
-        { name: "Mounting Hardware", status: "completed", duration: "3 weeks" },
-        { name: "TV Mounting", status: "in-progress", duration: "2 weeks" },
-        { name: "Heavy Item Mounting", status: "upcoming", duration: "3 weeks" },
-        { name: "Artwork & Decor", status: "upcoming", duration: "2 weeks" },
-      ],
-      skills: [
-        { name: "Stud Finding", level: 75 },
-        { name: "Drill Operation", level: 60 },
-        { name: "Level Usage", level: 80 },
-        { name: "Cable Management", level: 65 },
-        { name: "Weight Distribution", level: 70 },
-      ],
-      skillProjects: [
-        { name: "TV Wall Mount Installation", difficulty: "Beginner", earnings: "$60", status: "available" },
-        { name: "Floating Shelf Installation", difficulty: "Intermediate", earnings: "$45", status: "available" },
-        { name: "Gallery Wall Setup", difficulty: "Beginner", earnings: "$80", status: "in-progress" },
-      ],
-      milestones: [
-        { name: "Complete 5 TV Mounts", progress: 3, total: 5, reward: "Intermediate Badge" },
-        { name: "Earn 5 Client Reviews", progress: 4, total: 5, reward: "$50 Bonus" },
-        { name: "Complete Hardware Course", progress: 80, total: 100, reward: "Certificate" },
-      ],
-      stats: {
-        avgCompletionTime: "45 mins",
-        clientSatisfaction: "4.8/5",
-        repeatClients: "65%",
-        topEarners: "$95/hr",
-      },
-      testimonial: {
-        text: "The mounting skills I learned helped me earn $1,200 in my first month!",
-        author: "Michael T.",
-        rating: 5,
-      },
-    },
-    {
-      name: "Moving",
-      level: "Intermediate",
-      nextLevel: "Advanced",
-      progress: 42,
-      mentors: 36,
-      projects: 210,
-      earnings: "$30-50/hr",
-      nextEarnings: "$55-85/hr",
-      color: "#7950F2",
-      icon: <Truck className="h-4 w-4" />,
-      description: "Master the techniques for safely moving furniture, boxes, and other items",
-      learningPath: [
-        { name: "Lifting Techniques", status: "completed", duration: "4 weeks" },
-        { name: "Furniture Protection", status: "completed", duration: "3 weeks" },
-        { name: "Space Planning", status: "in-progress", duration: "2 weeks" },
-        { name: "Vehicle Loading", status: "upcoming", duration: "2 weeks" },
-        { name: "Team Coordination", status: "upcoming", duration: "3 weeks" },
-      ],
-      skills: [
-        { name: "Heavy Lifting", level: 90 },
-        { name: "Furniture Disassembly", level: 75 },
-        { name: "Space Optimization", level: 65 },
-        { name: "Fragile Item Handling", level: 50 },
-        { name: "Time Management", level: 80 },
-      ],
-      skillProjects: [
-        { name: "Studio Apartment Move", difficulty: "Intermediate", earnings: "$120", status: "available" },
-        { name: "Furniture Rearrangement", difficulty: "Beginner", earnings: "$80", status: "available" },
-        { name: "Office Relocation Help", difficulty: "Intermediate", earnings: "$150", status: "in-progress" },
-      ],
-      milestones: [
-        { name: "Complete 3 Full Moves", progress: 2, total: 3, reward: "Advanced Badge" },
-        { name: "Zero Damage Reports", progress: 1, total: 3, reward: "Featured Profile" },
-        { name: "Complete Safety Course", progress: 60, total: 100, reward: "Certificate" },
-      ],
-      stats: {
-        avgCompletionTime: "3.5 hours",
-        clientSatisfaction: "4.7/5",
-        repeatClients: "40%",
-        topEarners: "$110/hr",
-      },
-      testimonial: {
-        text: "I've turned weekend moving gigs into a reliable income stream that pays better than my old job!",
-        author: "Sarah K.",
-        rating: 5,
-      },
-    },
-    {
-      name: "Painting",
-      level: "Advanced",
-      nextLevel: "Expert",
-      progress: 89,
-      mentors: 18,
-      projects: 94,
-      earnings: "$35-60/hr",
-      nextEarnings: "$65-100/hr",
-      color: "#F59F0B",
-      icon: <Paintbrush className="h-4 w-4" />,
-      description: "Learn professional painting techniques for walls, trim, furniture and more",
-      learningPath: [
-        { name: "Surface Preparation", status: "completed", duration: "4 weeks" },
-        { name: "Paint Selection", status: "completed", duration: "3 weeks" },
-        { name: "Brush & Roller Techniques", status: "completed", duration: "3 weeks" },
-        { name: "Trim & Detail Work", status: "in-progress", duration: "2 weeks" },
-        { name: "Special Finishes", status: "upcoming", duration: "3 weeks" },
-      ],
-      skills: [
-        { name: "Wall Painting", level: 90 },
-        { name: "Trim Work", level: 85 },
-        { name: "Color Matching", level: 80 },
-        { name: "Surface Prep", level: 75 },
-        { name: "Spray Painting", level: 95 },
-      ],
-      skillProjects: [
-        { name: "Bedroom Repaint", difficulty: "Advanced", earnings: "$200", status: "available" },
-        { name: "Cabinet Refinishing", difficulty: "Advanced", earnings: "$180", status: "available" },
-        { name: "Accent Wall Creation", difficulty: "Expert", earnings: "$250", status: "in-progress" },
-      ],
-      milestones: [
-        { name: "Complete 5 Room Paints", progress: 4, total: 5, reward: "Expert Badge" },
-        { name: "Generate $2K in Revenue", progress: 1800, total: 2000, reward: "$200 Bonus" },
-        { name: "Complete Finishes Course", progress: 90, total: 100, reward: "Certificate" },
-      ],
-      stats: {
-        avgCompletionTime: "6 hours",
-        clientSatisfaction: "4.9/5",
-        repeatClients: "75%",
-        topEarners: "$125/hr",
-      },
-      testimonial: {
-        text: "The advanced techniques I learned helped me charge premium rates and build a waiting list of clients!",
-        author: "David R.",
-        rating: 5,
-      },
-    },
-    {
-      name: "Furniture Assembly",
-      level: "Beginner",
-      nextLevel: "Intermediate",
-      progress: 35,
-      mentors: 29,
-      projects: 178,
-      earnings: "$20-40/hr",
-      nextEarnings: "$45-65/hr",
-      color: "#12B886",
-      icon: <Hammer className="h-4 w-4" />,
-      description: "Master the assembly of flat-pack furniture from IKEA and other retailers",
-      learningPath: [
-        { name: "Tool Fundamentals", status: "completed", duration: "2 weeks" },
-        { name: "Instruction Reading", status: "in-progress", duration: "3 weeks" },
-        { name: "IKEA Furniture Types", status: "upcoming", duration: "2 weeks" },
-        { name: "Hardware Organization", status: "upcoming", duration: "2 weeks" },
-        { name: "Troubleshooting", status: "upcoming", duration: "2 weeks" },
-      ],
-      skills: [
-        { name: "Allen Wrench Usage", level: 65 },
-        { name: "Part Identification", level: 80 },
-        { name: "Instruction Following", level: 70 },
-        { name: "Problem Solving", level: 40 },
-        { name: "Finishing Touches", level: 60 },
-      ],
-      milestones: [
-        { name: "Assemble 10 Furniture Pieces", progress: 4, total: 10, reward: "Intermediate Badge" },
-        { name: "Earn 5 Client Reviews", progress: 2, total: 5, reward: "$50 Bonus" },
-        { name: "Complete IKEA Course", progress: 30, total: 100, reward: "Certificate" },
-      ],
-      stats: {
-        avgCompletionTime: "1.5 hours",
-        clientSatisfaction: "4.6/5",
-        repeatClients: "55%",
-        topEarners: "$75/hr",
-      },
-      testimonial: {
-        text: "I turned my knack for furniture assembly into a weekend side hustle that pays for my vacations!",
-        author: "Jamie L.",
-        rating: 5,
-      },
-    },
-  ]
+  // Initialize skills state with the skillsData
+  const [skills, setSkills] = useState(skillsData)
 
   // Generate decorative elements
   useEffect(() => {
@@ -723,7 +721,7 @@ export function EnhancedHeroSection() {
     }, 8000)
 
     return () => clearInterval(interval)
-  }, [])
+  }, [skills.length])
 
   // Diamond glint effect
   useEffect(() => {
@@ -736,9 +734,6 @@ export function EnhancedHeroSection() {
 
     return () => clearInterval(glintInterval)
   }, [])
-
-  // Medal glow effect
-  // Remove this useEffect
 
   // Animate progress bar when skill changes
   useEffect(() => {
@@ -763,7 +758,7 @@ export function EnhancedHeroSection() {
         clearInterval(progressInterval.current)
       }
     }
-  }, [activeSkill])
+  }, [activeSkill, skills])
 
   // Animate the skill path visualization
   useEffect(() => {
@@ -930,9 +925,7 @@ export function EnhancedHeroSection() {
 
   return (
     <>
-      <style jsx global>
-        {scrollbarHideStyles}
-      </style>
+      <style jsx global></style>
       <style jsx global>
         {detailedVisualStyles}
       </style>
@@ -951,7 +944,7 @@ export function EnhancedHeroSection() {
         <div className="absolute inset-0 bg-noise opacity-5 dark:opacity-10 z-0"></div>
 
         {/* Enhanced gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-purple-500/10 z-0"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-purple-500/10 z-0" />
 
         {/* Particle system */}
         {particles.map((particle) => (
@@ -973,6 +966,7 @@ export function EnhancedHeroSection() {
               duration: particle.duration,
               repeat: Number.POSITIVE_INFINITY,
               repeatType: "reverse",
+              ease: "easeInOut",
             }}
           />
         ))}
@@ -1526,53 +1520,6 @@ export function EnhancedHeroSection() {
                           </div>
                         </div>
                       )}
-
-                      {/* Forum Tab */}
-                      {activeTab === "forum" && <ForumTab />}
-
-                      {/* Analytics Tab */}
-                      {activeTab === "analytics" && (
-                        <div className="space-y-4">
-                          <h4 className="text-sm font-semibold text-black dark:text-white">Earnings Growth</h4>
-                          <div className="relative h-52">
-                            <canvas ref={chartRef} className="w-full h-full" />
-                          </div>
-                          <p className="text-xs text-black/60 dark:text-white/60">
-                            Track your earnings and see how your skills are growing over time.
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Milestones Tab */}
-                      {activeTab === "milestones" && (
-                        <div className="space-y-4">
-                          <h4 className="text-sm font-semibold text-black dark:text-white">Skill Milestones</h4>
-                          <div className="space-y-3">
-                            {skills[activeSkill].milestones.map((milestone, index) => (
-                              <div
-                                key={index}
-                                className="p-3 rounded-lg bg-white/5 dark:bg-black/10 border border-white/10 hover:border-primary/30 transition-all duration-300 relative overflow-hidden"
-                              >
-                                <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_10px_10px,rgba(var(--primary-rgb),0.4)_1px,transparent_1px)] bg-[length:20px_20px] pointer-events-none"></div>
-
-                                <div className="flex justify-between items-start">
-                                  <div>
-                                    <div className="text-sm font-medium text-black dark:text-white">
-                                      {milestone.name}
-                                    </div>
-                                    <div className="text-xs text-black/60 dark:text-white/60">
-                                      Progress: {milestone.progress} / {milestone.total}
-                                    </div>
-                                  </div>
-                                  <EnhancedButton variant="outline" size="sm" className="h-8 text-xs bg-white/5">
-                                    View
-                                  </EnhancedButton>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
                     </div>
 
                     <div className="lg:col-span-4 space-y-4">
@@ -1633,6 +1580,171 @@ export function EnhancedHeroSection() {
                 </motion.div>
               </div>
             </motion.div>
+
+            {/* Find the perfect service section - enhanced with matching background */}
+            <section className="w-full py-16 md:py-24 lg-py-32 bg-muted/50 relative">
+              <BackgroundPattern className="opacity-50" />
+              <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
+              <div className="container px-4 md:px-6 relative z-10">
+                <motion.div
+                  className="flex flex-col items-center justify-center space-y-4 text-center mb-12"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <div className="inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
+                    Popular Categories
+                  </div>
+                  <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl max-w-[800px]">
+                    Find the perfect service for your needs
+                  </h2>
+                  <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed mt-4">
+                    Browse through thousands of services across various categories
+                  </p>
+
+                  <div className="w-full max-w-md mx-auto mt-8 relative">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <input
+                        type="search"
+                        placeholder="Search categories or services..."
+                        className="w-full rounded-full border border-input bg-background/80 backdrop-blur-sm px-10 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Category tabs */}
+                  <div className="flex flex-wrap justify-center gap-2 mt-8">
+                    {["all", "trending", "popular", "new"].map((tab) => (
+                      <motion.button
+                        key={tab}
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                          activeTab === tab
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-background/80 backdrop-blur-sm hover:bg-background"
+                        }`}
+                        onClick={() => setActiveTab(tab)}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        {tab === "all" && "All Categories"}
+                        {tab === "trending" && (
+                          <span className="flex items-center">
+                            <TrendingUp className="mr-1 h-3 w-3" /> Trending
+                          </span>
+                        )}
+                        {tab === "popular" && (
+                          <span className="flex items-center">
+                            <Star className="mr-1 h-3 w-3" /> Popular
+                          </span>
+                        )}
+                        {tab === "new" && (
+                          <span className="flex items-center">
+                            <Sparkles className="mr-1 h-3 w-3" /> New
+                          </span>
+                        )}
+                      </motion.button>
+                    ))}
+                  </div>
+                </motion.div>
+
+                {/* Featured categories */}
+                <motion.div
+                  className="mb-12"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-semibold">Featured Categories</h3>
+                    <Link
+                      href="/explore"
+                      className="text-primary text-sm font-medium flex items-center hover:underline"
+                    >
+                      View all <ArrowRight className="ml-1 h-3 w-3" />
+                    </Link>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="relative">
+                      <EnhancedCategoryCard icon={Hammer} name="Mounting" count={1680} index={0} />
+                    </div>
+                    <div className="relative">
+                      <div className="absolute top-0 left-0 right-0 z-10 flex justify-center -mt-3">
+                        <span className="bg-purple-200 text-purple-700 text-xs px-3 py-1 rounded-full font-medium shadow-lg">
+                          Coming Soon
+                        </span>
+                      </div>
+                      <EnhancedCategoryCard icon={Broom} name="Cleaning" count={1450} index={1} />
+                    </div>
+                    <div className="relative">
+                      <div className="absolute top-0 left-0 right-0 z-10 flex justify-center -mt-3">
+                        <span className="bg-purple-200 text-purple-700 text-xs px-3 py-1 rounded-full font-medium shadow-lg">
+                          Coming Soon
+                        </span>
+                      </div>
+                      <EnhancedCategoryCard icon={Paintbrush} name="Painting" count={1120} index={2} />
+                    </div>
+                    <div className="relative">
+                      <div className="absolute top-0 left-0 right-0 z-10 flex justify-center -mt-3">
+                        <span className="bg-purple-200 text-purple-700 text-xs px-3 py-1 rounded-full font-medium shadow-lg">
+                          Coming Soon
+                        </span>
+                      </div>
+                      <EnhancedCategoryCard icon={ScrewDriver} name="Furniture Assembly" count={1240} index={3} />
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* All categories */}
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                  {[
+                    { icon: CreditCard, name: "Finance", count: 840 },
+                    { icon: Shield, name: "Legal", count: 560 },
+                    { icon: HomeIcon, name: "Lifestyle", count: 980 },
+                    { icon: Heart, name: "Health", count: 760 },
+                    { icon: MessageSquare, name: "Writing", count: 920 },
+                    { icon: Headphones, name: "Music", count: 540 },
+                    { icon: Zap, name: "Video", count: 680 },
+                    { icon: Lightbulb, name: "Education", count: 890 },
+                  ].map((category, index) => (
+                    <div className="relative" key={index}>
+                      <div className="absolute top-0 left-0 right-0 z-10 flex justify-center -mt-3">
+                        <span className="bg-purple-200 text-purple-700 text-xs px-3 py-1 rounded-full font-medium shadow-lg">
+                          Coming Soon
+                        </span>
+                      </div>
+                      <EnhancedCategoryCard
+                        key={index}
+                        icon={category.icon}
+                        name={category.name}
+                        count={category.count}
+                        index={index + 4} // Offset for animation delay
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                <motion.div
+                  className="flex justify-center mt-12"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                >
+                  <EnhancedButton
+                    variant="gradient"
+                    size="lg"
+                    className="font-medium"
+                    onClick={() => router.push("/explore")}
+                  >
+                    Explore All Categories
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </EnhancedButton>
+                </motion.div>
+              </div>
+            </section>
           </div>
         </div>
       </section>
@@ -1642,5 +1754,6 @@ export function EnhancedHeroSection() {
 }
 
 const handleHireNow = () => {
+  const router = useRouter()
   router.push("/stripe-checkout")
 }

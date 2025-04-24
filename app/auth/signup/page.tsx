@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -16,25 +16,91 @@ import { useAuth } from "@/context/auth-context"
 import { useToast } from "@/components/ui/use-toast"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { motion } from "framer-motion"
+import { checkEmailExists } from "@/app/actions/check-email-exists"
+import { createUserProfile } from "@/app/actions/create-user-profile"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+
+const supabase = createClientComponentClient()
 
 export default function SignupPage() {
   const router = useRouter()
-  const { signup } = useAuth()
+  const { signup, checkEmailExists: checkEmailExistsContext } = useAuth()
   const { toast } = useToast()
 
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
-  const [role, setRole] = useState<"client" | "provider">("client")
+  const [role, setRole] = useState<"client" | "provider" | "both">("client")
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [cooldownActive, setCooldownActive] = useState(false)
+  const [cooldownTime, setCooldownTime] = useState(0)
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false)
   const [errors, setErrors] = useState<{
     name?: string
     email?: string
     password?: string
     confirmPassword?: string
   }>({})
+
+  // Handle cooldown timer
+  useEffect(() => {
+    let interval: NodeJS.Timeout
+
+    if (cooldownActive && cooldownTime > 0) {
+      interval = setInterval(() => {
+        setCooldownTime((prev) => {
+          if (prev <= 1) {
+            setCooldownActive(false)
+            clearInterval(interval)
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+    }
+
+    return () => {
+      if (interval) clearInterval(interval)
+    }
+  }, [cooldownActive, cooldownTime])
+
+  // Check email availability when email changes
+  useEffect(() => {
+    const checkEmail = async () => {
+      if (email && email.includes("@") && email.includes(".")) {
+        setIsCheckingEmail(true)
+        try {
+          const exists = await checkEmailExists(email) // Call the server action
+          if (exists) {
+            setErrors((prev) => ({
+              ...prev,
+              email: "This email is already registered. Please use a different email or log in.",
+            }))
+          } else {
+            setErrors((prev) => {
+              const newErrors = { ...prev }
+              if (newErrors.email === "This email is already registered. Please use a different email or log in.") {
+                delete newErrors.email
+              }
+              return newErrors
+            })
+          }
+        } catch (error) {
+          console.error("Error checking email:", error)
+        } finally {
+          setIsCheckingEmail(false)
+        }
+      }
+    }
+
+    const debounceTimer = setTimeout(() => {
+      checkEmail()
+    }, 500)
+
+    return () => clearTimeout(debounceTimer)
+  }, [email])
 
   const validateForm = () => {
     const newErrors: {
@@ -66,8 +132,8 @@ export default function SignupPage() {
       newErrors.confirmPassword = "Passwords do not match"
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
+    setErrors((prev) => ({ ...prev, ...newErrors }))
+    return Object.keys(newErrors).length === 0 && !errors.email
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -75,20 +141,112 @@ export default function SignupPage() {
 
     if (!validateForm()) return
 
-    setIsLoading(true)
-    try {
-      await signup(name, email, password, role)
+    // Prevent submission during cooldown
+    if (cooldownActive) {
       toast({
-        title: "Account created successfully",
-        description: "Welcome to LevL!",
-      })
-      router.push("/dashboard")
-    } catch (error) {
-      toast({
-        title: "Signup failed",
-        description: "There was an error creating your account. Please try again.",
+        title: "Please wait",
+        description: `You can try again in ${cooldownTime} seconds.`,
         variant: "destructive",
       })
+      return
+    }
+
+    setIsLoading(true)
+    try {
+      // Map 'both' to 'client' for database storage, but keep the user's selection
+      const selectedRole = role === "both" ? "client" : role
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: {
+            name: name,
+            role: role,
+          },
+        },
+      })
+
+      if (error) {
+        console.error("Signup auth error:", error)
+        throw error
+      }
+
+      if (data.user) {
+        // Call the server action to create the user profile
+        const { success: profileSuccess, message: profileMessage } = await createUserProfile(
+          data.user.id,
+          name,
+          email,
+          selectedRole,
+        )
+
+        if (!profileSuccess) {
+          console.error("Error creating user profile:", profileMessage)
+          throw new Error(profileMessage)
+        }
+
+        // Set user in state
+        const userObj = {
+          id: data.user.id,
+          name: name,
+          email: email,
+          avatar: `/placeholder.svg?height=200&width=200&text=${name.charAt(0)}`,
+          role: role,
+          is_active: true,
+          is_verified: false,
+        }
+
+        console.log("Setting user after signup:", userObj.email)
+        //setUser(userObj)
+
+        // Also store in localStorage as a fallback
+        localStorage.setItem("levl_user", JSON.stringify(userObj))
+
+        router.push("/dashboard")
+        toast({
+          title: "Account created successfully",
+          description: "Welcome to LevL!",
+        })
+      }
+    } catch (error: any) {
+      console.error("Signup error:", error)
+
+      // Check for duplicate email error
+      if (error.message && error.message.includes("Email already in use")) {
+        setErrors((prev) => ({
+          ...prev,
+          email: "This email is already registered. Please use a different email or log in.",
+        }))
+
+        toast({
+          title: "Email already registered",
+          description: "Please use a different email address or try logging in.",
+          variant: "destructive",
+        })
+      }
+      // Check for rate limiting error
+      else if (error.message && error.message.includes("security purposes") && error.message.includes("seconds")) {
+        // Extract the number of seconds from the error message
+        const secondsMatch = error.message.match(/(\d+) seconds/)
+        const seconds = secondsMatch ? Number.parseInt(secondsMatch[1]) : 12
+
+        setCooldownTime(seconds)
+        setCooldownActive(true)
+
+        toast({
+          title: "Too many attempts",
+          description: `For security reasons, please wait ${seconds} seconds before trying again.`,
+          variant: "destructive",
+        })
+      } else {
+        toast({
+          title: "Signup failed",
+          description: error.message || "There was an error creating your account. Please try again.",
+          variant: "destructive",
+        })
+      }
     } finally {
       setIsLoading(false)
     }
@@ -133,16 +291,17 @@ export default function SignupPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="name@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={isLoading}
-                  className={errors.email ? "border-red-500" : ""}
-                />
-                {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
+                <div className="relative">
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="name@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={isLoading || isCheckingEmail}
+                    className={errors.email ? "border-red-500" : ""}
+                  />
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
@@ -186,22 +345,31 @@ export default function SignupPage() {
                 <Label>I want to</Label>
                 <RadioGroup
                   value={role}
-                  onValueChange={(value) => setRole(value as "client" | "provider")}
+                  onValueChange={(value) => setRole(value as "client" | "provider" | "both")}
                   className="flex flex-col space-y-1"
                 >
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50">
                     <RadioGroupItem value="client" id="client" />
-                    <Label htmlFor="client" className="font-normal">
+                    <Label htmlFor="client" className="font-normal cursor-pointer w-full">
                       Hire service providers (Client)
                     </Label>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50">
                     <RadioGroupItem value="provider" id="provider" />
-                    <Label htmlFor="provider" className="font-normal">
+                    <Label htmlFor="provider" className="font-normal cursor-pointer w-full">
                       Offer my services (Provider)
                     </Label>
                   </div>
+                  <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50">
+                    <RadioGroupItem value="both" id="both" />
+                    <Label htmlFor="both" className="font-normal cursor-pointer w-full">
+                      Both - Offer my services and hire
+                    </Label>
+                  </div>
                 </RadioGroup>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Selected: {role === "client" ? "Client" : role === "provider" ? "Provider" : "Both"}
+                </p>
               </div>
               <div className="flex items-center space-x-2">
                 <input type="checkbox" id="terms" className="rounded border-gray-300" required />
@@ -219,17 +387,27 @@ export default function SignupPage() {
               <Button
                 type="submit"
                 className="w-full bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90"
-                disabled={isLoading}
+                disabled={isLoading || cooldownActive || !!errors.email}
               >
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Creating account...
                   </>
+                ) : cooldownActive ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Wait {cooldownTime}s
+                  </>
                 ) : (
                   "Create Account"
                 )}
               </Button>
+              {cooldownActive && (
+                <p className="text-sm text-amber-600 text-center">
+                  Please wait {cooldownTime} seconds before trying again
+                </p>
+              )}
             </form>
             <div className="mt-4 flex items-center">
               <Separator className="flex-1" />
