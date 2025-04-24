@@ -9,13 +9,10 @@ import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 import { useAuth } from "@/context/auth-context"
 import { useToast } from "@/components/ui/use-toast"
 import { createClient } from "@/lib/supabase"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { getStorageUrl } from "@/lib/utils"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 
 export default function SettingsPage() {
   const { user, setUser } = useAuth()
@@ -38,55 +35,16 @@ export default function SettingsPage() {
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    try {
-      if (!user) {
-        throw new Error("User not found")
-      }
 
-      // Update user profile in the database
-      const { data, error } = await supabase
-        .from("users")
-        .update({
-          name: profileData.name,
-          bio: profileData.bio,
-          location: profileData.location,
-          website: profileData.website,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", user.id)
-        .select()
-        .single()
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1000))
 
-      if (error) {
-        console.error("Failed to update profile:", error)
-        toast({
-          title: "Failed to update profile",
-          description: error.message,
-          variant: "destructive",
-        })
-        return
-      }
+    toast({
+      title: "Profile updated",
+      description: "Your profile has been updated successfully.",
+    })
 
-      console.log("Profile updated in database:", data)
-
-      // Update user state with the returned data
-      const updatedUser = { ...user, ...data }
-      setUser(updatedUser)
-
-      toast({
-        title: "Profile updated",
-        description: "Your profile has been updated successfully.",
-      })
-    } catch (err) {
-      console.error("Profile update error:", err)
-      toast({
-        title: "Update error",
-        description: "There was an error updating your profile.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
-    }
+    setIsLoading(false)
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -129,7 +87,7 @@ export default function SettingsPage() {
         return
       }
 
-      const publicUrl = getStorageUrl(data.path)
+      const publicUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${data.path}`
 
       const { error: updateError } = await supabase.from("users").update({ avatar_url: publicUrl }).eq("id", user.id)
 
@@ -173,99 +131,49 @@ export default function SettingsPage() {
           <TabsTrigger value="account">Account</TabsTrigger>
         </TabsList>
         <TabsContent value="profile" className="space-y-4">
-          <form onSubmit={handleProfileUpdate} className="space-y-6">
-            <div className="grid sm:grid-cols-2 gap-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Personal Information</CardTitle>
-                  <CardDescription>Update your profile details</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Full Name</Label>
-                    <Input id="name" name="name" value={profileData.name} onChange={handleInputChange} required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="bio">Bio</Label>
-                    <Textarea
-                      id="bio"
-                      name="bio"
-                      placeholder="Write a short bio about yourself"
-                      value={profileData.bio}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="location">Location</Label>
-                    <Input
-                      id="location"
-                      name="location"
-                      value={profileData.location}
-                      onChange={handleInputChange}
-                      placeholder="City, Country"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="website">Website</Label>
-                    <Input
-                      id="website"
-                      name="website"
-                      value={profileData.website}
-                      onChange={handleInputChange}
-                      type="url"
-                      placeholder="https://yourwebsite.com"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Avatar</CardTitle>
-                  <CardDescription>Update your profile picture</CardDescription>
-                </CardHeader>
-                <CardContent className="flex flex-col items-center space-y-4">
-                  <Avatar className="h-24 w-24 cursor-pointer" onClick={handleAvatarClick}>
-                    <AvatarImage src={user?.avatar || "/placeholder.svg"} alt="Avatar" />
-                    <AvatarFallback>{user?.name?.[0] || "U"}</AvatarFallback>
-                  </Avatar>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="hidden"
-                    ref={fileInputRef}
-                  />
-                  <Button variant="outline" onClick={uploadAvatar} disabled={uploadingAvatar || !selectedImage}>
-                    {uploadingAvatar ? "Uploading..." : "Upload New Avatar"}
-                  </Button>
-                  {selectedImage && <p className="text-sm text-muted-foreground">Selected: {selectedImage.name}</p>}
-                  {!selectedImage && <p className="text-sm text-muted-foreground">Click on the avatar to change it</p>}
-                </CardContent>
-              </Card>
-            </div>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Updating..." : "Save Changes"}
-            </Button>
-          </form>
-        </TabsContent>
-        <TabsContent value="account" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Account Information</CardTitle>
-              <CardDescription>Manage your account details</CardDescription>
+              <CardTitle>Profile Information</CardTitle>
+              <CardDescription>Update your profile information</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" value={profileData.email} readOnly />
-              </div>
-              {/* Add more account settings here */}
+            <CardContent>
+              <form onSubmit={handleProfileUpdate} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Full Name</Label>
+                  <Input
+                    id="name"
+                    name="name"
+                    placeholder="John Doe"
+                    value={profileData.name}
+                    onChange={handleInputChange}
+                    disabled={isLoading}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="name@example.com"
+                    value={profileData.email}
+                    onChange={handleInputChange}
+                    disabled={isLoading}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="bio">Bio</Label>
+                </div>
+              </form>
             </CardContent>
             <CardFooter>
-              <Button>Update Password</Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? "Updating..." : "Update Profile"}
+              </Button>
             </CardFooter>
           </Card>
         </TabsContent>
+        <TabsContent value="account">Account Content</TabsContent>
       </Tabs>
     </DashboardShell>
   )

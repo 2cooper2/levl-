@@ -350,3 +350,18 @@ header.fixed {
 .dark header.fixed {
   background: rgba(0, 0, 0, 0.7);
 }
+
+html,
+body {
+  overflow-x: hidden;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: hsl(var(--background));
+}
+
+/* Ensure all fixed elements cover the entire viewport */
+.fixed {
+  width: 100vw;
+  min-height: 100vh;
+}
