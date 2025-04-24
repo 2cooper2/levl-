@@ -14,21 +14,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-        <style>{`/* Style tag needs a child */
-         html, body {
-           overflow-x: hidden;
-           width: 100%;
-           margin: 0;
-           padding: 0;
-           background-color: hsl(var(--background));
-         }
-         
-         /* Ensure all fixed elements cover the entire viewport */
-         .fixed {
-           width: 100vw;
-           min-height: 100vh;
-         }
-       `}</style>
+        <style>{` `}</style>
       </head>
       <body>
         <AuthProvider>
