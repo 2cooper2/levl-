@@ -2,15 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
-  /* Add overscroll behavior to prevent bounce effects that can cause flickering */
-  overscroll-behavior: none;
-  /* Ensure no horizontal scrolling */
-  overflow-x: hidden;
-  width: 100%;
-}
-
 @layer utilities {
   .text-balance {
     text-wrap: balance;
