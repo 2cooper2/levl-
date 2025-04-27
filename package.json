@@ -64,7 +64,8 @@
     "framer-motion": "latest",
     "@stripe/react-stripe-js": "latest",
     "stripe": "latest",
-    "@supabase/auth-helpers-nextjs": "latest"
+    "@supabase/auth-helpers-nextjs": "latest",
+    "canvas-confetti": "latest"
   },
   "devDependencies": {
     "@types/node": "^22",
