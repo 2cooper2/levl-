@@ -11,9 +11,17 @@ interface CategoryCardProps {
   count: number
   index: number
   featured?: boolean
+  className?: string
 }
 
-export function EnhancedCategoryCard({ icon: Icon, name, count, index, featured = false }: CategoryCardProps) {
+export function EnhancedCategoryCard({
+  icon: Icon,
+  name,
+  count,
+  index,
+  featured = false,
+  className = "",
+}: CategoryCardProps) {
   // Convert the category name to a URL-friendly slug
   const categorySlug = name.toLowerCase().replace(/\s+/g, "-")
 
@@ -38,7 +46,7 @@ export function EnhancedCategoryCard({ icon: Icon, name, count, index, featured 
             featured ? "border-purple-400/60" : "border-purple-300/50"
           } 
           backdrop-blur-xl text-card-foreground transition-all duration-300 h-full
-          bg-purple-400/40 dark:bg-purple-500/25
+          bg-purple-400/40 dark:bg-purple-500/25 ${className}
           shadow-[0_10px_20px_-5px_rgba(0,0,0,0.3)] 
           hover:shadow-[0_20px_30px_-10px_rgba(147,51,234,0.4)]`}
           style={{

@@ -2161,6 +2161,7 @@ export function EnhancedHeroSection() {
                                   <div
                                     className={`absolute top-0 right-0 h-20 w-20 bg-gradient-to-bl from-${stat.color}/10 to-transparent rounded-bl-full`}
                                   ></div>
+                                  <div className="absolute -bottom-2 -left-2 h-12 w-12 bg-gradient-to-tr from-${stat.color}/5 to-transparent rounded-tr-full"></div>
                                   <div className="flex flex-col items-center text-center">
                                     <div
                                       className={`text-${stat.color} mb-1 opacity-80 group-hover/stat:opacity-100 transition-opacity`}
@@ -3371,7 +3372,13 @@ export function EnhancedHeroSection() {
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="relative">
-                      <EnhancedCategoryCard icon={Hammer} name="Mounting" count={1680} index={0} />
+                      <EnhancedCategoryCard
+                        icon={Hammer}
+                        name="Mounting"
+                        count={1680}
+                        index={0}
+                        className="bg-purple-300/30 dark:bg-purple-400/20"
+                      />
                     </div>
                     <div className="relative">
                       <div className="absolute top-0 left-0 right-0 z-10 flex justify-center -mt-3">
@@ -3379,7 +3386,13 @@ export function EnhancedHeroSection() {
                           Coming Soon
                         </span>
                       </div>
-                      <EnhancedCategoryCard icon={Broom} name="Cleaning" count={1450} index={1} />
+                      <EnhancedCategoryCard
+                        icon={Broom}
+                        name="Cleaning"
+                        count={1450}
+                        index={1}
+                        className="bg-purple-300/30 dark:bg-purple-400/20"
+                      />
                     </div>
                     <div className="relative">
                       <div className="absolute top-0 left-0 right-0 z-10 flex justify-center -mt-3">
@@ -3387,7 +3400,13 @@ export function EnhancedHeroSection() {
                           Coming Soon
                         </span>
                       </div>
-                      <EnhancedCategoryCard icon={Paintbrush} name="Painting" count={1120} index={2} />
+                      <EnhancedCategoryCard
+                        icon={Paintbrush}
+                        name="Painting"
+                        count={1120}
+                        index={2}
+                        className="bg-purple-300/30 dark:bg-purple-400/20"
+                      />
                     </div>
                     <div className="relative">
                       <div className="absolute top-0 left-0 right-0 z-10 flex justify-center -mt-3">
@@ -3395,7 +3414,13 @@ export function EnhancedHeroSection() {
                           Coming Soon
                         </span>
                       </div>
-                      <EnhancedCategoryCard icon={ScrewDriver} name="Furniture Assembly" count={1240} index={3} />
+                      <EnhancedCategoryCard
+                        icon={ScrewDriver}
+                        name="Furniture Assembly"
+                        count={1240}
+                        index={3}
+                        className="bg-purple-300/30 dark:bg-purple-400/20"
+                      />
                     </div>
                   </div>
                 </motion.div>
