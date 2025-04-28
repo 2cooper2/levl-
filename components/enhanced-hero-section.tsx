@@ -19,7 +19,6 @@ import {
   Clock,
   TrendingUp,
   MessageSquare,
-  PenToolIcon as Tool,
   Lightbulb,
   Compass,
   BarChart,
@@ -31,7 +30,6 @@ import {
   Target,
   Zap,
   Search,
-  Code,
   CreditCard,
   Shield,
   HomeIcon,
@@ -1233,14 +1231,14 @@ const handleApplyForProject = (projectName: string) => {
 // Mock skills data
 const skillsData = [
   {
-    name: "UI/UX Design",
-    icon: <Tool className="h-5 w-5 text-white" />,
+    name: "Mounting",
+    icon: <Hammer className="h-5 w-5 text-white" />,
     level: "Intermediate",
     nextLevel: "Advanced",
     earnings: "$2,500/month",
     nextEarnings: "+$1,000/month",
     description:
-      "Master the art of creating intuitive and visually appealing user interfaces. Learn design principles, wireframing, prototyping, and user testing.",
+      "Master the art of securely mounting TVs, shelves, and artwork on various wall types. Learn proper techniques, tool usage, and safety procedures.",
     progress: 60,
     color: "#4C6EF5",
     mentors: 12,
@@ -1249,58 +1247,58 @@ const skillsData = [
       repeatClients: 15,
     },
     learningPath: [
-      { name: "UI Design Fundamentals", duration: "4h 30m", status: "completed" },
-      { name: "UX Research Methods", duration: "3h 15m", status: "completed" },
-      { name: "Prototyping with Figma", duration: "5h 0m", status: "in-progress" },
-      { name: "User Testing and Feedback", duration: "4h 45m", status: "upcoming" },
+      { name: "Wall Types & Materials", duration: "4h 30m", status: "completed" },
+      { name: "Mounting Hardware Selection", duration: "3h 15m", status: "completed" },
+      { name: "TV Mounting Techniques", duration: "5h 0m", status: "in-progress" },
+      { name: "Advanced Mounting Solutions", duration: "4h 45m", status: "upcoming" },
     ],
     skills: [
-      { name: "Visual Design", level: 75 },
-      { name: "Interaction Design", level: 60 },
-      { name: "User Research", level: 50 },
-      { name: "Prototyping", level: 80 },
+      { name: "Stud Finding", level: 75 },
+      { name: "Hardware Selection", level: 60 },
+      { name: "Level Mounting", level: 50 },
+      { name: "Cable Management", level: 80 },
     ],
     skillProjects: [
       {
-        name: "Design a mobile app for a local business",
+        name: "Mount a 65-inch TV on drywall",
         difficulty: "Intermediate",
         earnings: "$500",
         status: "completed",
       },
       {
-        name: "Redesign a website for a non-profit organization",
+        name: "Install floating shelves in a living room",
         difficulty: "Advanced",
         earnings: "$800",
         status: "in-progress",
       },
       {
-        name: "Create a design system for a startup",
+        name: "Mount a projector and screen in home theater",
         difficulty: "Intermediate",
         earnings: "$600",
         status: "available",
       },
     ],
     testimonial: {
-      author: "Jane Doe",
+      author: "Jane Smith",
       rating: 5,
-      text: "The UI/UX Design skill accelerator helped me land my dream job as a UX designer. The learning path was comprehensive and the projects were challenging and rewarding.",
+      text: "The Mounting skill accelerator helped me start my own TV mounting business. The techniques I learned were professional-grade and the projects gave me real-world experience.",
     },
     milestones: [
-      { name: "Complete UI Design Fundamentals", progress: 100, total: 100 },
-      { name: "Complete UX Research Methods", progress: 100, total: 100 },
-      { name: "Complete Prototyping with Figma", progress: 75, total: 100 },
-      { name: "Complete User Testing and Feedback", progress: 0, total: 100 },
+      { name: "Complete Wall Types & Materials", progress: 100, total: 100 },
+      { name: "Complete Mounting Hardware Selection", progress: 100, total: 100 },
+      { name: "Complete TV Mounting Techniques", progress: 75, total: 100 },
+      { name: "Complete Advanced Mounting Solutions", progress: 0, total: 100 },
     ],
   },
   {
-    name: "Web Development",
-    icon: <Code className="h-5 w-5 text-white" />,
+    name: "Painting",
+    icon: <Paintbrush className="h-5 w-5 text-white" />,
     level: "Beginner",
     nextLevel: "Intermediate",
     earnings: "$1,200/month",
     nextEarnings: "+$800/month",
     description:
-      "Build dynamic and responsive websites using HTML, CSS, and JavaScript. Learn front-end and back-end development, and deploy your projects to the web.",
+      "Learn professional painting techniques for interior and exterior surfaces. Master color selection, surface preparation, and proper application methods for flawless results.",
     progress: 30,
     color: "#7950F2",
     mentors: 8,
@@ -1309,48 +1307,48 @@ const skillsData = [
       repeatClients: 8,
     },
     learningPath: [
-      { name: "HTML and CSS Basics", duration: "3h 0m", status: "completed" },
-      { name: "JavaScript Fundamentals", duration: "4h 0m", status: "in-progress" },
-      { name: "Front-End Frameworks (React)", duration: "6h 0m", status: "upcoming" },
-      { name: "Back-End Development (Node.js)", duration: "5h 30m", status: "upcoming" },
+      { name: "Surface Preparation", duration: "3h 0m", status: "completed" },
+      { name: "Paint Types & Selection", duration: "4h 0m", status: "in-progress" },
+      { name: "Brush & Roller Techniques", duration: "6h 0m", status: "upcoming" },
+      { name: "Advanced Finishes & Effects", duration: "5h 30m", status: "upcoming" },
     ],
     skills: [
-      { name: "HTML", level: 80 },
-      { name: "CSS", level: 70 },
-      { name: "JavaScript", level: 40 },
-      { name: "React", level: 20 },
+      { name: "Surface Prep", level: 80 },
+      { name: "Color Matching", level: 70 },
+      { name: "Brush Technique", level: 40 },
+      { name: "Spray Painting", level: 20 },
     ],
     skillProjects: [
-      { name: "Build a personal portfolio website", difficulty: "Beginner", earnings: "$300", status: "completed" },
+      { name: "Paint a bedroom with accent wall", difficulty: "Beginner", earnings: "$300", status: "completed" },
       {
-        name: "Create a landing page for a local business",
+        name: "Refinish kitchen cabinets",
         difficulty: "Intermediate",
         earnings: "$500",
         status: "available",
       },
-      { name: "Develop a simple e-commerce website", difficulty: "Advanced", earnings: "$700", status: "available" },
+      { name: "Paint exterior of small house", difficulty: "Advanced", earnings: "$700", status: "available" },
     ],
     testimonial: {
-      author: "John Smith",
+      author: "John Davis",
       rating: 4,
-      text: "The Web Development skill accelerator gave me the foundation I needed to start my career as a web developer. The instructors were knowledgeable and the projects were practical.",
+      text: "The Painting skill accelerator gave me the foundation I needed to start taking on painting jobs. The instructors were knowledgeable and the projects were practical.",
     },
     milestones: [
-      { name: "Complete HTML and CSS Basics", progress: 100, total: 100 },
-      { name: "Complete JavaScript Fundamentals", progress: 50, total: 100 },
-      { name: "Complete Front-End Frameworks (React)", progress: 0, total: 100 },
-      { name: "Complete Back-End Development (Node.js)", progress: 0, total: 100 },
+      { name: "Complete Surface Preparation", progress: 100, total: 100 },
+      { name: "Complete Paint Types & Selection", progress: 50, total: 100 },
+      { name: "Complete Brush & Roller Techniques", progress: 0, total: 100 },
+      { name: "Complete Advanced Finishes & Effects", progress: 0, total: 100 },
     ],
   },
   {
-    name: "Digital Marketing",
-    icon: <TrendingUp className="h-5 w-5 text-white" />,
+    name: "Furniture Assembly",
+    icon: <ScrewDriver className="h-5 w-5 text-white" />,
     level: "Intermediate",
     nextLevel: "Advanced",
     earnings: "$3,000/month",
     nextEarnings: "+$1,200/month",
     description:
-      "Drive traffic and generate leads for businesses using SEO, social media marketing, email marketing, and content marketing. Learn how to analyze data and optimize your campaigns for maximum ROI.",
+      "Become an expert at assembling all types of furniture from various manufacturers. Learn efficient techniques, proper tool usage, and troubleshooting methods for complex assemblies.",
     progress: 70,
     color: "#6741D9",
     mentors: 10,
@@ -1359,47 +1357,47 @@ const skillsData = [
       repeatClients: 12,
     },
     learningPath: [
-      { name: "SEO Fundamentals", duration: "4h 0m", status: "completed" },
-      { name: "Social Media Marketing", duration: "3h 30m", status: "completed" },
-      { name: "Email Marketing Strategies", duration: "5h 0m", status: "completed" },
-      { name: "Content Marketing and Blogging", duration: "4h 30m", status: "in-progress" },
+      { name: "Basic Assembly Tools", duration: "4h 0m", status: "completed" },
+      { name: "Reading Assembly Instructions", duration: "3h 30m", status: "completed" },
+      { name: "Complex Furniture Types", duration: "5h 0m", status: "completed" },
+      { name: "Custom Modifications", duration: "4h 30m", status: "in-progress" },
     ],
     skills: [
-      { name: "SEO", level: 85 },
-      { name: "Social Media", level: 75 },
-      { name: "Email Marketing", level: 65 },
-      { name: "Content Marketing", level: 55 },
+      { name: "Tool Proficiency", level: 85 },
+      { name: "Instruction Reading", level: 75 },
+      { name: "Problem Solving", level: 65 },
+      { name: "Finishing Touches", level: 55 },
     ],
     skillProjects: [
       {
-        name: "Develop an SEO strategy for a local business",
+        name: "Assemble a complete bedroom set",
         difficulty: "Intermediate",
         earnings: "$600",
         status: "completed",
       },
       {
-        name: "Manage social media accounts for a startup",
+        name: "Build a complex entertainment center",
         difficulty: "Advanced",
         earnings: "$900",
         status: "available",
       },
       {
-        name: "Create an email marketing campaign for a non-profit organization",
+        name: "Assemble office furniture for small business",
         difficulty: "Intermediate",
         earnings: "$700",
         status: "available",
       },
     ],
     testimonial: {
-      author: "Emily Brown",
+      author: "Emily Wilson",
       rating: 5,
-      text: "The Digital Marketing skill accelerator helped me grow my freelance business exponentially. The strategies I learned were effective and the support from the mentors was invaluable.",
+      text: "The Furniture Assembly skill accelerator helped me grow my assembly business exponentially. The techniques I learned made me much more efficient and the support from mentors was invaluable.",
     },
     milestones: [
-      { name: "Complete SEO Fundamentals", progress: 100, total: 100 },
-      { name: "Complete Social Media Marketing", progress: 100, total: 100 },
-      { name: "Complete Email Marketing Strategies", progress: 100, total: 100 },
-      { name: "Complete Content Marketing and Blogging", progress: 60, total: 100 },
+      { name: "Complete Basic Assembly Tools", progress: 100, total: 100 },
+      { name: "Complete Reading Assembly Instructions", progress: 100, total: 100 },
+      { name: "Complete Complex Furniture Types", progress: 100, total: 100 },
+      { name: "Complete Custom Modifications", progress: 60, total: 100 },
     ],
   },
 ]
@@ -1480,14 +1478,11 @@ export function EnhancedHeroSection() {
     setDataFlows(flows)
   }, [])
 
-  // Auto-rotate through skills
+  // Removed auto-rotation of skills as requested
   useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveSkill((prev) => (prev + 1) % skills.length)
-    }, 8000)
-
-    return () => clearInterval(interval)
-  }, [skills.length])
+    // Skills will now stay on the selected skill without auto-rotating
+    // User can still manually switch between skills by clicking
+  }, [])
 
   // Diamond glint effect
   useEffect(() => {
@@ -1782,18 +1777,8 @@ export function EnhancedHeroSection() {
                     delay: 0.4,
                   }}
                   style={{
-                    boxShadow: "0 0 40px 5px rgba(147, 51, 234, 0.25)",
                     border: "1px solid rgba(147, 51, 234, 0.2)",
                   }}
-                  whileHover={
-                    !isMobile
-                      ? {
-                          boxShadow: "0 0 60px 10px rgba(147, 51, 234, 0.3)",
-                          y: -5,
-                          transition: { duration: 0.5 },
-                        }
-                      : {}
-                  }
                 >
                   {/* Tech pattern overlay */}
                   <div className="tech-pattern absolute inset-0 bg-[radial-gradient(circle_at_10px_10px,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none z-1"></div>
