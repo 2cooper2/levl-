@@ -436,13 +436,7 @@ export default function CategoryPage({ params }) {
                     whileHover={{ y: -5, transition: { duration: 0.2 } }}
                     className="group"
                   >
-                    <Card
-                      className={`overflow-hidden transition-all duration-300 hover:shadow-lg ${
-                        provider.featured
-                          ? "border-purple-400/50 bg-gradient-to-r from-purple-50/30 to-background dark:from-purple-900/10 dark:to-background"
-                          : ""
-                      }`}
-                    >
+                    <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg border-purple-400/50 bg-gradient-to-r from-purple-50/30 to-background dark:from-purple-900/10 dark:to-background">
                       <div className="p-6">
                         <div className="flex flex-col md:flex-row gap-6">
                           {/* Provider Info */}
@@ -554,7 +548,7 @@ export default function CategoryPage({ params }) {
                       {provider.featured && (
                         <div className="bg-gradient-to-r from-primary/10 to-purple-500/10 px-6 py-2 flex items-center">
                           <Award className="h-4 w-4 text-primary mr-2" />
-                          <span className="text-sm font-medium">Featured Expert • Top 1% in {categoryName}</span>
+                          <span className="text-sm font-medium">Featured Expert - Top 1% in {categoryName}</span>
                         </div>
                       )}
                     </Card>
