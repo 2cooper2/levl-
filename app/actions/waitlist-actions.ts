@@ -59,69 +59,18 @@ async function ensureWaitlistTable(supabase: any) {
 export async function joinWaitlist(
   formData: FormData | { name: string; email: string; role?: string; message?: string },
 ) {
-  let name: string, email: string, role: string | undefined, message: string | undefined
-
-  if (formData instanceof FormData) {
-    name = formData.get("name") as string
-    email = formData.get("email") as string
-    role = formData.get("role") as string | undefined
-    message = formData.get("message") as string | undefined
-  } else {
-    name = formData.name
-    email = formData.email
-    role = formData.role
-    message = formData.message
-  }
-
-  try {
-    const supabase = await import("@/lib/supabase").then((m) => m.createServerClient())
-
-    if (!supabase) {
-      return { success: false, message: "Failed to create Supabase client" }
-    }
-
-    const tableExists = await ensureWaitlistTable(supabase)
-    if (!tableExists) {
-      return { success: false, message: "Failed to ensure waitlist table exists" }
-    }
-
-    const { error } = await supabase.from("waitlist").insert({
-      name,
-      email,
-      message,
-      role,
-    })
-
-    if (error) {
-      console.error("Error joining waitlist:", error)
-      return { success: false, message: error.message }
-    }
-
-    return { success: true, message: "Successfully joined the waitlist!" }
-  } catch (err: any) {
-    console.error("Error in joinWaitlist:", err)
-    return { success: false, message: "An unexpected error occurred" }
+  // This functionality has been removed
+  return {
+    success: true,
+    message: "Waitlist functionality has been removed",
   }
 }
 
 export async function getWaitlistEntries() {
-  try {
-    const supabase = await import("@/lib/supabase").then((m) => m.createServerClient())
-
-    if (!supabase) {
-      return { success: false, message: "Failed to create Supabase client", data: [] }
-    }
-
-    const { data, error } = await supabase.from("waitlist").select("*").order("created_at", { ascending: false })
-
-    if (error) {
-      console.error("Error fetching waitlist entries:", error)
-      return { success: false, message: "Failed to fetch waitlist entries", data: [] }
-    }
-
-    return { success: true, data: data, message: "Successfully fetched waitlist entries" }
-  } catch (err: any) {
-    console.error("Error in getWaitlistEntries:", err)
-    return { success: false, message: "An unexpected error occurred", data: [] }
+  // This functionality has been removed
+  return {
+    success: true,
+    data: [],
+    message: "Waitlist functionality has been removed",
   }
 }
