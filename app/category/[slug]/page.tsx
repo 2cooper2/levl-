@@ -47,13 +47,17 @@ export default function CategoryPage({ params }) {
   const [priceRange, setPriceRange] = useState([0, 500])
   const [showFilters, setShowFilters] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
+
+  // Get category slug from params
   const categorySlug = params?.slug || ""
 
   // Convert slug to display name (e.g., "web-development" -> "Web Development")
   const categoryName = categorySlug
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ")
+    ? categorySlug
+        .split("-")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ")
+    : ""
 
   useEffect(() => {
     setIsLoaded(true)
@@ -148,19 +152,15 @@ export default function CategoryPage({ params }) {
     setShowFilters(!showFilters)
   }
 
-  // Function to safely parse rating values
-  const parseRating = (rating) => {
-    try {
-      return Number.parseFloat(rating)
-    } catch (e) {
-      return 0
-    }
-  }
-
-  // Function to safely create category links
-  const createCategoryLink = (category) => {
-    return `/category/${category.toLowerCase().replace(/ /g, "-")}`
-  }
+  // Related categories
+  const relatedCategories = [
+    "UI/UX Design",
+    "Mobile Development",
+    "Backend Development",
+    "DevOps",
+    "Data Science",
+    "Digital Marketing",
+  ]
 
   const FilterPanel = () => (
     <div className="space-y-6">
@@ -295,7 +295,7 @@ export default function CategoryPage({ params }) {
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
-                          className={`h-3 w-3 ${i < parseRating(option.id) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"}`}
+                          className={`h-3 w-3 ${i < 4 ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"}`}
                         />
                       ))}
                     </div>
@@ -352,7 +352,7 @@ export default function CategoryPage({ params }) {
                 {categoryName} Experts
               </h1>
               <p className="text-lg text-muted-foreground mb-6">
-                Connect with top-rated {categoryName.toLowerCase()} professionals ready to help you succeed
+                Connect with top-rated professionals ready to help you succeed
               </p>
             </motion.div>
 
@@ -594,14 +594,7 @@ export default function CategoryPage({ params }) {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {[
-              "UI/UX Design",
-              "Mobile Development",
-              "Backend Development",
-              "DevOps",
-              "Data Science",
-              "Digital Marketing",
-            ].map((category, index) => (
+            {relatedCategories.map((category, index) => (
               <motion.div
                 key={category}
                 initial={{ opacity: 0, y: 20 }}
@@ -609,7 +602,7 @@ export default function CategoryPage({ params }) {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.05 }}
               >
-                <Link href={createCategoryLink(category)}>
+                <Link href={`/category/${category.toLowerCase().replace(/ /g, "-")}`}>
                   <div className="bg-background/80 backdrop-blur-sm rounded-lg p-4 border text-center hover:border-primary hover:shadow-md transition-all duration-300 h-full flex flex-col items-center justify-center">
                     <h3 className="font-medium text-sm">{category}</h3>
                     <p className="text-xs text-muted-foreground mt-1">120+ Experts</p>
