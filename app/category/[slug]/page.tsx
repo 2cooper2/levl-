@@ -40,24 +40,20 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 
-export default function CategoryPage({ params }) {
+export default function CategoryPage({ params }: { params: { slug: string } }) {
   const router = useRouter()
   const [isLoaded, setIsLoaded] = useState(false)
   const [selectedFilter, setSelectedFilter] = useState("all")
   const [priceRange, setPriceRange] = useState([0, 500])
   const [showFilters, setShowFilters] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
-
-  // Get category slug from params
-  const categorySlug = params?.slug || ""
+  const categorySlug = params.slug as string
 
   // Convert slug to display name (e.g., "web-development" -> "Web Development")
   const categoryName = categorySlug
-    ? categorySlug
-        .split("-")
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(" ")
-    : ""
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ")
 
   useEffect(() => {
     setIsLoaded(true)
@@ -151,16 +147,6 @@ export default function CategoryPage({ params }) {
   const toggleFilters = () => {
     setShowFilters(!showFilters)
   }
-
-  // Related categories
-  const relatedCategories = [
-    "UI/UX Design",
-    "Mobile Development",
-    "Backend Development",
-    "DevOps",
-    "Data Science",
-    "Digital Marketing",
-  ]
 
   const FilterPanel = () => (
     <div className="space-y-6">
@@ -295,7 +281,7 @@ export default function CategoryPage({ params }) {
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
-                          className={`h-3 w-3 ${i < 4 ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"}`}
+                          className={`h-3 w-3 ${i < Number.parseInt(option.id) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"}`}
                         />
                       ))}
                     </div>
@@ -348,11 +334,11 @@ export default function CategoryPage({ params }) {
         <div className="container px-4 md:px-6 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-              <h1 className="text-3xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+              <h1 className="text-3xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
                 {categoryName} Experts
               </h1>
               <p className="text-lg text-muted-foreground mb-6">
-                Connect with top-rated professionals ready to help you succeed
+                Connect with top-rated {categoryName.toLowerCase()} professionals ready to help you succeed
               </p>
             </motion.div>
 
@@ -414,7 +400,7 @@ export default function CategoryPage({ params }) {
 
           <div className="flex flex-col md:flex-row gap-8">
             {/* Desktop Filters */}
-            <div className="md:w-72 lg:w-80 hidden md:block">
+            <div className={`md:w-72 lg:w-80 hidden md:block`}>
               <FilterPanel />
             </div>
 
@@ -450,7 +436,13 @@ export default function CategoryPage({ params }) {
                     whileHover={{ y: -5, transition: { duration: 0.2 } }}
                     className="group"
                   >
-                    <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg border-purple-400/50 bg-gradient-to-r from-purple-50/30 to-background dark:from-purple-900/10 dark:to-background">
+                    <Card
+                      className={`overflow-hidden transition-all duration-300 hover:shadow-lg ${
+                        provider.featured
+                          ? "border-purple-400/50 bg-gradient-to-r from-purple-50/30 to-background dark:from-purple-900/10 dark:to-background"
+                          : ""
+                      }`}
+                    >
                       <div className="p-6">
                         <div className="flex flex-col md:flex-row gap-6">
                           {/* Provider Info */}
@@ -562,7 +554,7 @@ export default function CategoryPage({ params }) {
                       {provider.featured && (
                         <div className="bg-gradient-to-r from-primary/10 to-purple-500/10 px-6 py-2 flex items-center">
                           <Award className="h-4 w-4 text-primary mr-2" />
-                          <span className="text-sm font-medium">Featured Expert - Top 1% in {categoryName}</span>
+                          <span className="text-sm font-medium">Featured Expert • Top 1% in {categoryName}</span>
                         </div>
                       )}
                     </Card>
@@ -594,7 +586,14 @@ export default function CategoryPage({ params }) {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {relatedCategories.map((category, index) => (
+            {[
+              "UI/UX Design",
+              "Mobile Development",
+              "Backend Development",
+              "DevOps",
+              "Data Science",
+              "Digital Marketing",
+            ].map((category, index) => (
               <motion.div
                 key={category}
                 initial={{ opacity: 0, y: 20 }}
@@ -602,7 +601,7 @@ export default function CategoryPage({ params }) {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.05 }}
               >
-                <Link href={`/category/${category.toLowerCase().replace(/ /g, "-")}`}>
+                <Link href={`/category/${category.toLowerCase().replace(/\s+/g, "-")}`}>
                   <div className="bg-background/80 backdrop-blur-sm rounded-lg p-4 border text-center hover:border-primary hover:shadow-md transition-all duration-300 h-full flex flex-col items-center justify-center">
                     <h3 className="font-medium text-sm">{category}</h3>
                     <p className="text-xs text-muted-foreground mt-1">120+ Experts</p>
@@ -621,7 +620,7 @@ export default function CategoryPage({ params }) {
             <div className="space-y-4 lg:col-span-2">
               <div className="flex items-center gap-2">
                 <LevlLogo className="h-8 w-8" />
-                <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+                <span className="text-xl font-bold bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
                   LevL
                 </span>
               </div>
