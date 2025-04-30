@@ -263,7 +263,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                 >
                   <span className="flex flex-col items-start">
                     <span className="font-medium">Enterprise</span>
-                    <span className="text-muted-foreground text-[10px]">{"$150+/hr"}</span>
+                    <span className="text-muted-foreground text-[10px]">$150/hr and up</span>
                   </span>
                 </Button>
               </div>
@@ -297,16 +297,17 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                   >
                     <span>{option.name}</span>
                     <div className="ml-2 flex">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`h-3 w-3 ${
-                            i < Number.parseFloat(option.id)
-                              ? "fill-yellow-400 text-yellow-400"
-                              : "text-muted-foreground/30"
-                          }`}
-                        />
-                      ))}
+                      {Array.from({ length: 5 }).map((_, i) => {
+                        const optionValue = Number.parseFloat(option.id)
+                        return (
+                          <Star
+                            key={i}
+                            className={`h-3 w-3 ${
+                              i < optionValue ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"
+                            }`}
+                          />
+                        )
+                      })}
                     </div>
                   </Label>
                 </div>
