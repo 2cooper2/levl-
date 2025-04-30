@@ -40,14 +40,14 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 
-export default function CategoryPage({ params }: { params: { slug: string } }) {
+export default function CategoryPage({ params }) {
   const router = useRouter()
   const [isLoaded, setIsLoaded] = useState(false)
   const [selectedFilter, setSelectedFilter] = useState("all")
   const [priceRange, setPriceRange] = useState([0, 500])
   const [showFilters, setShowFilters] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
-  const categorySlug = params.slug as string
+  const categorySlug = params.slug
 
   // Convert slug to display name (e.g., "web-development" -> "Web Development")
   const categoryName = categorySlug
@@ -281,7 +281,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
-                          className={`h-3 w-3 ${i < Number.parseInt(option.id) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"}`}
+                          className={`h-3 w-3 ${i < Number(option.id) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"}`}
                         />
                       ))}
                     </div>
@@ -400,7 +400,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
 
           <div className="flex flex-col md:flex-row gap-8">
             {/* Desktop Filters */}
-            <div className={`md:w-72 lg:w-80 hidden md:block`}>
+            <div className="md:w-72 lg:w-80 hidden md:block">
               <FilterPanel />
             </div>
 
