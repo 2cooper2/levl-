@@ -1,60 +1,62 @@
 "use server"
 
-import { createClient } from "@/lib/supabase"
+import { createServerClient } from "@/lib/supabase-server"
 import { randomUUID } from "crypto"
 
-/**
- * @deprecated Use the signup function from the auth context instead
- */
 export async function createUserProfile(userData: {
-  name: string
+  userId: string
   email: string
-  role: string
-  avatar_url?: string
+  fullName: string
+  displayName?: string
+  avatarUrl?: string
 }) {
   try {
-    const supabase = createClient()
+    const supabase = createServerClient()
 
-    // Check if user already exists
-    const { data: existingUser, error: checkError } = await supabase
-      .from("users")
+    if (!supabase) {
+      return {
+        error: "Could not connect to database",
+      }
+    }
+
+    // Check if profile already exists
+    const { data: existingProfile, error: fetchError } = await supabase
+      .from("profiles")
       .select("id")
-      .eq("email", userData.email)
+      .eq("user_id", userData.userId)
       .single()
 
-    if (checkError && checkError.code !== "PGRST116") {
-      // PGRST116 means no rows returned, which is what we want
-      console.error("Error checking for existing user:", checkError)
-      return { success: false, message: "Error checking for existing user" }
+    if (fetchError && fetchError.code !== "PGRST116") {
+      // PGRST116 means no rows returned, which is expected if profile doesn't exist
+      console.error("Error checking for existing profile:", fetchError)
+      return { error: "Failed to check for existing profile" }
     }
 
-    if (existingUser) {
-      return { success: false, message: "User with this email already exists" }
+    if (existingProfile) {
+      console.log("Profile already exists for user:", userData.userId)
+      return { success: true, message: "Profile already exists" }
     }
 
-    // Create new user
-    const { error } = await supabase.from("users").insert([
-      {
-        id: randomUUID(),
-        name: userData.name,
-        email: userData.email,
-        role: userData.role,
-        avatar_url: userData.avatar_url || `/placeholder.svg?height=200&width=200&text=${userData.name.charAt(0)}`,
-        is_active: true,
-        is_verified: false,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-    ])
+    // Create new profile
+    const { error } = await supabase.from("profiles").insert({
+      id: randomUUID(),
+      user_id: userData.userId,
+      full_name: userData.fullName,
+      display_name: userData.displayName || userData.fullName.split(" ")[0],
+      email: userData.email,
+      avatar_url: userData.avatarUrl || "",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
 
     if (error) {
-      console.error("Error creating user profile:", error)
-      return { success: false, message: "Error creating user profile" }
+      console.error("Error creating profile:", error)
+      return { error: "Failed to create profile" }
     }
 
-    return { success: true }
-  } catch (error) {
+    return { success: true, message: "Profile created successfully" }
+  } catch (error: any) {
     console.error("Error in createUserProfile:", error)
-    return { success: false, message: "An unexpected error occurred" }
+    return { error: error.message || "An unexpected error occurred" }
   }
 }

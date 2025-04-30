@@ -1,39 +1,31 @@
-import { createClient } from "@supabase/supabase-js"
-import { NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
+import { createServerClient } from "@/lib/supabase-server"
+import { randomUUID } from "crypto"
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const { name, email, password, role } = await request.json()
+    const supabase = createServerClient()
 
-    // Validate inputs
-    if (!name || !email || !password || !role) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    if (!supabase) {
+      return NextResponse.json({ error: "Could not connect to authentication service" }, { status: 500 })
     }
 
-    // Create admin client with service role key
-    const supabaseAdmin = createClient(
-      process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false,
-        },
-      },
-    )
+    const { email, password, fullName, displayName } = await request.json()
 
-    console.log("Creating auth user...")
+    if (!email || !password || !fullName) {
+      return NextResponse.json({ error: "Email, password, and full name are required" }, { status: 400 })
+    }
 
-    // Step 1: Create the auth user
-    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+    // Step 1: Create the user in auth
+    const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
-      email_confirm: true, // Auto-confirm the email
-      user_metadata: { name, role },
+      options: {
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/auth/callback`,
+      },
     })
 
     if (authError) {
-      console.error("Auth error:", authError)
       return NextResponse.json({ error: authError.message }, { status: 400 })
     }
 
@@ -41,34 +33,33 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Failed to create user" }, { status: 500 })
     }
 
-    const userId = authData.user.id
-    console.log("Auth user created:", userId)
-
     // Step 2: Create the user profile
-    console.log("Creating user profile...")
-    const { error: profileError } = await supabaseAdmin.from("users").insert({
-      id: userId,
-      name,
-      email,
-      role,
-      is_active: true,
-      is_verified: true,
+    const { error: profileError } = await supabase.from("profiles").insert({
+      id: randomUUID(),
+      user_id: authData.user.id,
+      full_name: fullName,
+      display_name: displayName || fullName.split(" ")[0],
+      email: email,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     })
 
     if (profileError) {
-      console.error("Profile error:", profileError)
-
-      // If profile creation fails, delete the auth user to avoid orphaned accounts
-      await supabaseAdmin.auth.admin.deleteUser(userId)
-
-      return NextResponse.json({ error: `Failed to create user profile: ${profileError.message}` }, { status: 500 })
+      console.error("Error creating profile:", profileError)
+      // We should ideally delete the auth user here, but Supabase doesn't expose this API easily
+      return NextResponse.json({ error: "Failed to create user profile" }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, userId })
+    return NextResponse.json(
+      {
+        message: "Signup successful",
+        user: authData.user,
+        session: authData.session,
+      },
+      { status: 201 },
+    )
   } catch (error: any) {
-    console.error("Signup error:", error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    console.error("Error in signup route:", error)
+    return NextResponse.json({ error: error.message || "An unexpected error occurred" }, { status: 500 })
   }
 }

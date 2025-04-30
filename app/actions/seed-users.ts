@@ -1,95 +1,91 @@
 "use server"
 
-import { createServerClient } from "@/lib/supabase"
-import { revalidatePath } from "next/cache"
+import { createServerClient } from "@/lib/supabase-server"
+import { randomUUID } from "crypto"
+
+// Sample user data
+const sampleUsers = [
+  {
+    email: "john.doe@example.com",
+    password: "password123",
+    fullName: "John Doe",
+    displayName: "John",
+    bio: "Experienced web developer with 5+ years in React and Node.js",
+    avatarUrl: "https://randomuser.me/api/portraits/men/1.jpg",
+  },
+  {
+    email: "jane.smith@example.com",
+    password: "password123",
+    fullName: "Jane Smith",
+    displayName: "Jane",
+    bio: "UI/UX designer passionate about creating beautiful interfaces",
+    avatarUrl: "https://randomuser.me/api/portraits/women/2.jpg",
+  },
+  // Add more sample users as needed
+]
 
 export async function seedUsers() {
   try {
     const supabase = createServerClient()
+
     if (!supabase) {
-      return { success: false, message: "Failed to create Supabase client" }
+      return {
+        error: "Could not connect to database",
+      }
     }
 
-    // Check if we already have users
-    const { data: existingUsers, error: checkError } = await supabase.from("users").select("id").limit(1)
+    const results = []
 
-    if (checkError) {
-      console.error("Error checking for existing users:", checkError)
-      return { success: false, message: "Error checking for existing users" }
-    }
-
-    // If we already have users, don't seed
-    if (existingUsers && existingUsers.length > 0) {
-      return { success: true, message: "Users already exist, skipping seed" }
-    }
-
-    // Create test users in auth.users
-    const testUsers = [
-      {
-        email: "client@example.com",
-        password: "password123",
-        name: "Client User",
-        role: "client",
-      },
-      {
-        email: "provider@example.com",
-        password: "password123",
-        name: "Provider User",
-        role: "provider",
-      },
-      {
-        email: "admin@example.com",
-        password: "password123",
-        name: "Admin User",
-        role: "admin",
-      },
-    ]
-
-    for (const user of testUsers) {
-      // Create user in auth.users
+    for (const user of sampleUsers) {
+      // Create user in auth
       const { data: authData, error: authError } = await supabase.auth.admin.createUser({
         email: user.email,
         password: user.password,
         email_confirm: true,
-        user_metadata: {
-          name: user.name,
-          role: user.role,
-        },
       })
 
       if (authError) {
-        console.error(`Error creating auth user ${user.email}:`, authError)
+        results.push({
+          email: user.email,
+          success: false,
+          error: authError.message,
+        })
         continue
       }
 
-      if (authData.user) {
-        // Create user profile in users table
-        const { error: profileError } = await supabase.from("users").insert([
-          {
-            id: authData.user.id,
-            name: user.name,
-            email: user.email,
-            avatar_url: `/placeholder.svg?height=200&width=200&text=${user.name.charAt(0)}`,
-            role: user.role,
-            is_active: true,
-            is_verified: user.role === "admin", // Only admin is verified by default
-            bio: `This is a test ${user.role} account created for demonstration purposes.`,
-            location: "San Francisco, CA",
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-        ])
+      const userId = authData.user.id
 
-        if (profileError) {
-          console.error(`Error creating user profile for ${user.email}:`, profileError)
-        }
+      // Create profile
+      const { error: profileError } = await supabase.from("profiles").insert({
+        id: randomUUID(),
+        user_id: userId,
+        full_name: user.fullName,
+        display_name: user.displayName,
+        email: user.email,
+        bio: user.bio,
+        avatar_url: user.avatarUrl,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+
+      if (profileError) {
+        results.push({
+          email: user.email,
+          success: false,
+          error: `Auth created but profile failed: ${profileError.message}`,
+        })
+        continue
       }
+
+      results.push({
+        email: user.email,
+        success: true,
+      })
     }
 
-    revalidatePath("/admin")
-    return { success: true, message: "Test users created successfully" }
-  } catch (error) {
+    return { results }
+  } catch (error: any) {
     console.error("Error seeding users:", error)
-    return { success: false, message: "An unexpected error occurred" }
+    return { error: error.message || "Failed to seed users" }
   }
 }

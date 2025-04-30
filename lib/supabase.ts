@@ -9,35 +9,6 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
 // Create a singleton instance for the client
 let clientInstance: ReturnType<typeof createSupabaseClient> | null = null
-let serverInstance: ReturnType<typeof createSupabaseClient> | null = null
-
-export const createServerClient = () => {
-  if (typeof window !== "undefined") {
-    console.warn("createServerClient should only be called on the server")
-  }
-
-  if (serverInstance) return serverInstance
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    console.error("Missing Supabase credentials for server client")
-    return null
-  }
-
-  // Use service role key for server operations if available
-  const key = supabaseServiceKey || supabaseAnonKey
-
-  serverInstance = createSupabaseClient(supabaseUrl, key, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-    db: {
-      schema: "public",
-    },
-  })
-
-  return serverInstance
-}
 
 export const createClient = () => {
   if (clientInstance) return clientInstance
@@ -55,4 +26,10 @@ export const createClient = () => {
   })
 
   return clientInstance
+}
+
+// Server-side client creation - moved to a separate file
+export const createServerClient = () => {
+  console.warn("createServerClient is now in lib/supabase-server.ts and should only be used in server components")
+  return createClient() // Fallback to client for now to prevent errors
 }
