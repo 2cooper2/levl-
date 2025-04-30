@@ -13,24 +13,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import {
-  Star,
-  Filter,
-  ArrowUpDown,
-  MapPin,
-  Clock,
-  Search,
-  ChevronDown,
-  Heart,
-  MessageSquare,
-  Briefcase,
-  DollarSign,
-  Award,
-  Users,
-  Twitter,
-  Instagram,
-  Linkedin,
-} from "lucide-react"
+import { Star, Filter, ArrowUpDown, MapPin, Clock, Search, ChevronDown, Heart, MessageSquare, Briefcase, DollarSign, Award, Users, Twitter, Instagram, Linkedin } from 'lucide-react'
 import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
@@ -282,7 +265,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
             </h4>
             <RadioGroup defaultValue="4.5" className="space-y-2">
               {ratingOptions.map((option) => {
-                const optionValue = Number.parseFloat(option.id)
+                const optionValue = parseFloat(option.id);
                 return (
                   <div
                     key={option.id}
@@ -310,7 +293,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                       </div>
                     </Label>
                   </div>
-                )
+                );
               })}
             </RadioGroup>
           </div>
