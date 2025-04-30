@@ -47,15 +47,13 @@ export default function CategoryPage({ params }) {
   const [priceRange, setPriceRange] = useState([0, 500])
   const [showFilters, setShowFilters] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
-  const categorySlug = params.slug
+  const categorySlug = params?.slug || ""
 
   // Convert slug to display name (e.g., "web-development" -> "Web Development")
   const categoryName = categorySlug
-    ? categorySlug
-        .split("-")
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(" ")
-    : ""
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ")
 
   useEffect(() => {
     setIsLoaded(true)
@@ -148,6 +146,20 @@ export default function CategoryPage({ params }) {
 
   const toggleFilters = () => {
     setShowFilters(!showFilters)
+  }
+
+  // Function to safely parse rating values
+  const parseRating = (rating) => {
+    try {
+      return Number.parseFloat(rating)
+    } catch (e) {
+      return 0
+    }
+  }
+
+  // Function to safely create category links
+  const createCategoryLink = (category) => {
+    return `/category/${category.toLowerCase().replace(/ /g, "-")}`
   }
 
   const FilterPanel = () => (
@@ -283,7 +295,7 @@ export default function CategoryPage({ params }) {
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
-                          className={`h-3 w-3 ${i < Number.parseInt(option.id) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"}`}
+                          className={`h-3 w-3 ${i < parseRating(option.id) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"}`}
                         />
                       ))}
                     </div>
@@ -597,7 +609,7 @@ export default function CategoryPage({ params }) {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.05 }}
               >
-                <Link href={`/category/${category.toLowerCase().replace(/ +/g, "-")}`}>
+                <Link href={createCategoryLink(category)}>
                   <div className="bg-background/80 backdrop-blur-sm rounded-lg p-4 border text-center hover:border-primary hover:shadow-md transition-all duration-300 h-full flex flex-col items-center justify-center">
                     <h3 className="font-medium text-sm">{category}</h3>
                     <p className="text-xs text-muted-foreground mt-1">120+ Experts</p>
