@@ -272,7 +272,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
 
           <Separator className="bg-purple-200/30 dark:bg-purple-900/30" />
 
-          {/* Rating Section - Fixed the star rating rendering */}
+          {/* Rating Section */}
           <div className="group">
             <h4 className="text-sm font-medium mb-3 flex items-center group-hover:text-primary transition-colors duration-200">
               <div className="mr-2 h-5 w-5 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center">
@@ -281,37 +281,37 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
               Rating
             </h4>
             <RadioGroup defaultValue="4.5" className="space-y-2">
-              {ratingOptions.map((option) => (
-                <div
-                  key={option.id}
-                  className="flex items-center space-x-2 p-2 rounded-md hover:bg-purple-50 dark:hover:bg-purple-900/10 transition-colors duration-200"
-                >
-                  <RadioGroupItem
-                    value={option.id}
-                    id={`rating-${option.id}`}
-                    className="text-primary border-purple-200 dark:border-purple-800"
-                  />
-                  <Label
-                    htmlFor={`rating-${option.id}`}
-                    className="text-sm font-normal cursor-pointer flex items-center justify-between w-full"
+              {ratingOptions.map((option) => {
+                const optionValue = Number.parseFloat(option.id)
+                return (
+                  <div
+                    key={option.id}
+                    className="flex items-center space-x-2 p-2 rounded-md hover:bg-purple-50 dark:hover:bg-purple-900/10 transition-colors duration-200"
                   >
-                    <span>{option.name}</span>
-                    <div className="ml-2 flex">
-                      {Array.from({ length: 5 }).map((_, i) => {
-                        const optionValue = Number.parseFloat(option.id)
-                        return (
+                    <RadioGroupItem
+                      value={option.id}
+                      id={`rating-${option.id}`}
+                      className="text-primary border-purple-200 dark:border-purple-800"
+                    />
+                    <Label
+                      htmlFor={`rating-${option.id}`}
+                      className="text-sm font-normal cursor-pointer flex items-center justify-between w-full"
+                    >
+                      <span>{option.name}</span>
+                      <div className="ml-2 flex">
+                        {[0, 1, 2, 3, 4].map((i) => (
                           <Star
                             key={i}
                             className={`h-3 w-3 ${
                               i < optionValue ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"
                             }`}
                           />
-                        )
-                      })}
-                    </div>
-                  </Label>
-                </div>
-              ))}
+                        ))}
+                      </div>
+                    </Label>
+                  </div>
+                )
+              })}
             </RadioGroup>
           </div>
 
