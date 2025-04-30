@@ -51,9 +51,11 @@ export default function CategoryPage({ params }) {
 
   // Convert slug to display name (e.g., "web-development" -> "Web Development")
   const categoryName = categorySlug
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ")
+    ? categorySlug
+        .split("-")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ")
+    : ""
 
   useEffect(() => {
     setIsLoaded(true)
@@ -595,7 +597,7 @@ export default function CategoryPage({ params }) {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.05 }}
               >
-                <Link href={`/category/${category.toLowerCase().replace(/\\s+/g, "-")}`}>
+                <Link href={`/category/${category.toLowerCase().replace(/ +/g, "-")}`}>
                   <div className="bg-background/80 backdrop-blur-sm rounded-lg p-4 border text-center hover:border-primary hover:shadow-md transition-all duration-300 h-full flex flex-col items-center justify-center">
                     <h3 className="font-medium text-sm">{category}</h3>
                     <p className="text-xs text-muted-foreground mt-1">120+ Experts</p>
