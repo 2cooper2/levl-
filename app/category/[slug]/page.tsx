@@ -147,7 +147,11 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
     label,
     subLabel,
     onClick,
-  }: { label: string; subLabel: string; onClick: () => void }) => (
+  }: {
+    label: string
+    subLabel: string
+    onClick: () => void
+  }) => (
     <Button
       variant="outline"
       size="sm"
@@ -166,7 +170,9 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
       {[...Array(5)].map((_, i) => (
         <Star
           key={i}
-          className={`h-3.5 w-3.5 ${i < Math.floor(rating) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"}`}
+          className={`h-3.5 w-3.5 ${
+            i < Math.floor(rating) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"
+          }`}
         />
       ))}
     </div>
@@ -280,7 +286,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                   >
                     <span>{option.name}</span>
                     <div className="ml-2">
-                      <StarRating rating={Number.parseInt(option.id)} />
+                      <StarRating rating={Number(option.id)} />
                     </div>
                   </Label>
                 </div>
