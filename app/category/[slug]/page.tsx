@@ -6,7 +6,7 @@ import { EnhancedMainNav } from "@/components/enhanced-main-nav"
 import { AnimatedGradientBackground } from "@/components/animated-gradient-background"
 import { BackgroundPattern } from "@/components/background-pattern"
 import { motion } from "framer-motion"
-import { useEffect, useState } from "react"
+import { useEffect, useState, type ReactNode } from "react"
 import { LevlLogo } from "@/components/levl-logo"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
@@ -40,12 +40,34 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 
+// Type definitions
+interface FilterOption {
+  id: string
+  name: string
+}
+
+interface Provider {
+  id: string
+  name: string
+  title: string
+  avatar: string
+  rating: number
+  reviews: number
+  location: string
+  hourlyRate: number
+  responseTime: string
+  tags: string[]
+  description: string
+  featured: boolean
+  availability?: string
+  completedProjects: number
+  languages: string[]
+}
+
 export default function CategoryPage({ params }: { params: { slug: string } }) {
   const router = useRouter()
   const [isLoaded, setIsLoaded] = useState(false)
-  const [selectedFilter, setSelectedFilter] = useState("all")
   const [priceRange, setPriceRange] = useState([0, 500])
-  const [showFilters, setShowFilters] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const categorySlug = params.slug as string
 
@@ -111,9 +133,44 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
     { id: "australia", name: "Australia" },
   ]
 
-  const toggleFilters = () => {
-    setShowFilters(!showFilters)
-  }
+  // Reusable components
+  const FilterSectionHeading = ({ icon, title }: { icon: ReactNode; title: string }) => (
+    <h4 className="text-sm font-medium mb-3 flex items-center group-hover:text-primary transition-colors duration-200">
+      <div className="mr-2 h-5 w-5 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center">
+        {icon}
+      </div>
+      {title}
+    </h4>
+  )
+
+  const PricePresetButton = ({
+    label,
+    subLabel,
+    onClick,
+  }: { label: string; subLabel: string; onClick: () => void }) => (
+    <Button
+      variant="outline"
+      size="sm"
+      className="text-xs justify-start h-auto py-2 border-purple-200/50 dark:border-purple-900/50 hover:border-primary hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all duration-200"
+      onClick={onClick}
+    >
+      <span className="flex flex-col items-start">
+        <span className="font-medium">{label}</span>
+        <span className="text-muted-foreground text-[10px]">{subLabel}</span>
+      </span>
+    </Button>
+  )
+
+  const StarRating = ({ rating }: { rating: number }) => (
+    <div className="flex">
+      {[...Array(5)].map((_, i) => (
+        <Star
+          key={i}
+          className={`h-3.5 w-3.5 ${i < Math.floor(rating) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"}`}
+        />
+      ))}
+    </div>
+  )
 
   const FilterPanel = () => (
     <div className="space-y-6">
@@ -138,12 +195,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
         <div className="p-5 space-y-6">
           {/* Search Section */}
           <div className="group">
-            <h4 className="text-sm font-medium mb-3 flex items-center group-hover:text-primary transition-colors duration-200">
-              <div className="mr-2 h-5 w-5 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center">
-                <Search className="h-3 w-3 text-white" />
-              </div>
-              Search
-            </h4>
+            <FilterSectionHeading icon={<Search className="h-3 w-3 text-white" />} title="Search" />
             <div className="relative">
               <Input
                 placeholder="Search experts..."
@@ -159,12 +211,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
 
           {/* Expertise Section */}
           <div className="group">
-            <h4 className="text-sm font-medium mb-3 flex items-center group-hover:text-primary transition-colors duration-200">
-              <div className="mr-2 h-5 w-5 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center">
-                <Briefcase className="h-3 w-3 text-white" />
-              </div>
-              Expertise
-            </h4>
+            <FilterSectionHeading icon={<Briefcase className="h-3 w-3 text-white" />} title="Expertise" />
             <div className="grid grid-cols-2 gap-2">
               {expertiseOptions.map((option) => (
                 <div
@@ -187,12 +234,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
 
           {/* Hourly Rate Section */}
           <div className="group">
-            <h4 className="text-sm font-medium mb-3 flex items-center group-hover:text-primary transition-colors duration-200">
-              <div className="mr-2 h-5 w-5 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center">
-                <DollarSign className="h-3 w-3 text-white" />
-              </div>
-              Hourly Rate
-            </h4>
+            <FilterSectionHeading icon={<DollarSign className="h-3 w-3 text-white" />} title="Hourly Rate" />
             <div className="px-2 space-y-5">
               <Slider
                 value={priceRange}
@@ -208,50 +250,10 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
               </div>
 
               <div className="grid grid-cols-2 gap-2 mt-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-xs justify-start h-auto py-2 border-purple-200/50 dark:border-purple-900/50 hover:border-primary hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all duration-200"
-                  onClick={() => setPriceRange([0, 50])}
-                >
-                  <span className="flex flex-col items-start">
-                    <span className="font-medium">Budget</span>
-                    <span className="text-muted-foreground text-[10px]">Under $50/hr</span>
-                  </span>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-xs justify-start h-auto py-2 border-purple-200/50 dark:border-purple-900/50 hover:border-primary hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all duration-200"
-                  onClick={() => setPriceRange([50, 100])}
-                >
-                  <span className="flex flex-col items-start">
-                    <span className="font-medium">Mid-range</span>
-                    <span className="text-muted-foreground text-[10px]">$50-$100/hr</span>
-                  </span>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-xs justify-start h-auto py-2 border-purple-200/50 dark:border-purple-900/50 hover:border-primary hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all duration-200"
-                  onClick={() => setPriceRange([100, 150])}
-                >
-                  <span className="flex flex-col items-start">
-                    <span className="font-medium">Premium</span>
-                    <span className="text-muted-foreground text-[10px]">$100-$150/hr</span>
-                  </span>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-xs justify-start h-auto py-2 border-purple-200/50 dark:border-purple-900/50 hover:border-primary hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all duration-200"
-                  onClick={() => setPriceRange([150, 200])}
-                >
-                  <span className="flex flex-col items-start">
-                    <span className="font-medium">Enterprise</span>
-                    <span className="text-muted-foreground text-[10px]">$150+/hr</span>
-                  </span>
-                </Button>
+                <PricePresetButton label="Budget" subLabel="Under $50/hr" onClick={() => setPriceRange([0, 50])} />
+                <PricePresetButton label="Mid-range" subLabel="$50-$100/hr" onClick={() => setPriceRange([50, 100])} />
+                <PricePresetButton label="Premium" subLabel="$100-$150/hr" onClick={() => setPriceRange([100, 150])} />
+                <PricePresetButton label="Enterprise" subLabel="$150+/hr" onClick={() => setPriceRange([150, 200])} />
               </div>
             </div>
           </div>
@@ -260,12 +262,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
 
           {/* Rating Section */}
           <div className="group">
-            <h4 className="text-sm font-medium mb-3 flex items-center group-hover:text-primary transition-colors duration-200">
-              <div className="mr-2 h-5 w-5 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center">
-                <Star className="h-3 w-3 text-white" />
-              </div>
-              Rating
-            </h4>
+            <FilterSectionHeading icon={<Star className="h-3 w-3 text-white" />} title="Rating" />
             <RadioGroup defaultValue="4.5" className="space-y-2">
               {ratingOptions.map((option) => (
                 <div
@@ -282,13 +279,8 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                     className="text-sm font-normal cursor-pointer flex items-center justify-between w-full"
                   >
                     <span>{option.name}</span>
-                    <div className="ml-2 flex">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`h-3 w-3 ${i < Number.parseInt(option.id) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"}`}
-                        />
-                      ))}
+                    <div className="ml-2">
+                      <StarRating rating={Number.parseInt(option.id)} />
                     </div>
                   </Label>
                 </div>
@@ -300,12 +292,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
 
           {/* Location Section */}
           <div className="group">
-            <h4 className="text-sm font-medium mb-3 flex items-center group-hover:text-primary transition-colors duration-200">
-              <div className="mr-2 h-5 w-5 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center">
-                <MapPin className="h-3 w-3 text-white" />
-              </div>
-              Location
-            </h4>
+            <FilterSectionHeading icon={<MapPin className="h-3 w-3 text-white" />} title="Location" />
             <div className="grid grid-cols-2 gap-2">
               {locationOptions.map((option) => (
                 <div
@@ -332,6 +319,125 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
           </div>
         </div>
       </div>
+    </div>
+  )
+
+  const StatCard = ({ value, icon, label }: { value: string | number; icon: ReactNode; label: string }) => (
+    <div className="bg-background/50 backdrop-blur-sm rounded-lg p-4 border">
+      <div className="text-2xl md:text-3xl font-bold text-primary">{value}</div>
+      <div className="text-sm text-muted-foreground flex items-center justify-center">
+        {icon} {label}
+      </div>
+    </div>
+  )
+
+  const ProviderDetails = ({ provider }: { provider: Provider }) => (
+    <div className="flex-1 space-y-4">
+      <div className="flex flex-wrap gap-2">
+        {provider.tags.map((tag) => (
+          <Badge key={tag} variant="secondary" className="text-xs font-normal">
+            {tag}
+          </Badge>
+        ))}
+      </div>
+
+      <p className="text-sm text-muted-foreground line-clamp-2">{provider.description}</p>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="space-y-1">
+          <p className="text-xs text-muted-foreground">Hourly Rate</p>
+          <p className="font-semibold flex items-center">
+            <DollarSign className="h-3.5 w-3.5 text-primary" />
+            {provider.hourlyRate}/hr
+          </p>
+        </div>
+        <div className="space-y-1">
+          <p className="text-xs text-muted-foreground">Response Time</p>
+          <div className="flex items-center">
+            <Clock className="h-3.5 w-3.5 mr-1 text-primary" />
+            <p className="text-sm">{provider.responseTime}</p>
+          </div>
+        </div>
+        <div className="space-y-1">
+          <p className="text-xs text-muted-foreground">Completed</p>
+          <div className="flex items-center">
+            <Briefcase className="h-3.5 w-3.5 mr-1 text-primary" />
+            <p className="text-sm">{provider.completedProjects} projects</p>
+          </div>
+        </div>
+        <div className="space-y-1">
+          <p className="text-xs text-muted-foreground">Languages</p>
+          <p className="text-sm">{provider.languages.join(", ")}</p>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-3 mt-4">
+        <Button
+          className="bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90 shadow-sm hover:shadow-md transition-all duration-300"
+          onClick={() => router.push(`/services/${provider.id}`)}
+        >
+          View Profile
+        </Button>
+        <Button variant="outline" className="border-primary text-primary hover:bg-primary/10">
+          <MessageSquare className="h-4 w-4 mr-2" /> Contact
+        </Button>
+        <Button variant="ghost" size="icon" className="rounded-full h-9 w-9 text-muted-foreground hover:text-rose-500">
+          <Heart className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  )
+
+  const ProviderInfo = ({ provider }: { provider: Provider }) => (
+    <div className="flex flex-col sm:flex-row md:flex-col items-center gap-4 md:w-48">
+      <div className="relative">
+        <Avatar className="h-20 w-20 border-2 border-background shadow-md group-hover:border-primary transition-colors duration-300">
+          <AvatarImage src={provider.avatar || "/placeholder.svg"} alt={provider.name} />
+          <AvatarFallback>
+            {provider.name
+              .split(" ")
+              .map((n) => n[0])
+              .join("")}
+          </AvatarFallback>
+        </Avatar>
+        {provider.featured && (
+          <div className="absolute -top-2 -right-2">
+            <Badge className="bg-gradient-to-r from-primary to-purple-500 hover:from-primary hover:to-purple-500 text-white border-none">
+              <Award className="h-3 w-3 mr-1" /> Top Rated
+            </Badge>
+          </div>
+        )}
+      </div>
+      <div className="text-center sm:text-left md:text-center">
+        <h3 className="font-semibold text-lg group-hover:text-primary transition-colors duration-300">
+          {provider.name}
+        </h3>
+        <p className="text-sm text-muted-foreground">{provider.title}</p>
+        <div className="mt-1 flex items-center justify-center sm:justify-start md:justify-center">
+          <StarRating rating={provider.rating} />
+          <span className="ml-1.5 text-sm font-medium">{provider.rating}</span>
+          <span className="ml-1 text-xs text-muted-foreground">({provider.reviews})</span>
+        </div>
+        <div className="mt-1 flex items-center justify-center sm:justify-start md:justify-center text-xs text-muted-foreground">
+          <MapPin className="h-3 w-3 mr-1" />
+          {provider.location}
+        </div>
+      </div>
+    </div>
+  )
+
+  const FooterSection = ({ title, links }: { title: string; links: string[] }) => (
+    <div className="space-y-4">
+      <h4 className="text-sm font-medium">{title}</h4>
+      <ul className="space-y-2 text-sm">
+        {links.map((link) => (
+          <li key={link}>
+            <Link href="#" className="text-muted-foreground hover:text-foreground">
+              {link}
+            </Link>
+          </li>
+        ))}
+      </ul>
     </div>
   )
 
@@ -364,30 +470,27 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              <div className="bg-background/50 backdrop-blur-sm rounded-lg p-4 border">
-                <div className="text-2xl md:text-3xl font-bold text-primary">{categoryStats.experts}</div>
-                <div className="text-sm text-muted-foreground flex items-center justify-center">
-                  <Users className="h-3.5 w-3.5 mr-1.5" /> Available Experts
-                </div>
-              </div>
+              <StatCard
+                value={categoryStats.experts}
+                icon={<Users className="h-3.5 w-3.5 mr-1.5" />}
+                label="Available Experts"
+              />
               <div className="bg-background/50 backdrop-blur-sm rounded-lg p-4 border">
                 <div className="text-2xl md:text-3xl font-bold text-primary flex items-center justify-center">
                   {categoryStats.averageRating} <Star className="h-4 w-4 ml-1 fill-yellow-400 text-yellow-400" />
                 </div>
                 <div className="text-sm text-muted-foreground">Average Rating</div>
               </div>
-              <div className="bg-background/50 backdrop-blur-sm rounded-lg p-4 border">
-                <div className="text-2xl md:text-3xl font-bold text-primary">{categoryStats.completedProjects}+</div>
-                <div className="text-sm text-muted-foreground flex items-center justify-center">
-                  <Award className="h-3.5 w-3.5 mr-1.5" /> Completed Projects
-                </div>
-              </div>
-              <div className="bg-background/50 backdrop-blur-sm rounded-lg p-4 border">
-                <div className="text-2xl md:text-3xl font-bold text-primary">{categoryStats.averageResponse}</div>
-                <div className="text-sm text-muted-foreground flex items-center justify-center">
-                  <Clock className="h-3.5 w-3.5 mr-1.5" /> Avg. Response Time
-                </div>
-              </div>
+              <StatCard
+                value={`${categoryStats.completedProjects}+`}
+                icon={<Award className="h-3.5 w-3.5 mr-1.5" />}
+                label="Completed Projects"
+              />
+              <StatCard
+                value={categoryStats.averageResponse}
+                icon={<Clock className="h-3.5 w-3.5 mr-1.5" />}
+                label="Avg. Response Time"
+              />
             </motion.div>
           </div>
         </div>
@@ -416,7 +519,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
 
           <div className="flex flex-col md:flex-row gap-8">
             {/* Desktop Filters */}
-            <div className={`md:w-72 lg:w-80 hidden md:block`}>
+            <div className="md:w-72 lg:w-80 hidden md:block">
               <FilterPanel />
             </div>
 
@@ -461,109 +564,8 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                     >
                       <div className="p-6">
                         <div className="flex flex-col md:flex-row gap-6">
-                          {/* Provider Info */}
-                          <div className="flex flex-col sm:flex-row md:flex-col items-center gap-4 md:w-48">
-                            <div className="relative">
-                              <Avatar className="h-20 w-20 border-2 border-background shadow-md group-hover:border-primary transition-colors duration-300">
-                                <AvatarImage src={provider.avatar || "/placeholder.svg"} alt={provider.name} />
-                                <AvatarFallback>
-                                  {provider.name
-                                    .split(" ")
-                                    .map((n) => n[0])
-                                    .join("")}
-                                </AvatarFallback>
-                              </Avatar>
-                              {provider.featured && (
-                                <div className="absolute -top-2 -right-2">
-                                  <Badge className="bg-gradient-to-r from-primary to-purple-500 hover:from-primary hover:to-purple-500 text-white border-none">
-                                    <Award className="h-3 w-3 mr-1" /> Top Rated
-                                  </Badge>
-                                </div>
-                              )}
-                            </div>
-                            <div className="text-center sm:text-left md:text-center">
-                              <h3 className="font-semibold text-lg group-hover:text-primary transition-colors duration-300">
-                                {provider.name}
-                              </h3>
-                              <p className="text-sm text-muted-foreground">{provider.title}</p>
-                              <div className="mt-1 flex items-center justify-center sm:justify-start md:justify-center">
-                                <div className="flex">
-                                  {[...Array(5)].map((_, i) => (
-                                    <Star
-                                      key={i}
-                                      className={`h-3.5 w-3.5 ${i < Math.floor(provider.rating) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"}`}
-                                    />
-                                  ))}
-                                </div>
-                                <span className="ml-1.5 text-sm font-medium">{provider.rating}</span>
-                                <span className="ml-1 text-xs text-muted-foreground">({provider.reviews})</span>
-                              </div>
-                              <div className="mt-1 flex items-center justify-center sm:justify-start md:justify-center text-xs text-muted-foreground">
-                                <MapPin className="h-3 w-3 mr-1" />
-                                {provider.location}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Provider Details */}
-                          <div className="flex-1 space-y-4">
-                            <div className="flex flex-wrap gap-2">
-                              {provider.tags.map((tag) => (
-                                <Badge key={tag} variant="secondary" className="text-xs font-normal">
-                                  {tag}
-                                </Badge>
-                              ))}
-                            </div>
-
-                            <p className="text-sm text-muted-foreground line-clamp-2">{provider.description}</p>
-
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                              <div className="space-y-1">
-                                <p className="text-xs text-muted-foreground">Hourly Rate</p>
-                                <p className="font-semibold flex items-center">
-                                  <DollarSign className="h-3.5 w-3.5 text-primary" />
-                                  {provider.hourlyRate}/hr
-                                </p>
-                              </div>
-                              <div className="space-y-1">
-                                <p className="text-xs text-muted-foreground">Response Time</p>
-                                <div className="flex items-center">
-                                  <Clock className="h-3.5 w-3.5 mr-1 text-primary" />
-                                  <p className="text-sm">{provider.responseTime}</p>
-                                </div>
-                              </div>
-                              <div className="space-y-1">
-                                <p className="text-xs text-muted-foreground">Completed</p>
-                                <div className="flex items-center">
-                                  <Briefcase className="h-3.5 w-3.5 mr-1 text-primary" />
-                                  <p className="text-sm">{provider.completedProjects} projects</p>
-                                </div>
-                              </div>
-                              <div className="space-y-1">
-                                <p className="text-xs text-muted-foreground">Languages</p>
-                                <p className="text-sm">{provider.languages.join(", ")}</p>
-                              </div>
-                            </div>
-
-                            <div className="flex flex-wrap gap-3 mt-4">
-                              <Button
-                                className="bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90 shadow-sm hover:shadow-md transition-all duration-300"
-                                onClick={() => router.push(`/services/${provider.id}`)}
-                              >
-                                View Profile
-                              </Button>
-                              <Button variant="outline" className="border-primary text-primary hover:bg-primary/10">
-                                <MessageSquare className="h-4 w-4 mr-2" /> Contact
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="rounded-full h-9 w-9 text-muted-foreground hover:text-rose-500"
-                              >
-                                <Heart className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
+                          <ProviderInfo provider={provider} />
+                          <ProviderDetails provider={provider} />
                         </div>
                       </div>
 
@@ -659,81 +661,18 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                 </Link>
               </div>
             </div>
-            <div className="space-y-4">
-              <h4 className="text-sm font-medium">For Clients</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <Link href="#" className="text-muted-foreground hover:text-foreground">
-                    Find Services
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="text-muted-foreground hover:text-foreground">
-                    Post a Job
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="text-muted-foreground hover:text-foreground">
-                    Payment Protection
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="text-muted-foreground hover:text-foreground">
-                    Success Stories
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div className="space-y-4">
-              <h4 className="text-sm font-medium">For Providers</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <Link href="#" className="text-muted-foreground hover:text-foreground">
-                    Start Selling
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="text-muted-foreground hover:text-foreground">
-                    Create Profile
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="text-muted-foreground hover:text-foreground">
-                    Community
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="text-muted-foreground hover:text-foreground">
-                    Resources
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div className="space-y-4">
-              <h4 className="text-sm font-medium">Company</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <Link href="#" className="text-muted-foreground hover:text-foreground">
-                    About Us
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="text-muted-foreground hover:text-foreground">
-                    Careers
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="text-muted-foreground hover:text-foreground">
-                    Privacy Policy
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="text-muted-foreground hover:text-foreground">
-                    Terms of Service
-                  </Link>
-                </li>
-              </ul>
-            </div>
+
+            <FooterSection
+              title="For Clients"
+              links={["Find Services", "Post a Job", "Payment Protection", "Success Stories"]}
+            />
+
+            <FooterSection
+              title="For Providers"
+              links={["Start Selling", "Create Profile", "Community", "Resources"]}
+            />
+
+            <FooterSection title="Company" links={["About Us", "Careers", "Privacy Policy", "Terms of Service"]} />
           </div>
           <div className="mt-8 border-t pt-8 flex flex-col md:flex-row justify-between items-center">
             <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} LevL. All rights reserved.</p>
