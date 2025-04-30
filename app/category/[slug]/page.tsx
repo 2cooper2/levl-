@@ -281,7 +281,7 @@ export default function CategoryPage({ params }) {
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
-                          className={`h-3 w-3 ${i < Number(option.id) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"}`}
+                          className={`h-3 w-3 ${i < Number.parseInt(option.id) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"}`}
                         />
                       ))}
                     </div>
@@ -334,7 +334,7 @@ export default function CategoryPage({ params }) {
         <div className="container px-4 md:px-6 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-              <h1 className="text-3xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
+              <h1 className="text-3xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
                 {categoryName} Experts
               </h1>
               <p className="text-lg text-muted-foreground mb-6">
@@ -620,7 +620,7 @@ export default function CategoryPage({ params }) {
             <div className="space-y-4 lg:col-span-2">
               <div className="flex items-center gap-2">
                 <LevlLogo className="h-8 w-8" />
-                <span className="text-xl font-bold bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
+                <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
                   LevL
                 </span>
               </div>
