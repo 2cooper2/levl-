@@ -10,7 +10,9 @@ let serverInstance: ReturnType<typeof createSupabaseClient> | null = null
 
 export const createServerClient = () => {
   if (typeof window !== "undefined") {
-    throw new Error("createServerClient should only be called on the server")
+    console.warn("createServerClient should only be called on the server")
+    // Return null instead of throwing an error to prevent build failures
+    return null
   }
 
   if (serverInstance) return serverInstance

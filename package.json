@@ -63,8 +63,8 @@
     "framer-motion": "latest",
     "@stripe/react-stripe-js": "latest",
     "canvas-confetti": "latest",
-    "stripe": "latest",
     "@supabase/supabase-js": "latest",
+    "stripe": "latest",
     "crypto": "latest"
   },
   "devDependencies": {
