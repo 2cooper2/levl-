@@ -263,7 +263,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                 >
                   <span className="flex flex-col items-start">
                     <span className="font-medium">Enterprise</span>
-                    <span className="text-muted-foreground text-[10px]">$150+/hr</span>
+                    <span className="text-muted-foreground text-[10px]">{"$150+/hr"}</span>
                   </span>
                 </Button>
               </div>
@@ -434,7 +434,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
 
           <div className="flex flex-col md:flex-row gap-8">
             {/* Desktop Filters */}
-            <div className={`md:w-72 lg:w-80 hidden md:block`}>
+            <div className="md:w-72 lg:w-80 hidden md:block">
               <FilterPanel />
             </div>
 
