@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import { useRouter } from "next/navigation"
-import { createClient, createServerClient } from "@/lib/supabase"
+import { createClient } from "@/lib/supabase"
 
 // Update the User type to include all the fields from our database
 type User = {
@@ -20,6 +20,17 @@ type User = {
   last_login_at?: string
 }
 
+export interface Session {
+  id: string
+  user_id: string
+  device_info: any
+  ip_address: string
+  user_agent: string
+  expires_at: string
+  created_at: string
+  isCurrent?: boolean
+}
+
 type AuthContextType = {
   user: User | null
   isLoading: boolean
@@ -28,6 +39,9 @@ type AuthContextType = {
   signup: (name: string, email: string, password: string, role: "client" | "provider" | "admin") => Promise<void>
   logout: () => void
   checkEmailExists: (email: string) => Promise<boolean>
+  getUserSessions: () => Promise<Session[]>
+  terminateSession: (sessionId: string) => Promise<boolean>
+  terminateAllOtherSessions: () => Promise<boolean>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -37,7 +51,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
   const supabase = createClient()
-  const serverSupabase = createServerClient()
 
   useEffect(() => {
     // Check if user is logged in from Supabase session
@@ -57,11 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (session) {
           // Get user profile from users table
-          const { data: userData, error } = await serverSupabase
-            .from("users")
-            .select("*")
-            .eq("id", session.user.id)
-            .single()
+          const { data: userData, error } = await supabase.from("users").select("*").eq("id", session.user.id).single()
 
           if (userData && !error) {
             const userObj = {
@@ -111,87 +120,70 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     checkSession()
 
     // Set up auth state change listener
-    let subscription: { unsubscribe: () => void } | null = null
+    const { data } = supabase?.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed:", event, session?.user?.id)
 
-    if (supabase) {
-      const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
-        console.log("Auth state changed:", event, session?.user?.id)
+      if (session?.user) {
+        // Get user profile when auth state changes
+        const { data: userData, error } = await supabase.from("users").select("*").eq("id", session.user.id).single()
 
-        if (session?.user) {
-          // Get user profile when auth state changes
-          // Use service role client to bypass RLS
-          const serviceSupabase = createServerClient()
-          const { data: userData, error } = await serviceSupabase
-            .from("users")
-            .select("*")
-            .eq("id", session.user.id)
-            .single()
-
-          if (userData && !error) {
-            const userObj = {
-              id: userData.id,
-              name: userData.name || "",
-              email: userData.email || "",
-              avatar:
-                userData.avatar_url || `/placeholder.svg?height=200&width=200&text=${userData.name?.charAt(0) || "U"}`,
-              role: (userData.role as "client" | "provider" | "admin") || "client",
-              phone: userData.phone,
-              bio: userData.bio,
-              location: userData.location,
-              website: userData.website,
-              is_verified: userData.is_verified,
-              is_active: userData.is_active,
-              last_login_at: userData.last_login_at,
-            }
-
-            console.log("Setting user from auth change:", userObj.email)
-            setUser(userObj)
-
-            // Also store in localStorage as a fallback
-            localStorage.setItem("levl_user", JSON.stringify(userObj))
-          } else if (error) {
-            console.error("Error fetching user data on auth change:", error)
+        if (userData && !error) {
+          const userObj = {
+            id: userData.id,
+            name: userData.name || "",
+            email: userData.email || "",
+            avatar:
+              userData.avatar_url || `/placeholder.svg?height=200&width=200&text=${userData.name?.charAt(0) || "U"}`,
+            role: (userData.role as "client" | "provider" | "admin") || "client",
+            phone: userData.phone,
+            bio: userData.bio,
+            location: userData.location,
+            website: userData.website,
+            is_verified: userData.is_verified,
+            is_active: userData.is_active,
+            last_login_at: userData.last_login_at,
           }
-        } else if (event === "SIGNED_OUT") {
-          console.log("User signed out, clearing user state")
-          setUser(null)
-          localStorage.removeItem("levl_user")
-        }
-      })
 
-      subscription = data.subscription
-    }
+          console.log("Setting user from auth change:", userObj.email)
+          setUser(userObj)
+
+          // Also store in localStorage as a fallback
+          localStorage.setItem("levl_user", JSON.stringify(userObj))
+        } else if (error) {
+          console.error("Error fetching user data on auth change:", error)
+        }
+      } else if (event === "SIGNED_OUT") {
+        console.log("User signed out, clearing user state")
+        setUser(null)
+        localStorage.removeItem("levl_user")
+      }
+    }) || { subscription: null }
 
     return () => {
-      if (subscription) {
-        subscription.unsubscribe()
-      }
+      data?.subscription?.unsubscribe()
     }
-  }, [supabase, serverSupabase])
+  }, [supabase])
 
-  // Add a function to check if an email already exists
+  // Check if email exists
   const checkEmailExists = async (email: string): Promise<boolean> => {
     try {
-      if (!serverSupabase) return false
+      if (!supabase) return false
 
-      const { data, error, count } = await serverSupabase
-        .from("users")
-        .select("email", { count: "exact" })
-        .eq("email", email)
+      const { data, error } = await supabase.from("users").select("id").eq("email", email).single()
 
-      if (error) {
+      if (error && error.code !== "PGRST116") {
         console.error("Error checking email:", error)
         return false
       }
 
-      return count ? count > 0 : false
+      return !!data
     } catch (error) {
       console.error("Error checking email:", error)
       return false
     }
   }
 
-  // Update the login function to record sessions
+  // Login function
   const login = async (email: string, password: string) => {
     setIsLoading(true)
     try {
@@ -242,7 +234,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Get user profile after login
       if (data.user) {
-        const { data: userData, error: profileError } = await serverSupabase
+        const { data: userData, error: profileError } = await supabase
           .from("users")
           .select("*")
           .eq("id", data.user.id)
@@ -279,7 +271,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Create a session record
           try {
             const userAgent = navigator.userAgent
-            await serverSupabase.from("sessions").insert([
+            await supabase.from("sessions").insert([
               {
                 user_id: data.user.id,
                 device_info: { userAgent },
@@ -307,7 +299,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  // Update the signup function to include the additional fields
+  // Simplified signup function
   const signup = async (name: string, email: string, password: string, role: "client" | "provider" | "admin") => {
     setIsLoading(true)
     try {
@@ -323,12 +315,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       console.log("Creating new user with email:", email)
 
-      // 1. Create auth user with email confirmation disabled
+      // 1. Create auth user
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
           data: {
             name: name,
             role: role,
@@ -341,81 +332,119 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw error
       }
 
-      console.log("Auth signup response:", data?.user?.id)
+      if (!data.user || !data.user.id) {
+        console.error("Signup failed: No user ID returned")
+        throw new Error("Failed to create user account. Please try again.")
+      }
 
-      if (data.user) {
-        // 2. Create user profile in users table
-        const { error: profileError } = await serverSupabase.from("users").insert([
-          {
-            id: data.user.id, // Use the user ID from auth.users
-            name: name,
-            email: email,
-            avatar_url: `/placeholder.svg?height=200&width=200&text=${name.charAt(0)}`,
-            role: role,
-            is_active: true,
-            is_verified: false,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-        ])
+      console.log("Auth signup response:", data.user.id)
 
-        if (profileError) {
-          console.error("Error creating user profile:", profileError)
-          throw profileError
-        }
-
-        // 3. Set user in state
-        const userObj = {
+      // 2. Create user profile in users table
+      const { error: profileError } = await supabase.from("users").insert([
+        {
           id: data.user.id,
           name: name,
           email: email,
-          avatar: `/placeholder.svg?height=200&width=200&text=${name.charAt(0)}`,
           role: role,
+          avatar_url: `/placeholder.svg?height=200&width=200&text=${name.charAt(0)}`,
           is_active: true,
           is_verified: false,
-        }
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+      ])
 
-        console.log("Setting user after signup:", userObj.email)
-        setUser(userObj)
-
-        // Also store in localStorage as a fallback
-        localStorage.setItem("levl_user", JSON.stringify(userObj))
-
-        // 4. Sign in the user immediately after signup
-        if (data.session === null) {
-          console.log("No session after signup, signing in manually")
-          const { error: signInError } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-          })
-
-          if (signInError) {
-            console.error("Error signing in after signup:", signInError)
-          }
-        }
-
-        // 5. Create a session record
-        try {
-          const userAgent = navigator.userAgent
-          await serverSupabase.from("sessions").insert([
-            {
-              user_id: data.user.id,
-              device_info: { userAgent },
-              ip_address: "client-side", // We can't get the real IP on client side
-              user_agent: userAgent,
-              expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
-            },
-          ])
-        } catch (sessionError) {
-          console.error("Error creating session:", sessionError)
-          // Non-critical error, don't throw
-        }
+      if (profileError) {
+        console.error("Error creating user profile:", profileError)
+        throw new Error(`Error creating user profile: ${profileError.message}`)
       }
+
+      // 3. Set user in state
+      const userObj = {
+        id: data.user.id,
+        name: name,
+        email: email,
+        avatar: `/placeholder.svg?height=200&width=200&text=${name.charAt(0)}`,
+        role: role,
+        is_active: true,
+        is_verified: false,
+      }
+
+      console.log("Setting user after signup:", userObj.email)
+      setUser(userObj)
+
+      // Also store in localStorage as a fallback
+      localStorage.setItem("levl_user", JSON.stringify(userObj))
+
+      return Promise.resolve()
     } catch (error) {
       console.error("Signup failed:", error)
       throw error
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  // Get user sessions
+  const getUserSessions = async (): Promise<Session[]> => {
+    if (!user || !supabase) return []
+
+    try {
+      const { data, error } = await supabase
+        .from("sessions")
+        .select("*")
+        .eq("user_id", user.id)
+        .gt("expires_at", new Date().toISOString())
+        .order("created_at", { ascending: false })
+
+      if (error) throw error
+
+      // Mark the current session
+      const currentUserAgent = navigator.userAgent
+      const sessionsWithCurrent = data.map((session) => ({
+        ...session,
+        isCurrent: session.user_agent === currentUserAgent,
+      }))
+
+      return sessionsWithCurrent
+    } catch (error) {
+      console.error("Error fetching sessions:", error)
+      return []
+    }
+  }
+
+  // Terminate a specific session
+  const terminateSession = async (sessionId: string): Promise<boolean> => {
+    if (!user || !supabase) return false
+
+    try {
+      const { error } = await supabase.from("sessions").delete().eq("id", sessionId)
+
+      if (error) throw error
+      return true
+    } catch (error) {
+      console.error("Error terminating session:", error)
+      return false
+    }
+  }
+
+  // Terminate all other sessions
+  const terminateAllOtherSessions = async (): Promise<boolean> => {
+    if (!user || !supabase) return false
+
+    try {
+      const currentUserAgent = navigator.userAgent
+      const { error } = await supabase
+        .from("sessions")
+        .delete()
+        .eq("user_id", user.id)
+        .neq("user_agent", currentUserAgent)
+
+      if (error) throw error
+      return true
+    } catch (error) {
+      console.error("Error terminating all sessions:", error)
+      return false
     }
   }
 
@@ -447,6 +476,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signup,
         logout,
         checkEmailExists,
+        getUserSessions,
+        terminateSession,
+        terminateAllOtherSessions,
       }}
     >
       {children}

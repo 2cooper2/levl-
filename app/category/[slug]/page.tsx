@@ -13,14 +13,37 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Star, Filter, ArrowUpDown, MapPin, Clock, Check } from "lucide-react"
+import {
+  Star,
+  Filter,
+  ArrowUpDown,
+  MapPin,
+  Clock,
+  Search,
+  ChevronDown,
+  Heart,
+  MessageSquare,
+  Briefcase,
+  DollarSign,
+  Award,
+  Users,
+} from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
+import { Slider } from "@/components/ui/slider"
+import { Checkbox } from "@/components/ui/checkbox"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Label } from "@/components/ui/label"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 
 export default function CategoryPage({ params }: { params: { slug: string } }) {
   const router = useRouter()
   const [isLoaded, setIsLoaded] = useState(false)
   const [selectedFilter, setSelectedFilter] = useState("all")
+  const [priceRange, setPriceRange] = useState([0, 500])
+  const [showFilters, setShowFilters] = useState(true)
+  const [searchQuery, setSearchQuery] = useState("")
   const categorySlug = params.slug as string
 
   // Convert slug to display name (e.g., "web-development" -> "Web Development")
@@ -43,161 +66,386 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
       rating: 4.9,
       reviews: 124,
       location: "New York, USA",
-      hourlyRate: "$65",
+      hourlyRate: 65,
       responseTime: "Under 2 hours",
       tags: ["React", "Next.js", "TypeScript", "UI/UX"],
       featured: true,
+      description: "Experienced web developer specializing in modern frontend frameworks and responsive design.",
+      completedProjects: 87,
+      languages: ["English", "Spanish"],
+    },
+    {
+      id: "alex-rivera",
+      name: "Alex Rivera",
+      title: "Full Stack Developer",
+      avatar: "/placeholder.svg?height=80&width=80&text=AR",
+      rating: 4.7,
+      reviews: 98,
+      location: "San Francisco, USA",
+      hourlyRate: 75,
+      responseTime: "Same day",
+      tags: ["React", "Node.js", "MongoDB", "AWS"],
+      featured: false,
+      description:
+        "Full stack developer with expertise in building scalable web applications and cloud infrastructure.",
+      completedProjects: 64,
+      languages: ["English", "Portuguese"],
+    },
+    {
+      id: "maya-patel",
+      name: "Maya Patel",
+      title: "UX/UI Designer & Developer",
+      avatar: "/placeholder.svg?height=80&width=80&text=MP",
+      rating: 4.8,
+      reviews: 112,
+      location: "London, UK",
+      hourlyRate: 70,
+      responseTime: "Under 3 hours",
+      tags: ["UI Design", "UX Research", "Figma", "React"],
+      featured: true,
+      description: "Designer-developer hybrid specializing in creating beautiful, user-centered digital experiences.",
+      completedProjects: 93,
+      languages: ["English", "Hindi"],
     },
   ]
+
+  // Category stats
+  const categoryStats = {
+    experts: providers.length,
+    averageRating: 4.8,
+    completedProjects: 244,
+    averageResponse: "2.5 hours",
+  }
+
+  // Filter options
+  const expertiseOptions = [
+    { id: "frontend", name: "Frontend Development" },
+    { id: "backend", name: "Backend Development" },
+    { id: "fullstack", name: "Full Stack Development" },
+    { id: "ui-design", name: "UI Design" },
+    { id: "ux-design", name: "UX Design" },
+    { id: "mobile", name: "Mobile Development" },
+  ]
+
+  const ratingOptions = [
+    { id: "4.5", name: "4.5 & up" },
+    { id: "4.0", name: "4.0 & up" },
+    { id: "3.5", name: "3.5 & up" },
+  ]
+
+  const locationOptions = [
+    { id: "worldwide", name: "Worldwide" },
+    { id: "north-america", name: "North America" },
+    { id: "europe", name: "Europe" },
+    { id: "asia", name: "Asia" },
+    { id: "australia", name: "Australia" },
+  ]
+
+  const toggleFilters = () => {
+    setShowFilters(!showFilters)
+  }
+
+  const FilterPanel = () => (
+    <div className="space-y-6">
+      <div className="bg-background/80 backdrop-blur-sm rounded-xl border shadow-sm">
+        <div className="p-4 border-b">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold flex items-center text-base">
+              <Filter className="mr-2 h-4 w-4 text-primary" /> Filters
+            </h3>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 text-xs font-normal text-muted-foreground hover:text-foreground"
+            >
+              Reset All
+            </Button>
+          </div>
+        </div>
+
+        <div className="p-4 space-y-5">
+          <div>
+            <h4 className="text-sm font-medium mb-3 flex items-center">
+              <Search className="h-3.5 w-3.5 mr-1.5 text-primary" /> Search
+            </h4>
+            <div className="relative">
+              <Input
+                placeholder="Search experts..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8"
+              />
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            </div>
+          </div>
+
+          <Separator />
+
+          <div>
+            <h4 className="text-sm font-medium mb-3 flex items-center">
+              <Briefcase className="h-3.5 w-3.5 mr-1.5 text-primary" /> Expertise
+            </h4>
+            <div className="space-y-2">
+              {expertiseOptions.map((option) => (
+                <div key={option.id} className="flex items-center space-x-2">
+                  <Checkbox id={`expertise-${option.id}`} />
+                  <Label htmlFor={`expertise-${option.id}`} className="text-sm font-normal cursor-pointer">
+                    {option.name}
+                  </Label>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <Separator />
+
+          <div>
+            <h4 className="text-sm font-medium mb-3 flex items-center">
+              <DollarSign className="h-3.5 w-3.5 mr-1.5 text-primary" /> Hourly Rate
+            </h4>
+            <div className="px-2 space-y-5">
+              <Slider value={priceRange} min={0} max={200} step={5} onValueChange={setPriceRange} />
+              <div className="flex items-center justify-between text-sm">
+                <span>${priceRange[0]}</span>
+                <span>${priceRange[1]}</span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs justify-start h-auto py-2"
+                  onClick={() => setPriceRange([0, 50])}
+                >
+                  <span className="flex flex-col items-start">
+                    <span className="font-medium">Budget</span>
+                    <span className="text-muted-foreground text-[10px]">Under $50/hr</span>
+                  </span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs justify-start h-auto py-2"
+                  onClick={() => setPriceRange([50, 100])}
+                >
+                  <span className="flex flex-col items-start">
+                    <span className="font-medium">Mid-range</span>
+                    <span className="text-muted-foreground text-[10px]">$50-$100/hr</span>
+                  </span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs justify-start h-auto py-2"
+                  onClick={() => setPriceRange([100, 150])}
+                >
+                  <span className="flex flex-col items-start">
+                    <span className="font-medium">Premium</span>
+                    <span className="text-muted-foreground text-[10px]">$100-$150/hr</span>
+                  </span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs justify-start h-auto py-2"
+                  onClick={() => setPriceRange([150, 200])}
+                >
+                  <span className="flex flex-col items-start">
+                    <span className="font-medium">Enterprise</span>
+                    <span className="text-muted-foreground text-[10px]">$150+/hr</span>
+                  </span>
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <Separator />
+
+          <div>
+            <h4 className="text-sm font-medium mb-3 flex items-center">
+              <Star className="h-3.5 w-3.5 mr-1.5 text-primary" /> Rating
+            </h4>
+            <RadioGroup defaultValue="4.5">
+              {ratingOptions.map((option) => (
+                <div key={option.id} className="flex items-center space-x-2">
+                  <RadioGroupItem value={option.id} id={`rating-${option.id}`} />
+                  <Label
+                    htmlFor={`rating-${option.id}`}
+                    className="text-sm font-normal cursor-pointer flex items-center"
+                  >
+                    {option.name}
+                    <div className="ml-2 flex">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`h-3 w-3 ${i < Number.parseInt(option.id) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"}`}
+                        />
+                      ))}
+                    </div>
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+          </div>
+
+          <Separator />
+
+          <div>
+            <h4 className="text-sm font-medium mb-3 flex items-center">
+              <MapPin className="h-3.5 w-3.5 mr-1.5 text-primary" /> Location
+            </h4>
+            <div className="space-y-2">
+              {locationOptions.map((option) => (
+                <div key={option.id} className="flex items-center space-x-2">
+                  <Checkbox id={`location-${option.id}`} />
+                  <Label htmlFor={`location-${option.id}`} className="text-sm font-normal cursor-pointer">
+                    {option.name}
+                  </Label>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="pt-2">
+            <Button className="w-full bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90">
+              Apply Filters
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 
   return (
     <div className="flex min-h-screen flex-col">
       <AnimatedGradientBackground />
       <EnhancedMainNav />
-      <main className="flex-1">
-        {/* Providers Section */}
-        <section className="w-full py-12 md:py-16 bg-muted/50 relative">
-          <BackgroundPattern className="opacity-50" />
-          <div className="container px-4 md:px-6 relative z-10">
-            <div className="grid gap-8 md:grid-cols-4">
-              {/* Filters Sidebar */}
-              <div className="space-y-6">
-                <div className="bg-background rounded-xl border p-4 shadow-sm">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold flex items-center">
-                      <Filter className="mr-2 h-4 w-4" /> Filters
-                    </h3>
-                    <Button variant="ghost" size="sm" className="text-xs h-8">
-                      Clear All
-                    </Button>
-                  </div>
 
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="text-sm font-medium mb-2">Expertise</h4>
-                      <div className="space-y-2">
-                        {["All", "Frontend", "Backend", "Full Stack", "Mobile", "UI/UX"].map((filter) => (
-                          <div key={filter} className="flex items-center">
-                            <input
-                              type="checkbox"
-                              id={`filter-${filter}`}
-                              className="mr-2"
-                              checked={selectedFilter === filter.toLowerCase()}
-                              onChange={() => setSelectedFilter(filter.toLowerCase())}
-                            />
-                            <label htmlFor={`filter-${filter}`} className="text-sm">
-                              {filter}
-                            </label>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+      {/* Hero Section */}
+      <section className="relative py-12 md:py-16 overflow-hidden border-b">
+        <div className="absolute inset-0 bg-gradient-to-b from-purple-500/10 to-background"></div>
+        <BackgroundPattern className="opacity-20" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/20 rounded-full filter blur-[100px]"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/10 rounded-full filter blur-[100px]"></div>
 
-                    <Separator />
+        <div className="container px-4 md:px-6 relative z-10">
+          <div className="max-w-3xl mx-auto text-center">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+              <h1 className="text-3xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
+                {categoryName} Experts
+              </h1>
+              <p className="text-lg text-muted-foreground mb-6">
+                Connect with top-rated {categoryName.toLowerCase()} professionals ready to help you succeed
+              </p>
+            </motion.div>
 
-                    <div>
-                      <h4 className="text-sm font-medium mb-2">Price Range</h4>
-                      <div className="space-y-2">
-                        <div className="flex items-center">
-                          <input type="checkbox" id="price-1" className="mr-2" />
-                          <label htmlFor="price-1" className="text-sm">
-                            Under $50/hr
-                          </label>
-                        </div>
-                        <div className="flex items-center">
-                          <input type="checkbox" id="price-2" className="mr-2" />
-                          <label htmlFor="price-2" className="text-sm">
-                            $50-$75/hr
-                          </label>
-                        </div>
-                        <div className="flex items-center">
-                          <input type="checkbox" id="price-3" className="mr-2" />
-                          <label htmlFor="price-3" className="text-sm">
-                            $75-$100/hr
-                          </label>
-                        </div>
-                        <div className="flex items-center">
-                          <input type="checkbox" id="price-4" className="mr-2" />
-                          <label htmlFor="price-4" className="text-sm">
-                            $100+/hr
-                          </label>
-                        </div>
-                      </div>
-                    </div>
+            <motion.div
+              className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mt-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <div className="bg-background/50 backdrop-blur-sm rounded-lg p-4 border">
+                <div className="text-2xl md:text-3xl font-bold text-primary">{categoryStats.experts}</div>
+                <div className="text-sm text-muted-foreground flex items-center justify-center">
+                  <Users className="h-3.5 w-3.5 mr-1.5" /> Available Experts
+                </div>
+              </div>
+              <div className="bg-background/50 backdrop-blur-sm rounded-lg p-4 border">
+                <div className="text-2xl md:text-3xl font-bold text-primary flex items-center justify-center">
+                  {categoryStats.averageRating} <Star className="h-4 w-4 ml-1 fill-yellow-400 text-yellow-400" />
+                </div>
+                <div className="text-sm text-muted-foreground">Average Rating</div>
+              </div>
+              <div className="bg-background/50 backdrop-blur-sm rounded-lg p-4 border">
+                <div className="text-2xl md:text-3xl font-bold text-primary">{categoryStats.completedProjects}+</div>
+                <div className="text-sm text-muted-foreground flex items-center justify-center">
+                  <Award className="h-3.5 w-3.5 mr-1.5" /> Completed Projects
+                </div>
+              </div>
+              <div className="bg-background/50 backdrop-blur-sm rounded-lg p-4 border">
+                <div className="text-2xl md:text-3xl font-bold text-primary">{categoryStats.averageResponse}</div>
+                <div className="text-sm text-muted-foreground flex items-center justify-center">
+                  <Clock className="h-3.5 w-3.5 mr-1.5" /> Avg. Response Time
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
 
-                    <Separator />
+      <main className="flex-1 py-8 md:py-12">
+        <div className="container px-4 md:px-6">
+          {/* Mobile Filter Button */}
+          <div className="md:hidden mb-4">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" className="w-full flex items-center justify-between">
+                  <span className="flex items-center">
+                    <Filter className="mr-2 h-4 w-4" /> Filters
+                  </span>
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-full sm:max-w-md overflow-y-auto">
+                <div className="py-4">
+                  <FilterPanel />
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
 
-                    <div>
-                      <h4 className="text-sm font-medium mb-2">Rating</h4>
-                      <div className="space-y-2">
-                        {[4.5, 4.0, 3.5, 3.0].map((rating) => (
-                          <div key={rating} className="flex items-center">
-                            <input type="checkbox" id={`rating-${rating}`} className="mr-2" />
-                            <label htmlFor={`rating-${rating}`} className="text-sm flex items-center">
-                              {rating}+ <Star className="h-3 w-3 ml-1 fill-yellow-400 text-yellow-400" />
-                            </label>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+          <div className="flex flex-col md:flex-row gap-8">
+            {/* Desktop Filters */}
+            <div className={`md:w-72 lg:w-80 hidden md:block`}>
+              <FilterPanel />
+            </div>
 
-                    <Separator />
-
-                    <div>
-                      <h4 className="text-sm font-medium mb-2">Location</h4>
-                      <div className="space-y-2">
-                        {["Worldwide", "North America", "Europe", "Asia", "Australia"].map((location) => (
-                          <div key={location} className="flex items-center">
-                            <input type="checkbox" id={`location-${location}`} className="mr-2" />
-                            <label htmlFor={`location-${location}`} className="text-sm">
-                              {location}
-                            </label>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+            {/* Providers Grid */}
+            <div className="flex-1">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                <h2 className="text-xl font-semibold">
+                  {providers.length} {providers.length === 1 ? "Expert" : "Experts"} Available
+                </h2>
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <Select defaultValue="relevance">
+                    <SelectTrigger className="w-full sm:w-[180px]">
+                      <SelectValue placeholder="Sort by" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="relevance">Most Relevant</SelectItem>
+                      <SelectItem value="rating">Highest Rating</SelectItem>
+                      <SelectItem value="price-low">Price: Low to High</SelectItem>
+                      <SelectItem value="price-high">Price: High to Low</SelectItem>
+                      <SelectItem value="projects">Most Projects</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
-              {/* Providers Grid */}
-              <div className="md:col-span-3">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-xl font-semibold">
-                    {providers.length} {providers.length === 1 ? "Expert" : "Experts"} Available
-                  </h2>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">Sort by:</span>
-                    <Select defaultValue="relevance">
-                      <SelectTrigger className="w-[160px] h-8 text-sm">
-                        <SelectValue placeholder="Relevance" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="relevance">Relevance</SelectItem>
-                        <SelectItem value="rating">Highest Rating</SelectItem>
-                        <SelectItem value="price-low">Price: Low to High</SelectItem>
-                        <SelectItem value="price-high">Price: High to Low</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="grid gap-6">
-                  {providers.map((provider, index) => (
-                    <motion.div
-                      key={provider.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
+              <div className="grid gap-6">
+                {providers.map((provider, index) => (
+                  <motion.div
+                    key={provider.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    whileHover={{ y: -5, transition: { duration: 0.2 } }}
+                    className="group"
+                  >
+                    <Card
+                      className={`overflow-hidden transition-all duration-300 hover:shadow-lg ${
+                        provider.featured
+                          ? "border-purple-400/50 bg-gradient-to-r from-purple-50/30 to-background dark:from-purple-900/10 dark:to-background"
+                          : ""
+                      }`}
                     >
-                      <Card
-                        className={`overflow-hidden ${provider.featured ? "border-purple-500/50 bg-purple-50/5" : ""}`}
-                      >
-                        <div className="p-6">
-                          <div className="flex flex-col md:flex-row gap-6">
-                            {/* Provider Info */}
-                            <div className="flex flex-col sm:flex-row md:flex-col items-center gap-4 md:w-48">
-                              <Avatar className="h-20 w-20">
+                      <div className="p-6">
+                        <div className="flex flex-col md:flex-row gap-6">
+                          {/* Provider Info */}
+                          <div className="flex flex-col sm:flex-row md:flex-col items-center gap-4 md:w-48">
+                            <div className="relative">
+                              <Avatar className="h-20 w-20 border-2 border-background shadow-md group-hover:border-primary transition-colors duration-300">
                                 <AvatarImage src={provider.avatar || "/placeholder.svg"} alt={provider.name} />
                                 <AvatarFallback>
                                   {provider.name
@@ -206,79 +454,161 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                                     .join("")}
                                 </AvatarFallback>
                               </Avatar>
-                              <div className="text-center sm:text-left md:text-center">
-                                <h3 className="font-semibold">{provider.name}</h3>
-                                <p className="text-sm text-muted-foreground">{provider.title}</p>
-                                <div className="mt-1 flex items-center justify-center sm:justify-start md:justify-center">
-                                  <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                                  <span className="ml-1 text-sm font-medium">{provider.rating}</span>
-                                  <span className="ml-1 text-xs text-muted-foreground">({provider.reviews})</span>
+                              {provider.featured && (
+                                <div className="absolute -top-2 -right-2">
+                                  <Badge className="bg-gradient-to-r from-primary to-purple-500 hover:from-primary hover:to-purple-500 text-white border-none">
+                                    <Award className="h-3 w-3 mr-1" /> Top Rated
+                                  </Badge>
                                 </div>
-                                <div className="mt-1 flex items-center justify-center sm:justify-start md:justify-center text-xs text-muted-foreground">
-                                  <MapPin className="h-3 w-3 mr-1" />
-                                  {provider.location}
+                              )}
+                            </div>
+                            <div className="text-center sm:text-left md:text-center">
+                              <h3 className="font-semibold text-lg group-hover:text-primary transition-colors duration-300">
+                                {provider.name}
+                              </h3>
+                              <p className="text-sm text-muted-foreground">{provider.title}</p>
+                              <div className="mt-1 flex items-center justify-center sm:justify-start md:justify-center">
+                                <div className="flex">
+                                  {[...Array(5)].map((_, i) => (
+                                    <Star
+                                      key={i}
+                                      className={`h-3.5 w-3.5 ${i < Math.floor(provider.rating) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"}`}
+                                    />
+                                  ))}
                                 </div>
+                                <span className="ml-1.5 text-sm font-medium">{provider.rating}</span>
+                                <span className="ml-1 text-xs text-muted-foreground">({provider.reviews})</span>
+                              </div>
+                              <div className="mt-1 flex items-center justify-center sm:justify-start md:justify-center text-xs text-muted-foreground">
+                                <MapPin className="h-3 w-3 mr-1" />
+                                {provider.location}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Provider Details */}
+                          <div className="flex-1 space-y-4">
+                            <div className="flex flex-wrap gap-2">
+                              {provider.tags.map((tag) => (
+                                <Badge key={tag} variant="secondary" className="text-xs font-normal">
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+
+                            <p className="text-sm text-muted-foreground line-clamp-2">{provider.description}</p>
+
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                              <div className="space-y-1">
+                                <p className="text-xs text-muted-foreground">Hourly Rate</p>
+                                <p className="font-semibold flex items-center">
+                                  <DollarSign className="h-3.5 w-3.5 text-primary" />
+                                  {provider.hourlyRate}/hr
+                                </p>
+                              </div>
+                              <div className="space-y-1">
+                                <p className="text-xs text-muted-foreground">Response Time</p>
+                                <div className="flex items-center">
+                                  <Clock className="h-3.5 w-3.5 mr-1 text-primary" />
+                                  <p className="text-sm">{provider.responseTime}</p>
+                                </div>
+                              </div>
+                              <div className="space-y-1">
+                                <p className="text-xs text-muted-foreground">Completed</p>
+                                <div className="flex items-center">
+                                  <Briefcase className="h-3.5 w-3.5 mr-1 text-primary" />
+                                  <p className="text-sm">{provider.completedProjects} projects</p>
+                                </div>
+                              </div>
+                              <div className="space-y-1">
+                                <p className="text-xs text-muted-foreground">Languages</p>
+                                <p className="text-sm">{provider.languages.join(", ")}</p>
                               </div>
                             </div>
 
-                            {/* Provider Details */}
-                            <div className="flex-1 space-y-4">
-                              <div className="flex flex-wrap gap-2">
-                                {provider.tags.map((tag) => (
-                                  <Badge key={tag} variant="secondary" className="text-xs font-normal">
-                                    {tag}
-                                  </Badge>
-                                ))}
-                              </div>
-
-                              <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-1">
-                                  <p className="text-xs text-muted-foreground">Hourly Rate</p>
-                                  <p className="font-semibold">{provider.hourlyRate}</p>
-                                </div>
-                                <div className="space-y-1">
-                                  <p className="text-xs text-muted-foreground">Response Time</p>
-                                  <div className="flex items-center">
-                                    <Clock className="h-3 w-3 mr-1 text-muted-foreground" />
-                                    <p className="text-sm">{provider.responseTime}</p>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="flex flex-col sm:flex-row gap-3 mt-4">
-                                <Button
-                                  className="bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90"
-                                  onClick={() => router.push(`/services/${provider.id}`)}
-                                >
-                                  View Services
-                                </Button>
-                                <Button variant="outline">Contact</Button>
-                              </div>
+                            <div className="flex flex-wrap gap-3 mt-4">
+                              <Button
+                                className="bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90 shadow-sm hover:shadow-md transition-all duration-300"
+                                onClick={() => router.push(`/services/${provider.id}`)}
+                              >
+                                View Profile
+                              </Button>
+                              <Button variant="outline" className="border-primary text-primary hover:bg-primary/10">
+                                <MessageSquare className="h-4 w-4 mr-2" /> Contact
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="rounded-full h-9 w-9 text-muted-foreground hover:text-rose-500"
+                              >
+                                <Heart className="h-4 w-4" />
+                              </Button>
                             </div>
                           </div>
                         </div>
+                      </div>
 
-                        {provider.featured && (
-                          <div className="bg-primary/10 px-6 py-2 flex items-center">
-                            <Check className="h-4 w-4 text-primary mr-2" />
-                            <span className="text-sm font-medium">Featured Expert</span>
-                          </div>
-                        )}
-                      </Card>
-                    </motion.div>
-                  ))}
-                </div>
+                      {provider.featured && (
+                        <div className="bg-gradient-to-r from-primary/10 to-purple-500/10 px-6 py-2 flex items-center">
+                          <Award className="h-4 w-4 text-primary mr-2" />
+                          <span className="text-sm font-medium">Featured Expert • Top 1% in {categoryName}</span>
+                        </div>
+                      )}
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
 
-                <div className="mt-8 flex justify-center">
-                  <Button variant="outline" className="gap-2">
-                    Load More <ArrowUpDown className="h-4 w-4" />
-                  </Button>
-                </div>
+              <div className="mt-8 flex justify-center">
+                <Button variant="outline" className="gap-2 px-8">
+                  Load More <ArrowUpDown className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           </div>
-        </section>
+        </div>
       </main>
+
+      {/* Related Categories Section */}
+      <section className="py-12 border-t relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-t from-purple-500/5 to-background/0"></div>
+        <BackgroundPattern className="opacity-10" />
+
+        <div className="container px-4 md:px-6 relative z-10">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl md:text-3xl font-bold mb-4">Related Categories</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Explore other categories that might help you find the perfect expert for your needs
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {[
+              "UI/UX Design",
+              "Mobile Development",
+              "Backend Development",
+              "DevOps",
+              "Data Science",
+              "Digital Marketing",
+            ].map((category, index) => (
+              <motion.div
+                key={category}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.05 }}
+              >
+                <Link href={`/category/${category.toLowerCase().replace(/\s+/g, "-")}`}>
+                  <div className="bg-background/80 backdrop-blur-sm rounded-lg p-4 border text-center hover:border-primary hover:shadow-md transition-all duration-300 h-full flex flex-col items-center justify-center">
+                    <h3 className="font-medium text-sm">{category}</h3>
+                    <p className="text-xs text-muted-foreground mt-1">120+ Experts</p>
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <footer className="w-full border-t bg-background py-6 md:py-12 relative">
         <BackgroundPattern className="opacity-30" />

@@ -15,9 +15,17 @@ interface PaymentFormProps {
   clientSecret: string
   amount: number
   serviceId: string
+  providerId: string
+  isConnectedAccount?: boolean
 }
 
-export function PaymentForm({ clientSecret, amount, serviceId }: PaymentFormProps) {
+export function PaymentForm({
+  clientSecret,
+  amount,
+  serviceId,
+  providerId,
+  isConnectedAccount = true, // Default to true since we're making Connect the default
+}: PaymentFormProps) {
   const stripe = useStripe()
   const elements = useElements()
   const { toast } = useToast()
@@ -25,9 +33,13 @@ export function PaymentForm({ clientSecret, amount, serviceId }: PaymentFormProp
   const [isLoading, setIsLoading] = useState(false)
   const [cardError, setCardError] = useState<string | null>(null)
 
-  // Calculate service fee (10%)
-  const serviceFee = Math.round(amount * 0.1)
-  const total = amount + serviceFee
+  // Fixed total amount of $2.02 (202 cents for Stripe)
+  const totalAmount = 202 // $2.02 in cents for Stripe
+
+  // Display values
+  const serviceFee = 2.0
+  const platformFee = 0.02
+  const total = 2.02
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -46,6 +58,7 @@ export function PaymentForm({ clientSecret, amount, serviceId }: PaymentFormProp
         throw new Error("Card element not found")
       }
 
+      // Use the client secret from props which should be for the $2.02 amount
       const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
         payment_method: {
           card: cardElement,
@@ -89,18 +102,25 @@ export function PaymentForm({ clientSecret, amount, serviceId }: PaymentFormProp
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>Service Fee</span>
-              <span className="font-medium">${(amount / 100).toFixed(2)}</span>
+              <span className="font-medium">$2.00</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span>Platform Fee (10%)</span>
-              <span className="font-medium">${(serviceFee / 100).toFixed(2)}</span>
+              <span>Platform Fee</span>
+              <span className="font-medium">$0.02</span>
             </div>
             <Separator className="my-2" />
             <div className="flex justify-between font-semibold">
               <span>Total</span>
-              <span className="text-primary">${(total / 100).toFixed(2)}</span>
+              <span className="text-primary">$2.02</span>
             </div>
           </div>
+
+          {isConnectedAccount && (
+            <div className="mt-2 text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+              <CheckCircle className="h-3 w-3" />
+              <span>Direct payment to service provider</span>
+            </div>
+          )}
         </div>
 
         {/* Payment Information */}
@@ -190,7 +210,7 @@ export function PaymentForm({ clientSecret, amount, serviceId }: PaymentFormProp
           disabled={!stripe || isLoading}
           className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white py-6 text-lg"
         >
-          {isLoading ? "Processing payment..." : `Pay $${(total / 100).toFixed(2)}`}
+          {isLoading ? "Processing payment..." : `Pay $2.02`}
         </Button>
         <p className="text-xs text-center text-muted-foreground">
           By clicking "Pay", you agree to our{" "}

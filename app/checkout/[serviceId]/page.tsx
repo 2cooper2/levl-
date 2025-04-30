@@ -6,8 +6,10 @@ import { Elements } from "@stripe/react-stripe-js"
 import { PaymentForm } from "@/components/checkout/payment-form"
 import { EnhancedMainNav } from "@/components/enhanced-main-nav"
 import { Skeleton } from "@/components/ui/skeleton"
-import { AlertCircle, ArrowLeft } from "lucide-react"
+import { AlertCircle, ArrowLeft, AlertTriangle } from "lucide-react"
 import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader } from "@/components/ui/card"
 
 // Initialize Stripe with the publishable key
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "")
@@ -16,22 +18,32 @@ export default function CheckoutPage({ params }: { params: { serviceId: string }
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [needsOnboarding, setNeedsOnboarding] = useState(false)
   const [serviceDetails, setServiceDetails] = useState<{
     title: string
     amount: number
+    providerId: string
   } | null>(null)
 
   useEffect(() => {
     // In a real app, fetch service details from your API
     const fetchServiceDetails = async () => {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500))
+      try {
+        // Simulate API call
+        await new Promise((resolve) => setTimeout(resolve, 500))
 
-      // Mock service details
-      setServiceDetails({
-        title: "Professional Website Development",
-        amount: 200, // $2.00 in cents
-      })
+        // Use the actual user ID that has a connected account
+        setServiceDetails({
+          title: "Professional Website Development",
+          amount: 202, // $2.02 in cents
+          providerId: "0c4ebdf3-3421-4f6a-adaf-0df55a85b242", // The user ID with the connected account
+        })
+      } catch (err) {
+        console.error("Error fetching service details:", err)
+        setError("Could not load service details")
+      } finally {
+        setIsLoading(false)
+      }
     }
 
     fetchServiceDetails()
@@ -51,6 +63,8 @@ export default function CheckoutPage({ params }: { params: { serviceId: string }
           body: JSON.stringify({
             amount: serviceDetails.amount,
             serviceId: params.serviceId,
+            providerId: serviceDetails.providerId, // Pass the provider ID
+            description: serviceDetails.title,
           }),
         })
 
@@ -58,6 +72,15 @@ export default function CheckoutPage({ params }: { params: { serviceId: string }
 
         if (response.ok && data.clientSecret) {
           setClientSecret(data.clientSecret)
+          // Note whether this is a connected account payment
+          const isConnected = data.isConnectedAccount || false
+          if (!isConnected) {
+            console.warn("Provider does not have a connected Stripe account. Using direct payment.")
+            // You could show a warning to the user here
+          }
+        } else if (data.needsOnboarding) {
+          setNeedsOnboarding(true)
+          setError(data.error || "Provider needs to complete Stripe Connect setup")
         } else {
           setError(data.error?.message || "Failed to initialize payment")
         }
@@ -113,6 +136,28 @@ export default function CheckoutPage({ params }: { params: { serviceId: string }
               <Skeleton className="h-4 w-full" />
               <Skeleton className="h-[600px] w-full rounded-lg" />
             </div>
+          ) : needsOnboarding ? (
+            <Card className="border-2 border-yellow-200">
+              <CardHeader className="bg-yellow-50 dark:bg-yellow-950/20 border-b">
+                <div className="flex items-center gap-2 text-yellow-600 dark:text-yellow-400 mb-2">
+                  <AlertTriangle className="h-5 w-5" />
+                  <h3 className="font-medium">Provider Not Ready</h3>
+                </div>
+                <CardDescription>This service provider hasn't completed their payment setup yet.</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <p className="text-sm text-muted-foreground mb-4">
+                  The service provider needs to complete their Stripe Connect setup before they can accept payments.
+                  Please try again later or contact the provider directly.
+                </p>
+              </CardContent>
+              <CardFooter className="bg-yellow-50 dark:bg-yellow-950/20 border-t">
+                <Button variant="outline" className="w-full" onClick={() => window.history.back()}>
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Go Back
+                </Button>
+              </CardFooter>
+            </Card>
           ) : error ? (
             <div className="bg-red-50 border border-red-200 text-red-700 p-6 rounded-lg flex items-start gap-3">
               <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
@@ -127,7 +172,9 @@ export default function CheckoutPage({ params }: { params: { serviceId: string }
               <PaymentForm
                 clientSecret={clientSecret}
                 amount={serviceDetails.amount}
-                serviceName={serviceDetails.title}
+                serviceId={params.serviceId}
+                providerId={serviceDetails.providerId}
+                isConnectedAccount={true}
               />
             </Elements>
           ) : (

@@ -2,16 +2,15 @@
 
 import { createServerClient } from "@/lib/supabase"
 
-export async function checkEmailExists(email: string): Promise<boolean> {
+export async function checkEmailExistsAction(email: string): Promise<boolean> {
   try {
     const supabase = createServerClient()
-    if (!supabase) return false
 
-    // Check in the users table, bypassing RLS policies using the service key
-    const { data, error, count } = await supabase.from("users").select("email", { count: "exact" }).eq("email", email)
+    // Check if the email exists in the users table
+    const { count, error } = await supabase.from("users").select("*", { count: "exact", head: true }).eq("email", email)
 
     if (error) {
-      console.error("Error checking email:", error)
+      console.error("Error checking email in users table:", error)
       return false
     }
 

@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
+import { createServerClient } from "@/lib/supabase"
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
 
   // Define public paths that don't require authentication
@@ -16,10 +17,18 @@ export function middleware(request: NextRequest) {
     path.startsWith("/category/") ||
     path.startsWith("/checkout")
 
-  // Check if user is logged in
-  const isAuthenticated = request.cookies.has("levl_user")
+  // Create a Supabase client for server-side authentication check
+  const supabase = createServerClient()
+
+  // Get the session from the request cookies
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
+  const isAuthenticated = !!session
 
   // Redirect logic
+  // Uncomment this block if you want to enforce authentication for protected routes
   // if (!isPublicPath && !isAuthenticated) {
   //   // Redirect to login if trying to access protected routes while not authenticated
   //   return NextResponse.redirect(new URL("/auth/login", request.url))

@@ -1,56 +1,28 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Laptop, Smartphone, Globe, Loader2, X } from "lucide-react"
-import { createClient, createServerClient } from "@/lib/supabase"
 import { useAuth } from "@/context/auth-context"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Laptop, Smartphone, Loader2, Globe, Clock, X } from "lucide-react"
+import { formatDistanceToNow } from "date-fns"
 import { useToast } from "@/hooks/use-toast"
-
-interface Session {
-  id: string
-  user_id: string
-  device_info: any
-  ip_address: string
-  user_agent: string
-  expires_at: string
-  created_at: string
-  isCurrent?: boolean
-}
+import type { Session } from "@/context/auth-context"
 
 export function ActiveSessions() {
+  const { getUserSessions, terminateSession, terminateAllOtherSessions } = useAuth()
   const [sessions, setSessions] = useState<Session[]>([])
-  const [loading, setLoading] = useState(true)
-  const [terminating, setTerminating] = useState<string | null>(null)
-  const { user } = useAuth()
-  const supabase = createClient()
-  const serverSupabase = createServerClient() // Create server client
+  const [isLoading, setIsLoading] = useState(true)
+  const [isTerminating, setIsTerminating] = useState<string | null>(null)
+  const [isTerminatingAll, setIsTerminatingAll] = useState(false)
   const { toast } = useToast()
-  const currentUserAgent = navigator.userAgent
 
   useEffect(() => {
     const fetchSessions = async () => {
-      if (!user) return
-
+      setIsLoading(true)
       try {
-        // Use serverSupabase to bypass RLS
-        const { data, error } = await serverSupabase
-          .from("sessions")
-          .select("*")
-          .eq("user_id", user.id)
-          .gt("expires_at", new Date().toISOString())
-          .order("created_at", { ascending: false })
-
-        if (error) throw error
-
-        // Mark the current session
-        const sessionsWithCurrent = data.map((session) => ({
-          ...session,
-          isCurrent: session.user_agent === currentUserAgent,
-        }))
-
-        setSessions(sessionsWithCurrent)
+        const sessionData = await getUserSessions()
+        setSessions(sessionData)
       } catch (error) {
         console.error("Error fetching sessions:", error)
         toast({
@@ -59,56 +31,26 @@ export function ActiveSessions() {
           variant: "destructive",
         })
       } finally {
-        setLoading(false)
+        setIsLoading(false)
       }
     }
 
     fetchSessions()
-  }, [user, serverSupabase, toast, currentUserAgent])
+  }, [getUserSessions, toast])
 
-  const getDeviceIcon = (userAgent: string) => {
-    if (/mobile|android|iphone|ipad|ipod/i.test(userAgent.toLowerCase())) {
-      return <Smartphone className="h-5 w-5" />
-    } else if (/windows|macintosh|linux/i.test(userAgent.toLowerCase())) {
-      return <Laptop className="h-5 w-5" />
-    } else {
-      return <Globe className="h-5 w-5" />
-    }
-  }
-
-  const getDeviceName = (userAgent: string) => {
-    if (/iphone/i.test(userAgent)) return "iPhone"
-    if (/ipad/i.test(userAgent)) return "iPad"
-    if (/android/i.test(userAgent)) return "Android Device"
-    if (/macintosh/i.test(userAgent)) return "Mac"
-    if (/windows/i.test(userAgent)) return "Windows PC"
-    if (/linux/i.test(userAgent)) return "Linux"
-    return "Unknown Device"
-  }
-
-  const getBrowserName = (userAgent: string) => {
-    if (/chrome/i.test(userAgent)) return "Chrome"
-    if (/firefox/i.test(userAgent)) return "Firefox"
-    if (/safari/i.test(userAgent)) return "Safari"
-    if (/edge/i.test(userAgent)) return "Edge"
-    if (/opera/i.test(userAgent)) return "Opera"
-    return "Unknown Browser"
-  }
-
-  const terminateSession = async (sessionId: string) => {
-    if (!user) return
-
-    setTerminating(sessionId)
+  const handleTerminateSession = async (sessionId: string) => {
+    setIsTerminating(sessionId)
     try {
-      const { error } = await supabase.from("sessions").delete().eq("id", sessionId)
-
-      if (error) throw error
-
-      setSessions((prev) => prev.filter((session) => session.id !== sessionId))
-      toast({
-        title: "Success",
-        description: "Session terminated successfully",
-      })
+      const success = await terminateSession(sessionId)
+      if (success) {
+        setSessions((prev) => prev.filter((session) => session.id !== sessionId))
+        toast({
+          title: "Success",
+          description: "Session terminated successfully",
+        })
+      } else {
+        throw new Error("Failed to terminate session")
+      }
     } catch (error) {
       console.error("Error terminating session:", error)
       toast({
@@ -117,105 +59,121 @@ export function ActiveSessions() {
         variant: "destructive",
       })
     } finally {
-      setTerminating(null)
+      setIsTerminating(null)
     }
   }
 
-  const terminateAllOtherSessions = async () => {
-    if (!user) return
-
-    setLoading(true)
+  const handleTerminateAllOtherSessions = async () => {
+    setIsTerminatingAll(true)
     try {
-      // Delete all sessions except the current one
-      const { error } = await supabase
-        .from("sessions")
-        .delete()
-        .eq("user_id", user.id)
-        .neq("user_agent", currentUserAgent)
-
-      if (error) throw error
-
-      // Update the sessions list to only include the current session
-      setSessions((prev) => prev.filter((session) => session.isCurrent))
-      toast({
-        title: "Success",
-        description: "All other sessions terminated successfully",
-      })
+      const success = await terminateAllOtherSessions()
+      if (success) {
+        setSessions((prev) => prev.filter((session) => session.isCurrent))
+        toast({
+          title: "Success",
+          description: "All other sessions terminated successfully",
+        })
+      } else {
+        throw new Error("Failed to terminate sessions")
+      }
     } catch (error) {
       console.error("Error terminating all sessions:", error)
       toast({
         title: "Error",
-        description: "Failed to terminate sessions",
+        description: "Failed to terminate all other sessions",
         variant: "destructive",
       })
     } finally {
-      setLoading(false)
+      setIsTerminatingAll(false)
     }
   }
 
-  if (loading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Active Sessions</CardTitle>
-          <CardDescription>Manage your active login sessions</CardDescription>
-        </CardHeader>
-        <CardContent className="flex justify-center py-6">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </CardContent>
-      </Card>
-    )
+  const getDeviceIcon = (userAgent: string) => {
+    if (userAgent.toLowerCase().includes("mobile") || userAgent.toLowerCase().includes("android")) {
+      return <Smartphone className="h-5 w-5" />
+    }
+    return <Laptop className="h-5 w-5" />
+  }
+
+  const getDeviceName = (userAgent: string) => {
+    if (userAgent.toLowerCase().includes("iphone") || userAgent.toLowerCase().includes("ipad")) {
+      return "iOS Device"
+    } else if (userAgent.toLowerCase().includes("android")) {
+      return "Android Device"
+    } else if (userAgent.toLowerCase().includes("windows")) {
+      return "Windows Device"
+    } else if (userAgent.toLowerCase().includes("mac")) {
+      return "Mac Device"
+    } else if (userAgent.toLowerCase().includes("linux")) {
+      return "Linux Device"
+    }
+    return "Unknown Device"
+  }
+
+  const getBrowserName = (userAgent: string) => {
+    if (userAgent.toLowerCase().includes("chrome")) {
+      return "Chrome"
+    } else if (userAgent.toLowerCase().includes("firefox")) {
+      return "Firefox"
+    } else if (userAgent.toLowerCase().includes("safari") && !userAgent.toLowerCase().includes("chrome")) {
+      return "Safari"
+    } else if (userAgent.toLowerCase().includes("edge")) {
+      return "Edge"
+    } else if (userAgent.toLowerCase().includes("opera")) {
+      return "Opera"
+    }
+    return "Unknown Browser"
   }
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle>Active Sessions</CardTitle>
-          <CardDescription>Manage your active login sessions</CardDescription>
-        </div>
-        {sessions.length > 1 && (
-          <Button variant="outline" size="sm" onClick={terminateAllOtherSessions} disabled={loading}>
-            Sign out all other devices
-          </Button>
-        )}
+      <CardHeader>
+        <CardTitle>Active Sessions</CardTitle>
+        <CardDescription>Manage your active login sessions across devices</CardDescription>
       </CardHeader>
       <CardContent>
-        {sessions.length === 0 ? (
-          <p className="text-center text-muted-foreground py-6">No active sessions found</p>
+        {isLoading ? (
+          <div className="flex justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        ) : sessions.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">No active sessions found</div>
         ) : (
           <div className="space-y-4">
             {sessions.map((session) => (
               <div
                 key={session.id}
-                className={`flex items-center justify-between rounded-lg border p-4 ${
-                  session.isCurrent ? "bg-muted/50" : ""
+                className={`flex items-center justify-between p-4 rounded-lg border ${
+                  session.isCurrent ? "bg-primary/5 border-primary/20" : "bg-card"
                 }`}
               >
-                <div className="flex items-center space-x-4">
-                  <div className="rounded-full bg-primary/10 p-2 text-primary">{getDeviceIcon(session.user_agent)}</div>
+                <div className="flex items-center gap-3">
+                  <div className="bg-primary/10 p-2 rounded-full">{getDeviceIcon(session.user_agent)}</div>
                   <div>
-                    <p className="font-medium">
-                      {getDeviceName(session.user_agent)} • {getBrowserName(session.user_agent)}
+                    <div className="font-medium flex items-center gap-2">
+                      {getDeviceName(session.user_agent)}
                       {session.isCurrent && (
-                        <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                          Current
-                        </span>
+                        <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">Current</span>
                       )}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Last active: {new Date(session.created_at).toLocaleString()}
-                    </p>
+                    </div>
+                    <div className="text-sm text-muted-foreground flex items-center gap-1">
+                      <Globe className="h-3 w-3" />
+                      {getBrowserName(session.user_agent)}
+                    </div>
+                    <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                      <Clock className="h-3 w-3" />
+                      {formatDistanceToNow(new Date(session.created_at), { addSuffix: true })}
+                    </div>
                   </div>
                 </div>
                 {!session.isCurrent && (
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => terminateSession(session.id)}
-                    disabled={terminating === session.id}
+                    onClick={() => handleTerminateSession(session.id)}
+                    disabled={isTerminating === session.id}
                   >
-                    {terminating === session.id ? (
+                    {isTerminating === session.id ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       <X className="h-4 w-4" />
@@ -228,6 +186,25 @@ export function ActiveSessions() {
           </div>
         )}
       </CardContent>
+      {sessions.length > 1 && (
+        <CardFooter>
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={handleTerminateAllOtherSessions}
+            disabled={isTerminatingAll}
+          >
+            {isTerminatingAll ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Terminating...
+              </>
+            ) : (
+              "Terminate All Other Sessions"
+            )}
+          </Button>
+        </CardFooter>
+      )}
     </Card>
   )
 }

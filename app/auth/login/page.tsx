@@ -3,203 +3,143 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useAuth } from "@/context/auth-context"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Loader2 } from "lucide-react"
 import { LevlLogo } from "@/components/levl-logo"
-import { Eye, EyeOff, Loader2 } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-import { createClient } from "@/lib/supabase"
+import { createClient } from "@supabase/supabase-js"
+
+// Create a Supabase client
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
 
 export default function LoginPage() {
-  const [email, setEmail] = useState(() => {
-    // Get the email from localStorage on initial load
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("rememberedEmail") || ""
-    }
-    return ""
-  })
-  const [password, setPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
-  const { login, isAuthenticated } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { toast } = useToast()
-  const supabase = createClient()
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
-  // Check for error parameter in URL
   useEffect(() => {
-    const errorParam = searchParams.get("error")
-    if (errorParam) {
-      setError(
-        errorParam === "server_error"
-          ? "Server error occurred. Please try again."
-          : "Authentication error. Please try again.",
-      )
+    // Check for signup success message
+    if (searchParams.get("signup") === "success") {
+      setSuccessMessage("Account created successfully! Please log in.")
     }
   }, [searchParams])
 
-  // Check if already logged in
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.push("/dashboard")
-    }
-  }, [isAuthenticated, router])
-
-  useEffect(() => {
-    // Store the email in localStorage whenever it changes
-    localStorage.setItem("rememberedEmail", email)
-  }, [email])
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError("")
+    setError(null)
     setIsLoading(true)
 
     try {
-      console.log("Attempting to login with:", email)
-
-      // For development testing
-      if (process.env.NODE_ENV === "development" && email === "test@example.com") {
-        console.log("Using test account")
-      }
-
-      await login(email, password)
-
-      toast({
-        title: "Login successful",
-        description: "Welcome back to Levl!",
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       })
 
-      // Short delay before redirect to ensure state is updated
-      setTimeout(() => {
+      if (error) {
+        throw new Error(error.message)
+      }
+
+      if (data.user) {
+        // Redirect to dashboard
         router.push("/dashboard")
-      }, 500)
-    } catch (error: any) {
-      console.error("Login error:", error)
-
-      // Provide more specific error messages
-      let errorMessage = "Failed to log in. Please check your credentials and try again."
-
-      if (error.message?.includes("Invalid login credentials")) {
-        errorMessage = "Invalid email or password. Please try again."
-      } else if (error.message?.includes("Email not confirmed")) {
-        errorMessage = "Please confirm your email address before logging in."
       }
-
-      setError(errorMessage)
-      toast({
-        variant: "destructive",
-        title: "Login failed",
-        description: errorMessage,
-      })
+    } catch (err: any) {
+      console.error("Login error:", err)
+      setError(err.message || "Invalid email or password")
     } finally {
       setIsLoading(false)
     }
   }
 
-  // For development testing - add a quick login option
-  const handleQuickLogin = async () => {
-    setEmail("test@example.com")
-    setPassword("password")
-
-    // Submit the form after a short delay to ensure state is updated
-    setTimeout(() => {
-      const form = document.querySelector("form")
-      if (form) form.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }))
-    }, 100)
-  }
-
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 p-4">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="space-y-1 text-center">
-          <div className="flex justify-center mb-2">
-            <LevlLogo className="h-12 w-12" />
-          </div>
-          <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-          <CardDescription>Enter your credentials to access your account</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <div className="relative">
+    <div className="min-h-screen flex items-center justify-center bg-muted/50 p-4">
+      <div className="w-full max-w-md">
+        <div className="flex justify-center mb-8">
+          <Link href="/" className="flex items-center gap-2">
+            <LevlLogo className="h-10 w-10 text-primary" />
+            <span className="text-2xl font-bold bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
+              LevL
+            </span>
+          </Link>
+        </div>
+        <Card>
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl font-bold text-center">Sign in</CardTitle>
+            <CardDescription className="text-center">Enter your email and password to sign in</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {successMessage && (
+              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded mb-4 text-sm">
+                {successMessage}
+              </div>
+            )}
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4 text-sm">{error}</div>
+            )}
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="your.email@example.com"
+                  placeholder="name@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  disabled={isLoading}
                   required
-                  className="w-full"
                 />
               </div>
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                <Link href="/auth/forgot-password" className="text-sm text-primary hover:underline">
-                  Forgot password?
-                </Link>
-              </div>
-              <div className="relative">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Password</Label>
+                  <Link href="/auth/forgot-password" className="text-sm text-primary hover:underline">
+                    Forgot password?
+                  </Link>
+                </div>
                 <Input
                   id="password"
-                  type={showPassword ? "text" : "password"}
+                  type="password"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
                   required
-                  className="w-full pr-10"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-                >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                  <span className="sr-only">{showPassword ? "Hide password" : "Show password"}</span>
-                </button>
               </div>
-            </div>
-            {error && (
-              <div className="text-sm text-red-500 dark:text-red-400 p-2 bg-red-50 dark:bg-red-900/20 rounded-md">
-                {error}
-              </div>
-            )}
-            <Button type="submit" className="w-full bg-gradient-to-r from-primary to-purple-600" disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Logging in...
-                </>
-              ) : (
-                "Log in"
-              )}
-            </Button>
-
-            {process.env.NODE_ENV === "development" && (
-              <Button type="button" variant="outline" className="w-full mt-2" onClick={handleQuickLogin}>
-                Quick Login (Dev Only)
+              <Button
+                type="submit"
+                className="w-full bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  "Sign In"
+                )}
               </Button>
-            )}
-          </form>
-        </CardContent>
-        <CardFooter className="flex flex-col space-y-4">
-          <div className="text-center text-sm">
-            Don&apos;t have an account?{" "}
-            <Link href="/auth/signup" className="text-primary hover:underline">
-              Sign up
-            </Link>
-          </div>
-        </CardFooter>
-      </Card>
+            </form>
+          </CardContent>
+          <CardFooter className="flex flex-col">
+            <p className="text-center text-sm text-muted-foreground">
+              Don't have an account?{" "}
+              <Link href="/auth/signup" className="text-primary hover:underline">
+                Sign up
+              </Link>
+            </p>
+          </CardFooter>
+        </Card>
+      </div>
     </div>
   )
 }
