@@ -53,7 +53,8 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        purple: {
+        // Add custom colors for lavender
+        lavender: {
           100: "#f3e8ff",
           200: "#e9d5ff",
           300: "#d8b4fe",
