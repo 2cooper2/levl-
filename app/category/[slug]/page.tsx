@@ -43,7 +43,9 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 export default function CategoryPage({ params }: { params: { slug: string } }) {
   const router = useRouter()
   const [isLoaded, setIsLoaded] = useState(false)
+  const [selectedFilter, setSelectedFilter] = useState("all")
   const [priceRange, setPriceRange] = useState([0, 500])
+  const [showFilters, setShowFilters] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const categorySlug = params.slug as string
 
@@ -109,16 +111,25 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
     { id: "australia", name: "Australia" },
   ]
 
+  const toggleFilters = () => {
+    setShowFilters(!showFilters)
+  }
+
   const FilterPanel = () => (
     <div className="space-y-6">
-      <div className="bg-background/80 backdrop-blur-sm rounded-xl border shadow-lg overflow-hidden">
-        <div className="p-4 border-b">
+      <div className="bg-background/80 backdrop-blur-sm rounded-xl border border-purple-200/30 dark:border-purple-900/30 shadow-lg overflow-hidden">
+        {/* Header with gradient background */}
+        <div className="bg-gradient-to-r from-primary/10 to-purple-500/10 p-4 border-b border-purple-200/30 dark:border-purple-900/30">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold flex items-center text-base">
-              <Filter className="mr-2 h-4 w-4" />
-              <span>Filters</span>
+            <h3 className="font-semibold flex items-center text-base bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+              <Filter className="mr-2 h-4 w-4 text-primary" />
+              <span className="text-foreground">Filters</span>
             </h3>
-            <Button variant="ghost" size="sm" className="h-8 text-xs font-normal">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 text-xs font-normal text-muted-foreground hover:text-primary transition-colors duration-200"
+            >
               Reset All
             </Button>
           </div>
@@ -126,9 +137,11 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
 
         <div className="p-5 space-y-6">
           {/* Search Section */}
-          <div>
-            <h4 className="text-sm font-medium mb-3 flex items-center">
-              <Search className="mr-2 h-4 w-4" />
+          <div className="group">
+            <h4 className="text-sm font-medium mb-3 flex items-center group-hover:text-primary transition-colors duration-200">
+              <div className="mr-2 h-5 w-5 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center">
+                <Search className="h-3 w-3 text-white" />
+              </div>
               Search
             </h4>
             <div className="relative">
@@ -136,24 +149,32 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                 placeholder="Search experts..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8"
+                className="pl-8 border-purple-200/50 dark:border-purple-900/50 focus-visible:ring-primary transition-all duration-200"
               />
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4" />
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             </div>
           </div>
 
-          <Separator />
+          <Separator className="bg-purple-200/30 dark:bg-purple-900/30" />
 
           {/* Expertise Section */}
-          <div>
-            <h4 className="text-sm font-medium mb-3 flex items-center">
-              <Briefcase className="mr-2 h-4 w-4" />
+          <div className="group">
+            <h4 className="text-sm font-medium mb-3 flex items-center group-hover:text-primary transition-colors duration-200">
+              <div className="mr-2 h-5 w-5 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center">
+                <Briefcase className="h-3 w-3 text-white" />
+              </div>
               Expertise
             </h4>
             <div className="grid grid-cols-2 gap-2">
               {expertiseOptions.map((option) => (
-                <div key={option.id} className="flex items-center space-x-2 p-2 rounded-md">
-                  <Checkbox id={`expertise-${option.id}`} />
+                <div
+                  key={option.id}
+                  className="flex items-center space-x-2 p-2 rounded-md hover:bg-purple-50 dark:hover:bg-purple-900/10 transition-colors duration-200"
+                >
+                  <Checkbox
+                    id={`expertise-${option.id}`}
+                    className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                  />
                   <Label htmlFor={`expertise-${option.id}`} className="text-sm font-normal cursor-pointer">
                     {option.name}
                   </Label>
@@ -162,58 +183,139 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
             </div>
           </div>
 
-          <Separator />
+          <Separator className="bg-purple-200/30 dark:bg-purple-900/30" />
 
           {/* Hourly Rate Section */}
-          <div>
-            <h4 className="text-sm font-medium mb-3 flex items-center">
-              <DollarSign className="mr-2 h-4 w-4" />
+          <div className="group">
+            <h4 className="text-sm font-medium mb-3 flex items-center group-hover:text-primary transition-colors duration-200">
+              <div className="mr-2 h-5 w-5 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center">
+                <DollarSign className="h-3 w-3 text-white" />
+              </div>
               Hourly Rate
             </h4>
             <div className="px-2 space-y-5">
-              <Slider value={priceRange} min={0} max={200} step={5} onValueChange={setPriceRange} />
+              <Slider
+                value={priceRange}
+                min={0}
+                max={200}
+                step={5}
+                onValueChange={setPriceRange}
+                className="[&>span]:bg-primary"
+              />
               <div className="flex items-center justify-between text-sm">
-                <span className="font-medium">${priceRange[0]}</span>
-                <span className="font-medium">${priceRange[1]}</span>
+                <span className="font-medium text-primary">${priceRange[0]}</span>
+                <span className="font-medium text-primary">${priceRange[1]}</span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs justify-start h-auto py-2 border-purple-200/50 dark:border-purple-900/50 hover:border-primary hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all duration-200"
+                  onClick={() => setPriceRange([0, 50])}
+                >
+                  <span className="flex flex-col items-start">
+                    <span className="font-medium">Budget</span>
+                    <span className="text-muted-foreground text-[10px]">Under $50/hr</span>
+                  </span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs justify-start h-auto py-2 border-purple-200/50 dark:border-purple-900/50 hover:border-primary hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all duration-200"
+                  onClick={() => setPriceRange([50, 100])}
+                >
+                  <span className="flex flex-col items-start">
+                    <span className="font-medium">Mid-range</span>
+                    <span className="text-muted-foreground text-[10px]">$50-$100/hr</span>
+                  </span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs justify-start h-auto py-2 border-purple-200/50 dark:border-purple-900/50 hover:border-primary hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all duration-200"
+                  onClick={() => setPriceRange([100, 150])}
+                >
+                  <span className="flex flex-col items-start">
+                    <span className="font-medium">Premium</span>
+                    <span className="text-muted-foreground text-[10px]">$100-$150/hr</span>
+                  </span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs justify-start h-auto py-2 border-purple-200/50 dark:border-purple-900/50 hover:border-primary hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all duration-200"
+                  onClick={() => setPriceRange([150, 200])}
+                >
+                  <span className="flex flex-col items-start">
+                    <span className="font-medium">Enterprise</span>
+                    <span className="text-muted-foreground text-[10px]">$150+/hr</span>
+                  </span>
+                </Button>
               </div>
             </div>
           </div>
 
-          <Separator />
+          <Separator className="bg-purple-200/30 dark:bg-purple-900/30" />
 
           {/* Rating Section */}
-          <div>
-            <h4 className="text-sm font-medium mb-3 flex items-center">
-              <Star className="mr-2 h-4 w-4" />
+          <div className="group">
+            <h4 className="text-sm font-medium mb-3 flex items-center group-hover:text-primary transition-colors duration-200">
+              <div className="mr-2 h-5 w-5 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center">
+                <Star className="h-3 w-3 text-white" />
+              </div>
               Rating
             </h4>
             <RadioGroup defaultValue="4.5" className="space-y-2">
               {ratingOptions.map((option) => (
-                <div key={option.id} className="flex items-center space-x-2 p-2 rounded-md">
-                  <RadioGroupItem value={option.id} id={`rating-${option.id}`} />
+                <div
+                  key={option.id}
+                  className="flex items-center space-x-2 p-2 rounded-md hover:bg-purple-50 dark:hover:bg-purple-900/10 transition-colors duration-200"
+                >
+                  <RadioGroupItem
+                    value={option.id}
+                    id={`rating-${option.id}`}
+                    className="text-primary border-purple-200 dark:border-purple-800"
+                  />
                   <Label
                     htmlFor={`rating-${option.id}`}
                     className="text-sm font-normal cursor-pointer flex items-center justify-between w-full"
                   >
                     <span>{option.name}</span>
+                    <div className="ml-2 flex">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`h-3 w-3 ${i < Number.parseInt(option.id) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"}`}
+                        />
+                      ))}
+                    </div>
                   </Label>
                 </div>
               ))}
             </RadioGroup>
           </div>
 
-          <Separator />
+          <Separator className="bg-purple-200/30 dark:bg-purple-900/30" />
 
           {/* Location Section */}
-          <div>
-            <h4 className="text-sm font-medium mb-3 flex items-center">
-              <MapPin className="mr-2 h-4 w-4" />
+          <div className="group">
+            <h4 className="text-sm font-medium mb-3 flex items-center group-hover:text-primary transition-colors duration-200">
+              <div className="mr-2 h-5 w-5 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center">
+                <MapPin className="h-3 w-3 text-white" />
+              </div>
               Location
             </h4>
             <div className="grid grid-cols-2 gap-2">
               {locationOptions.map((option) => (
-                <div key={option.id} className="flex items-center space-x-2 p-2 rounded-md">
-                  <Checkbox id={`location-${option.id}`} />
+                <div
+                  key={option.id}
+                  className="flex items-center space-x-2 p-2 rounded-md hover:bg-purple-50 dark:hover:bg-purple-900/10 transition-colors duration-200"
+                >
+                  <Checkbox
+                    id={`location-${option.id}`}
+                    className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                  />
                   <Label htmlFor={`location-${option.id}`} className="text-sm font-normal cursor-pointer">
                     {option.name}
                   </Label>
@@ -223,9 +325,9 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
           </div>
 
           <div className="pt-2">
-            <Button className="w-full">
+            <Button className="w-full bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90 shadow-md hover:shadow-lg transition-all duration-300 group">
               <span>Apply Filters</span>
-              <Filter className="ml-2 h-4 w-4" />
+              <Filter className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:rotate-180" />
             </Button>
           </div>
         </div>
@@ -240,12 +342,18 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
 
       {/* Hero Section */}
       <section className="relative py-12 md:py-16 overflow-hidden border-b">
+        <div className="absolute inset-0 bg-gradient-to-b from-purple-500/10 to-background"></div>
         <BackgroundPattern className="opacity-20" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/20 rounded-full filter blur-[100px]"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/10 rounded-full filter blur-[100px]"></div>
+
         <div className="container px-4 md:px-6 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-              <h1 className="text-3xl md:text-5xl font-bold mb-4">{categoryName} Experts</h1>
-              <p className="text-lg mb-6">
+              <h1 className="text-3xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
+                {categoryName} Experts
+              </h1>
+              <p className="text-lg text-muted-foreground mb-6">
                 Connect with top-rated {categoryName.toLowerCase()} professionals ready to help you succeed
               </p>
             </motion.div>
@@ -257,26 +365,26 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
               transition={{ duration: 0.5, delay: 0.2 }}
             >
               <div className="bg-background/50 backdrop-blur-sm rounded-lg p-4 border">
-                <div className="text-2xl md:text-3xl font-bold">{categoryStats.experts}</div>
-                <div className="text-sm flex items-center justify-center">
+                <div className="text-2xl md:text-3xl font-bold text-primary">{categoryStats.experts}</div>
+                <div className="text-sm text-muted-foreground flex items-center justify-center">
                   <Users className="h-3.5 w-3.5 mr-1.5" /> Available Experts
                 </div>
               </div>
               <div className="bg-background/50 backdrop-blur-sm rounded-lg p-4 border">
-                <div className="text-2xl md:text-3xl font-bold flex items-center justify-center">
-                  {categoryStats.averageRating} <Star className="h-4 w-4 ml-1" />
+                <div className="text-2xl md:text-3xl font-bold text-primary flex items-center justify-center">
+                  {categoryStats.averageRating} <Star className="h-4 w-4 ml-1 fill-yellow-400 text-yellow-400" />
                 </div>
-                <div className="text-sm">Average Rating</div>
+                <div className="text-sm text-muted-foreground">Average Rating</div>
               </div>
               <div className="bg-background/50 backdrop-blur-sm rounded-lg p-4 border">
-                <div className="text-2xl md:text-3xl font-bold">{categoryStats.completedProjects}+</div>
-                <div className="text-sm flex items-center justify-center">
+                <div className="text-2xl md:text-3xl font-bold text-primary">{categoryStats.completedProjects}+</div>
+                <div className="text-sm text-muted-foreground flex items-center justify-center">
                   <Award className="h-3.5 w-3.5 mr-1.5" /> Completed Projects
                 </div>
               </div>
               <div className="bg-background/50 backdrop-blur-sm rounded-lg p-4 border">
-                <div className="text-2xl md:text-3xl font-bold">{categoryStats.averageResponse}</div>
-                <div className="text-sm flex items-center justify-center">
+                <div className="text-2xl md:text-3xl font-bold text-primary">{categoryStats.averageResponse}</div>
+                <div className="text-sm text-muted-foreground flex items-center justify-center">
                   <Clock className="h-3.5 w-3.5 mr-1.5" /> Avg. Response Time
                 </div>
               </div>
@@ -308,7 +416,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
 
           <div className="flex flex-col md:flex-row gap-8">
             {/* Desktop Filters */}
-            <div className="md:w-72 lg:w-80 hidden md:block">
+            <div className={`md:w-72 lg:w-80 hidden md:block`}>
               <FilterPanel />
             </div>
 
@@ -344,13 +452,19 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                     whileHover={{ y: -5, transition: { duration: 0.2 } }}
                     className="group"
                   >
-                    <Card className="overflow-hidden">
+                    <Card
+                      className={`overflow-hidden transition-all duration-300 hover:shadow-lg ${
+                        provider.featured
+                          ? "border-purple-400/50 bg-gradient-to-r from-purple-50/30 to-background dark:from-purple-900/10 dark:to-background"
+                          : ""
+                      }`}
+                    >
                       <div className="p-6">
                         <div className="flex flex-col md:flex-row gap-6">
                           {/* Provider Info */}
                           <div className="flex flex-col sm:flex-row md:flex-col items-center gap-4 md:w-48">
                             <div className="relative">
-                              <Avatar className="h-20 w-20 border-2 shadow-md">
+                              <Avatar className="h-20 w-20 border-2 border-background shadow-md group-hover:border-primary transition-colors duration-300">
                                 <AvatarImage src={provider.avatar || "/placeholder.svg"} alt={provider.name} />
                                 <AvatarFallback>
                                   {provider.name
@@ -361,28 +475,30 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                               </Avatar>
                               {provider.featured && (
                                 <div className="absolute -top-2 -right-2">
-                                  <Badge>
+                                  <Badge className="bg-gradient-to-r from-primary to-purple-500 hover:from-primary hover:to-purple-500 text-white border-none">
                                     <Award className="h-3 w-3 mr-1" /> Top Rated
                                   </Badge>
                                 </div>
                               )}
                             </div>
                             <div className="text-center sm:text-left md:text-center">
-                              <h3 className="font-semibold text-lg">{provider.name}</h3>
-                              <p className="text-sm">{provider.title}</p>
+                              <h3 className="font-semibold text-lg group-hover:text-primary transition-colors duration-300">
+                                {provider.name}
+                              </h3>
+                              <p className="text-sm text-muted-foreground">{provider.title}</p>
                               <div className="mt-1 flex items-center justify-center sm:justify-start md:justify-center">
                                 <div className="flex">
                                   {[...Array(5)].map((_, i) => (
                                     <Star
                                       key={i}
-                                      className={`h-3.5 w-3.5 ${i < Math.floor(provider.rating) ? "text-yellow-400" : "text-gray-300"}`}
+                                      className={`h-3.5 w-3.5 ${i < Math.floor(provider.rating) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"}`}
                                     />
                                   ))}
                                 </div>
                                 <span className="ml-1.5 text-sm font-medium">{provider.rating}</span>
-                                <span className="ml-1 text-xs">({provider.reviews})</span>
+                                <span className="ml-1 text-xs text-muted-foreground">({provider.reviews})</span>
                               </div>
-                              <div className="mt-1 flex items-center justify-center sm:justify-start md:justify-center text-xs">
+                              <div className="mt-1 flex items-center justify-center sm:justify-start md:justify-center text-xs text-muted-foreground">
                                 <MapPin className="h-3 w-3 mr-1" />
                                 {provider.location}
                               </div>
@@ -399,42 +515,51 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                               ))}
                             </div>
 
-                            <p className="text-sm line-clamp-2">{provider.description}</p>
+                            <p className="text-sm text-muted-foreground line-clamp-2">{provider.description}</p>
 
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                               <div className="space-y-1">
-                                <p className="text-xs">Hourly Rate</p>
+                                <p className="text-xs text-muted-foreground">Hourly Rate</p>
                                 <p className="font-semibold flex items-center">
-                                  <DollarSign className="h-3.5 w-3.5" />
+                                  <DollarSign className="h-3.5 w-3.5 text-primary" />
                                   {provider.hourlyRate}/hr
                                 </p>
                               </div>
                               <div className="space-y-1">
-                                <p className="text-xs">Response Time</p>
+                                <p className="text-xs text-muted-foreground">Response Time</p>
                                 <div className="flex items-center">
-                                  <Clock className="h-3.5 w-3.5 mr-1" />
+                                  <Clock className="h-3.5 w-3.5 mr-1 text-primary" />
                                   <p className="text-sm">{provider.responseTime}</p>
                                 </div>
                               </div>
                               <div className="space-y-1">
-                                <p className="text-xs">Completed</p>
+                                <p className="text-xs text-muted-foreground">Completed</p>
                                 <div className="flex items-center">
-                                  <Briefcase className="h-3.5 w-3.5 mr-1" />
+                                  <Briefcase className="h-3.5 w-3.5 mr-1 text-primary" />
                                   <p className="text-sm">{provider.completedProjects} projects</p>
                                 </div>
                               </div>
                               <div className="space-y-1">
-                                <p className="text-xs">Languages</p>
+                                <p className="text-xs text-muted-foreground">Languages</p>
                                 <p className="text-sm">{provider.languages.join(", ")}</p>
                               </div>
                             </div>
 
                             <div className="flex flex-wrap gap-3 mt-4">
-                              <Button onClick={() => router.push(`/services/${provider.id}`)}>View Profile</Button>
-                              <Button variant="outline">
+                              <Button
+                                className="bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90 shadow-sm hover:shadow-md transition-all duration-300"
+                                onClick={() => router.push(`/services/${provider.id}`)}
+                              >
+                                View Profile
+                              </Button>
+                              <Button variant="outline" className="border-primary text-primary hover:bg-primary/10">
                                 <MessageSquare className="h-4 w-4 mr-2" /> Contact
                               </Button>
-                              <Button variant="ghost" size="icon" className="rounded-full h-9 w-9">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="rounded-full h-9 w-9 text-muted-foreground hover:text-rose-500"
+                              >
                                 <Heart className="h-4 w-4" />
                               </Button>
                             </div>
@@ -443,8 +568,8 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                       </div>
 
                       {provider.featured && (
-                        <div className="px-6 py-2 flex items-center bg-gray-50 dark:bg-gray-900">
-                          <Award className="h-4 w-4 mr-2" />
+                        <div className="bg-gradient-to-r from-primary/10 to-purple-500/10 px-6 py-2 flex items-center">
+                          <Award className="h-4 w-4 text-primary mr-2" />
                           <span className="text-sm font-medium">Featured Expert • Top 1% in {categoryName}</span>
                         </div>
                       )}
@@ -465,12 +590,13 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
 
       {/* Related Categories Section */}
       <section className="py-12 border-t relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-t from-purple-500/5 to-background/0"></div>
         <BackgroundPattern className="opacity-10" />
 
         <div className="container px-4 md:px-6 relative z-10">
           <div className="text-center mb-10">
             <h2 className="text-2xl md:text-3xl font-bold mb-4">Related Categories</h2>
-            <p className="max-w-2xl mx-auto">
+            <p className="text-muted-foreground max-w-2xl mx-auto">
               Explore other categories that might help you find the perfect expert for your needs
             </p>
           </div>
@@ -492,9 +618,9 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                 transition={{ duration: 0.5, delay: index * 0.05 }}
               >
                 <Link href={`/category/${category.toLowerCase().replace(/\s+/g, "-")}`}>
-                  <div className="bg-background/80 backdrop-blur-sm rounded-lg p-4 border text-center h-full flex flex-col items-center justify-center">
+                  <div className="bg-background/80 backdrop-blur-sm rounded-lg p-4 border text-center hover:border-primary hover:shadow-md transition-all duration-300 h-full flex flex-col items-center justify-center">
                     <h3 className="font-medium text-sm">{category}</h3>
-                    <p className="text-xs mt-1">120+ Experts</p>
+                    <p className="text-xs text-muted-foreground mt-1">120+ Experts</p>
                   </div>
                 </Link>
               </motion.div>
@@ -510,22 +636,24 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
             <div className="space-y-4 lg:col-span-2">
               <div className="flex items-center gap-2">
                 <LevlLogo className="h-8 w-8" />
-                <span className="text-xl font-bold">LevL</span>
+                <span className="text-xl font-bold bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
+                  LevL
+                </span>
               </div>
-              <p className="text-sm max-w-xs">
+              <p className="text-sm text-muted-foreground max-w-xs">
                 The marketplace where skills meet opportunity. Connect, collaborate, and level up your career or
                 business.
               </p>
               <div className="flex gap-4">
-                <Link href="#" className="hover:text-foreground">
+                <Link href="#" className="text-muted-foreground hover:text-foreground">
                   <span className="sr-only">Twitter</span>
                   <Twitter className="h-5 w-5" />
                 </Link>
-                <Link href="#" className="hover:text-foreground">
+                <Link href="#" className="text-muted-foreground hover:text-foreground">
                   <span className="sr-only">Instagram</span>
                   <Instagram className="h-5 w-5" />
                 </Link>
-                <Link href="#" className="hover:text-foreground">
+                <Link href="#" className="text-muted-foreground hover:text-foreground">
                   <span className="sr-only">LinkedIn</span>
                   <Linkedin className="h-5 w-5" />
                 </Link>
@@ -535,16 +663,24 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
               <h4 className="text-sm font-medium">For Clients</h4>
               <ul className="space-y-2 text-sm">
                 <li>
-                  <Link href="#">Find Services</Link>
+                  <Link href="#" className="text-muted-foreground hover:text-foreground">
+                    Find Services
+                  </Link>
                 </li>
                 <li>
-                  <Link href="#">Post a Job</Link>
+                  <Link href="#" className="text-muted-foreground hover:text-foreground">
+                    Post a Job
+                  </Link>
                 </li>
                 <li>
-                  <Link href="#">Payment Protection</Link>
+                  <Link href="#" className="text-muted-foreground hover:text-foreground">
+                    Payment Protection
+                  </Link>
                 </li>
                 <li>
-                  <Link href="#">Success Stories</Link>
+                  <Link href="#" className="text-muted-foreground hover:text-foreground">
+                    Success Stories
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -552,16 +688,24 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
               <h4 className="text-sm font-medium">For Providers</h4>
               <ul className="space-y-2 text-sm">
                 <li>
-                  <Link href="#">Start Selling</Link>
+                  <Link href="#" className="text-muted-foreground hover:text-foreground">
+                    Start Selling
+                  </Link>
                 </li>
                 <li>
-                  <Link href="#">Create Profile</Link>
+                  <Link href="#" className="text-muted-foreground hover:text-foreground">
+                    Create Profile
+                  </Link>
                 </li>
                 <li>
-                  <Link href="#">Community</Link>
+                  <Link href="#" className="text-muted-foreground hover:text-foreground">
+                    Community
+                  </Link>
                 </li>
                 <li>
-                  <Link href="#">Resources</Link>
+                  <Link href="#" className="text-muted-foreground hover:text-foreground">
+                    Resources
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -569,22 +713,30 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
               <h4 className="text-sm font-medium">Company</h4>
               <ul className="space-y-2 text-sm">
                 <li>
-                  <Link href="#">About Us</Link>
+                  <Link href="#" className="text-muted-foreground hover:text-foreground">
+                    About Us
+                  </Link>
                 </li>
                 <li>
-                  <Link href="#">Careers</Link>
+                  <Link href="#" className="text-muted-foreground hover:text-foreground">
+                    Careers
+                  </Link>
                 </li>
                 <li>
-                  <Link href="#">Privacy Policy</Link>
+                  <Link href="#" className="text-muted-foreground hover:text-foreground">
+                    Privacy Policy
+                  </Link>
                 </li>
                 <li>
-                  <Link href="#">Terms of Service</Link>
+                  <Link href="#" className="text-muted-foreground hover:text-foreground">
+                    Terms of Service
+                  </Link>
                 </li>
               </ul>
             </div>
           </div>
           <div className="mt-8 border-t pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-xs">© {new Date().getFullYear()} LevL. All rights reserved.</p>
+            <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} LevL. All rights reserved.</p>
             <div className="mt-4 md:mt-0">
               <ThemeToggle />
             </div>
