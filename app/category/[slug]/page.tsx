@@ -13,7 +13,24 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Star, Filter, ArrowUpDown, MapPin, Clock, Search, ChevronDown, Heart, MessageSquare, Briefcase, DollarSign, Award, Users, Twitter, Instagram, Linkedin } from 'lucide-react'
+import {
+  Star,
+  Filter,
+  ArrowUpDown,
+  MapPin,
+  Clock,
+  Search,
+  ChevronDown,
+  Heart,
+  MessageSquare,
+  Briefcase,
+  DollarSign,
+  Award,
+  Users,
+  Twitter,
+  Instagram,
+  Linkedin,
+} from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
@@ -30,7 +47,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
   const [priceRange, setPriceRange] = useState([0, 500])
   const [showFilters, setShowFilters] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
-  const categorySlug = params.slug as string
+  const categorySlug = params.slug
 
   // Convert slug to display name (e.g., "web-development" -> "Web Development")
   const categoryName = categorySlug
@@ -98,10 +115,10 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
     setShowFilters(!showFilters)
   }
 
-  // Fixed star rating component
+  // Star rating component
   const StarRating = ({ rating }: { rating: number }) => (
     <div className="flex">
-      {Array.from({ length: 5 }).map((_, i) => (
+      {[0, 1, 2, 3, 4].map((i) => (
         <Star
           key={i}
           className={`h-3.5 w-3.5 ${
@@ -112,10 +129,10 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
     </div>
   )
 
+  // Filter panel component
   const FilterPanel = () => (
     <div className="space-y-6">
       <div className="bg-background/80 backdrop-blur-sm rounded-xl border border-purple-200/30 dark:border-purple-900/30 shadow-lg overflow-hidden">
-        {/* Header with gradient background */}
         <div className="bg-gradient-to-r from-primary/10 to-purple-500/10 p-4 border-b border-purple-200/30 dark:border-purple-900/30">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold flex items-center text-base bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
@@ -264,37 +281,36 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
               Rating
             </h4>
             <RadioGroup defaultValue="4.5" className="space-y-2">
-              {ratingOptions.map((option) => {
-                const optionValue = parseFloat(option.id);
-                return (
-                  <div
-                    key={option.id}
-                    className="flex items-center space-x-2 p-2 rounded-md hover:bg-purple-50 dark:hover:bg-purple-900/10 transition-colors duration-200"
+              {ratingOptions.map((option) => (
+                <div
+                  key={option.id}
+                  className="flex items-center space-x-2 p-2 rounded-md hover:bg-purple-50 dark:hover:bg-purple-900/10 transition-colors duration-200"
+                >
+                  <RadioGroupItem
+                    value={option.id}
+                    id={`rating-${option.id}`}
+                    className="text-primary border-purple-200 dark:border-purple-800"
+                  />
+                  <Label
+                    htmlFor={`rating-${option.id}`}
+                    className="text-sm font-normal cursor-pointer flex items-center justify-between w-full"
                   >
-                    <RadioGroupItem
-                      value={option.id}
-                      id={`rating-${option.id}`}
-                      className="text-primary border-purple-200 dark:border-purple-800"
-                    />
-                    <Label
-                      htmlFor={`rating-${option.id}`}
-                      className="text-sm font-normal cursor-pointer flex items-center justify-between w-full"
-                    >
-                      <span>{option.name}</span>
-                      <div className="ml-2 flex">
-                        {[0, 1, 2, 3, 4].map((i) => (
-                          <Star
-                            key={i}
-                            className={`h-3 w-3 ${
-                              i < optionValue ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    </Label>
-                  </div>
-                );
-              })}
+                    <span>{option.name}</span>
+                    <div className="ml-2 flex">
+                      {[0, 1, 2, 3, 4].map((i) => (
+                        <Star
+                          key={i}
+                          className={`h-3 w-3 ${
+                            i < Number.parseFloat(option.id)
+                              ? "fill-yellow-400 text-yellow-400"
+                              : "text-muted-foreground/30"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </Label>
+                </div>
+              ))}
             </RadioGroup>
           </div>
 
