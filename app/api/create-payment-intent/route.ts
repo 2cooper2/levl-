@@ -15,6 +15,7 @@ const stripe = new Stripe(stripeSecretKey, {
   apiVersion: "2023-10-16",
 })
 
+// Modify the POST function to handle errors better
 export async function POST(request: Request) {
   try {
     const { serviceId, description, providerId } = await request.json()
@@ -26,7 +27,14 @@ export async function POST(request: Request) {
     const applicationFeeAmount = 2
 
     // Get the provider's connected account ID
-    const connectedAccountId = await getConnectedAccountId(providerId)
+    let connectedAccountId
+    try {
+      connectedAccountId = await getConnectedAccountId(providerId)
+    } catch (error) {
+      console.error("Error getting connected account ID:", error)
+      connectedAccountId = null
+      // Continue with direct payment
+    }
 
     // Create payment intent parameters
     const paymentIntentParams: Stripe.PaymentIntentCreateParams = {

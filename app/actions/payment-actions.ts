@@ -18,6 +18,15 @@ const stripe = new Stripe(stripeSecretKey, {
 // Get the connected account ID for a provider
 export async function getConnectedAccountId(providerId: string) {
   try {
+    // For demo purposes, return a mock connected account ID or null
+    // This bypasses the need for the connect_accounts table
+    console.log(`Demo mode: Simulating connected account lookup for provider ${providerId}`)
+
+    // You can return null to use direct payment mode
+    // Or return a mock ID for testing connected accounts
+    return null // Direct payment mode
+
+    /* Original code commented out due to missing table
     // Validate if providerId is in UUID format
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
     if (!uuidRegex.test(providerId)) {
@@ -47,6 +56,7 @@ export async function getConnectedAccountId(providerId: string) {
 
     // Return the first account ID
     return data[0].stripe_account_id || null
+    */
   } catch (error) {
     console.error("Error getting connected account ID:", error)
     return null

@@ -5,8 +5,6 @@ import { EnhancedMainNav } from "@/components/enhanced-main-nav"
 import { AnimatedGradientBackground } from "@/components/animated-gradient-background"
 import { BackgroundPattern } from "@/components/background-pattern"
 import { EnhancedHeroSection } from "@/components/enhanced-hero-section"
-import { MessageSquare, Users, Search } from "lucide-react"
-import { motion } from "framer-motion"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { LevlLogo } from "@/components/levl-logo"
@@ -29,78 +27,6 @@ export default function Home() {
       <EnhancedMainNav />
       <main className="flex-1">
         <EnhancedHeroSection />
-
-        {/* Journey Section */}
-        <section className="w-full py-16 md:py-24 lg:py-32 bg-muted/50 relative">
-          <BackgroundPattern className="opacity-50" />
-          <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
-          <div className="container px-4 md:px-6 relative z-10">
-            <motion.div
-              className="flex flex-col items-center justify-center space-y-4 text-center mb-12"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-            >
-              <div className="space-y-2">
-                <div className="inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
-                  Your Path to Success
-                </div>
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                  Transform Your Career with LevL
-                </h2>
-                <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  Discover the steps to unlock your full potential and achieve your goals
-                </p>
-              </div>
-            </motion.div>
-
-            <div className="grid gap-8 md:grid-cols-3 lg:gap-12 mt-8 relative">
-              <div className="hidden md:block absolute top-1/4 left-1/4 right-1/4 h-0.5 bg-gradient-to-r from-transparent via-primary/30 to-transparent -translate-y-1/2"></div>
-              {[
-                {
-                  step: "01",
-                  title: "Create an account",
-                  description: "Sign up for free and set up your profile with your skills or needs.",
-                  icon: Users,
-                },
-                {
-                  step: "02",
-                  title: "Browse or list services",
-                  description: "Search for services you need or create listings for services you offer.",
-                  icon: Search,
-                },
-                {
-                  step: "03",
-                  title: "Connect and collaborate",
-                  description: "Hire professionals or get hired, communicate, and complete projects.",
-                  icon: MessageSquare,
-                },
-              ].map((item, index) => (
-                <motion.div
-                  key={index}
-                  className="relative flex flex-col items-center text-center"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.2 }}
-                >
-                  <div className="absolute -top-10 text-8xl font-bold bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent opacity-70">
-                    {item.step}
-                  </div>
-                  <div className="relative z-10 mt-12">
-                    <div className="mb-4 rounded-full bg-purple-400/20 backdrop-blur-sm border border-purple-300/30 p-4 text-purple-600 mx-auto w-16 h-16 flex items-center justify-center shadow-sm hover:shadow-md transition-all duration-300">
-                      <item.icon className="h-8 w-8" />
-                    </div>
-                    <h3 className="text-xl font-bold">{item.title}</h3>
-                    <p className="mt-2 text-muted-foreground">{item.description}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-          <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent"></div>
-        </section>
 
         {/* REMOVE THIS SECTION */}
         {/* Value Proposition */}

@@ -3,10 +3,8 @@
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { EnhancedMainNav } from "@/components/enhanced-main-nav"
-import { ServiceGallery } from "@/components/services/service-gallery"
 import { ServiceReviews } from "@/components/services/service-reviews"
 import { ServiceFAQ } from "@/components/services/service-faq"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -14,6 +12,57 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Star, Clock, MessageSquare, ArrowRight, DollarSign } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/context/auth-context" // Import the custom auth context
+
+// Add these animation keyframes after the imports
+const fadeInAnimation = `
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+`
+
+const fadeInUpAnimation = `
+@keyframes fadeInUp {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+`
+
+// Add this style tag after the animations
+const animationStyles = `
+<style jsx global>
+  ${fadeInAnimation}
+  ${fadeInUpAnimation}
+  
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+  
+  .animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+  }
+  
+  .delay-100 {
+    animation-delay: 0.1s;
+  }
+  
+  .delay-200 {
+    animation-delay: 0.2s;
+  }
+  
+  .bg-grid-pattern {
+    background-image: linear-gradient(to right, rgba(128, 90, 213, 0.1) 1px, transparent 1px),
+                      linear-gradient(to bottom, rgba(128, 90, 213, 0.1) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+</style>
+`
 
 export default function ServicePage() {
   const params = useParams()
@@ -33,13 +82,13 @@ export default function ServicePage() {
         // Mock data with hourly rate instead of packages
         setService({
           id: params.id,
-          title: "Professional Website Development",
+          title: "Professional TV & Wall Mounting Services",
           description:
-            "I will create a professional, responsive website tailored to your business needs. With over 5 years of experience in web development, I deliver high-quality websites that not only look great but also perform exceptionally well. My approach focuses on creating websites that are user-friendly, fast-loading, and optimized for search engines.",
+            "I provide expert TV and wall mounting services for your home or office. With over 5 years of experience, I ensure secure and professional installation of TVs, shelves, artwork, and more. My approach focuses on safety, precision, and attention to detail, leaving your walls looking clean and organized.",
           provider: {
             id: "caydon-cooper",
             name: "Caydon Cooper",
-            title: "Senior Web Developer",
+            title: "TV & Wall Mounting Specialist",
             avatar: "/placeholder.svg?height=100&width=100&text=CC",
             rating: 4.9,
             reviews: 127,
@@ -52,14 +101,14 @@ export default function ServicePage() {
             "/placeholder.svg?height=600&width=800&text=Website+Preview+3",
           ],
           skills: [
-            "Web Development",
-            "React",
-            "UI/UX Design",
-            "Responsive Design",
-            "E-commerce",
-            "WordPress",
-            "JavaScript",
-            "HTML/CSS",
+            "TV Mounting",
+            "Wall Shelving",
+            "Sound Bar Installation",
+            "Cable Management",
+            "Mirror Hanging",
+            "Artwork Installation",
+            "Home Theater Setup",
+            "Projector Mounting",
           ],
           reviews: [
             {
@@ -168,158 +217,280 @@ export default function ServicePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-purple-950/5 relative overflow-hidden">
+      {/* Advanced background effects */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(120,80,220,0.05)_0%,rgba(30,20,60,0)_50%)] pointer-events-none"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(80,70,200,0.07)_0%,rgba(20,10,40,0)_50%)] pointer-events-none"></div>
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(120,90,213,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(120,90,213,0.03)_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none"></div>
+
+      {/* Floating orbs */}
+      <div className="absolute top-20 left-[10%] w-64 h-64 rounded-full bg-purple-400/5 blur-[80px] animate-pulse-slow"></div>
+      <div className="absolute bottom-20 right-[5%] w-96 h-96 rounded-full bg-indigo-400/5 blur-[100px] animate-pulse-slow-delay"></div>
+
       <EnhancedMainNav />
-      <main className="container py-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="md:col-span-2 space-y-8">
-            <div>
-              <h1 className="text-3xl font-bold mb-4">{service.title}</h1>
-              <p className="text-muted-foreground">{service.description}</p>
-            </div>
 
-            <ServiceGallery images={service.gallery} />
+      <main className="container py-16 relative z-10">
+        {/* Hero section with service title */}
+        <div className="mb-12 relative">
+          <div className="absolute -left-4 top-0 h-full w-1 bg-gradient-to-b from-purple-500/80 via-indigo-500/80 to-transparent rounded-full blur-[1px]"></div>
+          <h1
+            className="text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-500 via-indigo-400 to-purple-600 animate-gradient-x"
+            style={{ animationDuration: "8s" }}
+          >
+            {service.title}
+          </h1>
+          <p className="text-muted-foreground text-lg max-w-3xl leading-relaxed">{service.description}</p>
+        </div>
 
-            <Tabs defaultValue="about">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="about">About</TabsTrigger>
-                <TabsTrigger value="reviews">Reviews</TabsTrigger>
-                <TabsTrigger value="faq">FAQ</TabsTrigger>
-              </TabsList>
-              <TabsContent value="about" className="space-y-6 pt-4">
-                <div className="prose max-w-none">
-                  <h3>My Expertise</h3>
-                  <p>
-                    With over 5 years of experience in web development, I specialize in creating modern, responsive
-                    websites that not only look great but also perform exceptionally well. My approach focuses on
-                    creating websites that are user-friendly, fast-loading, and optimized for search engines.
-                  </p>
-
-                  <h3>My Process</h3>
-                  <ol>
-                    <li>Initial consultation to understand your requirements and goals</li>
-                    <li>Research and planning to create a strategy for your website</li>
-                    <li>Design mockups for your approval</li>
-                    <li>Development of the website</li>
-                    <li>Testing and quality assurance</li>
-                    <li>Launch and post-launch support</li>
-                  </ol>
-
-                  <h3>What You Can Expect</h3>
-                  <ul>
-                    <li>Professional, responsive communication</li>
-                    <li>High-quality work delivered on time</li>
-                    <li>Attention to detail and focus on your specific needs</li>
-                    <li>Transparent pricing with no hidden fees</li>
-                    <li>Ongoing support after project completion</li>
-                  </ul>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-14">
+          {/* Main content area */}
+          <div className="md:col-span-2 space-y-10">
+            {/* Provider card moved to gallery position */}
+            <div className="relative group">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-300"></div>
+              <div className="relative bg-white/60 dark:bg-black/30 backdrop-blur-xl rounded-xl border border-purple-200/20 dark:border-purple-800/20 p-6 space-y-6 transition-all duration-300 hover:shadow-xl">
+                <div className="flex items-center">
+                  <div>
+                    <h3 className="font-bold text-xl text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600">
+                      {service.provider.name}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">{service.provider.title}</p>
+                  </div>
                 </div>
 
-                <div className="bg-purple-50 dark:bg-purple-950/20 p-6 rounded-lg border border-purple-100 dark:border-purple-800/30">
-                  <h3 className="text-lg font-semibold mb-2 text-purple-700 dark:text-purple-300">Hourly Rate</h3>
-                  <div className="flex items-center">
-                    <span className="text-3xl font-bold text-purple-700 dark:text-purple-300">
-                      ${service.provider.hourlyRate}
-                    </span>
-                    <span className="text-sm text-purple-600 dark:text-purple-400 ml-1">/hour</span>
+                <div className="bg-purple-50/70 dark:bg-purple-900/20 rounded-lg p-4 border border-purple-100/50 dark:border-purple-800/30">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center">
+                      <div className="flex">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`h-4 w-4 ${
+                              i < Math.floor(service.provider.rating)
+                                ? "fill-yellow-400 text-yellow-400"
+                                : "text-muted-foreground"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-sm font-medium ml-2">{service.provider.rating}</span>
+                    </div>
+                    <span className="text-sm text-muted-foreground">({service.provider.reviews} reviews)</span>
                   </div>
-                  <p className="text-sm text-purple-600 dark:text-purple-400 mt-2">
-                    Typical projects range from 10-40 hours depending on complexity.
-                  </p>
+
+                  <div className="flex items-center text-sm">
+                    <Clock className="h-4 w-4 mr-2 text-purple-500" />
+                    <span>Response time: {service.provider.responseTime}</span>
+                  </div>
+                </div>
+
+                <div className="relative group">
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-300"></div>
+                  <div className="relative bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950/40 dark:to-indigo-950/40 p-4 rounded-lg border border-purple-200/30 dark:border-purple-800/30">
+                    <div className="flex items-center">
+                      <DollarSign className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                      <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600 ml-1">
+                        $75
+                      </span>
+                      <span className="text-sm text-purple-600 dark:text-purple-400 ml-1">/service</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col space-y-3 pt-2">
                   <Button
-                    className="mt-4 w-full bg-purple-500/80 hover:bg-purple-600/90 backdrop-blur-sm border border-purple-300/30 shadow-sm hover:shadow-md transition-all duration-300"
+                    variant="outline"
+                    className="w-full border-purple-200/50 hover:bg-purple-50/50 dark:hover:bg-purple-900/20 transition-all duration-300 h-11"
+                    onClick={handleContact}
+                  >
+                    <MessageSquare className="h-4 w-4 mr-2 text-purple-500" /> Contact Provider
+                  </Button>
+
+                  <Button
+                    className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white border-none shadow-md hover:shadow-lg transition-all duration-300 group h-11"
                     onClick={handleHireNow}
                   >
-                    Book <ArrowRight className="ml-2 h-4 w-4" />
+                    <span className="relative z-10 flex items-center">
+                      Book Now
+                      <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                    </span>
                   </Button>
                 </div>
-              </TabsContent>
-              <TabsContent value="reviews">
-                <ServiceReviews reviews={service.reviews} />
-              </TabsContent>
-              <TabsContent value="faq">
-                <ServiceFAQ faqs={service.faqs} />
-              </TabsContent>
-            </Tabs>
-          </div>
-
-          <div className="space-y-6">
-            <div className="border rounded-lg p-6 space-y-4">
-              <div className="flex items-center space-x-4">
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src={service.provider.avatar || "/placeholder.svg"} alt={service.provider.name} />
-                  <AvatarFallback>
-                    {service.provider.name
-                      .split(" ")
-                      .map((n: string) => n[0])
-                      .join("")}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="font-semibold">{service.provider.name}</h3>
-                  <p className="text-sm text-muted-foreground">{service.provider.title}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`h-4 w-4 ${
-                        i < Math.floor(service.provider.rating)
-                          ? "fill-yellow-400 text-yellow-400"
-                          : "text-muted-foreground"
-                      }`}
-                    />
-                  ))}
-                </div>
-                <span className="text-sm font-medium">{service.provider.rating}</span>
-                <span className="text-sm text-muted-foreground">({service.provider.reviews} reviews)</span>
-              </div>
-
-              <div className="flex items-center text-sm">
-                <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-                <span>Response time: {service.provider.responseTime}</span>
-              </div>
-
-              <div className="bg-purple-50 dark:bg-purple-950/20 p-4 rounded-lg border border-purple-100 dark:border-purple-800/30">
-                <div className="flex items-center">
-                  <DollarSign className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                  <span className="text-xl font-bold text-purple-700 dark:text-purple-300">
-                    ${service.provider.hourlyRate}
-                  </span>
-                  <span className="text-sm text-purple-600 dark:text-purple-400 ml-1">/hour</span>
-                </div>
-              </div>
-
-              <div className="flex flex-col space-y-3">
-                <Button variant="outline" className="w-full" onClick={handleContact}>
-                  <MessageSquare className="h-4 w-4 mr-2" /> Contact
-                </Button>
-
-                <Button
-                  className="w-full bg-purple-500/80 hover:bg-purple-600/90 backdrop-blur-sm border border-purple-300/30 shadow-sm hover:shadow-md transition-all duration-300"
-                  onClick={handleHireNow}
-                >
-                  Book <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
               </div>
             </div>
 
-            <div className="border rounded-lg p-6">
-              <h3 className="font-semibold mb-4">Skills</h3>
-              <div className="flex flex-wrap gap-2">
-                {service.skills.map((skill: string) => (
-                  <Badge key={skill} variant="secondary" className="text-xs">
-                    {skill}
-                  </Badge>
-                ))}
+            {/* Tabs section with enhanced styling */}
+            <div className="bg-white/40 dark:bg-black/20 backdrop-blur-xl rounded-2xl border border-purple-300/20 dark:border-purple-800/20 shadow-[0_8px_30px_rgb(120,90,213,0.08)] overflow-hidden">
+              <Tabs defaultValue="about" className="w-full">
+                <div className="px-6 pt-6">
+                  <TabsList className="grid w-full grid-cols-3 mb-6 bg-purple-50/70 dark:bg-purple-950/30 p-1 rounded-xl">
+                    <TabsTrigger
+                      value="about"
+                      className="data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-500/90 data-[state=active]:to-indigo-500/90 data-[state=active]:text-white rounded-lg transition-all duration-300"
+                    >
+                      About
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="reviews"
+                      className="data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-500/90 data-[state=active]:to-indigo-500/90 data-[state=active]:text-white rounded-lg transition-all duration-300"
+                    >
+                      Reviews
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="faq"
+                      className="data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-500/90 data-[state=active]:to-indigo-500/90 data-[state=active]:text-white rounded-lg transition-all duration-300"
+                    >
+                      FAQ
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
+
+                <TabsContent value="about" className="p-6 pt-0 space-y-8">
+                  <div className="prose max-w-none dark:prose-invert">
+                    <h3 className="text-2xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600 mb-4">
+                      My Expertise
+                    </h3>
+                    <p className="text-base leading-relaxed">
+                      With over 5 years of experience in furniture and TV mounting, I specialize in secure and
+                      professional installations that enhance your living or working space. My approach focuses on
+                      safety, precision, and attention to detail, ensuring that all your items are mounted correctly and
+                      securely.
+                    </p>
+
+                    <h3 className="text-2xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600 mt-8 mb-4">
+                      My Process
+                    </h3>
+                    <div className="space-y-4">
+                      {[
+                        "Initial consultation to understand your mounting needs and space requirements",
+                        "Assessment of wall type and structure to determine the best mounting approach",
+                        "Selection of appropriate mounting hardware for your specific items",
+                        "Professional installation with careful attention to level and security",
+                        "Cable management and organization for a clean look",
+                        "Testing to ensure all mounted items are secure and stable",
+                      ].map((step, index) => (
+                        <div key={index} className="flex items-center gap-4 group">
+                          <div className="relative">
+                            <div className="absolute inset-0 bg-purple-400/20 dark:bg-purple-600/20 rounded-full blur-md group-hover:bg-purple-400/30 dark:group-hover:bg-purple-600/30 transition-all duration-300"></div>
+                            <div className="relative flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 text-white text-sm font-medium shadow-lg shadow-purple-500/20 group-hover:shadow-purple-500/30 transition-all duration-300">
+                              {index + 1}
+                            </div>
+                          </div>
+                          <p className="text-base group-hover:translate-x-1 transition-transform duration-300">
+                            {step}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <h3 className="text-2xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600 mt-8 mb-4">
+                      What You Can Expect
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {[
+                        "Professional, responsive communication",
+                        "High-quality work delivered on time",
+                        "Attention to detail and focus on your specific needs",
+                        "Transparent pricing with no hidden fees",
+                        "Ongoing support after project completion",
+                      ].map((item, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center gap-3 group bg-purple-50/50 dark:bg-purple-900/10 p-3 rounded-lg border border-purple-200/30 dark:border-purple-800/20 hover:bg-purple-100/50 dark:hover:bg-purple-900/20 transition-all duration-300"
+                        >
+                          <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-white">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="14"
+                              height="14"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="3"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                          </div>
+                          <span className="text-sm">{item}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="reviews">
+                  <ServiceReviews reviews={service.reviews} />
+                </TabsContent>
+
+                <TabsContent value="faq">
+                  <ServiceFAQ faqs={service.faqs} />
+                </TabsContent>
+              </Tabs>
+            </div>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-8">
+            {/* Skills card */}
+            <div className="relative group">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-300"></div>
+              <div className="relative bg-white/60 dark:bg-black/30 backdrop-blur-xl rounded-xl border border-purple-200/20 dark:border-purple-800/20 p-6 transition-all duration-300 hover:shadow-xl">
+                <h3 className="font-bold text-xl mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600">
+                  Skills & Expertise
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {service.skills.map((skill: string) => (
+                    <div key={skill} className="group/skill relative">
+                      <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600/60 to-indigo-600/60 rounded-full blur opacity-0 group-hover/skill:opacity-50 transition duration-300"></div>
+                      <Badge
+                        variant="secondary"
+                        className="relative text-xs bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30 text-purple-700 dark:text-purple-300 border border-purple-200/30 dark:border-purple-800/30 px-3 py-1 group-hover/skill:border-purple-300/50 dark:group-hover/skill:border-purple-700/50 transition-all duration-300"
+                      >
+                        {skill}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         </div>
       </main>
+
+      {/* Add animation keyframes */}
+      <style jsx global>{`
+        @keyframes pulse-slow {
+          0%, 100% { opacity: 0.5; }
+          50% { opacity: 0.8; }
+        }
+        
+        @keyframes pulse-slow-delay {
+          0%, 100% { opacity: 0.5; }
+          50% { opacity: 0.7; }
+        }
+        
+        @keyframes gradient-x {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        
+        .animate-pulse-slow {
+          animation: pulse-slow 6s ease-in-out infinite;
+        }
+        
+        .animate-pulse-slow-delay {
+          animation: pulse-slow-delay 8s ease-in-out infinite;
+          animation-delay: 2s;
+        }
+        
+        .animate-gradient-x {
+          background-size: 200% 200%;
+          animation: gradient-x 15s ease infinite;
+        }
+      `}</style>
     </div>
   )
 }

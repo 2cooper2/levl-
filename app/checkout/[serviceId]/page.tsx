@@ -68,9 +68,17 @@ export default function CheckoutPage({ params }: { params: { serviceId: string }
           }),
         })
 
+        if (!response.ok) {
+          const errorText = await response.text()
+          console.error("Payment intent creation failed:", errorText)
+          setError(`Payment setup failed: ${response.status} ${response.statusText}`)
+          setIsLoading(false)
+          return
+        }
+
         const data = await response.json()
 
-        if (response.ok && data.clientSecret) {
+        if (data.clientSecret) {
           setClientSecret(data.clientSecret)
           // Note whether this is a connected account payment
           const isConnected = data.isConnectedAccount || false

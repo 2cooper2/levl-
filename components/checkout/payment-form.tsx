@@ -178,29 +178,6 @@ export function PaymentForm({
             </div>
           </div>
         </div>
-
-        {/* Service Details */}
-        <div className="space-y-3 border rounded-lg p-4">
-          <h3 className="font-medium">What's included:</h3>
-          <div className="space-y-2 text-sm">
-            <div className="flex items-start gap-2">
-              <CheckCircle className="h-4 w-4 text-primary mt-0.5" />
-              <p>Professional website development by Alex Morgan</p>
-            </div>
-            <div className="flex items-start gap-2">
-              <CheckCircle className="h-4 w-4 text-primary mt-0.5" />
-              <p>Unlimited revisions during the development period</p>
-            </div>
-            <div className="flex items-start gap-2">
-              <CheckCircle className="h-4 w-4 text-primary mt-0.5" />
-              <p>30-day support after project completion</p>
-            </div>
-            <div className="flex items-start gap-2">
-              <CheckCircle className="h-4 w-4 text-primary mt-0.5" />
-              <p>Full source code and documentation</p>
-            </div>
-          </div>
-        </div>
       </CardContent>
 
       <CardFooter className="flex-col gap-4 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 rounded-b-lg border-t p-6">

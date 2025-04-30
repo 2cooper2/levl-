@@ -64,8 +64,8 @@
     "@stripe/react-stripe-js": "latest",
     "canvas-confetti": "latest",
     "stripe": "latest",
-    "crypto": "latest",
-    "@supabase/supabase-js": "latest"
+    "@supabase/supabase-js": "latest",
+    "crypto": "latest"
   },
   "devDependencies": {
     "@types/node": "^22",
