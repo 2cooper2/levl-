@@ -150,48 +150,64 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
 
   const FilterPanel = () => (
     <div className="space-y-6">
-      <div className="bg-background/80 backdrop-blur-sm rounded-xl border shadow-sm">
-        <div className="p-4 border-b">
+      <div className="bg-background/80 backdrop-blur-sm rounded-xl border border-purple-200/30 dark:border-purple-900/30 shadow-lg overflow-hidden">
+        {/* Header with gradient background */}
+        <div className="bg-gradient-to-r from-primary/10 to-purple-500/10 p-4 border-b border-purple-200/30 dark:border-purple-900/30">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold flex items-center text-base">
-              <Filter className="mr-2 h-4 w-4 text-primary" /> Filters
+            <h3 className="font-semibold flex items-center text-base bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+              <Filter className="mr-2 h-4 w-4 text-primary" />
+              <span className="text-foreground">Filters</span>
             </h3>
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 text-xs font-normal text-muted-foreground hover:text-foreground"
+              className="h-8 text-xs font-normal text-muted-foreground hover:text-primary transition-colors duration-200"
             >
               Reset All
             </Button>
           </div>
         </div>
 
-        <div className="p-4 space-y-5">
-          <div>
-            <h4 className="text-sm font-medium mb-3 flex items-center">
-              <Search className="h-3.5 w-3.5 mr-1.5 text-primary" /> Search
+        <div className="p-5 space-y-6">
+          {/* Search Section */}
+          <div className="group">
+            <h4 className="text-sm font-medium mb-3 flex items-center group-hover:text-primary transition-colors duration-200">
+              <div className="mr-2 h-5 w-5 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center">
+                <Search className="h-3 w-3 text-white" />
+              </div>
+              Search
             </h4>
             <div className="relative">
               <Input
                 placeholder="Search experts..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8"
+                className="pl-8 border-purple-200/50 dark:border-purple-900/50 focus-visible:ring-primary transition-all duration-200"
               />
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             </div>
           </div>
 
-          <Separator />
+          <Separator className="bg-purple-200/30 dark:bg-purple-900/30" />
 
-          <div>
-            <h4 className="text-sm font-medium mb-3 flex items-center">
-              <Briefcase className="h-3.5 w-3.5 mr-1.5 text-primary" /> Expertise
+          {/* Expertise Section */}
+          <div className="group">
+            <h4 className="text-sm font-medium mb-3 flex items-center group-hover:text-primary transition-colors duration-200">
+              <div className="mr-2 h-5 w-5 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center">
+                <Briefcase className="h-3 w-3 text-white" />
+              </div>
+              Expertise
             </h4>
-            <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-2">
               {expertiseOptions.map((option) => (
-                <div key={option.id} className="flex items-center space-x-2">
-                  <Checkbox id={`expertise-${option.id}`} />
+                <div
+                  key={option.id}
+                  className="flex items-center space-x-2 p-2 rounded-md hover:bg-purple-50 dark:hover:bg-purple-900/10 transition-colors duration-200"
+                >
+                  <Checkbox
+                    id={`expertise-${option.id}`}
+                    className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                  />
                   <Label htmlFor={`expertise-${option.id}`} className="text-sm font-normal cursor-pointer">
                     {option.name}
                   </Label>
@@ -200,24 +216,35 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
             </div>
           </div>
 
-          <Separator />
+          <Separator className="bg-purple-200/30 dark:bg-purple-900/30" />
 
-          <div>
-            <h4 className="text-sm font-medium mb-3 flex items-center">
-              <DollarSign className="h-3.5 w-3.5 mr-1.5 text-primary" /> Hourly Rate
+          {/* Hourly Rate Section */}
+          <div className="group">
+            <h4 className="text-sm font-medium mb-3 flex items-center group-hover:text-primary transition-colors duration-200">
+              <div className="mr-2 h-5 w-5 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center">
+                <DollarSign className="h-3 w-3 text-white" />
+              </div>
+              Hourly Rate
             </h4>
             <div className="px-2 space-y-5">
-              <Slider value={priceRange} min={0} max={200} step={5} onValueChange={setPriceRange} />
+              <Slider
+                value={priceRange}
+                min={0}
+                max={200}
+                step={5}
+                onValueChange={setPriceRange}
+                className="[&>span]:bg-primary"
+              />
               <div className="flex items-center justify-between text-sm">
-                <span>${priceRange[0]}</span>
-                <span>${priceRange[1]}</span>
+                <span className="font-medium text-primary">${priceRange[0]}</span>
+                <span className="font-medium text-primary">${priceRange[1]}</span>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2 mt-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-xs justify-start h-auto py-2"
+                  className="text-xs justify-start h-auto py-2 border-purple-200/50 dark:border-purple-900/50 hover:border-primary hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all duration-200"
                   onClick={() => setPriceRange([0, 50])}
                 >
                   <span className="flex flex-col items-start">
@@ -228,7 +255,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-xs justify-start h-auto py-2"
+                  className="text-xs justify-start h-auto py-2 border-purple-200/50 dark:border-purple-900/50 hover:border-primary hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all duration-200"
                   onClick={() => setPriceRange([50, 100])}
                 >
                   <span className="flex flex-col items-start">
@@ -239,7 +266,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-xs justify-start h-auto py-2"
+                  className="text-xs justify-start h-auto py-2 border-purple-200/50 dark:border-purple-900/50 hover:border-primary hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all duration-200"
                   onClick={() => setPriceRange([100, 150])}
                 >
                   <span className="flex flex-col items-start">
@@ -250,7 +277,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-xs justify-start h-auto py-2"
+                  className="text-xs justify-start h-auto py-2 border-purple-200/50 dark:border-purple-900/50 hover:border-primary hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all duration-200"
                   onClick={() => setPriceRange([150, 200])}
                 >
                   <span className="flex flex-col items-start">
@@ -262,21 +289,32 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
             </div>
           </div>
 
-          <Separator />
+          <Separator className="bg-purple-200/30 dark:bg-purple-900/30" />
 
-          <div>
-            <h4 className="text-sm font-medium mb-3 flex items-center">
-              <Star className="h-3.5 w-3.5 mr-1.5 text-primary" /> Rating
+          {/* Rating Section */}
+          <div className="group">
+            <h4 className="text-sm font-medium mb-3 flex items-center group-hover:text-primary transition-colors duration-200">
+              <div className="mr-2 h-5 w-5 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center">
+                <Star className="h-3 w-3 text-white" />
+              </div>
+              Rating
             </h4>
-            <RadioGroup defaultValue="4.5">
+            <RadioGroup defaultValue="4.5" className="space-y-2">
               {ratingOptions.map((option) => (
-                <div key={option.id} className="flex items-center space-x-2">
-                  <RadioGroupItem value={option.id} id={`rating-${option.id}`} />
+                <div
+                  key={option.id}
+                  className="flex items-center space-x-2 p-2 rounded-md hover:bg-purple-50 dark:hover:bg-purple-900/10 transition-colors duration-200"
+                >
+                  <RadioGroupItem
+                    value={option.id}
+                    id={`rating-${option.id}`}
+                    className="text-primary border-purple-200 dark:border-purple-800"
+                  />
                   <Label
                     htmlFor={`rating-${option.id}`}
-                    className="text-sm font-normal cursor-pointer flex items-center"
+                    className="text-sm font-normal cursor-pointer flex items-center justify-between w-full"
                   >
-                    {option.name}
+                    <span>{option.name}</span>
                     <div className="ml-2 flex">
                       {[...Array(5)].map((_, i) => (
                         <Star
@@ -291,16 +329,26 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
             </RadioGroup>
           </div>
 
-          <Separator />
+          <Separator className="bg-purple-200/30 dark:bg-purple-900/30" />
 
-          <div>
-            <h4 className="text-sm font-medium mb-3 flex items-center">
-              <MapPin className="h-3.5 w-3.5 mr-1.5 text-primary" /> Location
+          {/* Location Section */}
+          <div className="group">
+            <h4 className="text-sm font-medium mb-3 flex items-center group-hover:text-primary transition-colors duration-200">
+              <div className="mr-2 h-5 w-5 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center">
+                <MapPin className="h-3 w-3 text-white" />
+              </div>
+              Location
             </h4>
-            <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-2">
               {locationOptions.map((option) => (
-                <div key={option.id} className="flex items-center space-x-2">
-                  <Checkbox id={`location-${option.id}`} />
+                <div
+                  key={option.id}
+                  className="flex items-center space-x-2 p-2 rounded-md hover:bg-purple-50 dark:hover:bg-purple-900/10 transition-colors duration-200"
+                >
+                  <Checkbox
+                    id={`location-${option.id}`}
+                    className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                  />
                   <Label htmlFor={`location-${option.id}`} className="text-sm font-normal cursor-pointer">
                     {option.name}
                   </Label>
@@ -310,8 +358,9 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
           </div>
 
           <div className="pt-2">
-            <Button className="w-full bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90">
-              Apply Filters
+            <Button className="w-full bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90 shadow-md hover:shadow-lg transition-all duration-300 group">
+              <span>Apply Filters</span>
+              <Filter className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:rotate-180" />
             </Button>
           </div>
         </div>
