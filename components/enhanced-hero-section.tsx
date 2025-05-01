@@ -1701,7 +1701,7 @@ export function EnhancedHeroSection() {
         <div className="absolute inset-0 bg-noise opacity-5 dark:opacity-10 z-0"></div>
 
         {/* Enhanced gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-purple-500/10 z-0" />
+        <div className="absolute inset-0 bg-gradient-to-b from-purple-500/10 to-background z-0" />
 
         {/* Particle system */}
         {particles.map((particle) => (
@@ -2814,36 +2814,6 @@ export function EnhancedHeroSection() {
                                       onMouseLeave={() => setShowTooltip(false)}
                                     />
                                   ))}
-
-                                  {/* Projected data points */}
-                                  {[
-                                    { x: 70, y: 30, value: "$1,800" },
-                                    { x: 80, y: 20, value: "$2,200" },
-                                    { x: 90, y: 15, value: "$2,600" },
-                                    { x: 100, y: 5, value: "$3,000" },
-                                  ].map((point, i) => (
-                                    <motion.div
-                                      key={i}
-                                      className="absolute h-2 w-2 rounded-full bg-white border-2 border-purple-500 cursor-pointer"
-                                      style={{
-                                        left: `${point.x - 1}%`,
-                                        bottom: `${point.y - 1}%`,
-                                      }}
-                                      whileHover={{ scale: 2 }}
-                                      onMouseEnter={() => {
-                                        setTooltipContent({
-                                          title: "Projected Earnings",
-                                          description: point.value,
-                                        })
-                                        setTooltipPosition({
-                                          x: point.x,
-                                          y: point.y,
-                                        })
-                                        setShowTooltip(true)
-                                      }}
-                                      onMouseLeave={() => setShowTooltip(false)}
-                                    />
-                                  ))}
                                 </div>
 
                                 {/* X-axis labels */}
@@ -3165,7 +3135,7 @@ export function EnhancedHeroSection() {
                                 ].map((opportunity, i) => (
                                   <motion.div
                                     key={i}
-                                    className="p-3 rounded-md bg-white/5 dark:bg-black/10 border border-white/10 hover:border-primary/30 transition-all cursor-pointer relative overflow-hidden"
+                                    className="p-3 rounded-md bg-white/5 dark:bg-black/20 border border-white/10 hover:border-primary/30 transition-all cursor-pointer relative overflow-hidden"
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.7 + i * 0.1 }}
@@ -3271,10 +3241,11 @@ export function EnhancedHeroSection() {
             </motion.div>
 
             {/* Find the perfect service section - enhanced with matching background */}
-            <section className="w-full py-16 md:py-24 lg-py-32 bg-muted/50 relative">
+
+            <section className="w-screen max-w-none py-16 md:py-24 lg-py-32 relative">
               <BackgroundPattern className="opacity-50" />
               <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
-              <div className="container px-4 md:px-6 relative z-10">
+              <div className="container mx-auto px-4 md:px-6 relative z-10">
                 <motion.div
                   className="flex flex-col items-center justify-center space-y-4 text-center mb-12"
                   initial={{ opacity: 0, y: 20 }}

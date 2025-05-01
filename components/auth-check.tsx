@@ -13,6 +13,12 @@ export function AuthCheck({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        if (!supabase) {
+          console.error("Supabase client not initialized")
+          router.push("/auth/login")
+          return
+        }
+
         const { data } = await supabase.auth.getSession()
 
         if (!data.session) {

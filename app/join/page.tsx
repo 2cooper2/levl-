@@ -1,7 +1,6 @@
 "use client"
 
 import { EnhancedMainNav } from "@/components/enhanced-main-nav"
-import { WaitlistForm } from "@/components/waitlist/waitlist-form"
 import { LevlLogo } from "@/components/levl-logo"
 import { BackgroundPattern } from "@/components/background-pattern"
 import { motion } from "framer-motion"
@@ -46,7 +45,15 @@ export default function JoinPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <WaitlistForm />
+            <div className="bg-background/60 backdrop-blur-sm p-6 rounded-lg border border-border">
+              <h2 className="text-xl font-semibold mb-4">Join LevL</h2>
+              <p className="mb-4">Direct registration is now available. Create your account to get started.</p>
+              <a href="/auth/signup" className="inline-block w-full">
+                <button className="w-full py-2 px-4 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
+                  Create Account
+                </button>
+              </a>
+            </div>
           </motion.div>
 
           <motion.div

@@ -64,16 +64,17 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
     {
       id: "caydon-cooper",
       name: "Caydon Cooper",
-      title: "Senior Web Developer",
+      title: "Professional TV & Art Mounting Specialist",
       avatar: "/placeholder.svg?height=80&width=80&text=CC",
       rating: 4.9,
       reviews: 124,
-      location: "New York, USA",
-      hourlyRate: 65,
+      location: "Los Angeles, USA",
+      hourlyRate: 75,
       responseTime: "Under 2 hours",
-      tags: ["React", "Next.js", "TypeScript", "UI/UX"],
+      tags: ["TV Mounting", "Art Installation", "Cable Management"],
       featured: true,
-      description: "Experienced web developer specializing in modern frontend frameworks and responsive design.",
+      description:
+        "Experienced mounting specialist providing professional TV, artwork, and home theater installation with clean cable management.",
       completedProjects: 87,
       languages: ["English", "Spanish"],
     },
@@ -359,9 +360,9 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
       <EnhancedMainNav />
 
       {/* Hero Section */}
-      <section className="relative py-12 md:py-16 overflow-hidden border-b">
-        <div className="absolute inset-0 bg-gradient-to-b from-purple-500/10 to-background"></div>
-        <BackgroundPattern className="opacity-20" />
+      <section className="relative py-12 md:py-16 overflow-hidden border-b z-10">
+        <div className="absolute inset-0 bg-gradient-to-b from-purple-500/10 to-background z-0"></div>
+        <BackgroundPattern className="opacity-20 z-0" />
         <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/20 rounded-full filter blur-[100px]"></div>
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/10 rounded-full filter blur-[100px]"></div>
 
@@ -411,10 +412,10 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
         </div>
       </section>
 
-      <main className="flex-1 py-8 md:py-12">
-        <div className="container px-4 md:px-6">
+      <main className="flex-1 py-8 md:py-12 relative z-20 w-full">
+        <div className="container px-4 md:px-6 relative">
           {/* Mobile Filter Button */}
-          <div className="md:hidden mb-4">
+          <div className="md:hidden mb-4 relative z-10">
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="outline" className="w-full flex items-center justify-between">
@@ -471,18 +472,23 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                     className="group"
                   >
                     <Card
-                      className={`overflow-hidden transition-all duration-300 hover:shadow-lg ${
+                      className={`overflow-hidden transition-all duration-300 hover:shadow-xl border border-purple-200/30 dark:border-purple-900/30 ${
                         provider.featured
-                          ? "border-purple-400/50 bg-gradient-to-r from-purple-50/30 to-background dark:from-purple-900/10 dark:to-background"
-                          : ""
+                          ? "bg-gradient-to-br from-purple-50/50 via-background to-primary/5 dark:from-purple-900/20 dark:via-background dark:to-primary/10"
+                          : "hover:bg-gradient-to-br hover:from-purple-50/30 hover:via-background hover:to-primary/5 dark:hover:from-purple-900/10 dark:hover:via-background dark:hover:to-primary/5"
                       }`}
                     >
-                      <div className="p-6">
-                        <div className="flex flex-col md:flex-row gap-6">
+                      <div className="p-6 relative">
+                        {/* Add subtle glow effect */}
+                        <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/20 rounded-full filter blur-[80px] opacity-60 pointer-events-none"></div>
+                        <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-purple-500/20 rounded-full filter blur-[80px] opacity-60 pointer-events-none"></div>
+
+                        <div className="flex flex-col md:flex-row gap-6 relative">
                           {/* Provider Info */}
                           <div className="flex flex-col sm:flex-row md:flex-col items-center gap-4 md:w-48">
                             <div className="relative">
-                              <Avatar className="h-20 w-20 border-2 border-background shadow-md group-hover:border-primary transition-colors duration-300">
+                              <div className="absolute inset-0 bg-gradient-to-br from-primary to-purple-500 rounded-full opacity-0 group-hover:opacity-20 blur-md transition-all duration-300"></div>
+                              <Avatar className="h-20 w-20 border-2 border-background shadow-md group-hover:border-primary/50 transition-colors duration-300 ring-2 ring-purple-200/20 dark:ring-purple-900/20 group-hover:ring-primary/30">
                                 <AvatarImage src={provider.avatar || "/placeholder.svg"} alt={provider.name} />
                                 <AvatarFallback>
                                   {provider.name
@@ -493,7 +499,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                               </Avatar>
                               {provider.featured && (
                                 <div className="absolute -top-2 -right-2">
-                                  <Badge className="bg-gradient-to-r from-primary to-purple-500 hover:from-primary hover:to-purple-500 text-white border-none">
+                                  <Badge className="bg-gradient-to-r from-primary to-purple-500 hover:from-primary hover:to-purple-500 text-white border-none shadow-md">
                                     <Award className="h-3 w-3 mr-1" /> Top Rated
                                   </Badge>
                                 </div>
@@ -520,7 +526,11 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                           <div className="flex-1 space-y-4">
                             <div className="flex flex-wrap gap-2">
                               {provider.tags.map((tag) => (
-                                <Badge key={tag} variant="secondary" className="text-xs font-normal">
+                                <Badge
+                                  key={tag}
+                                  variant="secondary"
+                                  className="text-xs font-normal bg-purple-100/50 dark:bg-purple-900/20 hover:bg-purple-200/70 dark:hover:bg-purple-800/30 transition-colors duration-200"
+                                >
                                   {tag}
                                 </Badge>
                               ))}
@@ -529,28 +539,28 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                             <p className="text-sm text-muted-foreground line-clamp-2">{provider.description}</p>
 
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                              <div className="space-y-1">
+                              <div className="space-y-1 bg-purple-50/50 dark:bg-purple-900/10 p-2 rounded-md">
                                 <p className="text-xs text-muted-foreground">Hourly Rate</p>
-                                <p className="font-semibold flex items-center">
+                                <p className="font-semibold flex items-center text-primary">
                                   <DollarSign className="h-3.5 w-3.5 text-primary" />
                                   {provider.hourlyRate}/hr
                                 </p>
                               </div>
-                              <div className="space-y-1">
+                              <div className="space-y-1 bg-purple-50/50 dark:bg-purple-900/10 p-2 rounded-md">
                                 <p className="text-xs text-muted-foreground">Response Time</p>
                                 <div className="flex items-center">
                                   <Clock className="h-3.5 w-3.5 mr-1 text-primary" />
                                   <p className="text-sm">{provider.responseTime}</p>
                                 </div>
                               </div>
-                              <div className="space-y-1">
+                              <div className="space-y-1 bg-purple-50/50 dark:bg-purple-900/10 p-2 rounded-md">
                                 <p className="text-xs text-muted-foreground">Completed</p>
                                 <div className="flex items-center">
                                   <Briefcase className="h-3.5 w-3.5 mr-1 text-primary" />
                                   <p className="text-sm">{provider.completedProjects} projects</p>
                                 </div>
                               </div>
-                              <div className="space-y-1">
+                              <div className="space-y-1 bg-purple-50/50 dark:bg-purple-900/10 p-2 rounded-md">
                                 <p className="text-xs text-muted-foreground">Languages</p>
                                 <p className="text-sm">{provider.languages.join(", ")}</p>
                               </div>
@@ -558,18 +568,22 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
 
                             <div className="flex flex-wrap gap-3 mt-4">
                               <Button
-                                className="bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90 shadow-sm hover:shadow-md transition-all duration-300"
+                                className="bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden group"
                                 onClick={() => router.push(`/services/${provider.id}`)}
                               >
+                                <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                                 View Profile
                               </Button>
-                              <Button variant="outline" className="border-primary text-primary hover:bg-primary/10">
+                              <Button
+                                variant="outline"
+                                className="border-primary/50 text-primary hover:bg-primary/10 hover:border-primary transition-all duration-200"
+                              >
                                 <MessageSquare className="h-4 w-4 mr-2" /> Contact
                               </Button>
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="rounded-full h-9 w-9 text-muted-foreground hover:text-rose-500"
+                                className="rounded-full h-9 w-9 text-muted-foreground hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all duration-200"
                               >
                                 <Heart className="h-4 w-4" />
                               </Button>
@@ -579,9 +593,11 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                       </div>
 
                       {provider.featured && (
-                        <div className="bg-gradient-to-r from-primary/10 to-purple-500/10 px-6 py-2 flex items-center">
+                        <div className="bg-gradient-to-r from-primary/10 via-purple-400/10 to-purple-500/10 px-6 py-2 flex items-center border-t border-purple-200/30 dark:border-purple-900/30">
                           <Award className="h-4 w-4 text-primary mr-2" />
-                          <span className="text-sm font-medium">Featured Expert • Top 1% in {categoryName}</span>
+                          <span className="text-sm font-medium bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
+                            Featured Expert • Top 1% in {categoryName}
+                          </span>
                         </div>
                       )}
                     </Card>

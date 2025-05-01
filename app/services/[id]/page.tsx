@@ -23,6 +23,7 @@ const fadeInAnimation = `
 
 const fadeInUpAnimation = `
 @keyframes fadeInUp {
+@keyframes fadeInUp {
   from { 
     opacity: 0;
     transform: translateY(20px);
@@ -31,6 +32,7 @@ const fadeInUpAnimation = `
     opacity: 1;
     transform: translateY(0);
   }
+}
 }
 `
 
@@ -217,24 +219,23 @@ export default function ServicePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-purple-950/5 relative overflow-hidden">
-      {/* Advanced background effects */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(120,80,220,0.05)_0%,rgba(30,20,60,0)_50%)] pointer-events-none"></div>
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(80,70,200,0.07)_0%,rgba(20,10,40,0)_50%)] pointer-events-none"></div>
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(120,90,213,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(120,90,213,0.03)_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none"></div>
-
-      {/* Floating orbs */}
-      <div className="absolute top-20 left-[10%] w-64 h-64 rounded-full bg-purple-400/5 blur-[80px] animate-pulse-slow"></div>
-      <div className="absolute bottom-20 right-[5%] w-96 h-96 rounded-full bg-indigo-400/5 blur-[100px] animate-pulse-slow-delay"></div>
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Background elements matching the Mounting Experts category page */}
+      <div className="absolute inset-0 bg-gradient-to-b from-purple-500/10 to-background"></div>
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(160,120,213,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(160,120,213,0.03)_1px,transparent_1px)] bg-[size:24px_24px] opacity-20 pointer-events-none"></div>
+      <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/20 rounded-full filter blur-[100px]"></div>
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/10 rounded-full filter blur-[100px]"></div>
 
       <EnhancedMainNav />
 
       <main className="container py-16 relative z-10">
+        {/* No additional background elements inside main as they're now at the page level */}
+
         {/* Hero section with service title */}
         <div className="mb-12 relative">
-          <div className="absolute -left-4 top-0 h-full w-1 bg-gradient-to-b from-purple-500/80 via-indigo-500/80 to-transparent rounded-full blur-[1px]"></div>
+          <div className="absolute -left-4 top-0 h-full w-1 bg-gradient-to-b from-purple-500/80 via-purple-400/80 to-transparent rounded-full blur-[1px]"></div>
           <h1
-            className="text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-500 via-indigo-400 to-purple-600 animate-gradient-x"
+            className="text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-500 via-purple-400 to-purple-500 animate-gradient-x"
             style={{ animationDuration: "8s" }}
           >
             {service.title}
@@ -247,11 +248,11 @@ export default function ServicePage() {
           <div className="md:col-span-2 space-y-10">
             {/* Provider card moved to gallery position */}
             <div className="relative group">
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-300"></div>
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-purple-400 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-300"></div>
               <div className="relative bg-white/60 dark:bg-black/30 backdrop-blur-xl rounded-xl border border-purple-200/20 dark:border-purple-800/20 p-6 space-y-6 transition-all duration-300 hover:shadow-xl">
                 <div className="flex items-center">
                   <div>
-                    <h3 className="font-bold text-xl text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600">
+                    <h3 className="font-bold text-xl text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-purple-500">
                       {service.provider.name}
                     </h3>
                     <p className="text-sm text-muted-foreground">{service.provider.title}</p>
@@ -285,14 +286,14 @@ export default function ServicePage() {
                 </div>
 
                 <div className="relative group">
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-300"></div>
-                  <div className="relative bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950/40 dark:to-indigo-950/40 p-4 rounded-lg border border-purple-200/30 dark:border-purple-800/30">
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-purple-400 rounded-lg blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-300"></div>
+                  <div className="relative bg-gradient-to-br from-purple-50 to-purple-100/80 dark:from-purple-950/40 dark:to-purple-900/40 p-4 rounded-lg border border-purple-200/30 dark:border-purple-800/30">
                     <div className="flex items-center">
-                      <DollarSign className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                      <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600 ml-1">
+                      <DollarSign className="h-5 w-5 text-purple-500 dark:text-purple-400" />
+                      <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-purple-400 ml-1">
                         $75
                       </span>
-                      <span className="text-sm text-purple-600 dark:text-purple-400 ml-1">/service</span>
+                      <span className="text-sm text-purple-500 dark:text-purple-400 ml-1">/service</span>
                     </div>
                   </div>
                 </div>
@@ -303,11 +304,11 @@ export default function ServicePage() {
                     className="w-full border-purple-200/50 hover:bg-purple-50/50 dark:hover:bg-purple-900/20 transition-all duration-300 h-11"
                     onClick={handleContact}
                   >
-                    <MessageSquare className="h-4 w-4 mr-2 text-purple-500" /> Contact Provider
+                    <MessageSquare className="h-4 w-4 mr-2 text-purple-400" /> Contact Provider
                   </Button>
 
                   <Button
-                    className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white border-none shadow-md hover:shadow-lg transition-all duration-300 group h-11"
+                    className="w-full bg-gradient-to-r from-purple-500 to-purple-400 hover:from-purple-600 hover:to-purple-500 text-white border-none shadow-md hover:shadow-lg transition-all duration-300 group h-11"
                     onClick={handleHireNow}
                   >
                     <span className="relative z-10 flex items-center">
@@ -326,19 +327,19 @@ export default function ServicePage() {
                   <TabsList className="grid w-full grid-cols-3 mb-6 bg-purple-50/70 dark:bg-purple-950/30 p-1 rounded-xl">
                     <TabsTrigger
                       value="about"
-                      className="data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-500/90 data-[state=active]:to-indigo-500/90 data-[state=active]:text-white rounded-lg transition-all duration-300"
+                      className="data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-500/90 data-[state=active]:to-purple-400/90 data-[state=active]:text-white rounded-lg transition-all duration-300"
                     >
                       About
                     </TabsTrigger>
                     <TabsTrigger
                       value="reviews"
-                      className="data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-500/90 data-[state=active]:to-indigo-500/90 data-[state=active]:text-white rounded-lg transition-all duration-300"
+                      className="data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-500/90 data-[state=active]:to-purple-400/90 data-[state=active]:text-white rounded-lg transition-all duration-300"
                     >
                       Reviews
                     </TabsTrigger>
                     <TabsTrigger
                       value="faq"
-                      className="data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-500/90 data-[state=active]:to-indigo-500/90 data-[state=active]:text-white rounded-lg transition-all duration-300"
+                      className="data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-500/90 data-[state=active]:to-purple-400/90 data-[state=active]:text-white rounded-lg transition-all duration-300"
                     >
                       FAQ
                     </TabsTrigger>
@@ -347,7 +348,7 @@ export default function ServicePage() {
 
                 <TabsContent value="about" className="p-6 pt-0 space-y-8">
                   <div className="prose max-w-none dark:prose-invert">
-                    <h3 className="text-2xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600 mb-4">
+                    <h3 className="text-2xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-purple-500 mb-4">
                       My Expertise
                     </h3>
                     <p className="text-base leading-relaxed">
@@ -357,7 +358,7 @@ export default function ServicePage() {
                       securely.
                     </p>
 
-                    <h3 className="text-2xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600 mt-8 mb-4">
+                    <h3 className="text-2xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-purple-500 mt-8 mb-4">
                       My Process
                     </h3>
                     <div className="space-y-4">
@@ -372,7 +373,7 @@ export default function ServicePage() {
                         <div key={index} className="flex items-center gap-4 group">
                           <div className="relative">
                             <div className="absolute inset-0 bg-purple-400/20 dark:bg-purple-600/20 rounded-full blur-md group-hover:bg-purple-400/30 dark:group-hover:bg-purple-600/30 transition-all duration-300"></div>
-                            <div className="relative flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 text-white text-sm font-medium shadow-lg shadow-purple-500/20 group-hover:shadow-purple-500/30 transition-all duration-300">
+                            <div className="relative flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-purple-400 text-white text-sm font-medium shadow-lg shadow-purple-500/20 group-hover:shadow-purple-500/30 transition-all duration-300">
                               {index + 1}
                             </div>
                           </div>
@@ -383,7 +384,7 @@ export default function ServicePage() {
                       ))}
                     </div>
 
-                    <h3 className="text-2xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600 mt-8 mb-4">
+                    <h3 className="text-2xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-purple-500 mt-8 mb-4">
                       What You Can Expect
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -398,7 +399,7 @@ export default function ServicePage() {
                           key={index}
                           className="flex items-center gap-3 group bg-purple-50/50 dark:bg-purple-900/10 p-3 rounded-lg border border-purple-200/30 dark:border-purple-800/20 hover:bg-purple-100/50 dark:hover:bg-purple-900/20 transition-all duration-300"
                         >
-                          <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-white">
+                          <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-purple-400 flex items-center justify-center text-white">
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
                               width="14"
@@ -435,18 +436,18 @@ export default function ServicePage() {
           <div className="space-y-8">
             {/* Skills card */}
             <div className="relative group">
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-300"></div>
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-purple-400 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-300"></div>
               <div className="relative bg-white/60 dark:bg-black/30 backdrop-blur-xl rounded-xl border border-purple-200/20 dark:border-purple-800/20 p-6 transition-all duration-300 hover:shadow-xl">
-                <h3 className="font-bold text-xl mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600">
+                <h3 className="font-bold text-xl mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-purple-500">
                   Skills & Expertise
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {service.skills.map((skill: string) => (
                     <div key={skill} className="group/skill relative">
-                      <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600/60 to-indigo-600/60 rounded-full blur opacity-0 group-hover/skill:opacity-50 transition duration-300"></div>
+                      <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500/60 to-purple-400/60 rounded-full blur opacity-0 group-hover/skill:opacity-50 transition duration-300"></div>
                       <Badge
                         variant="secondary"
-                        className="relative text-xs bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30 text-purple-700 dark:text-purple-300 border border-purple-200/30 dark:border-purple-800/30 px-3 py-1 group-hover/skill:border-purple-300/50 dark:group-hover/skill:border-purple-700/50 transition-all duration-300"
+                        className="relative text-xs bg-gradient-to-r from-purple-100/80 to-purple-50 text-purple-700 dark:text-purple-300 border border-purple-200/30 dark:border-purple-800/30 px-3 py-1 group-hover/skill:border-purple-300/50 dark:group-hover/skill:border-purple-700/50 transition-all duration-300"
                       >
                         {skill}
                       </Badge>

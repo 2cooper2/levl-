@@ -1,15 +1,28 @@
+"use client"
+
 import { createClient } from "@supabase/supabase-js"
 
 // Get environment variables
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-// Create the Supabase client
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Create a singleton instance for the client
+let clientInstance: ReturnType<typeof createClient> | null = null
 
-// Create a server-side admin client for operations that need higher permissions
-export const createAdminClient = () => {
-  const supabaseUrl = process.env.SUPABASE_URL!
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-  return createClient(supabaseUrl, supabaseServiceKey)
-}
+export const supabase = (() => {
+  if (clientInstance) return clientInstance
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error("Missing Supabase credentials for client")
+    return null
+  }
+
+  clientInstance = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: true,
+      storageKey: "levl-supabase-auth",
+    },
+  })
+
+  return clientInstance
+})()

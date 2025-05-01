@@ -196,32 +196,73 @@ export default function MessagesPage() {
           <CardContent className="p-0 h-full flex flex-col">
             {activeContactInfo ? (
               <>
-                <div className="flex items-center justify-between border-b p-4">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={activeContactInfo.avatar || "/placeholder.svg"} alt={activeContactInfo.name} />
-                      <AvatarFallback>{activeContactInfo.name[0]}</AvatarFallback>
-                    </Avatar>
+                <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-purple-500/10 to-background relative overflow-hidden">
+                  {/* Background elements */}
+                  <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(168,85,247,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(168,85,247,0.05)_1px,transparent_1px)] bg-[size:20px_20px] opacity-40"></div>
+                  <div className="absolute -right-10 top-0 w-40 h-20 bg-purple-500/20 rounded-full filter blur-[40px]"></div>
+
+                  <div className="flex items-center gap-3 relative z-10">
+                    <div className="relative">
+                      <Avatar className="h-10 w-10 ring-2 ring-purple-500/20 ring-offset-2 ring-offset-background">
+                        <AvatarImage
+                          src={activeContactInfo.avatar || "/placeholder.svg"}
+                          alt={activeContactInfo.name}
+                        />
+                        <AvatarFallback className="bg-gradient-to-br from-purple-500 to-purple-600 text-white">
+                          {activeContactInfo.name[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span
+                        className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-background ${
+                          activeContactInfo.status === "online" ? "bg-green-500" : "bg-muted"
+                        }`}
+                      ></span>
+                    </div>
                     <div>
-                      <p className="font-medium">{activeContactInfo.name}</p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="font-medium bg-gradient-to-r from-purple-600 to-purple-500 bg-clip-text text-transparent">
+                        {activeContactInfo.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1">
+                        <span
+                          className={`inline-block h-1.5 w-1.5 rounded-full ${
+                            activeContactInfo.status === "online" ? "bg-green-500" : "bg-muted"
+                          }`}
+                        ></span>
                         {activeContactInfo.status === "online" ? "Online" : "Offline"}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon">
-                      <Phone className="h-4 w-4" />
+
+                  <div className="flex items-center gap-2 relative z-10">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-full hover:bg-purple-500/10 transition-colors"
+                    >
+                      <Phone className="h-4 w-4 text-purple-500" />
                     </Button>
-                    <Button variant="ghost" size="icon">
-                      <Video className="h-4 w-4" />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-full hover:bg-purple-500/10 transition-colors"
+                    >
+                      <Video className="h-4 w-4 text-purple-500" />
                     </Button>
-                    <Button variant="ghost" size="icon">
-                      <MoreHorizontal className="h-4 w-4" />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-full hover:bg-purple-500/10 transition-colors"
+                    >
+                      <MoreHorizontal className="h-4 w-4 text-purple-500" />
                     </Button>
                   </div>
                 </div>
-                <div className="flex-1 overflow-auto p-4 space-y-4">
+                <div className="flex-1 overflow-auto p-4 space-y-4 relative">
+                  {/* Background elements */}
+                  <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(168,85,247,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(168,85,247,0.02)_1px,transparent_1px)] bg-[size:24px_24px] -z-10"></div>
+                  <div className="absolute top-0 right-0 w-60 h-60 bg-purple-500/5 rounded-full filter blur-[80px] -z-10"></div>
+                  <div className="absolute bottom-0 left-0 w-60 h-60 bg-primary/5 rounded-full filter blur-[80px] -z-10"></div>
+
                   {activeContactMessages.map((msg, index) => (
                     <motion.div
                       key={msg.id}
@@ -230,22 +271,58 @@ export default function MessagesPage() {
                       animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 10 }}
                       transition={{ duration: 0.3, delay: 0.2 + index * 0.1 }}
                     >
+                      {msg.sender !== "user" && (
+                        <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 mr-2">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage
+                              src={activeContactInfo?.avatar || "/placeholder.svg"}
+                              alt={activeContactInfo?.name}
+                            />
+                            <AvatarFallback className="bg-gradient-to-br from-purple-500 to-purple-600 text-white text-xs">
+                              {activeContactInfo?.name[0]}
+                            </AvatarFallback>
+                          </Avatar>
+                        </div>
+                      )}
                       <div
-                        className={`max-w-[70%] rounded-lg p-3 ${
-                          msg.sender === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
+                        className={`max-w-[70%] rounded-lg p-3 shadow-sm ${
+                          msg.sender === "user"
+                            ? "bg-gradient-to-r from-purple-600 to-purple-500 text-white"
+                            : "bg-white dark:bg-gray-800 border border-purple-100 dark:border-purple-900/20"
                         }`}
                       >
-                        <p>{msg.text}</p>
+                        <p className={msg.sender === "user" ? "text-white" : ""}>{msg.text}</p>
                         <p
-                          className={`text-right text-xs ${
-                            msg.sender === "user" ? "text-primary-foreground/80" : "text-muted-foreground"
+                          className={`text-right text-xs mt-1 ${
+                            msg.sender === "user" ? "text-white/80" : "text-muted-foreground"
                           }`}
                         >
                           {msg.time}
                         </p>
                       </div>
+                      {msg.sender === "user" && (
+                        <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 ml-2">
+                          <div className="h-8 w-8 bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white text-xs">
+                            You
+                          </div>
+                        </div>
+                      )}
                     </motion.div>
                   ))}
+
+                  {activeContactMessages.length === 0 && (
+                    <div className="h-full flex items-center justify-center">
+                      <div className="text-center p-6 rounded-lg bg-purple-50/50 dark:bg-purple-900/10 border border-purple-100 dark:border-purple-900/20">
+                        <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                          <Send className="h-5 w-5 text-white" />
+                        </div>
+                        <h3 className="text-lg font-medium bg-gradient-to-r from-purple-600 to-purple-500 bg-clip-text text-transparent">
+                          Start the conversation
+                        </h3>
+                        <p className="text-muted-foreground mt-1">Send a message to begin chatting</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div className="border-t p-4">
                   <div className="flex items-center gap-2">
