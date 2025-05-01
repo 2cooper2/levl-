@@ -71,25 +71,22 @@ export default function ConnectRefreshPage() {
                 Please wait while we refresh your Stripe Connect session...
               </CardDescription>
             </CardHeader>
-            
+
             <CardContent className="pt-6 space-y-6">
               <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg">
                 <p className="text-center text-sm text-muted-foreground">
-                  Your previous session has expired. We're creating a new session for you to complete your Stripe account setup.
+                  Your previous session has expired. We're creating a new session for you to complete your Stripe
+                  account setup.
                 </p>
               </div>
-              
+
               <div className="flex justify-center">
                 <RefreshCw className="h-8 w-8 animate-spin text-primary" />
               </div>
             </CardContent>
-            
+
             <CardFooter className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-b-lg border-t p-6">
-              <Button 
-                onClick={() => router.push("/dashboard/connect")} 
-                variant="outline"
-                className="w-full"
-              >
+              <Button onClick={() => router.push("/dashboard/connect")} variant="outline" className="w-full">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Connect Page
               </Button>
@@ -98,5 +95,5 @@ export default function ConnectRefreshPage() {
         </div>
       </main>
     </div>
-  \
+  )
 }
