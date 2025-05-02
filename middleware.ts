@@ -1,42 +1,50 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
-import { createServerClient } from "@/lib/supabase"
 
-export async function middleware(request: NextRequest) {
+// Define public paths that don't require authentication
+const publicPaths = [
+  "/",
+  "/auth/login",
+  "/auth/signup",
+  "/auth/forgot-password",
+  "/auth/reset-password",
+  "/auth/callback",
+  "/explore",
+  "/about",
+  "/how-it-works",
+]
+
+// Check if a path starts with any of these prefixes
+const publicPathPrefixes = ["/services/", "/category/", "/checkout", "/api/"]
+
+export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
 
-  // Define public paths that don't require authentication
-  const isPublicPath =
-    path === "/" ||
-    path === "/auth/login" ||
-    path === "/auth/signup" ||
-    path === "/explore" ||
-    path === "/about" ||
-    path === "/how-it-works" ||
-    path.startsWith("/services/") ||
-    path.startsWith("/category/") ||
-    path.startsWith("/checkout")
+  // Check if the path is public
+  const isPublicPath = publicPaths.includes(path) || publicPathPrefixes.some((prefix) => path.startsWith(prefix))
 
-  // Create a Supabase client for server-side authentication check
-  const supabase = createServerClient()
+  if (isPublicPath) {
+    return NextResponse.next()
+  }
 
-  // Get the session from the request cookies
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
+  // Check for auth cookie
+  const authCookie = request.cookies.get("auth-token")?.value
 
-  const isAuthenticated = !!session
+  // Check for Supabase session
+  const supabaseSession =
+    request.cookies.get("sb-access-token")?.value ||
+    request.cookies.get("sb:token")?.value ||
+    request.cookies.get("levl-supabase-auth")?.value
+
+  // User is authenticated if either cookie is present
+  const isAuthenticated = !!authCookie || !!supabaseSession
 
   // Redirect logic
-  // Uncomment this block if you want to enforce authentication for protected routes
-  // if (!isPublicPath && !isAuthenticated) {
-  //   // Redirect to login if trying to access protected routes while not authenticated
-  //   return NextResponse.redirect(new URL("/auth/login", request.url))
-  // }
-
-  if ((path === "/auth/login" || path === "/auth/signup") && isAuthenticated) {
-    // Redirect to dashboard if trying to access auth pages while already authenticated
-    return NextResponse.redirect(new URL("/dashboard", request.url))
+  if (!isAuthenticated) {
+    // Redirect to login if trying to access protected routes while not authenticated
+    const redirectUrl = new URL("/auth/login", request.url)
+    redirectUrl.searchParams.set("redirectTo", path)
+    return NextResponse.redirect(redirectUrl)
   }
 
   return NextResponse.next()

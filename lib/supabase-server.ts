@@ -1,35 +1,38 @@
-import { createClient as createSupabaseClient } from "@supabase/supabase-js"
-
-// Get environment variables
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-// Create a singleton instance for the server
-let serverInstance: ReturnType<typeof createSupabaseClient> | null = null
+import { createServerClient as createSupabaseServerClient } from "@supabase/ssr"
+import { cookies } from "next/headers"
+import type { CookieOptions } from "@supabase/ssr"
 
 export const createServerClient = () => {
-  if (typeof window !== "undefined") {
-    console.warn("createServerClient should only be called on the server")
-    return null
-  }
+  const cookieStore = cookies()
 
-  if (serverInstance) return serverInstance
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!supabaseUrl || !supabaseAnonKey) {
     console.error("Missing Supabase credentials for server client")
-    return null
+    throw new Error("Missing Supabase credentials")
   }
 
-  // Use service role key for server operations if available
-  const key = supabaseServiceKey || supabaseAnonKey
-
-  serverInstance = createSupabaseClient(supabaseUrl, key, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
+  return createSupabaseServerClient(supabaseUrl, supabaseAnonKey, {
+    cookies: {
+      get(name: string) {
+        return cookieStore.get(name)?.value
+      },
+      set(name: string, value: string, options: CookieOptions) {
+        try {
+          cookieStore.set({ name, value, ...options })
+        } catch (error) {
+          // This can happen when attempting to set cookies in a middleware
+          console.error("Error setting cookie:", error)
+        }
+      },
+      remove(name: string, options: CookieOptions) {
+        try {
+          cookieStore.set({ name, value: "", ...options })
+        } catch (error) {
+          console.error("Error removing cookie:", error)
+        }
+      },
     },
   })
-
-  return serverInstance
 }

@@ -1,4 +1,4 @@
-import { createServerClient } from "@/lib/supabase"
+import { createServerClient } from "@/lib/supabase-server"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
@@ -7,6 +7,7 @@ export async function GET(request: NextRequest) {
   const code = requestUrl.searchParams.get("code")
   const error = requestUrl.searchParams.get("error")
   const errorDescription = requestUrl.searchParams.get("error_description")
+  const type = requestUrl.searchParams.get("type") || "signup"
 
   // Handle error case
   if (error) {
@@ -19,11 +20,6 @@ export async function GET(request: NextRequest) {
   if (code) {
     const supabase = createServerClient()
 
-    if (!supabase) {
-      console.error("Failed to create Supabase client in auth callback")
-      return NextResponse.redirect(new URL(`/auth/login?error=server_error`, requestUrl.origin))
-    }
-
     try {
       // Exchange the code for a session
       const { data, error } = await supabase.auth.exchangeCodeForSession(code)
@@ -33,7 +29,16 @@ export async function GET(request: NextRequest) {
         return NextResponse.redirect(new URL(`/auth/login?error=exchange_error`, requestUrl.origin))
       }
 
-      // If we have a user, redirect to dashboard
+      // Handle different callback types
+      if (type === "recovery") {
+        // Password reset flow
+        return NextResponse.redirect(new URL("/auth/reset-password", requestUrl.origin))
+      } else if (type === "signup" || type === "invite") {
+        // Email verification after signup
+        return NextResponse.redirect(new URL("/auth/login?verified=success", requestUrl.origin))
+      }
+
+      // Default: If we have a user, redirect to dashboard
       if (data?.session) {
         return NextResponse.redirect(new URL("/dashboard", requestUrl.origin))
       }
@@ -44,5 +49,5 @@ export async function GET(request: NextRequest) {
   }
 
   // Fallback redirect if no code or other issues
-  return NextResponse.redirect(new URL("/dashboard", requestUrl.origin))
+  return NextResponse.redirect(new URL("/auth/login", requestUrl.origin))
 }

@@ -60,12 +60,15 @@
     "zod": "^3.24.1",
     "@emotion/is-prop-valid": "latest",
     "@stripe/stripe-js": "latest",
+    "@supabase/supabase-js": "latest",
     "framer-motion": "latest",
     "@stripe/react-stripe-js": "latest",
     "canvas-confetti": "latest",
-    "@supabase/supabase-js": "latest",
     "stripe": "latest",
-    "crypto": "latest"
+    "crypto": "latest",
+    "resend": "latest",
+    "@supabase/ssr": "latest",
+    "js-cookie": "latest"
   },
   "devDependencies": {
     "@types/node": "^22",

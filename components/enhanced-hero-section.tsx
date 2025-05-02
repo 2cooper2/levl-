@@ -110,6 +110,7 @@ const detailedVisualStyles = `
    position: absolute;
    width: 4px;
    height: 4px;
+   height: 4px;
    border-radius: 50%;
    background-color: rgba(var(--primary-rgb), 0.5);
    box-shadow: 0 0 5px rgba(var(--primary-rgb), 0.5);
@@ -3253,56 +3254,84 @@ export function EnhancedHeroSection() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.5 }}
                 >
-                  <div className="inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
-                    Popular Categories
-                  </div>
-                  <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl max-w-[800px]">
-                    Find the perfect service for your needs
-                  </h2>
-                  <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed mt-4">
-                    Browse through thousands of services across various categories
-                  </p>
-
                   <div className="w-full max-w-md mx-auto mt-8 relative">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <div className="relative group">
+                      <div className="absolute inset-0 bg-gradient-to-r from-primary/30 to-purple-500/30 rounded-full blur-md opacity-0 group-hover:opacity-70 transition-opacity duration-300"></div>
+                      <div
+                        className="absolute inset-0 bg-gradient-to-r from-primary/10 via-purple-500/10 to-primary/10 rounded-full animate-pulse"
+                        style={{ animationDuration: "3s" }}
+                      ></div>
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
                       <input
                         type="search"
                         placeholder="Search categories or services..."
-                        className="w-full rounded-full border border-input bg-background/80 backdrop-blur-sm px-10 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        className="w-full rounded-full border border-primary/30 bg-white/5 dark:bg-black/10 backdrop-blur-xl px-10 py-3 text-sm shadow-lg transition-all duration-300 hover:border-primary/50 focus:border-primary/70 focus:ring-2 focus:ring-primary/30 focus-visible:outline-none"
                       />
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 h-6 w-6 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center opacity-80 hover:opacity-100 transition-opacity cursor-pointer">
+                        <ArrowRight className="h-3 w-3 text-white" />
+                      </div>
                     </div>
                   </div>
 
-                  {/* Category tabs */}
-                  <div className="flex flex-wrap justify-center gap-2 mt-8">
+                  <div className="flex flex-wrap justify-center gap-3 mt-10">
                     {["all", "trending", "popular", "new"].map((tab) => (
                       <motion.button
                         key={tab}
-                        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                        className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 relative overflow-hidden ${
                           activeTab === tab
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-background/80 backdrop-blur-sm hover:bg-background"
+                            ? "bg-gradient-to-r from-primary to-purple-500 text-white shadow-lg shadow-primary/30"
+                            : "bg-white/5 dark:bg-black/20 border border-white/10 hover:border-primary/40 hover:bg-white/10 dark:hover:bg-black/30"
                         }`}
                         onClick={() => setActiveTab(tab)}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
+                        whileHover={{ scale: 1.05, boxShadow: "0 10px 25px -5px rgba(147, 51, 234, 0.3)" }}
+                        whileTap={{ scale: 0.98 }}
                       >
-                        {tab === "all" && "All Categories"}
+                        {activeTab === tab && (
+                          <motion.div
+                            className="absolute inset-0 bg-gradient-to-r from-primary/20 via-transparent to-purple-500/20"
+                            animate={{
+                              x: ["-100%", "100%"],
+                            }}
+                            transition={{
+                              repeat: Number.POSITIVE_INFINITY,
+                              duration: 2,
+                              ease: "linear",
+                            }}
+                          />
+                        )}
+                        {tab === "all" && (
+                          <span className="flex items-center">
+                            <Layers className="mr-1.5 h-3.5 w-3.5" /> All Categories
+                          </span>
+                        )}
                         {tab === "trending" && (
                           <span className="flex items-center">
-                            <TrendingUp className="mr-1 h-3 w-3" /> Trending
+                            <TrendingUp className="mr-1.5 h-3.5 w-3.5" /> Trending
                           </span>
                         )}
                         {tab === "popular" && (
                           <span className="flex items-center">
-                            <Star className="mr-1 h-3 w-3" /> Popular
+                            <Star className="mr-1.5 h-3.5 w-3.5" /> Popular
                           </span>
                         )}
                         {tab === "new" && (
                           <span className="flex items-center">
-                            <Sparkles className="mr-1 h-3 w-3" /> New
+                            <Sparkles className="mr-1.5 h-3.5 w-3.5" /> New
                           </span>
+                        )}
+                        {activeTab === tab && (
+                          <>
+                            <motion.div
+                              className="absolute top-0 left-0 right-0 h-full w-full bg-gradient-to-r from-primary/10 to-purple-500/10 blur-md -z-10"
+                              layoutId="activeTabGlow"
+                              transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                            />
+                            <motion.div
+                              className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 h-1 w-1/2 bg-white rounded-full"
+                              layoutId="activeTabIndicator"
+                              transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                            />
+                          </>
                         )}
                       </motion.button>
                     ))}
@@ -3318,7 +3347,7 @@ export function EnhancedHeroSection() {
                   transition={{ duration: 0.5 }}
                 >
                   <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-xl font-semibold">Featured Categories</h3>
+                    <h3 className="text-xl font-semibold"></h3>
                     <Link
                       href="/explore"
                       className="text-primary text-sm font-medium flex items-center hover:underline"
