@@ -73,17 +73,73 @@ const floatAnimation = `
   -webkit-background-clip: text;
   animation: shimmer 12s infinite linear;
 }
+
+/* Add luxury animations */
+@keyframes subtleFade {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes lineGrow {
+  0% { width: 0; opacity: 0; }
+  100% { width: 100%; opacity: 1; }
+}
+
+@keyframes accentFade {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+`
+
+const enhanced3DStyles = `
+  @keyframes float3D {
+    0% { transform: translateZ(120px) rotateX(8deg); }
+    50% { transform: translateZ(140px) rotateX(8deg) translateY(-5px); }
+    100% { transform: translateZ(120px) rotateX(8deg); }
+  }
+  
+  @keyframes floatMiddle3D {
+    0% { transform: translateZ(20px) rotateX(3deg); }
+    50% { transform: translateZ(30px) rotateX(3deg) translateY(-2px); }
+    100% { transform: translateZ(20px) rotateX(3deg); }
+  }
+  
+  @keyframes floatBack3D {
+    0% { transform: translateZ(-80px) rotateX(-8deg); }
+    50% { transform: translateZ(-100px) rotateX(-8deg) translateY(5px); }
+    100% { transform: translateZ(-80px) rotateX(-8deg); }
+  }
+  
+  .float-3d-front {
+    animation: float3D 8s ease-in-out infinite;
+  }
+  
+  .float-3d-middle {
+    animation: floatMiddle3D 8s ease-in-out infinite;
+    animation-delay: 1s;
+  }
+  
+  .float-3d-back {
+    animation: floatBack3D 8s ease-in-out infinite reverse;
+  }
+  
+  .depth-container {
+    transform-style: preserve-3d;
+    transform: translateZ(0);
+  }
 `
 
 interface AnimatedTextDividerProps {
-  firstText: string
-  secondText: string
+  firstText?: string
+  secondText?: string
+  thirdText?: string
   className?: string
 }
 
 export function AnimatedTextDivider({
-  firstText = "INNOVATE",
-  secondText = "ACCELERATE",
+  firstText = "LEARN",
+  secondText = "GROW YOUR BUSINESS",
+  thirdText = "EARN",
   className = "",
 }: AnimatedTextDividerProps) {
   const dividerRef = useRef<HTMLDivElement>(null)
@@ -137,6 +193,13 @@ export function AnimatedTextDivider({
         ],
         cta: "Browse Courses",
       }
+    } else if (index === 1) {
+      return {
+        title: "Grow your business",
+        description: "Access tools and resources to scale your business and reach new customers.",
+        features: ["Marketing automation", "Customer analytics", "Business templates", "Growth strategies"],
+        cta: "Explore Tools",
+      }
     } else {
       return {
         title: "Earn as you progress",
@@ -150,11 +213,16 @@ export function AnimatedTextDivider({
   return (
     <section
       ref={dividerRef}
-      className={`relative w-full py-16 md:py-20 overflow-hidden ${className}`}
-      aria-label={`${firstText} and ${secondText} section`}
+      className={`relative w-full py-12 md:py-16 overflow-hidden ${className}`}
+      aria-label={`${firstText}, ${secondText}, and ${thirdText} section`}
+      style={{
+        perspective: "800px",
+        perspectiveOrigin: "center center",
+      }}
     >
       <div className="absolute inset-0 bg-gradient-to-b from-purple-500/10 to-background pointer-events-none"></div>
       <style dangerouslySetInnerHTML={{ __html: floatAnimation }} />
+      <style dangerouslySetInnerHTML={{ __html: enhanced3DStyles }} />
 
       {/* Enhanced background with more vibrant gradients */}
       <div className="absolute inset-0 overflow-hidden">
@@ -194,9 +262,15 @@ export function AnimatedTextDivider({
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="flex flex-col items-center justify-center">
-          <div className="relative flex flex-col items-center max-w-4xl mx-auto">
+          <div
+            className="relative flex flex-col items-center max-w-5xl mx-auto w-full depth-container"
+            style={{
+              transformStyle: "preserve-3d",
+            }}
+          >
+            {/* First word with luxury styling - positioned with depth */}
             <div
-              className="relative mb-6 md:mb-8 group"
+              className="relative mb-3 md:mb-4 group w-full float-3d-front"
               onClick={() => toggleExpanded(0)}
               onMouseEnter={() => setActiveIndex(0)}
               onMouseLeave={() => expandedInfo !== 0 && setActiveIndex(null)}
@@ -205,19 +279,109 @@ export function AnimatedTextDivider({
               aria-expanded={expandedInfo === 0}
               aria-controls="learn-panel"
               onKeyDown={(e) => handleKeyDown(0, e)}
+              style={{
+                transform: "translateZ(120px) rotateX(8deg)",
+                transformStyle: "preserve-3d",
+                filter: "drop-shadow(0 10px 15px rgba(0,0,0,0.3))",
+              }}
             >
-              {/* Main text - more sleek version */}
-              <h2
-                className="text-4xl md:text-5xl lg:text-7xl font-bold text-lavender-300"
+              {/* Luxury frame */}
+              <div
+                className="absolute -inset-6 md:-inset-8"
                 style={{
-                  textShadow: "0 4px 6px rgba(0,0,0,0.2), 0 8px 12px rgba(0,0,0,0.1), 0 -1px 1px rgba(255,255,255,0.3)",
-                  transform: "perspective(800px) translateZ(10px)",
-                  paddingBottom: "0.1em",
-                  position: "relative",
+                  border: "1px solid rgba(255, 255, 255, 0.05)",
+                  background:
+                    "linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0) 100%)",
+                  opacity: 0.7,
                 }}
-              >
-                {firstText}
-              </h2>
+              ></div>
+
+              {/* Corner accents */}
+              <div
+                className="absolute top-0 left-0 w-4 h-4 md:w-6 md:h-6"
+                style={{
+                  borderTop: "1px solid rgba(255, 255, 255, 0.3)",
+                  borderLeft: "1px solid rgba(255, 255, 255, 0.3)",
+                }}
+              ></div>
+              <div
+                className="absolute top-0 right-0 w-4 h-4 md:w-6 md:h-6"
+                style={{
+                  borderTop: "1px solid rgba(255, 255, 255, 0.3)",
+                  borderRight: "1px solid rgba(255, 255, 255, 0.3)",
+                }}
+              ></div>
+              <div
+                className="absolute bottom-0 left-0 w-4 h-4 md:w-6 md:h-6"
+                style={{
+                  borderBottom: "1px solid rgba(255, 255, 255, 0.3)",
+                  borderLeft: "1px solid rgba(255, 255, 255, 0.3)",
+                }}
+              ></div>
+              <div
+                className="absolute bottom-0 right-0 w-4 h-4 md:w-6 md:h-6"
+                style={{
+                  borderBottom: "1px solid rgba(255, 255, 255, 0.3)",
+                  borderRight: "1px solid rgba(255, 255, 255, 0.3)",
+                }}
+              ></div>
+
+              {/* Luxury text container */}
+              <div className="relative px-8 py-2 flex flex-col items-center">
+                {/* Elegant label */}
+                <span
+                  className="text-xs tracking-[0.4em] uppercase mb-1 opacity-80"
+                  style={{
+                    color: "#ffffff",
+                    fontFamily: "'Montserrat', sans-serif",
+                    letterSpacing: "0.4em",
+                    fontWeight: 300,
+                  }}
+                >
+                  Elevate Your Potential
+                </span>
+
+                {/* Main heading with luxury styling - NO ANIMATION */}
+                <h2
+                  className="text-4xl md:text-5xl lg:text-6xl relative tracking-widest"
+                  style={{
+                    color: "#ffffff",
+                    fontFamily: "'Cormorant Garamond', serif",
+                    fontWeight: 300,
+                    letterSpacing: "0.15em",
+                    lineHeight: 1.2,
+                    textAlign: "center",
+                    textTransform: "uppercase",
+                    textShadow: "0 4px 8px rgba(0,0,0,0.3), 0 0 30px rgba(255,255,255,0.2)",
+                  }}
+                >
+                  {firstText}
+                </h2>
+
+                {/* Elegant divider */}
+                <div className="mt-2 flex items-center justify-center w-full">
+                  <div
+                    className="w-12 h-px mx-2"
+                    style={{
+                      background:
+                        "linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0))",
+                    }}
+                  ></div>
+                  <div
+                    className="w-1 h-1 rounded-full"
+                    style={{
+                      background: "rgba(255, 255, 255, 0.8)",
+                    }}
+                  ></div>
+                  <div
+                    className="w-12 h-px mx-2"
+                    style={{
+                      background:
+                        "linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0))",
+                    }}
+                  ></div>
+                </div>
+              </div>
 
               {/* Mobile indicator for expandable content */}
               {isMobile && (
@@ -227,42 +391,246 @@ export function AnimatedTextDivider({
               )}
             </div>
 
+            {/* Middle word - GROW YOUR BUSINESS */}
             <div
-              className="relative mt-2 group"
+              className="relative mb-3 md:mb-4 group w-full float-3d-middle"
               onClick={() => toggleExpanded(1)}
               onMouseEnter={() => setActiveIndex(1)}
               onMouseLeave={() => expandedInfo !== 1 && setActiveIndex(null)}
               tabIndex={0}
               role="button"
               aria-expanded={expandedInfo === 1}
-              aria-controls="earn-panel"
+              aria-controls="grow-panel"
               onKeyDown={(e) => handleKeyDown(1, e)}
+              style={{
+                transform: "translateZ(20px) rotateX(3deg)",
+                transformStyle: "preserve-3d",
+                filter: "drop-shadow(0 5px 10px rgba(0,0,0,0.25))",
+              }}
             >
-              {/* Main text - more sleek version */}
-              <h2
-                className="text-4xl md:text-5xl lg:text-7xl font-bold text-lavender-300"
+              {/* Luxury frame */}
+              <div
+                className="absolute -inset-6 md:-inset-8"
                 style={{
-                  textShadow: "0 4px 6px rgba(0,0,0,0.2), 0 8px 12px rgba(0,0,0,0.1), 0 -1px 1px rgba(255,255,255,0.3)",
-                  transform: "perspective(800px) translateZ(10px)",
-                  paddingBottom: "0.1em",
-                  position: "relative",
+                  border: "1px solid rgba(255, 255, 255, 0.05)",
+                  background:
+                    "linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0) 100%)",
+                  opacity: 0.7,
                 }}
-              >
-                {secondText}
-              </h2>
+              ></div>
 
-              {/* Decorative brackets - more sleek version */}
-              <span className="absolute -left-6 top-1/2 -translate-y-1/2 text-3xl text-lavender-300/80 font-sans">
-                [
-              </span>
-              <span className="absolute -right-6 top-1/2 -translate-y-1/2 text-3xl text-lavender-300/80 font-sans">
-                ]
-              </span>
+              {/* Corner accents */}
+              <div
+                className="absolute top-0 left-0 w-4 h-4 md:w-6 md:h-6"
+                style={{
+                  borderTop: "1px solid rgba(255, 255, 255, 0.3)",
+                  borderLeft: "1px solid rgba(255, 255, 255, 0.3)",
+                }}
+              ></div>
+              <div
+                className="absolute top-0 right-0 w-4 h-4 md:w-6 md:h-6"
+                style={{
+                  borderTop: "1px solid rgba(255, 255, 255, 0.3)",
+                  borderRight: "1px solid rgba(255, 255, 255, 0.3)",
+                }}
+              ></div>
+              <div
+                className="absolute bottom-0 left-0 w-4 h-4 md:w-6 md:h-6"
+                style={{
+                  borderBottom: "1px solid rgba(255, 255, 255, 0.3)",
+                  borderLeft: "1px solid rgba(255, 255, 255, 0.3)",
+                }}
+              ></div>
+              <div
+                className="absolute bottom-0 right-0 w-4 h-4 md:w-6 md:h-6"
+                style={{
+                  borderBottom: "1px solid rgba(255, 255, 255, 0.3)",
+                  borderRight: "1px solid rgba(255, 255, 255, 0.3)",
+                }}
+              ></div>
+
+              {/* Luxury text container */}
+              <div className="relative px-8 py-2 flex flex-col items-center">
+                {/* Elegant label */}
+                <span
+                  className="text-xs tracking-[0.4em] uppercase mb-1 opacity-80"
+                  style={{
+                    color: "#ffffff",
+                    fontFamily: "'Montserrat', sans-serif",
+                    letterSpacing: "0.4em",
+                    fontWeight: 300,
+                  }}
+                >
+                  Expand Your Horizons
+                </span>
+
+                {/* Main heading with luxury styling */}
+                <h2
+                  className="text-4xl md:text-5xl lg:text-6xl relative tracking-widest"
+                  style={{
+                    color: "#ffffff",
+                    fontFamily: "'Cormorant Garamond', serif",
+                    fontWeight: 300,
+                    letterSpacing: "0.15em",
+                    lineHeight: 1.2,
+                    textAlign: "center",
+                    textTransform: "uppercase",
+                    textShadow: "0 2px 5px rgba(0,0,0,0.25), 0 0 20px rgba(255,255,255,0.15)",
+                    opacity: 0.9,
+                  }}
+                >
+                  {secondText}
+                </h2>
+
+                {/* Elegant divider */}
+                <div className="mt-2 flex items-center justify-center w-full">
+                  <div
+                    className="w-12 h-px mx-2"
+                    style={{
+                      background:
+                        "linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0))",
+                    }}
+                  ></div>
+                  <div
+                    className="w-1 h-1 rounded-full"
+                    style={{
+                      background: "rgba(255, 255, 255, 0.8)",
+                    }}
+                  ></div>
+                  <div
+                    className="w-12 h-px mx-2"
+                    style={{
+                      background:
+                        "linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0))",
+                    }}
+                  ></div>
+                </div>
+              </div>
 
               {/* Mobile indicator for expandable content */}
               {isMobile && (
                 <span className="absolute -right-8 top-1/2 -translate-y-1/2 text-white/70">
                   {expandedInfo === 1 ? "−" : "+"}
+                </span>
+              )}
+            </div>
+
+            {/* Third word with luxury styling - positioned with depth */}
+            <div
+              className="relative group w-full float-3d-back"
+              onClick={() => toggleExpanded(2)}
+              onMouseEnter={() => setActiveIndex(2)}
+              onMouseLeave={() => expandedInfo !== 2 && setActiveIndex(null)}
+              tabIndex={0}
+              role="button"
+              aria-expanded={expandedInfo === 2}
+              aria-controls="earn-panel"
+              onKeyDown={(e) => handleKeyDown(2, e)}
+              style={{
+                transform: "translateZ(-80px) rotateX(-8deg)",
+                transformStyle: "preserve-3d",
+                filter: "drop-shadow(0 -5px 10px rgba(0,0,0,0.2))",
+              }}
+            >
+              {/* Luxury frame */}
+              <div
+                className="absolute -inset-6 md:-inset-8"
+                style={{
+                  border: "1px solid rgba(255, 255, 255, 0.05)",
+                  background:
+                    "linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0) 100%)",
+                  opacity: 0.7,
+                }}
+              ></div>
+
+              {/* Corner accents */}
+              <div
+                className="absolute top-0 left-0 w-4 h-4 md:w-6 md:h-6"
+                style={{
+                  borderTop: "1px solid rgba(255, 255, 255, 0.3)",
+                  borderLeft: "1px solid rgba(255, 255, 255, 0.3)",
+                }}
+              ></div>
+              <div
+                className="absolute top-0 right-0 w-4 h-4 md:w-6 md:h-6"
+                style={{
+                  borderTop: "1px solid rgba(255, 255, 255, 0.3)",
+                  borderRight: "1px solid rgba(255, 255, 255, 0.3)",
+                }}
+              ></div>
+              <div
+                className="absolute bottom-0 left-0 w-4 h-4 md:w-6 md:h-6"
+                style={{
+                  borderBottom: "1px solid rgba(255, 255, 255, 0.3)",
+                  borderLeft: "1px solid rgba(255, 255, 255, 0.3)",
+                }}
+              ></div>
+              <div
+                className="absolute bottom-0 right-0 w-4 h-4 md:w-6 md:h-6"
+                style={{
+                  borderBottom: "1px solid rgba(255, 255, 255, 0.3)",
+                  borderRight: "1px solid rgba(255, 255, 255, 0.3)",
+                }}
+              ></div>
+
+              {/* Luxury text container */}
+              <div className="relative px-8 py-2 flex flex-col items-center">
+                {/* Elegant label */}
+                <span
+                  className="text-xs tracking-[0.4em] uppercase mb-1 opacity-80"
+                  style={{
+                    color: "#ffffff",
+                    fontFamily: "'Montserrat', sans-serif",
+                    letterSpacing: "0.4em",
+                    fontWeight: 300,
+                  }}
+                ></span>
+
+                {/* Main heading with luxury styling - NO ANIMATION */}
+                <h2
+                  className="text-4xl md:text-5xl lg:text-6xl relative tracking-widest"
+                  style={{
+                    color: "#ffffff",
+                    fontFamily: "'Cormorant Garamond', serif",
+                    fontWeight: 300,
+                    letterSpacing: "0.15em",
+                    lineHeight: 1.2,
+                    textAlign: "center",
+                    textTransform: "uppercase",
+                    opacity: 0.75, // More reduced opacity for enhanced depth effect
+                    textShadow: "0 -2px 5px rgba(0,0,0,0.2)",
+                  }}
+                ></h2>
+
+                {/* Elegant divider */}
+                <div className="mt-2 flex items-center justify-center w-full">
+                  <div
+                    className="w-12 h-px mx-2"
+                    style={{
+                      background:
+                        "linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0))",
+                    }}
+                  ></div>
+                  <div
+                    className="w-1 h-1 rounded-full"
+                    style={{
+                      background: "rgba(255, 255, 255, 0.8)",
+                    }}
+                  ></div>
+                  <div
+                    className="w-12 h-px mx-2"
+                    style={{
+                      background:
+                        "linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0))",
+                    }}
+                  ></div>
+                </div>
+              </div>
+
+              {/* Mobile indicator for expandable content */}
+              {isMobile && (
+                <span className="absolute -right-8 top-1/2 -translate-y-1/2 text-white/70">
+                  {expandedInfo === 2 ? "−" : "+"}
                 </span>
               )}
             </div>
