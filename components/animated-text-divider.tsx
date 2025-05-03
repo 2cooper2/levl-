@@ -89,38 +89,32 @@ const floatAnimation = `
   0% { opacity: 0; }
   100% { opacity: 1; }
 }
+
+@keyframes dividerFloat {
+  0% { transform: translateZ(300px) translateY(-50%); }
+  50% { transform: translateZ(330px) translateY(-50%) translateY(-3px); }
+  100% { transform: translateZ(300px) translateY(-50%); }
+}
 `
 
 const enhanced3DStyles = `
-  @keyframes float3D {
-    0% { transform: translateZ(120px) rotateX(8deg); }
-    50% { transform: translateZ(140px) rotateX(8deg) translateY(-5px); }
-    100% { transform: translateZ(120px) rotateX(8deg); }
+  /* Static positioning styles instead of animations */
+  .static-3d-front {
+    transform: translateZ(180px) rotateX(10deg);
+    transform-style: preserve-3d;
+    filter: drop-shadow(0 15px 20px rgba(0,0,0,0.4));
   }
   
-  @keyframes floatMiddle3D {
-    0% { transform: translateZ(20px) rotateX(3deg); }
-    50% { transform: translateZ(30px) rotateX(3deg) translateY(-2px); }
-    100% { transform: translateZ(20px) rotateX(3deg); }
+  .static-3d-middle {
+    transform: translateZ(40px) rotateX(5deg);
+    transform-style: preserve-3d;
+    filter: drop-shadow(0 8px 15px rgba(0,0,0,0.3));
   }
   
-  @keyframes floatBack3D {
-    0% { transform: translateZ(-80px) rotateX(-8deg); }
-    50% { transform: translateZ(-100px) rotateX(-8deg) translateY(5px); }
-    100% { transform: translateZ(-80px) rotateX(-8deg); }
-  }
-  
-  .float-3d-front {
-    animation: float3D 8s ease-in-out infinite;
-  }
-  
-  .float-3d-middle {
-    animation: floatMiddle3D 8s ease-in-out infinite;
-    animation-delay: 1s;
-  }
-  
-  .float-3d-back {
-    animation: floatBack3D 8s ease-in-out infinite reverse;
+  .static-3d-back {
+    transform: translateZ(-120px) rotateX(-10deg);
+    transform-style: preserve-3d;
+    filter: drop-shadow(0 -8px 15px rgba(0,0,0,0.25));
   }
   
   .depth-container {
@@ -216,7 +210,7 @@ export function AnimatedTextDivider({
       className={`relative w-full py-12 md:py-16 overflow-hidden ${className}`}
       aria-label={`${firstText}, ${secondText}, and ${thirdText} section`}
       style={{
-        perspective: "800px",
+        perspective: "1200px",
         perspectiveOrigin: "center center",
       }}
     >
@@ -268,9 +262,9 @@ export function AnimatedTextDivider({
               transformStyle: "preserve-3d",
             }}
           >
-            {/* First word with luxury styling - positioned with depth */}
+            {/* First word with luxury styling - positioned with depth - NO ANIMATION */}
             <div
-              className="relative mb-3 md:mb-4 group w-full float-3d-front"
+              className="relative mb-3 md:mb-4 group w-full static-3d-front"
               onClick={() => toggleExpanded(0)}
               onMouseEnter={() => setActiveIndex(0)}
               onMouseLeave={() => expandedInfo !== 0 && setActiveIndex(null)}
@@ -279,11 +273,6 @@ export function AnimatedTextDivider({
               aria-expanded={expandedInfo === 0}
               aria-controls="learn-panel"
               onKeyDown={(e) => handleKeyDown(0, e)}
-              style={{
-                transform: "translateZ(120px) rotateX(8deg)",
-                transformStyle: "preserve-3d",
-                filter: "drop-shadow(0 10px 15px rgba(0,0,0,0.3))",
-              }}
             >
               {/* Luxury frame */}
               <div
@@ -328,14 +317,18 @@ export function AnimatedTextDivider({
 
               {/* Luxury text container */}
               <div className="relative px-8 py-2 flex flex-col items-center">
-                {/* Elegant label */}
+                {/* Elegant label with ENHANCED DEPTH */}
                 <span
-                  className="text-xs tracking-[0.4em] uppercase mb-1 opacity-80"
+                  className="text-sm tracking-[0.4em] uppercase mb-1 opacity-80"
                   style={{
                     color: "#ffffff",
                     fontFamily: "'Montserrat', sans-serif",
                     letterSpacing: "0.4em",
                     fontWeight: 300,
+                    position: "relative",
+                    transform: "translateZ(210px)",
+                    textShadow: "0 4px 8px rgba(0,0,0,0.5), 0 0 20px rgba(255,255,255,0.3)",
+                    filter: "drop-shadow(0 10px 15px rgba(0,0,0,0.4))",
                   }}
                 >
                   Elevate Your Potential
@@ -352,35 +345,11 @@ export function AnimatedTextDivider({
                     lineHeight: 1.2,
                     textAlign: "center",
                     textTransform: "uppercase",
-                    textShadow: "0 4px 8px rgba(0,0,0,0.3), 0 0 30px rgba(255,255,255,0.2)",
+                    textShadow: "0 6px 12px rgba(0,0,0,0.4), 0 0 40px rgba(255,255,255,0.25)",
                   }}
                 >
                   {firstText}
                 </h2>
-
-                {/* Elegant divider */}
-                <div className="mt-2 flex items-center justify-center w-full">
-                  <div
-                    className="w-12 h-px mx-2"
-                    style={{
-                      background:
-                        "linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0))",
-                    }}
-                  ></div>
-                  <div
-                    className="w-1 h-1 rounded-full"
-                    style={{
-                      background: "rgba(255, 255, 255, 0.8)",
-                    }}
-                  ></div>
-                  <div
-                    className="w-12 h-px mx-2"
-                    style={{
-                      background:
-                        "linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0))",
-                    }}
-                  ></div>
-                </div>
               </div>
 
               {/* Mobile indicator for expandable content */}
@@ -391,9 +360,53 @@ export function AnimatedTextDivider({
               )}
             </div>
 
-            {/* Middle word - GROW YOUR BUSINESS */}
+            {/* Central Elegant Divider - SMALLER with ENHANCED depth */}
             <div
-              className="relative mb-3 md:mb-4 group w-full float-3d-middle"
+              className="relative w-full z-10 mb-3 md:mb-4"
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "0",
+                right: "0",
+                transform: "translateZ(300px) translateY(-50%)",
+                transformStyle: "preserve-3d",
+                animation: "dividerFloat 8s ease-in-out infinite",
+                filter: "drop-shadow(0 35px 45px rgba(0,0,0,0.8))",
+              }}
+            >
+              <div className="flex items-center justify-center">
+                <div
+                  className="w-14 md:w-20 h-[1px] mx-2"
+                  style={{
+                    background:
+                      "linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1), rgba(255, 255, 255, 0))",
+                    boxShadow:
+                      "0 0 15px rgba(255,255,255,0.9), 0 0 30px rgba(255,255,255,0.5), 0 0 45px rgba(255,255,255,0.3)",
+                  }}
+                ></div>
+                <div
+                  className="w-2 h-2 rounded-full"
+                  style={{
+                    background: "rgba(255, 255, 255, 1)",
+                    boxShadow:
+                      "0 0 15px rgba(255,255,255,1), 0 0 30px rgba(255,255,255,0.9), 0 0 45px rgba(255,255,255,0.5), 0 0 60px rgba(255,255,255,0.3)",
+                  }}
+                ></div>
+                <div
+                  className="w-14 md:w-20 h-[1px] mx-2"
+                  style={{
+                    background:
+                      "linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1), rgba(255, 255, 255, 0))",
+                    boxShadow:
+                      "0 0 15px rgba(255,255,255,0.9), 0 0 30px rgba(255,255,255,0.5), 0 0 45px rgba(255,255,255,0.3)",
+                  }}
+                ></div>
+              </div>
+            </div>
+
+            {/* Middle word - GROW YOUR BUSINESS - NO ANIMATION */}
+            <div
+              className="relative mb-3 md:mb-4 group w-full static-3d-middle"
               onClick={() => toggleExpanded(1)}
               onMouseEnter={() => setActiveIndex(1)}
               onMouseLeave={() => expandedInfo !== 1 && setActiveIndex(null)}
@@ -402,11 +415,6 @@ export function AnimatedTextDivider({
               aria-expanded={expandedInfo === 1}
               aria-controls="grow-panel"
               onKeyDown={(e) => handleKeyDown(1, e)}
-              style={{
-                transform: "translateZ(20px) rotateX(3deg)",
-                transformStyle: "preserve-3d",
-                filter: "drop-shadow(0 5px 10px rgba(0,0,0,0.25))",
-              }}
             >
               {/* Luxury frame */}
               <div
@@ -460,9 +468,7 @@ export function AnimatedTextDivider({
                     letterSpacing: "0.4em",
                     fontWeight: 300,
                   }}
-                >
-                  Expand Your Horizons
-                </span>
+                ></span>
 
                 {/* Main heading with luxury styling */}
                 <h2
@@ -475,36 +481,12 @@ export function AnimatedTextDivider({
                     lineHeight: 1.2,
                     textAlign: "center",
                     textTransform: "uppercase",
-                    textShadow: "0 2px 5px rgba(0,0,0,0.25), 0 0 20px rgba(255,255,255,0.15)",
+                    textShadow: "0 4px 8px rgba(0,0,0,0.3), 0 0 25px rgba(255,255,255,0.2)",
                     opacity: 0.9,
                   }}
                 >
                   {secondText}
                 </h2>
-
-                {/* Elegant divider */}
-                <div className="mt-2 flex items-center justify-center w-full">
-                  <div
-                    className="w-12 h-px mx-2"
-                    style={{
-                      background:
-                        "linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0))",
-                    }}
-                  ></div>
-                  <div
-                    className="w-1 h-1 rounded-full"
-                    style={{
-                      background: "rgba(255, 255, 255, 0.8)",
-                    }}
-                  ></div>
-                  <div
-                    className="w-12 h-px mx-2"
-                    style={{
-                      background:
-                        "linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0))",
-                    }}
-                  ></div>
-                </div>
               </div>
 
               {/* Mobile indicator for expandable content */}
@@ -515,9 +497,9 @@ export function AnimatedTextDivider({
               )}
             </div>
 
-            {/* Third word with luxury styling - positioned with depth */}
+            {/* Third word with luxury styling - positioned with depth - NO ANIMATION */}
             <div
-              className="relative group w-full float-3d-back"
+              className="relative group w-full static-3d-back"
               onClick={() => toggleExpanded(2)}
               onMouseEnter={() => setActiveIndex(2)}
               onMouseLeave={() => expandedInfo !== 2 && setActiveIndex(null)}
@@ -526,11 +508,6 @@ export function AnimatedTextDivider({
               aria-expanded={expandedInfo === 2}
               aria-controls="earn-panel"
               onKeyDown={(e) => handleKeyDown(2, e)}
-              style={{
-                transform: "translateZ(-80px) rotateX(-8deg)",
-                transformStyle: "preserve-3d",
-                filter: "drop-shadow(0 -5px 10px rgba(0,0,0,0.2))",
-              }}
             >
               {/* Luxury frame */}
               <div
@@ -597,34 +574,10 @@ export function AnimatedTextDivider({
                     lineHeight: 1.2,
                     textAlign: "center",
                     textTransform: "uppercase",
-                    opacity: 0.75, // More reduced opacity for enhanced depth effect
-                    textShadow: "0 -2px 5px rgba(0,0,0,0.2)",
+                    opacity: 0.7,
+                    textShadow: "0 -4px 8px rgba(0,0,0,0.25)",
                   }}
                 ></h2>
-
-                {/* Elegant divider */}
-                <div className="mt-2 flex items-center justify-center w-full">
-                  <div
-                    className="w-12 h-px mx-2"
-                    style={{
-                      background:
-                        "linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0))",
-                    }}
-                  ></div>
-                  <div
-                    className="w-1 h-1 rounded-full"
-                    style={{
-                      background: "rgba(255, 255, 255, 0.8)",
-                    }}
-                  ></div>
-                  <div
-                    className="w-12 h-px mx-2"
-                    style={{
-                      background:
-                        "linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0))",
-                    }}
-                  ></div>
-                </div>
               </div>
 
               {/* Mobile indicator for expandable content */}
