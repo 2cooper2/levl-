@@ -121,30 +121,6 @@ const enhanced3DStyles = `
     transform-style: preserve-3d;
     transform: translateZ(0);
   }
-  
-  /* Mobile-specific styles to ensure consistency */
-  @media (max-width: 767px) {
-    .mobile-text-fix {
-      display: block !important;
-      opacity: 1 !important;
-      visibility: visible !important;
-    }
-    
-    /* Ensure the third section shows EARN text on mobile */
-    .third-section-text:empty::before {
-      content: "EARN";
-      display: block;
-      color: #ffffff;
-      font-family: 'Cormorant Garamond', serif;
-      font-weight: 300;
-      letter-spacing: 0.15em;
-      line-height: 1.2;
-      text-align: center;
-      text-transform: uppercase;
-      opacity: 0.7;
-      text-shadow: 0 -4px 8px rgba(0,0,0,0.25);
-    }
-  }
 `
 
 interface AnimatedTextDividerProps {
@@ -360,7 +336,7 @@ export function AnimatedTextDivider({
 
                 {/* Main heading with luxury styling - NO ANIMATION */}
                 <h2
-                  className="text-4xl md:text-5xl lg:text-6xl relative tracking-widest mobile-text-fix"
+                  className="text-4xl md:text-5xl lg:text-6xl relative tracking-widest"
                   style={{
                     color: "#ffffff",
                     fontFamily: "'Cormorant Garamond', serif",
@@ -496,7 +472,7 @@ export function AnimatedTextDivider({
 
                 {/* Main heading with luxury styling */}
                 <h2
-                  className="text-4xl md:text-5xl lg:text-6xl relative tracking-widest mobile-text-fix"
+                  className="text-4xl md:text-5xl lg:text-6xl relative tracking-widest"
                   style={{
                     color: "#ffffff",
                     fontFamily: "'Cormorant Garamond', serif",
@@ -589,7 +565,7 @@ export function AnimatedTextDivider({
 
                 {/* Main heading with luxury styling - NO ANIMATION */}
                 <h2
-                  className="text-4xl md:text-5xl lg:text-6xl relative tracking-widest mobile-text-fix third-section-text"
+                  className="text-4xl md:text-5xl lg:text-6xl relative tracking-widest"
                   style={{
                     color: "#ffffff",
                     fontFamily: "'Cormorant Garamond', serif",
@@ -601,9 +577,7 @@ export function AnimatedTextDivider({
                     opacity: 0.7,
                     textShadow: "0 -4px 8px rgba(0,0,0,0.25)",
                   }}
-                >
-                  {/* This is empty on desktop but will show "EARN" on mobile via CSS */}
-                </h2>
+                ></h2>
               </div>
 
               {/* Mobile indicator for expandable content */}
