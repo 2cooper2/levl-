@@ -26,7 +26,9 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <AuthProvider>
-            <ErrorBoundary>{children}</ErrorBoundary>
+            <ErrorBoundary>
+              <div className="pb-16 md:pb-0">{children}</div>
+            </ErrorBoundary>
             <BottomNavigation />
             <Toaster />
           </AuthProvider>
