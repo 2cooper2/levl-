@@ -367,12 +367,12 @@
 /* Fixed header spacing */
 body {
   padding-top: 4rem; /* 64px, matches the header height */
-  padding-bottom: 4rem; /* Space for bottom navigation on mobile */
 }
 
-@media (min-width: 768px) {
+/* Add bottom padding only on mobile */
+@media (max-width: 767px) {
   body {
-    padding-bottom: 0; /* Remove bottom padding on desktop */
+    padding-bottom: 4rem; /* Space for bottom navigation on mobile */
   }
 }
 

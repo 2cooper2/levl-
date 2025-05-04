@@ -1,5 +1,5 @@
-import MobileExplore from "./mobile-explore"
+import ExploreClientPage from "@/app/explore/explore-client"
 
 export default function ExplorePage() {
-  return <MobileExplore />
+  return <ExploreClientPage />
 }

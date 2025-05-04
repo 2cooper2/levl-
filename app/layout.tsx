@@ -13,7 +13,6 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Levl - Connect with skilled professionals",
   description: "Find and book services from skilled professionals in your area",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
     generator: 'v0.dev'
 }
 

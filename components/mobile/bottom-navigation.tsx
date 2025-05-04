@@ -11,6 +11,7 @@ export function BottomNavigation() {
   const router = useRouter()
   const [visible, setVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
+  const [mounted, setMounted] = useState(false)
 
   // Hide bottom navigation on certain pages
   const shouldHideOnPages = [
@@ -24,6 +25,8 @@ export function BottomNavigation() {
   const shouldHide = shouldHideOnPages.some((page) => pathname?.startsWith(page))
 
   useEffect(() => {
+    setMounted(true)
+
     const handleScroll = () => {
       const currentScrollY = window.scrollY
 
@@ -41,6 +44,10 @@ export function BottomNavigation() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [lastScrollY])
 
+  // Don't render anything during SSR to prevent hydration mismatch
+  if (!mounted) return null
+
+  // Don't render if we should hide on this page
   if (shouldHide) return null
 
   const navItems = [
