@@ -6,7 +6,6 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider } from "@/context/auth-context"
 import { Toaster } from "@/components/ui/toaster"
 import { ErrorBoundary } from "@/components/error-boundary"
-import { BottomNavigation } from "@/components/mobile/bottom-navigation"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -26,10 +25,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <AuthProvider>
-            <ErrorBoundary>
-              <div className="pb-16 md:pb-0">{children}</div>
-            </ErrorBoundary>
-            <BottomNavigation />
+            <ErrorBoundary>{children}</ErrorBoundary>
             <Toaster />
           </AuthProvider>
         </ThemeProvider>

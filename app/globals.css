@@ -417,26 +417,3 @@ body {
     min-width: 44px;
   }
 }
-
-/* Bottom navigation specific styles */
-.bottom-nav-container {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 4rem; /* 64px */
-  z-index: 40;
-  background-color: hsl(var(--background));
-  border-top: 1px solid hsl(var(--border));
-}
-
-/* Add padding to main content area to prevent content from being hidden behind bottom nav */
-.main-content {
-  padding-bottom: 4rem; /* Match height of bottom nav */
-}
-
-@media (min-width: 768px) {
-  .main-content {
-    padding-bottom: 0; /* No bottom nav on desktop */
-  }
-}
