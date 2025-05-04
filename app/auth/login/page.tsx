@@ -13,10 +13,15 @@ import { LevlLogo } from "@/components/levl-logo"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { supabase } from "@/lib/supabase-client"
 import Cookies from "js-cookie"
+import { FormError } from "@/components/ui/form-error"
+import { validateForm, required, email } from "@/lib/form-validation"
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  })
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
@@ -25,16 +30,48 @@ export default function LoginPage() {
   useEffect(() => {
     // Prefetch the dashboard page to make navigation faster
     router.prefetch("/dashboard")
-  }, [router])
+
+    // Check for success message from signup
+    const signupSuccess = searchParams.get("signup") === "success"
+    if (signupSuccess) {
+      // Could show a success toast or message here
+    }
+  }, [router, searchParams])
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+
+    // Clear error for this field when user types
+    if (formErrors[name]) {
+      setFormErrors((prev) => {
+        const newErrors = { ...prev }
+        delete newErrors[name]
+        return newErrors
+      })
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+
+    // Validate form
+    const validation = validateForm(formData, {
+      email: [required(), email()],
+      password: [required()],
+    })
+
+    if (!validation.isValid) {
+      setFormErrors(validation.errors)
+      return
+    }
+
     setIsLoading(true)
 
     try {
       // Set auth cookie immediately for faster perceived login
-      Cookies.set("auth-token", email, { expires: 7 }) // 7 days expiry
+      Cookies.set("auth-token", formData.email, { expires: 7 }) // 7 days expiry
 
       // Redirect immediately to dashboard
       window.location.href = "/dashboard"
@@ -43,8 +80,8 @@ export default function LoginPage() {
       // This will run but the page will have already navigated away
       supabase.auth
         .signInWithPassword({
-          email,
-          password,
+          email: formData.email,
+          password: formData.password,
         })
         .then(({ data, error }) => {
           if (error) {
@@ -84,12 +121,15 @@ export default function LoginPage() {
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
+                name="email"
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={formData.email}
+                onChange={handleChange}
                 placeholder="john@example.com"
-                required
+                aria-invalid={!!formErrors.email}
+                aria-describedby={formErrors.email ? "email-error" : undefined}
               />
+              <FormError message={formErrors.email} />
             </div>
 
             <div className="space-y-2">
@@ -101,12 +141,15 @@ export default function LoginPage() {
               </div>
               <Input
                 id="password"
+                name="password"
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={formData.password}
+                onChange={handleChange}
                 placeholder="••••••••"
-                required
+                aria-invalid={!!formErrors.password}
+                aria-describedby={formErrors.password ? "password-error" : undefined}
               />
+              <FormError message={formErrors.password} />
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>

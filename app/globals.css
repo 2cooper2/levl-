@@ -27,6 +27,35 @@
     animation: shimmer 2s infinite;
   }
 
+  /* Mobile-specific utilities */
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+
+  .tap-highlight-transparent {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .overscroll-none {
+    overscroll-behavior: none;
+  }
+
+  .mobile-snap-scroll {
+    scroll-snap-type: x mandatory;
+  }
+
+  .mobile-snap-center {
+    scroll-snap-align: center;
+  }
+
   @keyframes fadeIn {
     from {
       opacity: 0;
@@ -338,6 +367,13 @@
 /* Fixed header spacing */
 body {
   padding-top: 4rem; /* 64px, matches the header height */
+  padding-bottom: 4rem; /* Space for bottom navigation on mobile */
+}
+
+@media (min-width: 768px) {
+  body {
+    padding-bottom: 0; /* Remove bottom padding on desktop */
+  }
 }
 
 /* Enhanced glassmorphic effect for header */
@@ -364,4 +400,20 @@ body {
 .fixed {
   width: 100vw;
   min-height: 100vh;
+}
+
+/* Mobile form optimizations */
+@media (max-width: 767px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important; /* Prevents iOS zoom on focus */
+  }
+
+  /* Increase touch targets */
+  button,
+  a {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }

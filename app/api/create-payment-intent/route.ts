@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import Stripe from "stripe"
 import { getConnectedAccountId } from "@/app/actions/payment-actions"
+import { ApiError, handleApiError } from "@/lib/api-error"
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY
 
@@ -18,7 +19,14 @@ const stripe = new Stripe(stripeSecretKey, {
 // Modify the POST function to handle errors better
 export async function POST(request: Request) {
   try {
-    const { serviceId, description, providerId } = await request.json()
+    const body = await request.json()
+
+    // Validate required fields
+    if (!body.serviceId || !body.description) {
+      throw new ApiError("Missing required fields: serviceId and description are required", 400)
+    }
+
+    const { serviceId, description, providerId } = body
 
     // Fixed amount of $2.02 (202 cents)
     const amount = 202
@@ -77,12 +85,7 @@ export async function POST(request: Request) {
       paymentIntentId: paymentIntent.id,
       isConnectedAccount: !!connectedAccountId,
     })
-  } catch (error: any) {
-    console.error("Error creating payment intent:", error)
-    let message = "Failed to create payment intent"
-    if (error && typeof error === "object" && "message" in error) {
-      message = error.message as string
-    }
-    return NextResponse.json({ error: { message: message } }, { status: 500 })
+  } catch (error) {
+    return handleApiError(error)
   }
 }
