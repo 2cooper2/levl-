@@ -12,6 +12,7 @@ const publicPaths = [
   "/explore",
   "/about",
   "/how-it-works",
+  "/profile", // Add profile to public paths
 ]
 
 // Check if a path starts with any of these prefixes
