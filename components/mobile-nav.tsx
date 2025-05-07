@@ -97,7 +97,9 @@ export function MobileNav() {
               <Link
                 href="/profile"
                 className="text-lg font-medium transition-colors hover:text-primary flex items-center gap-2 bg-primary/10 px-3 py-2 rounded-md"
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  setOpen(false)
+                }}
               >
                 <User className="h-5 w-5 text-primary" />
                 My Profile
