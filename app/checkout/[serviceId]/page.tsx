@@ -10,15 +10,18 @@ import { AlertCircle, ArrowLeft, AlertTriangle } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader } from "@/components/ui/card"
+import { useToast } from "@/components/ui/use-toast"
 
 // Initialize Stripe with the publishable key
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "")
 
 export default function CheckoutPage({ params }: { params: { serviceId: string } }) {
   const [clientSecret, setClientSecret] = useState<string | null>(null)
+  const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [needsOnboarding, setNeedsOnboarding] = useState(false)
+  const { toast } = useToast()
   const [serviceDetails, setServiceDetails] = useState<{
     title: string
     amount: number
@@ -26,28 +29,32 @@ export default function CheckoutPage({ params }: { params: { serviceId: string }
   } | null>(null)
 
   useEffect(() => {
-    // In a real app, fetch service details from your API
+    // Fetch service details from your API
     const fetchServiceDetails = async () => {
       try {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 500))
-
-        // Use the actual user ID that has a connected account
+        setIsLoading(true)
+        // For testing, we'll use hardcoded values
+        // In production, you would fetch this from your API
         setServiceDetails({
           title: "Professional Website Development",
-          amount: 202, // $2.02 in cents
-          providerId: "0c4ebdf3-3421-4f6a-adaf-0df55a85b242", // The user ID with the connected account
+          amount: 1999, // $19.99 in cents
+          providerId: "0c4ebdf3-3421-4f6a-adaf-0df55a85b242", // Replace with a valid provider ID
         })
       } catch (err) {
         console.error("Error fetching service details:", err)
         setError("Could not load service details")
+        toast({
+          title: "Error",
+          description: "Could not load service details. Please try again.",
+          variant: "destructive",
+        })
       } finally {
         setIsLoading(false)
       }
     }
 
     fetchServiceDetails()
-  }, [params.serviceId])
+  }, [params.serviceId, toast])
 
   useEffect(() => {
     if (!serviceDetails) return
@@ -55,6 +62,12 @@ export default function CheckoutPage({ params }: { params: { serviceId: string }
     const createPaymentIntent = async () => {
       setIsLoading(true)
       try {
+        console.log("Creating payment intent with:", {
+          amount: serviceDetails.amount,
+          serviceId: params.serviceId,
+          providerId: serviceDetails.providerId,
+        })
+
         const response = await fetch("/api/create-payment-intent", {
           method: "POST",
           headers: {
@@ -63,45 +76,70 @@ export default function CheckoutPage({ params }: { params: { serviceId: string }
           body: JSON.stringify({
             amount: serviceDetails.amount,
             serviceId: params.serviceId,
-            providerId: serviceDetails.providerId, // Pass the provider ID
+            providerId: serviceDetails.providerId,
             description: serviceDetails.title,
           }),
         })
 
-        if (!response.ok) {
-          const errorText = await response.text()
-          console.error("Payment intent creation failed:", errorText)
-          setError(`Payment setup failed: ${response.status} ${response.statusText}`)
+        const responseText = await response.text()
+        console.log("Response from create-payment-intent:", responseText)
+
+        let data
+        try {
+          data = JSON.parse(responseText)
+        } catch (e) {
+          console.error("Failed to parse response as JSON:", e)
+          setError(`Invalid response from server: ${responseText}`)
           setIsLoading(false)
           return
         }
 
-        const data = await response.json()
+        if (!response.ok) {
+          console.error("Payment intent creation failed:", data.error || response.statusText)
+          setError(`Payment setup failed: ${data.error || response.statusText}`)
+          toast({
+            title: "Payment Setup Failed",
+            description: data.error || "Could not initialize payment. Please try again later.",
+            variant: "destructive",
+          })
+          setIsLoading(false)
+          return
+        }
 
         if (data.clientSecret) {
           setClientSecret(data.clientSecret)
-          // Note whether this is a connected account payment
-          const isConnected = data.isConnectedAccount || false
-          if (!isConnected) {
-            console.warn("Provider does not have a connected Stripe account. Using direct payment.")
-            // You could show a warning to the user here
-          }
+          setPaymentIntentId(data.paymentIntentId)
         } else if (data.needsOnboarding) {
           setNeedsOnboarding(true)
-          setError(data.error || "Provider needs to complete Stripe Connect setup")
+          setError(data.error || "Provider needs to complete payment setup")
+          toast({
+            title: "Provider Not Ready",
+            description: "This service provider hasn't completed their payment setup yet.",
+            variant: "destructive",
+          })
         } else {
-          setError(data.error?.message || "Failed to initialize payment")
+          setError(data.error || "Failed to initialize payment")
+          toast({
+            title: "Payment Error",
+            description: data.error || "Failed to initialize payment",
+            variant: "destructive",
+          })
         }
       } catch (error: any) {
         console.error("Error creating payment intent:", error)
         setError(error.message || "Failed to initialize payment")
+        toast({
+          title: "Error",
+          description: error.message || "An unexpected error occurred",
+          variant: "destructive",
+        })
       } finally {
         setIsLoading(false)
       }
     }
 
     createPaymentIntent()
-  }, [serviceDetails, params.serviceId])
+  }, [serviceDetails, params.serviceId, toast])
 
   // Stripe Elements options
   const appearance = {
@@ -155,8 +193,8 @@ export default function CheckoutPage({ params }: { params: { serviceId: string }
               </CardHeader>
               <CardContent className="pt-6">
                 <p className="text-sm text-muted-foreground mb-4">
-                  The service provider needs to complete their Stripe Connect setup before they can accept payments.
-                  Please try again later or contact the provider directly.
+                  The service provider needs to complete their payment setup before they can accept payments. Please try
+                  again later or contact the provider directly.
                 </p>
               </CardContent>
               <CardFooter className="bg-yellow-50 dark:bg-yellow-950/20 border-t">
@@ -173,12 +211,17 @@ export default function CheckoutPage({ params }: { params: { serviceId: string }
                 <h3 className="font-medium">Payment Error</h3>
                 <p>{error}</p>
                 <p className="text-sm mt-2">Please try again or contact support if the issue persists.</p>
+                <Button variant="outline" className="mt-4" onClick={() => window.history.back()}>
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Go Back
+                </Button>
               </div>
             </div>
-          ) : clientSecret && serviceDetails ? (
+          ) : clientSecret && paymentIntentId && serviceDetails ? (
             <Elements stripe={stripePromise} options={options}>
               <PaymentForm
                 clientSecret={clientSecret}
+                paymentIntentId={paymentIntentId}
                 amount={serviceDetails.amount}
                 serviceId={params.serviceId}
                 providerId={serviceDetails.providerId}
@@ -188,6 +231,10 @@ export default function CheckoutPage({ params }: { params: { serviceId: string }
           ) : (
             <div className="text-center">
               <p>Unable to initialize payment. Please try again.</p>
+              <Button variant="outline" className="mt-4" onClick={() => window.history.back()}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Go Back
+              </Button>
             </div>
           )}
         </div>

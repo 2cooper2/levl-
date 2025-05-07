@@ -46,6 +46,7 @@ type AuthContextType = {
   terminateSession: (sessionId: string) => Promise<boolean>
   terminateAllOtherSessions: () => Promise<boolean>
   setUser: (user: User | null) => void
+  checkAuth: () => Promise<boolean>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -215,12 +216,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Login function
   const login = async (email: string, password: string) => {
     try {
+      setIsLoading(true)
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
       if (error) {
+        console.error("Login error:", error.message)
         return { success: false, error: error.message }
       }
 
@@ -228,6 +232,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const userData = await fetchUserProfile(data.user.id)
         setUser(userData)
         setSession(data.session)
+
+        // Update last login timestamp in the users table
+        await supabase.from("users").update({ last_login_at: new Date().toISOString() }).eq("id", data.user.id)
+
         return { success: true }
       }
 
@@ -235,6 +243,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error: any) {
       console.error("Login error:", error)
       return { success: false, error: error.message || "An error occurred during login" }
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -339,6 +349,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  // Check if user is authenticated
+  const checkAuth = async (): Promise<boolean> => {
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
+      if (!session) {
+        return false
+      }
+
+      // Verify the session is valid by checking user data
+      const { data: userData, error } = await supabase.auth.getUser()
+
+      if (error || !userData.user) {
+        return false
+      }
+
+      return true
+    } catch (error) {
+      console.error("Auth check error:", error)
+      return false
+    }
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -356,6 +391,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         terminateSession,
         terminateAllOtherSessions,
         setUser,
+        checkAuth,
       }}
     >
       {children}

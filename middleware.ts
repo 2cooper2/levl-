@@ -27,24 +27,17 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Check for auth cookie
-  const authCookie = request.cookies.get("auth-token")?.value
-
-  // Check for Supabase session
+  // Check for Supabase session - the only reliable way to verify authentication
   const supabaseSession =
-    request.cookies.get("sb-access-token")?.value ||
-    request.cookies.get("sb:token")?.value ||
-    request.cookies.get("levl-supabase-auth")?.value
+    request.cookies.get("sb-access-token")?.value || request.cookies.get("sb-refresh-token")?.value
 
-  // User is authenticated if either cookie is present
-  const isAuthenticated = !!authCookie || !!supabaseSession
-
-  // Redirect logic
-  if (!isAuthenticated) {
-    // Redirect to login if trying to access protected routes while not authenticated
-    const redirectUrl = new URL("/auth/login", request.url)
-    redirectUrl.searchParams.set("redirectTo", path)
-    return NextResponse.redirect(redirectUrl)
+  // If no session exists, redirect to login
+  if (!supabaseSession) {
+    // Redirect to login is removed. Instead, return a 401 Unauthorized response.
+    return new NextResponse(JSON.stringify({ success: false, message: "authentication failed" }), {
+      status: 401,
+      headers: { "content-type": "application/json" },
+    })
   }
 
   return NextResponse.next()

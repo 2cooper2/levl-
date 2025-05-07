@@ -40,6 +40,29 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 
+// Add these keyframe animations
+const animationKeyframes = {
+  shimmer: `@keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+  }`,
+  float: `@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+  }`,
+  pulse: `@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+  }`,
+  gradientMove: `@keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }`,
+}
+
 export default function CategoryPage({ params }: { params: { slug: string } }) {
   const router = useRouter()
   const [isLoaded, setIsLoaded] = useState(false)
@@ -133,8 +156,31 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
   // Filter panel component
   const FilterPanel = () => (
     <div className="space-y-6">
+      {/* Add subtle animation to filter panel */}
+      <style jsx>{`
+        .filter-item {
+          transition: all 0.2s ease;
+        }
+        .filter-item:hover {
+          background-color: rgba(147, 51, 234, 0.05);
+          transform: translateX(5px);
+        }
+        .filter-header {
+          position: relative;
+          overflow: hidden;
+        }
+        .filter-header::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(147, 51, 234, 0.3), transparent);
+        }
+      `}</style>
       <div className="bg-background/80 backdrop-blur-sm rounded-xl border border-purple-200/30 dark:border-purple-900/30 shadow-lg overflow-hidden">
-        <div className="bg-gradient-to-r from-primary/10 to-purple-500/10 p-4 border-b border-purple-200/30 dark:border-purple-900/30">
+        <div className="bg-gradient-to-r from-primary/10 to-purple-500/10 p-4 border-b border-purple-200/30 dark:border-purple-900/30 filter-header">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold flex items-center text-base bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
               <Filter className="mr-2 h-4 w-4 text-primary" />
@@ -184,7 +230,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
               {expertiseOptions.map((option) => (
                 <div
                   key={option.id}
-                  className="flex items-center space-x-2 p-2 rounded-md hover:bg-purple-50 dark:hover:bg-purple-900/10 transition-colors duration-200"
+                  className="flex items-center space-x-2 p-2 rounded-md hover:bg-purple-50 dark:hover:bg-purple-900/10 transition-colors duration-200 filter-item"
                 >
                   <Checkbox
                     id={`expertise-${option.id}`}
@@ -285,7 +331,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
               {ratingOptions.map((option) => (
                 <div
                   key={option.id}
-                  className="flex items-center space-x-2 p-2 rounded-md hover:bg-purple-50 dark:hover:bg-purple-900/10 transition-colors duration-200"
+                  className="flex items-center space-x-2 p-2 rounded-md hover:bg-purple-50 dark:hover:bg-purple-900/10 transition-colors duration-200 filter-item"
                 >
                   <RadioGroupItem
                     value={option.id}
@@ -329,7 +375,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
               {locationOptions.map((option) => (
                 <div
                   key={option.id}
-                  className="flex items-center space-x-2 p-2 rounded-md hover:bg-purple-50 dark:hover:bg-purple-900/10 transition-colors duration-200"
+                  className="flex items-center space-x-2 p-2 rounded-md hover:bg-purple-50 dark:hover:bg-purple-900/10 transition-colors duration-200 filter-item"
                 >
                   <Checkbox
                     id={`location-${option.id}`}
@@ -361,10 +407,29 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
 
       {/* Hero Section */}
       <section className="relative py-12 md:py-16 overflow-hidden border-b z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-purple-500/10 to-background z-0"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-purple-500/10 via-purple-400/5 to-background z-0 animate-gradient-slow"></div>
+        <div className="absolute inset-0 bg-grid-pattern opacity-[0.015] z-0"></div>
         <BackgroundPattern className="opacity-20 z-0" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/20 rounded-full filter blur-[100px]"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/10 rounded-full filter blur-[100px]"></div>
+        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/20 rounded-full filter blur-[100px] animate-pulse-slow"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/10 rounded-full filter blur-[100px] animate-pulse-slow-delay"></div>
+        <div className="absolute top-1/2 left-1/4 w-64 h-64 bg-blue-500/10 rounded-full filter blur-[120px] animate-pulse-slow-delay-2"></div>
+
+        {/* Add decorative elements */}
+        <div className="absolute top-10 left-10 w-6 h-6 rounded-full bg-purple-400/30 animate-[float_6s_ease-in-out_infinite]"></div>
+        <div className="absolute top-20 right-20 w-4 h-4 rounded-full bg-primary/30 animate-[float_8s_ease-in-out_infinite_0.5s]"></div>
+        <div className="absolute bottom-10 left-1/4 w-5 h-5 rounded-full bg-purple-500/30 animate-[float_7s_ease-in-out_infinite_1s]"></div>
+        <div className="absolute top-1/3 right-1/3 w-3 h-3 rounded-full bg-primary/20 animate-[float_5s_ease-in-out_infinite_1.5s]"></div>
+
+        {/* Add subtle particle effect */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-px h-px bg-primary/50 shadow-[0_0_10px_5px_rgba(147,51,234,0.3)] animate-[pulse_4s_ease-in-out_infinite]"></div>
+          <div className="absolute top-3/4 left-2/3 w-px h-px bg-purple-500/50 shadow-[0_0_8px_4px_rgba(147,51,234,0.2)] animate-[pulse_6s_ease-in-out_infinite_1s]"></div>
+          <div className="absolute top-1/2 left-1/6 w-px h-px bg-primary/50 shadow-[0_0_12px_6px_rgba(147,51,234,0.25)] animate-[pulse_5s_ease-in-out_infinite_2s]"></div>
+        </div>
+
+        {/* Add subtle light beam effect */}
+        <div className="absolute -top-20 left-1/3 w-1 h-[300px] bg-gradient-to-b from-purple-500/0 via-purple-500/10 to-purple-500/0 rotate-[30deg] animate-[float_15s_ease-in-out_infinite]"></div>
+        <div className="absolute -top-20 right-1/4 w-1 h-[250px] bg-gradient-to-b from-primary/0 via-primary/10 to-primary/0 -rotate-[20deg] animate-[float_12s_ease-in-out_infinite_2s]"></div>
 
         <div className="container px-4 md:px-6 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
@@ -383,25 +448,51 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              <div className="bg-background/50 backdrop-blur-sm rounded-lg p-4 border">
+              {/* Add subtle hover effect to each stat card */}
+              <style jsx>{`
+                .stat-card {
+                  transition: all 0.3s ease;
+                  position: relative;
+                  overflow: hidden;
+                }
+                .stat-card:hover {
+                  transform: translateY(-5px);
+                  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+                }
+                .stat-card::after {
+                  content: '';
+                  position: absolute;
+                  top: 0;
+                  left: 0;
+                  width: 200%;
+                  height: 100%;
+                  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+                  transform: translateX(-100%);
+                }
+                .stat-card:hover::after {
+                  transition: transform 0.6s ease;
+                  transform: translateX(100%);
+                }
+              `}</style>
+              <div className="bg-background/50 backdrop-blur-sm rounded-lg p-4 border stat-card">
                 <div className="text-2xl md:text-3xl font-bold text-primary">{categoryStats.experts}</div>
                 <div className="text-sm text-muted-foreground flex items-center justify-center">
                   <Users className="h-3.5 w-3.5 mr-1.5" /> Available Experts
                 </div>
               </div>
-              <div className="bg-background/50 backdrop-blur-sm rounded-lg p-4 border">
+              <div className="bg-background/50 backdrop-blur-sm rounded-lg p-4 border stat-card">
                 <div className="text-2xl md:text-3xl font-bold text-primary flex items-center justify-center">
                   {categoryStats.averageRating} <Star className="h-4 w-4 ml-1 fill-yellow-400 text-yellow-400" />
                 </div>
                 <div className="text-sm text-muted-foreground">Average Rating</div>
               </div>
-              <div className="bg-background/50 backdrop-blur-sm rounded-lg p-4 border">
+              <div className="bg-background/50 backdrop-blur-sm rounded-lg p-4 border stat-card">
                 <div className="text-2xl md:text-3xl font-bold text-primary">{categoryStats.completedProjects}+</div>
                 <div className="text-sm text-muted-foreground flex items-center justify-center">
                   <Award className="h-3.5 w-3.5 mr-1.5" /> Completed Projects
                 </div>
               </div>
-              <div className="bg-background/50 backdrop-blur-sm rounded-lg p-4 border">
+              <div className="bg-background/50 backdrop-blur-sm rounded-lg p-4 border stat-card">
                 <div className="text-2xl md:text-3xl font-bold text-primary">{categoryStats.averageResponse}</div>
                 <div className="text-sm text-muted-foreground flex items-center justify-center">
                   <Clock className="h-3.5 w-3.5 mr-1.5" /> Avg. Response Time
@@ -472,7 +563,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                     className="group"
                   >
                     <Card
-                      className={`overflow-hidden transition-all duration-300 hover:shadow-xl border border-purple-200/30 dark:border-purple-900/30 ${
+                      className={`overflow-hidden transition-all duration-300 hover:shadow-xl hover:translate-y-[-4px] border border-purple-200/30 dark:border-purple-900/30 ${
                         provider.featured
                           ? "bg-gradient-to-br from-purple-50/50 via-background to-primary/5 dark:from-purple-900/20 dark:via-background dark:to-primary/10"
                           : "hover:bg-gradient-to-br hover:from-purple-50/30 hover:via-background hover:to-primary/5 dark:hover:from-purple-900/10 dark:hover:via-background dark:hover:to-primary/5"
@@ -572,7 +663,21 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                                 onClick={() => router.push(`/services/${provider.id}`)}
                               >
                                 <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                                View Profile
+                                <span className="relative z-10 flex items-center">
+                                  View Profile
+                                  <svg
+                                    className="ml-1 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                                      clipRule="evenodd"
+                                    />
+                                  </svg>
+                                </span>
                               </Button>
                               <Button
                                 variant="outline"
@@ -592,22 +697,25 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                         </div>
                       </div>
 
-                      {provider.featured && (
-                        <div className="bg-gradient-to-r from-primary/10 via-purple-400/10 to-purple-500/10 px-6 py-2 flex items-center border-t border-purple-200/30 dark:border-purple-900/30">
-                          <Award className="h-4 w-4 text-primary mr-2" />
-                          <span className="text-sm font-medium bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
-                            Featured Expert • Top 1% in {categoryName}
-                          </span>
-                        </div>
-                      )}
+                      {/* Add subtle interaction cues */}
+                      <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-primary/0 via-primary/50 to-primary/0 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center"></div>
+                      <div className="absolute inset-y-0 right-0 w-1 bg-gradient-to-b from-purple-500/0 via-purple-500/50 to-purple-500/0 transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300 origin-center"></div>
+                      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/0 via-primary/50 to-primary/0 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center"></div>
+                      <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-purple-500/0 via-purple-500/50 to-purple-500/0 transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300 origin-center"></div>
                     </Card>
                   </motion.div>
                 ))}
               </div>
 
               <div className="mt-8 flex justify-center">
-                <Button variant="outline" className="gap-2 px-8">
-                  Load More <ArrowUpDown className="h-4 w-4" />
+                <Button
+                  variant="outline"
+                  className="gap-2 px-8 relative overflow-hidden group"
+                  aria-label="Load more experts"
+                >
+                  <span>Load More</span>
+                  <ArrowUpDown className="h-4 w-4" />
+                  <span className="absolute inset-0 w-full h-full bg-primary/5 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
                 </Button>
               </div>
             </div>
@@ -645,9 +753,11 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
                 transition={{ duration: 0.5, delay: index * 0.05 }}
               >
                 <Link href={`/category/${category.toLowerCase().replace(/\s+/g, "-")}`}>
-                  <div className="bg-background/80 backdrop-blur-sm rounded-lg p-4 border text-center hover:border-primary hover:shadow-md transition-all duration-300 h-full flex flex-col items-center justify-center">
-                    <h3 className="font-medium text-sm">{category}</h3>
-                    <p className="text-xs text-muted-foreground mt-1">120+ Experts</p>
+                  <div className="bg-background/80 backdrop-blur-sm rounded-lg p-4 border text-center hover:border-primary hover:shadow-md transition-all duration-300 h-full flex flex-col items-center justify-center relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-primary/50 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+                    <h3 className="font-medium text-sm relative z-10">{category}</h3>
+                    <p className="text-xs text-muted-foreground mt-1 relative z-10">120+ Experts</p>
                   </div>
                 </Link>
               </motion.div>

@@ -1,91 +1,57 @@
-import { NextResponse } from "next/server"
-import Stripe from "stripe"
-import { getConnectedAccountId } from "@/app/actions/payment-actions"
-import { ApiError, handleApiError } from "@/lib/api-error"
+import { type NextRequest, NextResponse } from "next/server"
+import { createPaymentIntent } from "@/app/actions/payment-actions"
 
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY
-
-// Ensure the Stripe secret key is defined
-if (!stripeSecretKey) {
-  console.error("STRIPE_SECRET_KEY is not set")
-  throw new Error("STRIPE_SECRET_KEY is not set")
-}
-
-// Initialize Stripe with the secret key
-const stripe = new Stripe(stripeSecretKey, {
-  apiVersion: "2023-10-16",
-})
-
-// Modify the POST function to handle errors better
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-
-    // Validate required fields
-    if (!body.serviceId || !body.description) {
-      throw new ApiError("Missing required fields: serviceId and description are required", 400)
-    }
-
-    const { serviceId, description, providerId } = body
-
-    // Fixed amount of $2.02 (202 cents)
-    const amount = 202
-
-    // Fixed platform fee of $0.02 (2 cents)
-    const applicationFeeAmount = 2
-
-    // Get the provider's connected account ID
-    let connectedAccountId
+    // Parse the request body
+    let body
     try {
-      connectedAccountId = await getConnectedAccountId(providerId)
+      body = await request.json()
     } catch (error) {
-      console.error("Error getting connected account ID:", error)
-      connectedAccountId = null
-      // Continue with direct payment
+      console.error("Error parsing request body:", error)
+      return NextResponse.json({ error: "Invalid request body" }, { status: 400 })
     }
 
-    // Create payment intent parameters
-    const paymentIntentParams: Stripe.PaymentIntentCreateParams = {
-      amount: amount,
-      currency: "usd",
-      // Include metadata about the service being purchased
-      metadata: {
-        serviceId,
-        providerId: providerId || "unknown",
-        description: description || "Service booking",
-        serviceFee: "2.00",
-        platformFee: "0.02",
-      },
-      // Enable automatic payment methods for the PaymentIntent
-      automatic_payment_methods: {
-        enabled: true,
-      },
+    const { amount, serviceId, providerId, description } = body
+
+    // Basic validation
+    if (!amount || !serviceId || !providerId) {
+      return NextResponse.json(
+        {
+          error:
+            `Missing required fields: ${!amount ? "amount" : ""} ${!serviceId ? "serviceId" : ""} ${!providerId ? "providerId" : ""}`.trim(),
+        },
+        { status: 400 },
+      )
     }
 
-    // If we have a connected account ID, use Stripe Connect
-    if (connectedAccountId) {
-      console.log("Using Stripe Connect with account:", connectedAccountId)
-
-      // Add Connect-specific parameters
-      paymentIntentParams.application_fee_amount = applicationFeeAmount
-      paymentIntentParams.transfer_data = {
-        destination: connectedAccountId,
-      }
-    } else {
-      console.log("No connected account found for provider. Using direct payment.")
-      // For development/testing purposes, we'll still create a payment intent
-      // In production, you might want to handle this differently
+    // Validate amount (must be positive number)
+    if (typeof amount !== "number" || amount <= 0) {
+      return NextResponse.json({ error: "Amount must be a positive number" }, { status: 400 })
     }
 
-    const paymentIntent = await stripe.paymentIntents.create(paymentIntentParams)
+    console.log("Creating payment intent with:", { amount, serviceId, providerId, description })
 
-    // Return the client secret to the client
-    return NextResponse.json({
-      clientSecret: paymentIntent.client_secret,
-      paymentIntentId: paymentIntent.id,
-      isConnectedAccount: !!connectedAccountId,
+    // Create a payment intent
+    const result = await createPaymentIntent({
+      amount,
+      serviceId,
+      providerId,
+      description: description || `Payment for service ${serviceId}`,
     })
-  } catch (error) {
-    return handleApiError(error)
+
+    if (result.error) {
+      console.error("Error creating payment intent:", result.error)
+      return NextResponse.json({ error: result.error }, { status: 500 })
+    }
+
+    return NextResponse.json({
+      clientSecret: result.clientSecret,
+      paymentIntentId: result.paymentIntentId,
+      isConnectedAccount: result.isConnectedAccount,
+    })
+  } catch (error: any) {
+    console.error("Error in create-payment-intent API:", error)
+    return NextResponse.json({ error: error.message || "An unexpected error occurred" }, { status: 500 })
   }
 }

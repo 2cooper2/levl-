@@ -2,124 +2,84 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { cn } from "@/lib/utils"
 import { LevlLogo } from "@/components/levl-logo"
-import { MobileNav } from "@/components/mobile-nav"
 import { Button } from "@/components/ui/button"
+import { UserNav } from "@/components/dashboard/user-nav"
 import { useAuth } from "@/context/auth-context"
-import { Menu, Moon, Sun } from "lucide-react"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { useTheme } from "next-themes"
+import { MobileNav } from "@/components/mobile-nav"
+import { User } from "lucide-react"
 
 export function EnhancedMainNav() {
   const pathname = usePathname()
-  const { user, isAuthenticated } = useAuth()
-  const { setTheme, theme } = useTheme()
+  const { isAuthenticated } = useAuth()
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/70 backdrop-blur-md shadow-sm">
-      <div className="container flex h-16 items-center justify-between pl-2">
-        <div className="flex items-center gap-2">
-          <Link href="/" className="flex items-center relative">
-            <LevlLogo className="h-16 w-16" />
-            <span className="text-3xl font-bold text-black dark:text-white absolute left-14 bottom-2 z-10">LevL</span>
-          </Link>
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="flex h-16 items-center px-2">
+        <Link href="/" className="flex items-center space-x-2 ml-0">
+          <LevlLogo className="h-12 w-12" />
+          <span className="hidden text-2xl font-bold sm:inline-block">LevL</span>
+        </Link>
+        <MobileNav className="ml-2" />
+        <div className="ml-6 hidden md:flex">
+          <nav className="flex items-center space-x-6 text-sm font-medium">
+            <Link
+              href="/explore"
+              className={cn(
+                "transition-colors hover:text-foreground/80",
+                pathname === "/explore" ? "text-foreground" : "text-foreground/60",
+              )}
+            >
+              Explore
+            </Link>
+            <Link
+              href="/providers"
+              className={cn(
+                "transition-colors hover:text-foreground/80",
+                pathname?.startsWith("/providers") ? "text-foreground" : "text-foreground/60",
+              )}
+            >
+              Providers
+            </Link>
+            <Link
+              href="/about"
+              className={cn(
+                "transition-colors hover:text-foreground/80",
+                pathname?.startsWith("/about") ? "text-foreground" : "text-foreground/60",
+              )}
+            >
+              About
+            </Link>
+          </nav>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="hidden md:flex items-center gap-4">
+        <div className="flex flex-1 items-center justify-end space-x-4">
+          <nav className="flex items-center space-x-2">
+            <Link
+              href="/profile"
+              className="relative inline-flex items-center px-4 py-1.5 mr-2 bg-black/5 dark:bg-white/10 backdrop-blur-md border border-purple-500/30 rounded-lg overflow-hidden hover:border-purple-500/70 transition-all duration-300 group"
+            >
+              <span className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-indigo-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+              <span className="absolute -inset-px bg-gradient-to-r from-purple-500 to-indigo-500 opacity-20 blur-sm group-hover:opacity-30 transition-opacity duration-300"></span>
+
+              <User className="h-4 w-4 mr-2 text-purple-600 dark:text-purple-400 relative z-10" />
+              <span className="font-medium text-foreground relative z-10 tracking-wide">Profile</span>
+
+              <span className="absolute bottom-0 left-0 h-[1px] w-full bg-gradient-to-r from-transparent via-purple-500 to-transparent transform translate-y-[1px] opacity-70"></span>
+            </Link>
             {isAuthenticated ? (
-              <>
-                <Link href="/messages" className="text-sm font-medium transition-colors hover:text-primary">
-                  Messages
-                </Link>
-                <Link href="/dashboard" className="text-sm font-medium transition-colors hover:text-primary">
-                  Dashboard
-                </Link>
-                <Link href="/profile">
-                  <Button variant="ghost" size="icon" className="rounded-full">
-                    <img
-                      src={user?.avatar || "/placeholder.svg?height=32&width=32&text=U"}
-                      alt={user?.name || "User"}
-                      className="h-8 w-8 rounded-full"
-                    />
-                  </Button>
-                </Link>
-              </>
+              <UserNav />
             ) : (
               <>
-                <div className="flex items-center gap-3">
-                  <Link href="/auth/signup">
-                    <Button className="bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90 text-white backdrop-blur-sm rounded-md">
-                      Sign Up
-                    </Button>
-                  </Link>
-                  <Link href="/auth/login">
-                    <Button variant="outline" className="border-primary text-primary hover:bg-primary/10">
-                      Log In
-                    </Button>
-                  </Link>
-                </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-purple-500 hover:text-purple-600 hover:bg-purple-100 dark:hover:bg-purple-900/20 border-purple-500"
-                    >
-                      <Menu className="h-7 w-7" />
-                      <span className="sr-only">Open menu</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem asChild>
-                      <Link href="/explore">Find Services</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/providers">Become a Provider</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/how-it-works">How it Works</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/about">About</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
-                      <div className="flex items-center">
-                        {theme === "dark" ? (
-                          <>
-                            <Sun className="h-4 w-4 mr-2" />
-                            <span>Light Mode</span>
-                          </>
-                        ) : (
-                          <>
-                            <Moon className="h-4 w-4 mr-2" />
-                            <span>Dark Mode</span>
-                          </>
-                        )}
-                      </div>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <Button variant="ghost" size="sm" asChild className="hidden md:flex">
+                  <Link href="/auth/login">Log in</Link>
+                </Button>
+                <Button size="sm" asChild className="hidden md:flex">
+                  <Link href="/auth/signup">Sign up</Link>
+                </Button>
               </>
             )}
-          </div>
-          {!isAuthenticated && (
-            <div className="md:hidden flex items-center gap-2">
-              <Link href="/auth/signup">
-                <Button
-                  size="sm"
-                  className="bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90 text-white backdrop-blur-sm rounded-md"
-                >
-                  Sign Up
-                </Button>
-              </Link>
-              <Link href="/auth/login">
-                <Button size="sm" variant="outline" className="border-primary text-primary hover:bg-primary/10">
-                  Log In
-                </Button>
-              </Link>
-            </div>
-          )}
-          <MobileNav />
+          </nav>
         </div>
       </div>
     </header>

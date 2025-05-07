@@ -64,11 +64,10 @@
     "framer-motion": "latest",
     "@stripe/react-stripe-js": "latest",
     "canvas-confetti": "latest",
-    "stripe": "latest",
     "crypto": "latest",
     "resend": "latest",
     "@supabase/ssr": "latest",
-    "js-cookie": "latest"
+    "stripe": "latest"
   },
   "devDependencies": {
     "@types/node": "^22",

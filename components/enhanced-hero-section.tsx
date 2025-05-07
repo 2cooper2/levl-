@@ -46,7 +46,6 @@ import {
   Award,
 } from "lucide-react"
 import { AnimatedTextDivider } from "@/components/animated-text-divider"
-import wave from "@/public/wave.png"
 import { useAuth } from "@/context/auth-context"
 import Link from "next/link"
 import { BackgroundPattern } from "@/components/background-pattern"
@@ -1687,14 +1686,7 @@ export function EnhancedHeroSection() {
 
   return (
     <>
-      <section
-        className="w-full relative overflow-hidden"
-        style={{
-          backgroundImage: `url(${wave})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
+      <section className="w-full relative overflow-hidden bg-gradient-to-br from-background via-purple-500/5 to-background/90">
         {/* Animated background elements */}
         <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5 z-0" />
 
@@ -1730,15 +1722,7 @@ export function EnhancedHeroSection() {
         ))}
 
         {/* 3D perspective container */}
-        <div
-          className="absolute inset-0 opacity-20 pointer-events-none"
-          style={{
-            backgroundImage: `url(${wave})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            filter: "hue-rotate(240deg)", // Adjust hue for purple
-          }}
-        />
+        <div className="absolute inset-0 opacity-20 pointer-events-none bg-gradient-to-br from-purple-500/20 to-primary/20"></div>
 
         <AnimatedTextDivider firstText="Learn. Earn." secondText="Grow Your Business" className="mb-12 text-white" />
         {/* Animated background elements */}

@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { LevlLogo } from "@/components/levl-logo"
-import { Menu, Moon, Sun } from "lucide-react"
+import { Menu, Moon, Sun, User } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 import { useAuth } from "@/context/auth-context"
@@ -96,10 +96,11 @@ export function MobileNav() {
               </Link>
               <Link
                 href="/profile"
-                className="text-lg font-medium transition-colors hover:text-primary"
+                className="text-lg font-medium transition-colors hover:text-primary flex items-center gap-2 bg-primary/10 px-3 py-2 rounded-md"
                 onClick={() => setOpen(false)}
               >
-                Profile
+                <User className="h-5 w-5 text-primary" />
+                My Profile
               </Link>
               <Link
                 href="/settings"

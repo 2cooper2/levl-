@@ -6,6 +6,25 @@ export async function POST(request: Request) {
     // Parse request body
     const { name, email, password, role } = await request.json()
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      return NextResponse.json({ success: false, error: "Invalid email format" }, { status: 400 })
+    }
+
+    // Validate password strength
+    if (password.length < 8) {
+      return NextResponse.json(
+        { success: false, error: "Password must be at least 8 characters long" },
+        { status: 400 },
+      )
+    }
+
+    // Validate role
+    if (!["client", "provider", "admin"].includes(role)) {
+      return NextResponse.json({ success: false, error: "Invalid role specified" }, { status: 400 })
+    }
+
     // Validate inputs
     if (!name || !email || !password || !role) {
       return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 })

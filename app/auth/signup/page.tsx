@@ -60,7 +60,6 @@ export default function SignupPage() {
       }, 2000)
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred")
-    } finally {
       setIsLoading(false)
     }
   }
