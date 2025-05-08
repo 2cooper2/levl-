@@ -40,9 +40,10 @@ export function PaymentForm({
   const [errorRecoveryAttempt, setErrorRecoveryAttempt] = useState(0)
 
   // Format amounts for display
-  const serviceFee = ((amount - 2) / 100).toFixed(2)
-  const platformFee = (2 / 100).toFixed(2)
   const total = (amount / 100).toFixed(2)
+  const platformFeePercentage = 0.1 // 10% platform fee
+  const platformFee = ((amount / 100) * platformFeePercentage).toFixed(2)
+  const serviceFee = (amount / 100 - Number.parseFloat(platformFee)).toFixed(2)
 
   // Handle card input changes
   const handleCardChange = (event: any) => {
