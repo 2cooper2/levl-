@@ -7,10 +7,13 @@ import { EnhancedCard, EnhancedCardContent, EnhancedCardFooter } from "@/compone
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { EnhancedButton } from "@/components/ui/enhanced-button"
-import { Star, Heart, MessageSquare } from "lucide-react"
+import { Star, Heart, MessageSquare, Eye } from "lucide-react"
 import { motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/components/ui/use-toast"
+import Image from "next/image"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
 
 interface ServiceCardProps {
   image: string
@@ -42,6 +45,7 @@ export function EnhancedServiceCard({
   const router = useRouter()
   const { toast } = useToast()
   const [isSaved, setIsSaved] = useState(false)
+  const [showPreview, setShowPreview] = useState(false)
 
   const handleSave = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -62,6 +66,11 @@ export function EnhancedServiceCard({
     router.push(`/services/${id}`)
   }
 
+  const handlePreview = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setShowPreview(true)
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -72,11 +81,16 @@ export function EnhancedServiceCard({
     >
       <EnhancedCard interactive elevation="low" className="overflow-hidden h-full flex flex-col">
         <div className="relative aspect-[4/3] overflow-hidden group">
-          <img
-            src={image || "/placeholder.svg"}
-            alt={title}
-            className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
-          />
+          <div className="relative w-full h-full">
+            <Image
+              src={image || "/placeholder.svg"}
+              alt={title}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              priority={delay === 0} // Only prioritize the first few cards
+            />
+          </div>
           <div className="absolute top-3 right-3">
             <Badge variant="secondary" className="font-medium shadow-sm">
               {price}
@@ -89,9 +103,20 @@ export function EnhancedServiceCard({
               isSaved ? "text-red-500" : "text-muted-foreground"
             }`}
             onClick={handleSave}
+            aria-pressed={isSaved}
+            aria-label={`${isSaved ? "Remove from" : "Add to"} saved services`}
           >
-            <Heart className={`h-4 w-4 ${isSaved ? "fill-current" : ""}`} />
+            <Heart className={`h-4 w-4 ${isSaved ? "fill-current" : ""}`} aria-hidden="true" />
             <span className="sr-only">{isSaved ? "Unsave" : "Save"}</span>
+          </EnhancedButton>
+          <EnhancedButton
+            variant="ghost"
+            size="icon"
+            className="absolute top-3 left-14 h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm text-muted-foreground"
+            onClick={handlePreview}
+          >
+            <Eye className="h-4 w-4" />
+            <span className="sr-only">Preview</span>
           </EnhancedButton>
         </div>
         <EnhancedCardContent className="flex-1 pt-5">
@@ -117,17 +142,77 @@ export function EnhancedServiceCard({
           </div>
         </EnhancedCardContent>
         <EnhancedCardFooter className="border-t pt-4 flex items-center justify-between">
-          <div className="flex items-center">
-            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1.5" />
+          <div
+            className="flex items-center"
+            aria-label={`Rating: ${rating.toFixed(1)} out of 5 stars, ${reviews} reviews`}
+          >
+            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1.5" aria-hidden="true" />
             <span className="text-sm font-medium">{rating.toFixed(1)}</span>
             <span className="text-xs text-muted-foreground ml-1">({reviews})</span>
           </div>
-          <EnhancedButton variant="ghost" size="sm" className="h-8 gap-1.5 text-xs" onClick={handleContact}>
-            <MessageSquare className="h-3.5 w-3.5" />
+          <EnhancedButton
+            variant="ghost"
+            size="sm"
+            className="h-8 gap-1.5 text-xs"
+            onClick={handleContact}
+            aria-label={`Contact ${provider.name} about ${title}`}
+          >
+            <MessageSquare className="h-3.5 w-3.5" aria-hidden="true" />
             Contact
           </EnhancedButton>
         </EnhancedCardFooter>
       </EnhancedCard>
+      <Dialog open={showPreview} onOpenChange={setShowPreview}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>{title}</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4">
+            <div className="aspect-video overflow-hidden rounded-md">
+              <img src={image || "/placeholder.svg"} alt={title} className="object-cover w-full h-full" />
+            </div>
+            <div className="flex items-center gap-2">
+              <Avatar className="h-8 w-8 border-2 border-background">
+                <AvatarImage src={provider.avatar || "/placeholder.svg"} alt={provider.name} />
+                <AvatarFallback>{provider.name[0]}</AvatarFallback>
+              </Avatar>
+              <span className="text-sm font-medium">{provider.name}</span>
+              <Badge variant="outline" className="ml-auto text-xs font-normal">
+                {provider.level}
+              </Badge>
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg mb-2">{title}</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Professional service with attention to detail and customer satisfaction guaranteed.
+              </p>
+              <div className="flex flex-wrap gap-1.5 mb-3">
+                {tags.map((tag, i) => (
+                  <Badge key={i} variant="outline" className="text-xs font-normal bg-background/50">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-between items-center">
+              <div className="flex items-center">
+                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1.5" />
+                <span className="text-sm font-medium">{rating.toFixed(1)}</span>
+                <span className="text-xs text-muted-foreground ml-1">({reviews})</span>
+              </div>
+              <div className="text-lg font-bold">{price}</div>
+            </div>
+            <div className="flex gap-2 mt-2">
+              <Button className="flex-1" onClick={() => router.push(`/services/${id}`)}>
+                View Details
+              </Button>
+              <Button variant="outline" className="flex-1" onClick={handleContact}>
+                <MessageSquare className="h-4 w-4 mr-2" /> Contact
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   )
 }

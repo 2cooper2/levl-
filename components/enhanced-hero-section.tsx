@@ -9,7 +9,6 @@ import { EnhancedButton } from "@/components/ui/enhanced-button"
 import { Input } from "@/components/ui/input"
 import { ArrowRight, Sparkles } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { SkillAcceleratorSignup } from "@/components/skill-accelerator-signup"
 import {
   Trophy,
   Rocket,
@@ -25,16 +24,11 @@ import {
   Layers,
   Cpu,
   ThumbsUp,
-  Reply,
   Users,
   Target,
   Zap,
   Search,
-  CreditCard,
   Shield,
-  HomeIcon,
-  Heart,
-  Headphones,
   BrushIcon as Broom,
   WrenchIcon as ScrewDriver,
   Hammer,
@@ -44,6 +38,12 @@ import {
   Download,
   DollarSign,
   Award,
+  PlusCircle,
+  Filter,
+  CreditCard,
+  HomeIcon,
+  Heart,
+  Headphones,
 } from "lucide-react"
 import { AnimatedTextDivider } from "@/components/animated-text-divider"
 import { useAuth } from "@/context/auth-context"
@@ -53,6 +53,7 @@ import { EnhancedCategoryCard } from "@/components/enhanced-category-card"
 import { useMobile } from "@/hooks/use-mobile"
 // Remove the existing import for ForumComponent
 import { FeatureBadge } from "@/components/ui/feature-badge"
+import { useVirtualizer } from "@tanstack/react-virtual"
 
 // Add keyframes for the shimmer animation
 const shimmerAnimation = {
@@ -243,6 +244,7 @@ const FounderIcon = () => (
   </svg>
 )
 
+// TODO: Move this component to its own file at components/forum/forum-tab.tsx
 // Define forumTopics
 const forumTopics = [
   {
@@ -339,6 +341,7 @@ const ForumTab = () => {
   const [expandedTags, setExpandedTags] = useState(false)
   const [userBookmarks, setUserBookmarks] = useState<number[]>([])
   const [showOnlyBookmarked, setShowOnlyBookmarked] = useState(false)
+
   const [viewMode, setViewMode] = useState<"card" | "compact">("card")
   const [showUserTooltip, setShowUserTooltip] = useState<number | null>(null)
 
@@ -555,6 +558,14 @@ const ForumTab = () => {
     .filter((tag) => !categories.some((cat) => cat.id === tag))
     .slice(0, expandedTags ? undefined : 5)
 
+  const parentRef = useRef(null)
+  const rowVirtualizer = useVirtualizer({
+    count: filteredTopics.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 120, // Approximate height of each topic card
+    overscan: 5,
+  })
+
   return (
     <div className="space-y-4">
       {/* Notification toast */}
@@ -574,94 +585,65 @@ const ForumTab = () => {
       </AnimatePresence>
 
       {/* Header with search and new topic button */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-        <div className="relative flex-1">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-4 w-4 text-primary/60" />
+      {/* Header with search and new topic button - Enhanced with Levl UI/UX */}
+      <div className="bg-gradient-to-br from-purple-50/90 via-lavender-100/80 to-white/90 backdrop-blur-sm rounded-xl p-5 shadow-lg border border-lavender-300/50 transition-all duration-300 hover:shadow-lavender-200/30">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+          <div className="relative flex-1 group">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-4 w-4 text-primary/70 group-hover:text-primary transition-colors duration-200" />
+            </div>
+            <Input
+              type="text"
+              placeholder="Search forum topics..."
+              className="pl-10 pr-4 py-2.5 w-full rounded-lg border border-lavender-200 focus:border-primary/60 focus:ring-2 focus:ring-primary/20 bg-white/80 hover:bg-white transition-all duration-200 text-sm placeholder:text-gray-400"
+            />
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <span className="text-xs text-gray-400">Press / to search</span>
+            </div>
           </div>
-          <Input
-            type="search"
-            placeholder="Search discussions..."
-            className="pl-10 h-9 text-sm bg-white/5 dark:bg-black/20 border-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/30"
-            value={searchQuery}
-            onChange={handleSearch}
-          />
+          <button className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary/90 to-purple-500 hover:from-primary hover:to-purple-400 text-white rounded-lg font-medium text-sm transition-all duration-200 hover:shadow-md hover:shadow-primary/20 active:scale-[0.98] group">
+            <PlusCircle className="h-4 w-4 group-hover:rotate-90 transition-transform duration-300" />
+            <span>New Topic</span>
+          </button>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="flex items-center bg-white/5 dark:bg-black/20 rounded-md border border-white/10 p-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`h-7 px-2 rounded-sm ${viewMode === "card" ? "bg-white/10 dark:bg-black/30" : ""}`}
-              onClick={() => setViewMode("card")}
+        {/* Forum categories */}
+        <div className="flex flex-wrap gap-2 mb-2">
+          {["All Topics", "Announcements", "Discussions", "Questions", "Resources", "Events"].map((category) => (
+            <button
+              key={category}
+              className={`px-3 py-1.5 text-xs rounded-full transition-all duration-200 ${
+                category === "All Topics"
+                  ? "bg-primary/10 text-primary font-medium border-2 border-primary/20"
+                  : "bg-lavender-50 text-gray-600 hover:bg-lavender-100 border border-lavender-200/50"
+              }`}
             >
-              <Layers className="h-3.5 w-3.5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`h-7 px-2 rounded-sm ${viewMode === "compact" ? "bg-white/10 dark:bg-black/30" : ""}`}
-              onClick={() => setViewMode("compact")}
-            >
-              <MessageSquare className="h-3.5 w-3.5" />
-            </Button>
-          </div>
-
-          <EnhancedButton
-            variant="gradient"
-            size="sm"
-            className="h-9 gap-1 text-xs"
-            onClick={() => setShowNewTopicForm(!showNewTopicForm)}
-          >
-            <MessageSquare className="h-3.5 w-3.5" />
-            {showNewTopicForm ? "Cancel" : "New Topic"}
-          </EnhancedButton>
-        </div>
-      </div>
-
-      {/* Filters and sorting */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-        <div className="flex items-center gap-2">
-          <div className="text-xs text-black/60 dark:text-white/60">Sort by:</div>
-          <div className="flex items-center bg-white/5 dark:bg-black/20 rounded-md border border-white/10 p-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`h-7 px-2 text-xs rounded-sm ${sortBy === "recent" ? "bg-white/10 dark:bg-black/30" : ""}`}
-              onClick={() => setSortBy("recent")}
-            >
-              Recent
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`h-7 px-2 text-xs rounded-sm ${sortBy === "popular" ? "bg-white/10 dark:bg-black/30" : ""}`}
-              onClick={() => setSortBy("popular")}
-            >
-              Popular
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`h-7 px-2 text-xs rounded-sm ${sortBy === "replies" ? "bg-white/10 dark:bg-black/30" : ""}`}
-              onClick={() => setSortBy("replies")}
-            >
-              Most Replies
-            </Button>
-          </div>
+              {category}
+            </button>
+          ))}
         </div>
 
-        <div className="flex items-center">
-          <Button
-            variant="ghost"
-            size="sm"
-            className={`h-7 px-2 text-xs rounded-sm flex items-center gap-1 ${showOnlyBookmarked ? "text-yellow-500" : ""}`}
-            onClick={() => setShowOnlyBookmarked(!showOnlyBookmarked)}
-          >
-            <Star className={`h-3.5 w-3.5 ${showOnlyBookmarked ? "fill-yellow-500" : ""}`} />
-            {showOnlyBookmarked ? "All Topics" : "Bookmarked"}
-          </Button>
+        {/* Sort options */}
+        <div className="flex items-center justify-between text-xs text-gray-500">
+          <div className="flex items-center gap-3">
+            <span className="font-medium">Sort by:</span>
+            <div className="flex items-center gap-3">
+              {["Latest", "Popular", "Unanswered"].map((option, index) => (
+                <button
+                  key={option}
+                  className={`transition-colors duration-200 ${
+                    index === 0 ? "text-primary font-medium" : "hover:text-gray-700"
+                  }`}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Filter className="h-3 w-3" />
+            <span>Filters</span>
+          </div>
         </div>
       </div>
 
@@ -673,12 +655,12 @@ const ForumTab = () => {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="bg-white/5 dark:bg-black/20 rounded-lg p-4 border border-primary/20 mb-4 relative overflow-hidden"
+            className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm rounded-xl p-4 border border-primary/20 mb-4 relative overflow-hidden"
           >
             {/* Background pattern */}
             <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_10px_10px,rgba(var(--primary-rgb),0.4)_1px,transparent_1px)] bg-[length:20px_20px] pointer-events-none"></div>
 
-            <h3 className="text-sm font-semibold text-black dark:text-white mb-3 flex items-center">
+            <h3 className="text-sm font-semibold text-gray-800 mb-3 flex items-center">
               <Sparkles className="h-4 w-4 mr-2 text-primary" />
               Create New Discussion
             </h3>
@@ -691,7 +673,7 @@ const ForumTab = () => {
                   value={newTopicTitle}
                   onChange={(e) => setNewTopicTitle(e.target.value)}
                 />
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-black/40 dark:text-white/40">
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-500">
                   {newTopicTitle.length}/100
                 </div>
               </div>
@@ -699,13 +681,11 @@ const ForumTab = () => {
               <div className="relative">
                 <textarea
                   placeholder="What would you like to discuss?"
-                  className="w-full h-24 px-3 py-2 text-sm bg-white/5 dark:bg-black/20 rounded-md border border-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/30 outline-none transition-colors resize-none"
+                  className="w-full h-24 px-3 py-2 text-sm bg-white/5 dark:bg-black/20 rounded-md border border-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/30 outline-none transition-colors resize-none text-gray-800"
                   value={newTopicContent}
                   onChange={(e) => setNewTopicContent(e.target.value)}
                 />
-                <div className="absolute right-2 bottom-2 text-xs text-black/40 dark:text-white/40">
-                  {newTopicContent.length}/500
-                </div>
+                <div className="absolute right-2 bottom-2 text-xs text-gray-500">{newTopicContent.length}/500</div>
               </div>
 
               <div className="flex items-center">
@@ -723,17 +703,17 @@ const ForumTab = () => {
               </div>
 
               <div className="flex justify-between items-center">
-                <div className="text-xs text-black/60 dark:text-white/60">Use tags to help others find your topic</div>
-                <EnhancedButton
-                  variant="gradient"
+                <div className="text-xs text-gray-500">Use tags to help others find your topic</div>
+                <Button
+                  variant="default"
                   size="sm"
-                  className="gap-1 text-xs"
+                  className="gap-1 text-xs bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white"
                   onClick={handleCreateTopic}
                   disabled={!newTopicTitle.trim() || !newTopicContent.trim()}
                 >
                   <MessageSquare className="h-3.5 w-3.5" />
                   Post Topic
-                </EnhancedButton>
+                </Button>
               </div>
             </div>
           </motion.div>
@@ -741,65 +721,104 @@ const ForumTab = () => {
       </AnimatePresence>
 
       {/* Category tabs */}
-      <div className="flex overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide space-x-1 mb-3">
+      {/* Category tabs - Enhanced with Levl UI/UX */}
+      <div className="flex overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide space-x-1 mb-3 relative">
+        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
+
         {categories.map((category) => (
           <motion.button
             key={category.id}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 flex items-center ${
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 flex items-center relative ${
               activeCategory === category.id
                 ? "bg-gradient-to-r from-primary to-purple-500 text-white shadow-lg shadow-primary/20"
-                : "bg-white/10 dark:bg-black/20 text-black dark:text-white hover:bg-white/20 dark:hover:bg-black/30"
+                : "bg-white/80 text-gray-700 hover:bg-lavender-50 border border-lavender-200/50"
             }`}
             onClick={() => setActiveCategory(category.id)}
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ scale: 1.05, y: -1 }}
             whileTap={{ scale: 0.98 }}
           >
             <span className="mr-1.5">{category.icon}</span>
             {category.name}
             {activeCategory === category.id && (
-              <span className="ml-1.5 flex items-center">
+              <>
+                <span className="ml-1.5 flex items-center">
+                  <motion.div
+                    className="h-1.5 w-1.5 rounded-full bg-white"
+                    animate={{ scale: [1, 1.5, 1] }}
+                    transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
+                  />
+                </span>
                 <motion.div
-                  className="h-1.5 w-1.5 rounded-full bg-white"
-                  animate={{ scale: [1, 1.5, 1] }}
-                  transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
+                  className="absolute inset-0 rounded-full opacity-0"
+                  animate={{
+                    boxShadow: [
+                      "0 0 0px 0px rgba(147, 51, 234, 0)",
+                      "0 0 8px 2px rgba(147, 51, 234, 0.3)",
+                      "0 0 0px 0px rgba(147, 51, 234, 0)",
+                    ],
+                    opacity: [0, 0.7, 0],
+                  }}
+                  transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
                 />
-              </span>
+              </>
             )}
           </motion.button>
         ))}
       </div>
 
       {/* Tags cloud */}
-      <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3 mb-3 border border-white/10">
-        <div className="flex items-center justify-between mb-2">
-          <h4 className="text-xs font-medium text-black dark:text-white flex items-center">
-            <Target className="h-3.5 w-3.5 mr-1.5 text-primary/70" />
-            Popular Tags
+      {/* Trending Topics - Enhanced with Levl UI/UX */}
+      <div className="bg-gradient-to-br from-white/80 via-lavender-50/80 to-white/80 backdrop-blur-sm rounded-xl p-3 mb-3 border border-lavender-200/50 relative overflow-hidden">
+        {/* Decorative elements */}
+        <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-purple-500/10 to-transparent rounded-bl-full"></div>
+        <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-gradient-to-tr from-primary/10 to-transparent rounded-tr-full"></div>
+
+        <div className="flex items-center justify-between mb-3 relative z-10">
+          <h4 className="text-xs font-medium text-gray-800 flex items-center">
+            <div className="h-5 w-5 rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 flex items-center justify-center mr-1.5">
+              <TrendingUp className="h-3 w-3 text-primary" />
+            </div>
+            Trending Topics
           </h4>
-          {allTags.length > 5 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 text-xs px-2 py-0"
-              onClick={() => setExpandedTags(!expandedTags)}
-            >
-              {expandedTags ? "Show Less" : "Show More"}
-            </Button>
-          )}
+          <motion.button
+            whileHover={{ scale: 1.05, x: 1 }}
+            whileTap={{ scale: 0.95 }}
+            className="text-xs text-primary flex items-center"
+          >
+            View All <ArrowRight className="h-3 w-3 ml-1" />
+          </motion.button>
         </div>
-        <div className="flex flex-wrap gap-1">
-          {allTags.map((tag) => (
-            <Button
-              key={tag}
-              variant="ghost"
-              size="sm"
-              className={`h-6 text-xs px-2 py-0 rounded-full ${
-                activeCategory === tag ? "bg-primary/20 text-primary" : ""
-              }`}
-              onClick={() => setActiveCategory(tag === activeCategory ? "all" : tag)}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          {[
+            { title: "Best power drill for beginners", views: 342, hot: true },
+            { title: "How to find studs without a stud finder", views: 289 },
+            { title: "Wall anchors vs. toggle bolts", views: 215 },
+            { title: "Mounting a TV on drywall safely", views: 198 },
+          ].map((topic, i) => (
+            <motion.div
+              key={i}
+              className="group cursor-pointer bg-white/50 hover:bg-white rounded-lg p-2 border border-transparent hover:border-lavender-200/70 transition-all duration-200"
+              whileHover={{ y: -2, boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}
             >
-              #{tag}
-            </Button>
+              <div className="flex justify-between items-start">
+                <div className="text-xs text-gray-700 group-hover:text-primary transition-colors line-clamp-1 font-medium">
+                  {topic.title}
+                  {topic.hot && (
+                    <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] bg-primary/10 text-primary">
+                      <TrendingUp className="h-2 w-2 mr-0.5" /> Hot
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center justify-between mt-1">
+                <div className="flex items-center text-xs text-gray-500">
+                  <Eye className="h-3 w-3 mr-1 text-gray-400" />
+                  {topic.views} views
+                </div>
+                <div className="text-xs text-gray-400">3h ago</div>
+              </div>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -807,307 +826,200 @@ const ForumTab = () => {
       {/* Topics list */}
       <div className="space-y-3">
         {filteredTopics.length > 0 ? (
-          filteredTopics.map((topic) => (
-            <motion.div
-              key={topic.id}
-              className={`${viewMode === "card" ? "p-4" : "p-3"} rounded-lg bg-white/5 dark:bg-black/10 border hover:border-primary/30 transition-all duration-300 relative overflow-hidden cursor-pointer ${
-                activeTopic === topic.id ? "border-primary/30 bg-primary/5" : "border-white/10"
-              }`}
-              onClick={() => setActiveTopic(activeTopic === topic.id ? null : topic.id)}
-              whileHover={{ scale: 1.01 }}
-              layout
+          <div ref={parentRef} className="h-[600px] overflow-auto">
+            <div
+              style={{
+                height: `${rowVirtualizer.getTotalSize()}px`,
+                width: "100%",
+                position: "relative",
+              }}
             >
-              {/* Background pattern */}
-              <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_10px_10px,rgba(var(--primary-rgb),0.4)_1px,transparent_1px)] bg-[length:20px_20px] pointer-events-none"></div>
-
-              {/* Bookmark button */}
-              <div
-                className="absolute top-2 right-2 z-10"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  toggleBookmark(topic.id)
-                }}
-              >
-                <motion.button
-                  whileHover={{ scale: 1.2 }}
-                  whileTap={{ scale: 0.9 }}
-                  className="h-6 w-6 flex items-center justify-center rounded-full bg-white/10 dark:bg-black/20 hover:bg-white/20 dark:hover:bg-black/30"
-                >
-                  <Star
-                    className={`h-3.5 w-3.5 ${userBookmarks.includes(topic.id) ? "text-yellow-500 fill-yellow-500" : "text-white/60"}`}
-                  />
-                </motion.button>
-              </div>
-
-              {viewMode === "card" ? (
-                <>
-                  <div className="flex justify-between items-start pr-6">
-                    <div>
-                      <div className="flex items-center">
-                        <div className="text-sm font-medium text-black dark:text-white">{topic.title}</div>
-                        {topic.replies > 10 && (
-                          <span className="ml-2 px-1.5 py-0.5 text-xs font-medium bg-primary/20 text-primary rounded-md flex items-center">
-                            <TrendingUp className="h-3 w-3 mr-1" /> Hot
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {topic.tags.map((tag) => (
-                          <div
-                            key={tag}
-                            className="px-2 py-0.5 rounded-full bg-white/10 dark:bg-black/30 text-xs flex items-center"
-                          >
-                            <span className="h-1.5 w-1.5 rounded-full bg-primary/70 mr-1.5"></span>
-                            {tag}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="text-right text-xs">
-                      <div className="text-black/60 dark:text-white/60">{formatLastActive(topic.lastActive)}</div>
-                      <div className="flex items-center justify-end mt-1 space-x-3">
-                        <div className="flex items-center">
-                          <MessageSquare className="h-3 w-3 mr-1 text-primary" />
-                          <span>{topic.replies}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <ThumbsUp className="h-3 w-3 mr-1 text-primary/70" />
-                          <span>{topic.likes}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Author info */}
-                  <div
-                    className="flex items-center mt-3"
-                    onMouseEnter={() => setShowUserTooltip(topic.id)}
-                    onMouseLeave={() => setShowUserTooltip(null)}
+              {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                const topic = filteredTopics[virtualRow.index]
+                return (
+                  <motion.div
+                    key={topic.id}
+                    className={`absolute top-0 left-0 w-full ${
+                      viewMode === "card" ? "p-5" : "p-4"
+                    } rounded-xl bg-gradient-to-br from-white/95 via-lavender-50/80 to-white/90 backdrop-blur-sm border hover:border-primary/40 transition-all duration-300 relative overflow-hidden cursor-pointer shadow-sm hover:shadow-md ${
+                      activeTopic === topic.id
+                        ? "border-primary/40 bg-primary/5 shadow-primary/10"
+                        : "border-lavender-200/50"
+                    }`}
+                    style={{
+                      height: virtualRow.size,
+                      transform: `translateY(${virtualRow.start}px)`,
+                    }}
+                    onClick={() => setActiveTopic(activeTopic === topic.id ? null : topic.id)}
+                    whileHover={{
+                      scale: 1.01,
+                      y: virtualRow.start - 2,
+                      boxShadow: "0 8px 24px rgba(147, 51, 234, 0.08)",
+                    }}
+                    layout
                   >
-                    <div className="relative">
-                      <div className="h-5 w-5 rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 flex items-center justify-center text-xs font-bold text-primary">
-                        {topic.author.charAt(0)}
-                      </div>
+                    {/* Decorative elements */}
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-purple-500/5 to-transparent rounded-bl-full"></div>
+                    <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-gradient-to-tr from-primary/5 to-transparent rounded-tr-full"></div>
 
-                      {/* User tooltip */}
-                      {showUserTooltip === topic.id && (
-                        <motion.div
-                          className="absolute bottom-full left-0 mb-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-2 z-50"
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.2 }}
+                    {/* Background pattern */}
+                    <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_10px_10px,rgba(var(--primary-rgb),0.4)_1px,transparent_1px)] bg-[length:20px_20px] pointer-events-none"></div>
+
+                    {/* Bookmark button */}
+                    <div
+                      className="absolute top-3 right-3 z-10"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        toggleBookmark(topic.id)
+                      }}
+                    >
+                      <motion.button
+                        whileHover={{ scale: 1.2 }}
+                        whileTap={{ scale: 0.9 }}
+                        className="h-7 w-7 flex items-center justify-center rounded-full bg-white shadow-sm hover:shadow-md transition-all duration-200"
+                      >
+                        <Star
+                          className={`h-4 w-4 ${userBookmarks.includes(topic.id) ? "text-yellow-500 fill-yellow-500" : "text-gray-400"}`}
+                        />
+                      </motion.button>
+                    </div>
+
+                    {viewMode === "card" ? (
+                      <>
+                        <div className="flex justify-between items-start pr-8">
+                          <div>
+                            <div className="flex items-center">
+                              <div className="text-base font-medium text-gray-800 group-hover:text-primary transition-colors duration-200">
+                                {topic.title}
+                              </div>
+                              {topic.replies > 10 && (
+                                <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-primary/10 text-primary rounded-full flex items-center">
+                                  <TrendingUp className="h-3 w-3 mr-1" /> Hot
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex flex-wrap gap-1.5 mt-2.5">
+                              {topic.tags.map((tag) => (
+                                <div
+                                  key={tag}
+                                  className="px-2.5 py-0.5 rounded-full bg-lavender-100/80 text-xs flex items-center text-primary/80 font-medium border border-lavender-200/50"
+                                >
+                                  <span className="h-1.5 w-1.5 rounded-full bg-primary/70 mr-1.5"></span>
+                                  {tag}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="text-right text-xs">
+                            <div className="text-gray-500 font-medium">{topic.lastActive}</div>
+                            <div className="flex items-center justify-end mt-1.5 space-x-3">
+                              <div className="flex items-center px-2 py-1 rounded-full bg-lavender-50/80 border border-lavender-200/30">
+                                <MessageSquare className="h-3 w-3 mr-1 text-primary" />
+                                <span className="text-gray-700 font-medium">{topic.replies}</span>
+                              </div>
+                              <div className="flex items-center px-2 py-1 rounded-full bg-lavender-50/80 border border-lavender-200/30">
+                                <ThumbsUp className="h-3 w-3 mr-1 text-primary/70" />
+                                <span className="text-gray-700 font-medium">{topic.likes}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Preview text */}
+                        <div className="mt-3 text-sm text-gray-600 line-clamp-2 leading-relaxed">{topic.preview}</div>
+
+                        {/* Author info */}
+                        <div
+                          className="flex items-center mt-4 pt-3 border-t border-lavender-200/30"
+                          onMouseEnter={() => setShowUserTooltip(topic.id)}
+                          onMouseLeave={() => setShowUserTooltip(null)}
                         >
-                          <div className="flex items-start gap-2">
-                            <div className="h-8 w-8 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center text-sm font-bold text-white">
+                          <div className="relative">
+                            <div className="h-8 w-8 rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 flex items-center justify-center text-sm font-bold text-primary border border-lavender-200/50 shadow-sm">
                               {topic.author.charAt(0)}
                             </div>
-                            <div>
-                              <div className="font-medium text-black dark:text-white">{topic.author}</div>
-                              <div className="text-xs text-black/60 dark:text-white/60">Member since 2023</div>
-                              <div className="flex items-center mt-1 text-xs">
-                                <Star className="h-3 w-3 text-yellow-500 fill-yellow-500 mr-0.5" />
-                                <span>4.8</span>
-                                <span className="mx-1">•</span>
-                                <span>42 topics</span>
-                              </div>
+
+                            {/* User tooltip */}
+                            {showUserTooltip === topic.id && (
+                              <motion.div
+                                className="absolute bottom-full left-0 mb-2 w-56 bg-white rounded-lg shadow-lg p-3 z-50 border border-lavender-200"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.2 }}
+                              >
+                                <div className="flex items-start gap-3">
+                                  <div className="h-10 w-10 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center text-sm font-bold text-white">
+                                    {topic.author.charAt(0)}
+                                  </div>
+                                  <div>
+                                    <div className="font-medium text-gray-800">{topic.author}</div>
+                                    <div className="text-xs text-gray-500">Member since 2023</div>
+                                    <div className="flex items-center mt-1 text-xs text-gray-600">
+                                      <Star className="h-3 w-3 text-yellow-500 fill-yellow-500 mr-0.5" />
+                                      <span>4.8</span>
+                                      <span className="mx-1">•</span>
+                                      <span>42 topics</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            )}
+                          </div>
+                          <div className="ml-2">
+                            <span className="text-sm font-medium text-gray-700">{topic.author}</span>
+                            <div className="text-xs text-gray-500">Active contributor</div>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      // Compact view
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <div className="h-9 w-9 rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 flex items-center justify-center text-sm font-bold text-primary border border-lavender-200/50 shadow-sm">
+                            {topic.author.charAt(0)}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-sm font-medium text-gray-800 truncate">{topic.title}</div>
+                            <div className="flex items-center text-xs text-gray-500">
+                              <span className="font-medium">{topic.author}</span>
+                              <span className="mx-1.5">•</span>
+                              <span>{topic.lastActive}</span>
                             </div>
                           </div>
-                        </motion.div>
-                      )}
-                    </div>
-                    <span className="text-xs text-black/70 dark:text-white/70 ml-1.5">{topic.author}</span>
-                  </div>
-                </>
-              ) : (
-                // Compact view
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="h-8 w-8 rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 flex items-center justify-center text-xs font-bold text-primary">
-                      {topic.author.charAt(0)}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-sm font-medium text-black dark:text-white truncate">{topic.title}</div>
-                      <div className="flex items-center text-xs text-black/60 dark:text-white/60">
-                        <span>{topic.author}</span>
-                        <span className="mx-1">•</span>
-                        <span>{formatLastActive(topic.lastActive)}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 ml-2">
-                    <div className="flex items-center">
-                      <MessageSquare className="h-3 w-3 mr-1 text-primary" />
-                      <span className="text-xs">{topic.replies}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <ThumbsUp className="h-3 w-3 mr-1 text-primary/70" />
-                      <span className="text-xs">{topic.likes}</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Expanded topic content */}
-              <AnimatePresence>
-                {activeTopic === topic.id && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="mt-3 pt-3 border-t border-white/10"
-                  >
-                    <p className="text-sm text-black/80 dark:text-white/80 mb-3 leading-relaxed">{topic.preview}</p>
-
-                    {/* Topic actions */}
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className={`h-7 text-xs gap-1 ${userVotes[`${topic.id}`]?.up ? "text-primary" : ""}`}
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleVote(topic.id, null, "up")
-                          }}
-                        >
-                          <ThumbsUp className="h-3 w-3" />
-                          Like
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 text-xs gap-1"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <Reply className="h-3 w-3" />
-                          Reply
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 text-xs gap-1"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <Share2 className="h-3 w-3" />
-                          Share
-                        </Button>
-                      </div>
-                      <div className="text-xs text-black/60 dark:text-white/60">
-                        {topic.replies} {topic.replies === 1 ? "reply" : "replies"}
-                      </div>
-                    </div>
-
-                    {topic.responses && topic.responses.length > 0 ? (
-                      <div className="space-y-3">
-                        <div className="flex items-center">
-                          <div className="h-px flex-grow bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
-                          <span className="px-2 text-xs text-primary/70">Responses</span>
-                          <div className="h-px flex-grow bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
                         </div>
-
-                        {topic.responses.map((response, i) => (
-                          <motion.div
-                            key={i}
-                            className="bg-white/5 dark:bg-black/20 rounded-md p-3 text-xs relative overflow-hidden"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: i * 0.1 }}
-                          >
-                            {/* Background pattern */}
-                            <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_10px_10px,rgba(var(--primary-rgb),0.4)_1px,transparent_1px)] bg-[length:20px_20px] pointer-events-none"></div>
-
-                            <div className="flex justify-between items-center mb-2">
-                              <div className="flex items-center">
-                                <div className="h-5 w-5 rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 flex items-center justify-center text-xs font-bold text-primary mr-1.5">
-                                  {response.author.charAt(0)}
-                                </div>
-                                <div className="font-medium text-black dark:text-white">{response.author}</div>
-                                {response.author === "You" && (
-                                  <span className="ml-1.5 px-1.5 py-0.5 text-xs bg-primary/10 text-primary rounded-full">
-                                    You
-                                  </span>
-                                )}
-                              </div>
-                              <div className="text-black/60 dark:text-white/60">{response.time}</div>
-                            </div>
-                            <p className="text-black/80 dark:text-white/80 leading-relaxed">{response.content}</p>
-                            <div className="flex items-center justify-end mt-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className={`h-6 text-xs gap-1 hover:bg-primary/10 ${userVotes[`${topic.id}-${i}`]?.up ? "text-primary" : ""}`}
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleVote(topic.id, i, "up")
-                                }}
-                              >
-                                <ThumbsUp className="h-3 w-3" /> {response.likes}
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 text-xs gap-1 hover:bg-primary/10 hover:text-primary"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <Reply className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          </motion.div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="bg-white/5 dark:bg-black/20 rounded-md p-3 text-xs text-center text-black/60 dark:text-white/60 mb-3">
-                        <MessageSquare className="h-4 w-4 mx-auto mb-1 text-primary/50" />
-                        No responses yet. Be the first to reply!
+                        <div className="flex items-center gap-3 ml-2">
+                          <div className="flex items-center px-2 py-1 rounded-full bg-lavender-50/80 border border-lavender-200/30">
+                            <MessageSquare className="h-3 w-3 mr-1 text-primary" />
+                            <span className="text-xs text-gray-700 font-medium">{topic.replies}</span>
+                          </div>
+                          <div className="flex items-center px-2 py-1 rounded-full bg-lavender-50/80 border border-lavender-200/30">
+                            <ThumbsUp className="h-3 w-3 mr-1 text-primary/70" />
+                            <span className="text-xs text-gray-700 font-medium">{topic.likes}</span>
+                          </div>
+                        </div>
                       </div>
                     )}
-
-                    {/* Reply input */}
-                    <div className="relative mt-3">
-                      <Input
-                        placeholder="Add your response..."
-                        className="pr-20 text-sm bg-white/5 dark:bg-black/20 border-white/10 focus:border-primary/50"
-                        value={replyContent}
-                        onChange={(e) => setReplyContent(e.target.value)}
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                      <div className="absolute right-1 top-1">
-                        <EnhancedButton
-                          variant="gradient"
-                          size="sm"
-                          className="h-7 text-xs"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleReply(topic.id)
-                          }}
-                          disabled={!replyContent.trim()}
-                        >
-                          Reply
-                        </EnhancedButton>
-                      </div>
-                    </div>
                   </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          ))
+                )
+              })}
+            </div>
+          </div>
         ) : (
-          <div className="bg-white/5 dark:bg-black/10 rounded-lg p-6 border border-white/10 text-center">
+          <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50 text-center">
             <MessageSquare className="h-8 w-8 mx-auto mb-2 text-primary/50" />
-            <h3 className="text-sm font-medium text-black dark:text-white mb-1">No topics found</h3>
-            <p className="text-xs text-black/60 dark:text-white/60 mb-3">
+            <h3 className="text-sm font-medium text-gray-800 mb-1">No topics found</h3>
+            <p className="text-xs text-gray-500 mb-3">
               {searchQuery ? "Try adjusting your search or filters" : "Be the first to start a discussion"}
             </p>
-            <EnhancedButton
-              variant="gradient"
+            <Button
+              variant="default"
               size="sm"
-              className="mx-auto gap-1 text-xs"
+              className="mx-auto gap-1 text-xs bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white"
               onClick={() => setShowNewTopicForm(true)}
             >
               <MessageSquare className="h-3.5 w-3.5" />
               Create New Topic
-            </EnhancedButton>
+            </Button>
           </div>
         )}
 
@@ -1117,7 +1029,7 @@ const ForumTab = () => {
             <Button
               variant="outline"
               size="sm"
-              className="w-full relative overflow-hidden group"
+              className="w-full relative overflow-hidden group border-white/10 text-gray-600 hover:text-gray-800"
               onClick={loadMoreTopics}
               disabled={isLoading}
             >
@@ -1157,56 +1069,6 @@ const ForumTab = () => {
             </Button>
           </motion.div>
         )}
-      </div>
-
-      {/* Trending topics sidebar for larger screens */}
-      <div className="hidden lg:block mt-4 bg-white/5 dark:bg-black/10 rounded-lg p-3 border border-white/10">
-        <h4 className="text-sm font-semibold text-black dark:text-white mb-3 flex items-center">
-          <TrendingUp className="h-3.5 w-3.5 mr-1.5 text-primary" />
-          Trending Topics
-        </h4>
-        <div className="space-y-2">
-          {[
-            { title: "Best power drill for beginners", views: 342 },
-            { title: "How to find studs without a stud finder", views: 289 },
-            { title: "Wall anchors vs. toggle bolts", views: 215 },
-            { title: "Mounting a TV on drywall safely", views: 198 },
-          ].map((topic, i) => (
-            <motion.div key={i} className="group cursor-pointer" whileHover={{ x: 3 }}>
-              <div className="text-xs text-black/80 dark:text-white/80 group-hover:text-primary transition-colors line-clamp-1">
-                {topic.title}
-              </div>
-              <div className="flex items-center text-xs text-black/50 dark:text-white/50">
-                <Eye className="h-3 w-3 mr-1" />
-                {topic.views} views
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-
-      {/* Community stats */}
-      <div className="bg-white/5 dark:bg-black/10 rounded-lg p-3 border border-white/10 mt-4">
-        <h4 className="text-xs font-semibold text-black dark:text-white mb-2 flex items-center">
-          <Users className="h-3.5 w-3.5 mr-1.5 text-primary" />
-          Community Stats
-        </h4>
-        <div className="grid grid-cols-3 gap-2">
-          <div className="bg-white/5 dark:bg-black/20 rounded p-2 text-center">
-            <div className="text-lg font-bold text-primary">{topics.length}</div>
-            <div className="text-xs text-black/60 dark:text-white/60">Topics</div>
-          </div>
-          <div className="bg-white/5 dark:bg-black/20 rounded p-2 text-center">
-            <div className="text-lg font-bold text-primary">
-              {topics.reduce((acc, topic) => acc + topic.replies, 0)}
-            </div>
-            <div className="text-xs text-black/60 dark:text-white/60">Replies</div>
-          </div>
-          <div className="bg-white/5 dark:bg-black/20 rounded p-2 text-center">
-            <div className="text-lg font-bold text-primary">24</div>
-            <div className="text-xs text-black/60 dark:text-white/60">Members</div>
-          </div>
-        </div>
       </div>
     </div>
   )
@@ -1420,14 +1282,49 @@ export function EnhancedHeroSection() {
   const [selectedMilestone, setSelectedMilestone] = useState(0)
   const [showDiamondGlint, setShowDiamondGlint] = useState(false)
   const [hoverSkill, setHoverSkill] = useState<number | null>(null)
+
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
   const [showSignupModal, setShowSignupModal] = useState(false)
-  const [circuitLines, setCircuitLines] = useState<Array<{ top: number; width: number; left: number }>>([])
-  const [circuitDots, setCircuitDots] = useState<Array<{ top: number; left: number }>>([])
-  const [glowDots, setGlowDots] = useState<Array<{ top: number; left: number; delay: number }>>([])
-  const [dataFlows, setDataFlows] = useState<Array<{ top: number; left: number; delay: number }>>([])
+
+  const [circuitLines, setCircuitLines] = useState<
+    Array<{
+      top: number
+      width: number
+      left: number
+    }>
+  >([])
+
+  const [circuitDots, setCircuitDots] = useState<
+    Array<{
+      top: number
+      left: number
+    }>
+  >([])
+
+  const [glowDots, setGlowDots] = useState<
+    Array<{
+      top: number
+      left: number
+      delay: number
+    }>
+  >([])
+
+  const [dataFlows, setDataFlows] = useState<
+    Array<{
+      top: number
+      left: number
+      delay: number
+    }>
+  >([])
+
   const [particles, setParticles] = useState<
-    Array<{ id: number; x: number; y: number; size: number; duration: number }>
+    Array<{
+      id: number
+      x: number
+      y: number
+      size: number
+      duration: number
+    }>
   >(
     Array.from({ length: 20 }, (_, i) => ({
       id: i,
@@ -1444,6 +1341,11 @@ export function EnhancedHeroSection() {
   const [notificationMessage, setNotificationMessage] = useState("")
   const [showNotification, setShowNotification] = useState(false)
   const [timeRange, setTimeRange] = useState("1m")
+
+  // Define handleHireNow function inside the component
+  const handleHireNow = () => {
+    router.push("/stripe-checkout")
+  }
 
   // Generate decorative elements
   useEffect(() => {
@@ -1580,7 +1482,7 @@ export function EnhancedHeroSection() {
         }
         for (let i = 0; i < height; i += 20) {
           ctx.moveTo(0, i)
-          ctx.lineTo(width, height)
+          ctx.lineTo(width, i)
         }
         ctx.strokeStyle = "rgba(255, 255, 255, 0.05)"
         ctx.stroke()
@@ -1687,15 +1589,15 @@ export function EnhancedHeroSection() {
 
   return (
     <>
-      <section className="w-full relative overflow-hidden bg-gradient-to-br from-background via-purple-500/5 to-background/90">
+      <section className="w-full relative overflow-hidden bg-gradient-to-br from-white via-lavender-100/30 to-white">
         {/* Animated background elements */}
-        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5 z-0" />
+        <div className="absolute inset-0 bg-gradient-to-br from-white via-lavender-50 to-white/90 z-0" />
 
         {/* Subtle noise texture */}
         <div className="absolute inset-0 bg-noise opacity-5 dark:opacity-10 z-0"></div>
 
         {/* Enhanced gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-purple-500/10 to-background z-0" />
+        <div className="absolute inset-0 bg-gradient-to-b from-lavender-200/20 to-white/90 z-0" />
 
         {/* Particle system */}
         {particles.map((particle) => (
@@ -1709,13 +1611,13 @@ export function EnhancedHeroSection() {
               height: particle.size,
             }}
             animate={{
-              x: [0, Math.random() * 100 - 50],
-              y: [0, Math.random() * 100 - 50],
-              opacity: [0, 0.5, 0],
+              x: [0, Math.random() * 50 - 25], // Reduce the animation range
+              y: [0, Math.random() * 50 - 25], // Reduce the animation range
+              opacity: [0, 0.3, 0], // Reduce maximum opacity
             }}
             transition={{
               duration: particle.duration,
-              repeat: Number.POSITIVE_INFINITY,
+              repeat: 2, // Limit repeats instead of POSITIVE_INFINITY
               repeatType: "reverse",
               ease: "easeInOut",
             }}
@@ -1725,7 +1627,7 @@ export function EnhancedHeroSection() {
         {/* 3D perspective container */}
         <div className="absolute inset-0 opacity-20 pointer-events-none bg-gradient-to-br from-purple-500/20 to-primary/20"></div>
 
-        <AnimatedTextDivider firstText="Learn. Earn." secondText="Grow Your Business" className="mb-12 text-white" />
+        <AnimatedTextDivider firstText="Learn. Earn." secondText="Grow Your Business" className="mb-12 text-gray-800" />
         {/* Animated background elements */}
         <div
           className="absolute -left-64 -top-64 h-[500px] w-[500px] rounded-full bg-primary/10 blur-3xl opacity-50 animate-pulse"
@@ -1754,7 +1656,7 @@ export function EnhancedHeroSection() {
             >
               <div className="relative w-full max-w-full">
                 <motion.div
-                  className={`relative rounded-xl overflow-hidden bg-gradient-to-br from-purple-100/10 via-white/5 to-purple-50/10 dark:from-purple-900/10 dark:via-black/5 dark:to-purple-800/10 backdrop-blur-md p-3 sm:p-4 md:p-5 shadow-lg detailed-card ${isMobile ? "simple-card" : ""}`}
+                  className={`relative rounded-xl overflow-hidden bg-gradient-to-br from-white via-lavender-50/50 to-white backdrop-blur-md p-3 sm:p-4 md:p-5 shadow-lg border border-lavender-200/50 detailed-card ${isMobile ? "simple-card" : ""}`}
                   initial={{ opacity: 0, scale: 0.9, y: 20 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   transition={{
@@ -1879,7 +1781,7 @@ export function EnhancedHeroSection() {
                             }}
                           />
                         </div>
-                        <h3 className="text-xl font-bold text-black dark:text-white">
+                        <h3 className="text-xl font-bold text-gray-800">
                           Skill Accelerator
                           <div className="ml-2 flex flex-wrap gap-1.5">
                             <FeatureBadge type="ai" />
@@ -1890,7 +1792,7 @@ export function EnhancedHeroSection() {
                       </div>
                     </div>
 
-                    <p className="text-sm text-black/80 dark:text-white/80 lg:col-span-12">
+                    <p className="text-sm text-gray-700 lg:col-span-12">
                       The world's first AI-powered gig ecosystem that helps you earn while you learn and grow your
                       freelance career exponentially.
                       <span className="inline-flex items-center ml-2 text-primary">
@@ -1898,14 +1800,16 @@ export function EnhancedHeroSection() {
                       </span>
                     </p>
 
+                    {/* Improve mobile responsiveness in the hero section */}
+                    {/* Find the skills section with the tabs */}
                     <div className="flex flex-wrap gap-2 md:flex-nowrap overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide lg:col-span-12">
                       {skills.map((skill, index) => (
                         <motion.button
                           key={index}
-                          className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 flex items-center ${
+                          className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 flex items-center flex-shrink-0 ${
                             activeSkill === index
                               ? "bg-gradient-to-r from-primary to-purple-500 text-white shadow-lg shadow-primary/20"
-                              : "bg-white/10 dark:bg-black/20 text-black dark:text-white hover:bg-white/20 dark:hover:bg-black/30"
+                              : "bg-white/10 dark:bg-black/20 text-gray-800 hover:bg-white/20 dark:hover:bg-black/30"
                           }`}
                           onClick={() => setActiveSkill(index)}
                           onMouseEnter={() => setHoverSkill(index)}
@@ -1921,10 +1825,10 @@ export function EnhancedHeroSection() {
                           whileTap={{ scale: 0.98 }}
                         >
                           <span className="mr-1.5">{skill.icon}</span>
-                          {skill.name}
+                          <span className="whitespace-nowrap">{skill.name}</span>
                           {hoverSkill === index && (
                             <motion.span
-                              className="ml-1.5 text-xs opacity-0"
+                              className="ml-1.5 text-xs opacity-0 hidden md:inline"
                               animate={{ opacity: 0.7 }}
                               transition={{ duration: 0.2 }}
                             >
@@ -1944,14 +1848,13 @@ export function EnhancedHeroSection() {
                       ))}
                     </div>
 
+                    {/* Also improve the tabs section */}
                     <div className="flex border-b border-white/10 overflow-x-auto -mx-1 px-1 scrollbar-hide md:justify-start lg:col-span-12">
                       {["overview", "learning", "projects", "forum", "analytics", "milestones"].map((tab) => (
                         <motion.button
                           key={tab}
-                          className={`px-2 sm:px-3 py-2 text-xs font-medium capitalize whitespace-nowrap transition-all duration-300 detailed-tab ${
-                            activeTab === tab
-                              ? "active text-primary relative"
-                              : "text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white"
+                          className={`px-2 sm:px-3 py-2 text-xs font-medium capitalize whitespace-nowrap transition-all duration-300 detailed-tab flex-shrink-0 ${
+                            activeTab === tab ? "active text-primary relative" : "text-gray-500 hover:text-gray-800"
                           }`}
                           onClick={() => setActiveTab(tab)}
                           whileHover={{ y: -1 }}
@@ -1987,7 +1890,7 @@ export function EnhancedHeroSection() {
                         <div className="space-y-4">
                           {/* Active Skill Card - Enhanced with better UI/UX */}
                           <div
-                            className="bg-gradient-to-br from-white/10 via-white/5 to-purple-500/10 dark:from-black/20 dark:via-purple-900/10 dark:to-black/10 backdrop-blur-sm rounded-lg p-5 border border-purple-400/30 skill-card shadow-lg relative overflow-hidden group transition-all duration-300 hover:shadow-purple-500/20 hover:border-purple-400/50"
+                            className="bg-gradient-to-br from-white via-lavender-50/50 to-white backdrop-blur-sm rounded-lg p-5 border border-lavender-300/50 skill-card shadow-lg relative overflow-hidden group transition-all duration-300 hover:shadow-lavender-500/20 hover:border-lavender-400/50"
                             style={{ borderLeft: `4px solid ${skills[activeSkill].color}` }}
                           >
                             {/* Animated background elements */}
@@ -2014,9 +1917,13 @@ export function EnhancedHeroSection() {
                                     <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/50 to-purple-500/50 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                                   </div>
                                   <div>
-                                    <h4 className="text-lg font-bold text-black dark:text-white flex items-center">
+                                    <h4 className="text-lg font-bold text-gray-800 flex items-center">
                                       {skills[activeSkill].name}
-                                      <div className="ml-2 h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
+                                      <div className="ml-2 flex flex-wrap gap-1.5">
+                                        <FeatureBadge type="ai" />
+                                        <FeatureBadge type="founder" />
+                                        <FeatureBadge type="fees" />
+                                      </div>
                                     </h4>
                                     <div className="flex items-center mt-1 gap-2">
                                       <div className="px-2 py-0.5 rounded-full bg-white/10 dark:bg-black/30 text-xs font-medium">
@@ -2030,7 +1937,7 @@ export function EnhancedHeroSection() {
                                   </div>
                                 </div>
 
-                                <p className="text-sm text-black/80 dark:text-white/80 mt-3 leading-relaxed">
+                                <p className="text-sm text-gray-700 mt-3 leading-relaxed">
                                   {skills[activeSkill].description}
                                   <span className="inline-flex items-center ml-2 text-xs text-primary font-medium">
                                     <Cpu className="h-3 w-3 mr-1" /> AI-optimized learning path
@@ -2039,8 +1946,8 @@ export function EnhancedHeroSection() {
                               </div>
 
                               <div className="bg-white/10 dark:bg-black/20 rounded-lg p-3 shadow-inner min-w-[140px]">
-                                <div className="text-xs text-black/60 dark:text-white/60">Current Earnings</div>
-                                <div className="font-bold text-xl text-black dark:text-white mt-1">
+                                <div className="text-xs text-gray-500">Current Earnings</div>
+                                <div className="font-bold text-xl text-gray-800 mt-1">
                                   {skills[activeSkill].earnings}
                                 </div>
                                 <div className="text-xs text-green-500 mt-1 flex items-center">
@@ -2053,7 +1960,7 @@ export function EnhancedHeroSection() {
                             {/* Progress Bar - Enhanced */}
                             <div className="mb-5">
                               <div className="flex justify-between text-xs mb-1.5">
-                                <span className="text-black/60 dark:text-white/60 font-medium">
+                                <span className="text-gray-500 font-medium">
                                   Progress to {skills[activeSkill].nextLevel}
                                 </span>
                                 <span className="font-semibold text-primary">{progress}%</span>
@@ -2097,7 +2004,7 @@ export function EnhancedHeroSection() {
                                       className={`absolute -top-7 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded text-[10px] ${
                                         progress >= marker
                                           ? "bg-primary text-white"
-                                          : "bg-white/10 dark:bg-black/30 text-black/60 dark:text-white/60"
+                                          : "bg-white/10 dark:bg-black/30 text-gray-500"
                                       } opacity-0 group-hover:opacity-100 transition-opacity duration-200`}
                                     >
                                       {marker}%
@@ -2127,7 +2034,7 @@ export function EnhancedHeroSection() {
                               ].map((stat, i) => (
                                 <motion.div
                                   key={i}
-                                  className="bg-white/5 dark:bg-black/10 rounded-lg p-3 relative overflow-hidden hover:bg-white/10 dark:hover:bg-black/20 transition-colors duration-200 group/stat"
+                                  className="bg-white rounded-lg p-3 relative overflow-hidden hover:bg-lavender-50 transition-colors duration-200 shadow-sm border border-lavender-100 group/stat"
                                   whileHover={{ y: -2 }}
                                   transition={{ type: "spring", stiffness: 500, damping: 30 }}
                                 >
@@ -2141,13 +2048,13 @@ export function EnhancedHeroSection() {
                                     >
                                       <stat.icon className="h-4 w-4" />
                                     </div>
-                                    <div className="text-lg font-bold text-black dark:text-white flex items-center">
+                                    <div className="text-lg font-bold text-gray-800 flex items-center">
                                       {stat.value}
                                       {stat.showStar && (
                                         <Star className="h-4 w-4 ml-0.5 text-yellow-400 fill-yellow-400" />
                                       )}
                                     </div>
-                                    <div className="text-xs text-black/60 dark:text-white/60 mt-0.5">{stat.label}</div>
+                                    <div className="text-xs text-gray-500 mt-0.5">{stat.label}</div>
                                   </div>
                                 </motion.div>
                               ))}
@@ -2156,7 +2063,7 @@ export function EnhancedHeroSection() {
 
                           {/* Testimonial - Enhanced */}
                           <motion.div
-                            className="bg-white/5 dark:bg-black/10 rounded-lg p-4 border border-white/10 relative overflow-hidden group hover:border-primary/30 transition-all duration-300"
+                            className="bg-white rounded-lg p-4 border border-lavender-200/50 relative overflow-hidden group hover:border-primary/30 transition-all duration-300 shadow-sm"
                             whileHover={{ y: -2, boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1)" }}
                           >
                             {/* Quote marks */}
@@ -2178,7 +2085,7 @@ export function EnhancedHeroSection() {
                               </div>
                               <div className="flex-1">
                                 <div className="flex items-center mb-2">
-                                  <div className="text-sm font-medium text-black dark:text-white mr-2">
+                                  <div className="text-sm font-medium text-gray-800 mr-2">
                                     {skills[activeSkill].testimonial.author}
                                   </div>
                                   <div className="flex">
@@ -2199,10 +2106,10 @@ export function EnhancedHeroSection() {
                                     Verified Client
                                   </div>
                                 </div>
-                                <p className="text-sm text-black/80 dark:text-white/80 italic leading-relaxed">
+                                <p className="text-sm text-gray-700 italic leading-relaxed">
                                   "{skills[activeSkill].testimonial.text}"
                                 </p>
-                                <div className="flex items-center justify-end mt-2 text-xs text-black/50 dark:text-white/50">
+                                <div className="flex items-center justify-end mt-2 text-xs text-gray-500">
                                   <Clock className="h-3 w-3 mr-1" /> 2 months ago
                                 </div>
                               </div>
@@ -2212,39 +2119,39 @@ export function EnhancedHeroSection() {
                           {/* Quick Actions - New section */}
                           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             <motion.button
-                              className="bg-white/5 dark:bg-black/10 hover:bg-primary/10 rounded-lg p-3 flex flex-col items-center text-center transition-colors duration-200"
+                              className="bg-white hover:bg-lavender-50 rounded-lg p-3 flex flex-col items-center text-center transition-colors duration-200 border border-lavender-100 shadow-sm"
                               whileHover={{ y: -2 }}
                               whileTap={{ y: 0 }}
                             >
                               <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center mb-2">
                                 <BookOpen className="h-4 w-4 text-primary" />
                               </div>
-                              <div className="text-xs font-medium text-black dark:text-white">Continue Learning</div>
-                              <div className="text-[10px] text-black/60 dark:text-white/60 mt-1">4 lessons left</div>
+                              <div className="text-xs font-medium text-gray-800">Continue Learning</div>
+                              <div className="text-[10px] text-gray-500 mt-1">4 lessons left</div>
                             </motion.button>
 
                             <motion.button
-                              className="bg-white/5 dark:bg-black/10 hover:bg-primary/10 rounded-lg p-3 flex flex-col items-center text-center transition-colors duration-200"
+                              className="bg-white hover:bg-lavender-50 rounded-lg p-3 flex flex-col items-center text-center transition-colors duration-200 border border-lavender-100 shadow-sm"
                               whileHover={{ y: -2 }}
                               whileTap={{ y: 0 }}
                             >
                               <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center mb-2">
                                 <Layers className="h-4 w-4 text-primary" />
                               </div>
-                              <div className="text-xs font-medium text-black dark:text-white">Find Projects</div>
-                              <div className="text-[10px] text-black/60 dark:text-white/60 mt-1">12 available</div>
+                              <div className="text-xs font-medium text-gray-800">Find Projects</div>
+                              <div className="text-[10px] text-gray-500 mt-1">12 available</div>
                             </motion.button>
 
                             <motion.button
-                              className="bg-white/5 dark:bg-black/10 hover:bg-primary/10 rounded-lg p-3 flex flex-col items-center text-center transition-colors duration-200"
+                              className="bg-white hover:bg-lavender-50 rounded-lg p-3 flex flex-col items-center text-center transition-colors duration-200 border border-lavender-100 shadow-sm"
                               whileHover={{ y: -2 }}
                               whileTap={{ y: 0 }}
                             >
                               <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center mb-2">
                                 <MessageSquare className="h-4 w-4 text-primary" />
                               </div>
-                              <div className="text-xs font-medium text-black dark:text-white">Community</div>
-                              <div className="text-[10px] text-black/60 dark:text-white/60 mt-1">3 new topics</div>
+                              <div className="text-xs font-medium text-gray-800">Community</div>
+                              <div className="text-[10px] text-gray-500 mt-1">3 new topics</div>
                             </motion.button>
                           </div>
                         </div>
@@ -2254,7 +2161,7 @@ export function EnhancedHeroSection() {
                       {activeTab === "learning" && (
                         <div className="space-y-4">
                           <div className="flex items-center justify-between mb-2">
-                            <h4 className="text-sm font-semibold text-black dark:text-white">Learning Path</h4>
+                            <h4 className="text-sm font-semibold text-gray-800">Learning Path</h4>
                             <div className="text-xs text-primary">
                               {skills[activeSkill].learningPath.filter((item) => item.status === "completed").length} /{" "}
                               {skills[activeSkill].learningPath.length} Completed
@@ -2288,8 +2195,8 @@ export function EnhancedHeroSection() {
                                   )}
                                 </div>
                                 <div className="flex-1">
-                                  <div className="text-sm font-medium text-black dark:text-white">{item.name}</div>
-                                  <div className="text-xs text-black/60 dark:text-white/60">
+                                  <div className="text-sm font-medium text-gray-800">{item.name}</div>
+                                  <div className="text-xs text-gray-500">
                                     {item.duration} •{" "}
                                     {item.status === "completed"
                                       ? "Completed"
@@ -2308,13 +2215,13 @@ export function EnhancedHeroSection() {
                           </div>
 
                           <div className="mt-4">
-                            <h4 className="text-sm font-semibold text-black dark:text-white mb-2">Skill Breakdown</h4>
+                            <h4 className="text-sm font-semibold text-gray-800 mb-2">Skill Breakdown</h4>
                             <div className="space-y-2">
                               {skills[activeSkill].skills.map((skill, index) => (
                                 <div key={index} className="space-y-1">
                                   <div className="flex justify-between text-xs">
-                                    <span className="text-black dark:text-white">{skill.name}</span>
-                                    <span className="text-black/60 dark:text-white/60">{skill.level}%</span>
+                                    <span className="text-gray-800">{skill.name}</span>
+                                    <span className="text-gray-500">{skill.level}%</span>
                                   </div>
                                   <div className="h-1.5 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden progress-track">
                                     <div
@@ -2337,7 +2244,7 @@ export function EnhancedHeroSection() {
                       {activeTab === "projects" && (
                         <div className="space-y-4">
                           <div className="flex items-center justify-between mb-2">
-                            <h4 className="text-sm font-semibold text-black dark:text-white">Available Projects</h4>
+                            <h4 className="text-sm font-semibold text-gray-800">Available Projects</h4>
                             <div className="text-xs text-primary">Earn while you learn</div>
                           </div>
 
@@ -2351,14 +2258,12 @@ export function EnhancedHeroSection() {
 
                                 <div className="flex justify-between items-start">
                                   <div>
-                                    <div className="text-sm font-medium text-black dark:text-white">{project.name}</div>
+                                    <div className="text-sm font-medium text-gray-800">{project.name}</div>
                                     <div className="flex items-center mt-1">
                                       <div className="px-2 py-0.5 rounded-full bg-white/10 dark:bg-black/30 text-xs">
                                         {project.difficulty}
                                       </div>
-                                      <div className="text-xs text-black/60 dark:text-white/60">
-                                        Est. earnings: {project.earnings}
-                                      </div>
+                                      <div className="text-xs text-gray-500">Est. earnings: {project.earnings}</div>
                                     </div>
                                   </div>
                                   <EnhancedButton
@@ -2380,10 +2285,8 @@ export function EnhancedHeroSection() {
                                 <Lightbulb className="h-4 w-4" />
                               </div>
                               <div>
-                                <h4 className="text-sm font-semibold text-black dark:text-white">
-                                  AI-Matched Projects
-                                </h4>
-                                <p className="text-xs text-black/80 dark:text-white/80">
+                                <h4 className="text-sm font-semibold text-gray-800">AI-Matched Projects</h4>
+                                <p className="text-xs text-gray-700">
                                   Projects are matched to your skill level to maximize learning and earning potential.
                                 </p>
                               </div>
@@ -2393,7 +2296,7 @@ export function EnhancedHeroSection() {
                       )}
 
                       {/* Forum Tab */}
-                      {/* Forum Tab */}
+
                       {activeTab === "forum" && (
                         <div className="space-y-4">
                           <ForumTab />
@@ -2448,7 +2351,7 @@ export function EnhancedHeroSection() {
                                   1Y
                                 </Button>
                               </div>
-                              <div className="text-xs text-black/60 dark:text-white/60">
+                              <div className="text-xs text-gray-500">
                                 {timeRange === "7d"
                                   ? "Last 7 days"
                                   : timeRange === "1m"
@@ -2497,15 +2400,15 @@ export function EnhancedHeroSection() {
                                 <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2">
                                   <TrendingUp className="h-3.5 w-3.5 text-primary" />
                                 </div>
-                                <div className="text-xs text-black/60 dark:text-white/60">Skill Growth</div>
+                                <div className="text-xs text-gray-500">Skill Growth</div>
                               </div>
                               <div className="flex items-baseline">
-                                <div className="text-xl font-bold text-black dark:text-white">+45%</div>
+                                <div className="text-xl font-bold text-gray-800">+45%</div>
                                 <div className="ml-1 text-xs text-green-500 flex items-center">
                                   <TrendingUp className="h-3 w-3 mr-0.5" /> 12%
                                 </div>
                               </div>
-                              <div className="text-xs text-black/60 dark:text-white/60 mt-1">vs. last period</div>
+                              <div className="text-xs text-gray-500 mt-1">vs. last period</div>
 
                               {/* Mini Sparkline */}
                               <div className="h-6 mt-1 relative">
@@ -2531,15 +2434,15 @@ export function EnhancedHeroSection() {
                                 <div className="h-6 w-6 rounded-full bg-green-500/20 flex items-center justify-center mr-2">
                                   <DollarSign className="h-3.5 w-3.5 text-green-500" />
                                 </div>
-                                <div className="text-xs text-black/60 dark:text-white/60">Earnings</div>
+                                <div className="text-xs text-gray-500">Earnings</div>
                               </div>
                               <div className="flex items-baseline">
-                                <div className="text-xl font-bold text-black dark:text-white">$2,450</div>
+                                <div className="text-xl font-bold text-gray-800">$2,450</div>
                                 <div className="ml-1 text-xs text-green-500 flex items-center">
                                   <TrendingUp className="h-3 w-3 mr-0.5" /> 8%
                                 </div>
                               </div>
-                              <div className="text-xs text-black/60 dark:text-white/60 mt-1">this period</div>
+                              <div className="text-xs text-gray-500 mt-1">this period</div>
 
                               {/* Mini Sparkline */}
                               <div className="h-6 mt-1 relative">
@@ -2565,15 +2468,15 @@ export function EnhancedHeroSection() {
                                 <div className="h-6 w-6 rounded-full bg-blue-500/20 flex items-center justify-center mr-2">
                                   <Clock className="h-3.5 w-3.5 text-blue-500" />
                                 </div>
-                                <div className="text-xs text-black/60 dark:text-white/60">Learning Hours</div>
+                                <div className="text-xs text-gray-500">Learning Hours</div>
                               </div>
                               <div className="flex items-baseline">
-                                <div className="text-xl font-bold text-black dark:text-white">80</div>
+                                <div className="text-xl font-bold text-gray-800">80</div>
                                 <div className="ml-1 text-xs text-red-500 flex items-center">
                                   <TrendingUp className="h-3 w-3 mr-0.5 rotate-180" /> 5%
                                 </div>
                               </div>
-                              <div className="text-xs text-black/60 dark:text-white/60 mt-1">this period</div>
+                              <div className="text-xs text-gray-500 mt-1">this period</div>
 
                               {/* Mini Sparkline */}
                               <div className="h-6 mt-1 relative">
@@ -2599,15 +2502,15 @@ export function EnhancedHeroSection() {
                                 <div className="h-6 w-6 rounded-full bg-purple-500/20 flex items-center justify-center mr-2">
                                   <Users className="h-3.5 w-3.5 text-purple-500" />
                                 </div>
-                                <div className="text-xs text-black/60 dark:text-white/60">Clients</div>
+                                <div className="text-xs text-gray-500">Clients</div>
                               </div>
                               <div className="flex items-baseline">
-                                <div className="text-xl font-bold text-black dark:text-white">15</div>
+                                <div className="text-xl font-bold text-gray-800">15</div>
                                 <div className="ml-1 text-xs text-green-500 flex items-center">
                                   <TrendingUp className="h-3 w-3 mr-0.5" /> 20%
                                 </div>
                               </div>
-                              <div className="text-xs text-black/60 dark:text-white/60 mt-1">this period</div>
+                              <div className="text-xs text-gray-500 mt-1">this period</div>
 
                               {/* Mini Sparkline */}
                               <div className="h-6 mt-1 relative">
@@ -2638,22 +2541,20 @@ export function EnhancedHeroSection() {
                                 <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2">
                                   <TrendingUp className="h-3.5 w-3.5 text-primary" />
                                 </div>
-                                <div className="text-sm font-medium text-black dark:text-white">
-                                  Skill Progress & Earnings
-                                </div>
+                                <div className="text-sm font-medium text-gray-800">Skill Progress & Earnings</div>
                               </div>
                               <div className="flex items-center gap-2">
                                 <div className="flex items-center gap-1">
                                   <div className="h-2 w-2 rounded-full bg-primary"></div>
-                                  <div className="text-xs text-black/60 dark:text-white/60">Progress</div>
+                                  <div className="text-xs text-gray-500">Progress</div>
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <div className="h-2 w-2 rounded-full bg-green-500"></div>
-                                  <div className="text-xs text-black/60 dark:text-white/60">Earnings</div>
+                                  <div className="text-xs text-gray-500">Earnings</div>
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <div className="h-2 w-2 rounded-full bg-purple-500/50 border border-purple-500"></div>
-                                  <div className="text-xs text-black/60 dark:text-white/60">Projected</div>
+                                  <div className="text-xs text-gray-500">Projected</div>
                                 </div>
                               </div>
                             </div>
@@ -2663,7 +2564,7 @@ export function EnhancedHeroSection() {
                               <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent rounded-md"></div>
 
                               {/* Y-axis labels */}
-                              <div className="absolute left-0 top-0 bottom-0 w-8 flex flex-col justify-between text-xs text-black/40 dark:text-white/40 py-2">
+                              <div className="absolute left-0 top-0 bottom-0 w-8 flex flex-col justify-between text-xs text-gray-500 py-2">
                                 <div>100%</div>
                                 <div>75%</div>
                                 <div>50%</div>
@@ -2805,7 +2706,7 @@ export function EnhancedHeroSection() {
                                 </div>
 
                                 {/* X-axis labels */}
-                                <div className="absolute left-0 right-0 bottom-0 flex justify-between text-xs text-black/40 dark:text-white/40 pt-2">
+                                <div className="absolute left-0 right-0 bottom-0 flex justify-between text-xs text-gray-500 pt-2">
                                   <div>Jan</div>
                                   <div>Feb</div>
                                   <div>Mar</div>
@@ -2851,11 +2752,9 @@ export function EnhancedHeroSection() {
                                   <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2">
                                     <Target className="h-3.5 w-3.5 text-primary" />
                                   </div>
-                                  <div className="text-sm font-medium text-black dark:text-white">Skills Breakdown</div>
+                                  <div className="text-sm font-medium text-gray-800">Skills Breakdown</div>
                                 </div>
-                                <div className="text-xs text-black/60 dark:text-white/60">
-                                  {skills[activeSkill].name}
-                                </div>
+                                <div className="text-xs text-gray-500">{skills[activeSkill].name}</div>
                               </div>
 
                               <div className="space-y-3">
@@ -2868,10 +2767,10 @@ export function EnhancedHeroSection() {
                                     transition={{ delay: 0.1 + index * 0.1 }}
                                   >
                                     <div className="flex justify-between items-center mb-1">
-                                      <div className="text-xs font-medium text-black dark:text-white">{skill.name}</div>
-                                      <div className="text-xs text-black/60 dark:text-white/60">{skill.level}%</div>
+                                      <div className="text-xs font-medium text-gray-800">{skill.name}</div>
+                                      <div className="text-xs text-gray-500">{skill.level}%</div>
                                     </div>
-                                    <div className="h-2 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
+                                    <div className="h-2 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden progress-track">
                                       <motion.div
                                         className="h-full rounded-full"
                                         style={{
@@ -2883,10 +2782,10 @@ export function EnhancedHeroSection() {
                                         transition={{ duration: 1, delay: 0.2 + index * 0.1 }}
                                       >
                                         <motion.div
-                                          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                                          animate={{ x: ["-100%", "100%"] }}
+                                          className="absolute inset-0 bg-gradient-to-t from-transparent via-white/20 to-transparent"
+                                          animate={{ y: ["-100%", "100%"] }}
                                           transition={{
-                                            duration: 1.5,
+                                            duration: 2,
                                             repeat: Number.POSITIVE_INFINITY,
                                             repeatType: "loop",
                                             ease: "linear",
@@ -2898,9 +2797,9 @@ export function EnhancedHeroSection() {
 
                                     {/* Skill level indicators */}
                                     <div className="flex justify-between mt-1 px-1">
-                                      <div className="text-[10px] text-black/40 dark:text-white/40">Beginner</div>
-                                      <div className="text-[10px] text-black/40 dark:text-white/40">Intermediate</div>
-                                      <div className="text-[10px] text-black/40 dark:text-white/40">Advanced</div>
+                                      <div className="text-[10px] text-gray-500">Beginner</div>
+                                      <div className="text-[10px] text-gray-500">Intermediate</div>
+                                      <div className="text-[10px] text-gray-500">Advanced</div>
                                     </div>
                                   </motion.div>
                                 ))}
@@ -2908,12 +2807,11 @@ export function EnhancedHeroSection() {
 
                               <div className="mt-4 pt-3 border-t border-white/10">
                                 <div className="flex items-center justify-between">
-                                  <div className="text-xs font-medium text-black dark:text-white">
-                                    Overall Proficiency
-                                  </div>
+                                  <div className="text-xs font-medium text-gray-800">Overall Proficiency</div>
+
                                   <div className="text-xs text-primary font-medium">{skills[activeSkill].level}</div>
                                 </div>
-                                <div className="mt-1 text-xs text-black/60 dark:text-white/60">
+                                <div className="mt-1 text-xs text-gray-500">
                                   {skills[activeSkill].progress}% progress to {skills[activeSkill].nextLevel}
                                 </div>
                               </div>
@@ -2936,9 +2834,9 @@ export function EnhancedHeroSection() {
                                   <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2">
                                     <Clock className="h-3.5 w-3.5 text-primary" />
                                   </div>
-                                  <div className="text-sm font-medium text-black dark:text-white">Time Investment</div>
+                                  <div className="text-sm font-medium text-gray-800">Time Investment</div>
                                 </div>
-                                <div className="text-xs text-black/60 dark:text-white/60">Last 30 days</div>
+                                <div className="text-xs text-gray-500">Last 30 days</div>
                               </div>
 
                               {/* Time breakdown chart */}
@@ -2957,7 +2855,7 @@ export function EnhancedHeroSection() {
                                       animate={{ opacity: 1, y: 0 }}
                                       transition={{ delay: 0.5 + i * 0.1 }}
                                     >
-                                      <div className="text-xs text-black/60 dark:text-white/60 mb-1">{item.hours}h</div>
+                                      <div className="text-xs text-gray-500 mb-1">{item.hours}h</div>
                                       <motion.div
                                         className="w-full rounded-t-md"
                                         style={{
@@ -2980,7 +2878,7 @@ export function EnhancedHeroSection() {
                                           }}
                                         />
                                       </motion.div>
-                                      <div className="text-xs text-black/60 dark:text-white/60 mt-1 truncate w-full text-center">
+                                      <div className="text-xs text-gray-500 mt-1 truncate w-full text-center">
                                         {item.label}
                                       </div>
                                     </motion.div>
@@ -2990,12 +2888,10 @@ export function EnhancedHeroSection() {
 
                               <div className="mt-4 pt-3 border-t border-white/10">
                                 <div className="flex items-center justify-between">
-                                  <div className="text-xs font-medium text-black dark:text-white">Total Hours</div>
+                                  <div className="text-xs font-medium text-gray-800">Total Hours</div>
                                   <div className="text-xs text-primary font-medium">80 hours</div>
                                 </div>
-                                <div className="mt-1 text-xs text-black/60 dark:text-white/60">
-                                  +15% vs. previous period
-                                </div>
+                                <div className="mt-1 text-xs text-gray-500">+15% vs. previous period</div>
                               </div>
                             </motion.div>
 
@@ -3013,9 +2909,7 @@ export function EnhancedHeroSection() {
                                   <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2">
                                     <Trophy className="h-3.5 w-3.5 text-primary" />
                                   </div>
-                                  <div className="text-sm font-medium text-black dark:text-white">
-                                    Recent Achievements
-                                  </div>
+                                  <div className="text-sm font-medium text-gray-800">Recent Achievements</div>
                                 </div>
                                 <div className="text-xs text-primary">View All</div>
                               </div>
@@ -3060,10 +2954,10 @@ export function EnhancedHeroSection() {
                                       />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                      <div className="text-xs font-medium text-black dark:text-white truncate">
+                                      <div className="text-xs font-medium text-gray-800 truncate">
                                         {achievement.title}
                                       </div>
-                                      <div className="text-xs text-black/60 dark:text-white/60">{achievement.time}</div>
+                                      <div className="text-xs text-gray-500">{achievement.time}</div>
                                     </div>
                                     <div className="px-1.5 py-0.5 text-xs bg-white/10 dark:bg-black/20 rounded-full">
                                       {achievement.badge}
@@ -3097,9 +2991,7 @@ export function EnhancedHeroSection() {
                                   <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2">
                                     <Lightbulb className="h-3.5 w-3.5 text-primary" />
                                   </div>
-                                  <div className="text-sm font-medium text-black dark:text-white">
-                                    Growth Opportunities
-                                  </div>
+                                  <div className="text-sm font-medium text-gray-800">Growth Opportunities</div>
                                 </div>
                                 <div className="text-xs text-primary">AI-Recommended</div>
                               </div>
@@ -3131,12 +3023,8 @@ export function EnhancedHeroSection() {
                                   >
                                     <div className="absolute top-0 right-0 h-16 w-16 bg-gradient-to-bl from-primary/10 to-transparent rounded-bl-full"></div>
 
-                                    <div className="text-sm font-medium text-black dark:text-white mb-1">
-                                      {opportunity.title}
-                                    </div>
-                                    <div className="text-xs text-black/60 dark:text-white/60 mb-2">
-                                      {opportunity.description}
-                                    </div>
+                                    <div className="text-sm font-medium text-gray-800 mb-1">{opportunity.title}</div>
+                                    <div className="text-xs text-gray-700 mb-2">{opportunity.description}</div>
 
                                     <div className="flex items-center justify-between">
                                       <div className="flex items-center gap-2">
@@ -3148,7 +3036,7 @@ export function EnhancedHeroSection() {
                                           {opportunity.impact} Impact
                                         </div>
                                       </div>
-                                      <div className="text-xs text-black/60 dark:text-white/60">{opportunity.time}</div>
+                                      <div className="text-xs text-gray-500">{opportunity.time}</div>
                                     </div>
                                   </motion.div>
                                 ))}
@@ -3176,8 +3064,8 @@ export function EnhancedHeroSection() {
                             <MessageSquare className="h-3 w-3 text-primary" />
                           </div>
                           <div>
-                            <h4 className="text-xs font-semibold text-black dark:text-white">Forum</h4>
-                            <p className="text-xs text-black/60 dark:text-white/60">Community support</p>
+                            <h4 className="text-xs font-semibold text-gray-800">Forum</h4>
+                            <p className="text-xs text-gray-700">Community support</p>
                           </div>
                         </div>
 
@@ -3186,8 +3074,8 @@ export function EnhancedHeroSection() {
                             <Users className="h-3 w-3 text-primary" />
                           </div>
                           <div>
-                            <h4 className="text-xs font-semibold text-black dark:text-white">Mentor Network</h4>
-                            <p className="text-xs text-black/60 dark:text-white/60">Expert feedback</p>
+                            <h4 className="text-xs font-semibold text-gray-800">Mentor Network</h4>
+                            <p className="text-xs text-gray-700">Expert feedback</p>
                           </div>
                         </div>
 
@@ -3196,8 +3084,8 @@ export function EnhancedHeroSection() {
                             <Target className="h-3 w-3 text-primary" />
                           </div>
                           <div>
-                            <h4 className="text-xs font-semibold text-black dark:text-white">Skill Projects</h4>
-                            <p className="text-xs text-black/60 dark:text-white/60">Learn while earning</p>
+                            <h4 className="text-xs font-semibold text-gray-800">Skill Projects</h4>
+                            <p className="text-xs text-gray-700">Learn while earning</p>
                           </div>
                         </div>
 
@@ -3206,8 +3094,8 @@ export function EnhancedHeroSection() {
                             <Trophy className="h-3 w-3 text-primary" />
                           </div>
                           <div>
-                            <h4 className="text-xs font-semibold text-black dark:text-white">Skill Certification</h4>
-                            <p className="text-xs text-black/60 dark:text-white/60">Verified credentials</p>
+                            <h4 className="text-xs font-semibold text-gray-800">Skill Certification</h4>
+                            <p className="text-xs text-gray-700">Verified credentials</p>
                           </div>
                         </div>
                       </div>
@@ -3334,7 +3222,7 @@ export function EnhancedHeroSection() {
                   transition={{ duration: 0.5 }}
                 >
                   <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-xl font-semibold"></h3>
+                    <h3 className="text-xl font-semibold">Featured Categories</h3>
                     <Link
                       href="/explore"
                       className="text-primary text-sm font-medium flex items-center hover:underline"
@@ -3415,45 +3303,15 @@ export function EnhancedHeroSection() {
                           Coming Soon
                         </span>
                       </div>
-                      <EnhancedCategoryCard
-                        key={index}
-                        icon={category.icon}
-                        name={category.name}
-                        count={category.count}
-                        index={index + 4} // Offset for animation delay
-                      />
+                      <EnhancedCategoryCard key={index} icon={category.icon} name={category.name} />
                     </div>
                   ))}
                 </div>
-
-                <motion.div
-                  className="flex justify-center mt-12"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.3 }}
-                >
-                  <EnhancedButton
-                    variant="gradient"
-                    size="lg"
-                    className="font-medium"
-                    onClick={() => router.push("/explore")}
-                  >
-                    Explore All Categories
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </EnhancedButton>
-                </motion.div>
               </div>
             </section>
           </div>
         </div>
       </section>
-      <SkillAcceleratorSignup isOpen={showSignupModal} onClose={() => setShowSignupModal(false)} />
     </>
   )
-}
-
-const handleHireNow = () => {
-  const router = useRouter()
-  router.push("/stripe-checkout")
 }

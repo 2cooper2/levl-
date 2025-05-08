@@ -3,9 +3,12 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import type React from "react"
+import { motion } from "framer-motion"
 
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
+import { Badge } from "@/components/ui/badge"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 interface CheckoutFormProps {
   service: any
@@ -43,10 +46,55 @@ export function CheckoutForm({ service, packageName, userId }: CheckoutFormProps
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? "Processing..." : "Complete Checkout"}
-      </Button>
-    </form>
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold">Checkout</h2>
+        <div className="flex items-center space-x-2">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{
+              duration: 0.5,
+              delay: 0.2,
+              type: "spring",
+              stiffness: 100,
+            }}
+          >
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Badge className="bg-green-500 text-white">Secure</Badge>
+                </TooltipTrigger>
+                <TooltipContent>Your payment is secured with industry-standard encryption.</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{
+              duration: 0.5,
+              delay: 0.4,
+              type: "spring",
+              stiffness: 100,
+            }}
+          >
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Badge className="bg-blue-500 text-white">Guaranteed</Badge>
+                </TooltipTrigger>
+                <TooltipContent>We offer a satisfaction guarantee or your money back.</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </motion.div>
+        </div>
+      </div>
+      <form onSubmit={handleSubmit}>
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? "Processing..." : "Complete Checkout"}
+        </Button>
+      </form>
+    </div>
   )
 }

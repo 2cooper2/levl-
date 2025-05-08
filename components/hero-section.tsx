@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { ArrowRight, Search, Sparkles } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { Button } from "@/components/ui/button"
 
 export function HeroSection() {
   const router = useRouter()
@@ -158,13 +159,22 @@ export function HeroSection() {
               animate={controls}
             >
               <div className="relative flex items-center max-w-md">
-                <Search className="absolute left-3 text-muted-foreground z-10" />
+                <label htmlFor="service-search" className="sr-only">
+                  Search for services
+                </label>
+                <Search className="absolute left-3 text-muted-foreground z-10" aria-hidden="true" />
                 <Input
+                  id="service-search"
                   placeholder="What service are you looking for?"
                   className="pl-10 pr-32 py-6 text-base rounded-full border-primary/20 focus:border-primary"
+                  aria-label="Search for services"
                 />
-                <EnhancedButton className="absolute right-1.5 rounded-full" onClick={() => router.push("/explore")}>
-                  Explore <ArrowRight className="ml-2 h-4 w-4" />
+                <EnhancedButton
+                  className="absolute right-1.5 rounded-full"
+                  onClick={() => router.push("/explore")}
+                  aria-label="Explore services"
+                >
+                  Explore <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
                 </EnhancedButton>
               </div>
 
@@ -269,9 +279,18 @@ export function HeroSection() {
                   ))}
                 </div>
 
-                <Link href="/waitlist">
-                  <EnhancedButton className="w-full mt-4">Join Waitlist</EnhancedButton>
-                </Link>
+                <div className="flex flex-col space-y-2 mt-4">
+                  <Link href="/explore">
+                    <EnhancedButton className="w-full bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90">
+                      Explore Services <ArrowRight className="ml-2 h-4 w-4" />
+                    </EnhancedButton>
+                  </Link>
+                  <Link href="/waitlist">
+                    <Button variant="outline" className="w-full">
+                      Join Waitlist
+                    </Button>
+                  </Link>
+                </div>
               </div>
             </motion.div>
           </motion.div>

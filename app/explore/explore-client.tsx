@@ -11,11 +11,28 @@ import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { MainNav } from "@/components/main-nav"
 import { ServiceCard } from "@/components/service-card"
-import { Filter, Search, SlidersHorizontal, X, Star, ChevronDown } from "lucide-react"
+import { Filter, Search, SlidersHorizontal, X, Star, ChevronDown, BookmarkIcon } from "lucide-react"
 import { motion } from "framer-motion"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { toast } from "sonner"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export default function ExploreClientPage() {
+  // Add a "Save Search" feature to the explore page
+  // Add this at the top of the component function
+  const [savedSearches, setSavedSearches] = useState<Array<{ name: string; filters: any }>>([])
+  const [showSaveSearchDialog, setShowSaveSearchDialog] = useState(false)
+  const [searchName, setSearchName] = useState("")
+  const [currentFilters, setCurrentFilters] = useState({})
+
   const [isLoaded, setIsLoaded] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
@@ -192,6 +209,33 @@ export default function ExploreClientPage() {
     { id: "3.0", name: "3.0 & up" },
   ]
 
+  // Add this function to the component
+  const handleFilterChange = (filters) => {
+    setCurrentFilters(filters)
+    // Existing filter logic...
+  }
+
+  const saveCurrentSearch = () => {
+    if (!searchName.trim()) return
+
+    setSavedSearches([
+      ...savedSearches,
+      {
+        name: searchName,
+        filters: currentFilters,
+      },
+    ])
+
+    setSearchName("")
+    setShowSaveSearchDialog(false)
+
+    // Show toast notification
+    toast({
+      title: "Search saved",
+      description: `Your search "${searchName}" has been saved for future use.`,
+    })
+  }
+
   const filteredServices = services.filter((service) => {
     // Filter by search query
     const matchesSearch =
@@ -355,6 +399,45 @@ export default function ExploreClientPage() {
       <main className="flex-1 py-8">
         <div className="container px-4 md:px-6">
           <div className="mb-8">
+            {/* Add this UI element near the filter component */}
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold">Explore Services</h2>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowSaveSearchDialog(true)}
+                className="flex items-center gap-2"
+              >
+                <BookmarkIcon className="h-4 w-4" />
+                Save Search
+              </Button>
+            </div>
+
+            {/* Saved searches dropdown */}
+            {savedSearches.length > 0 && (
+              <div className="mb-4">
+                <Select
+                  onValueChange={(value) => {
+                    const search = savedSearches.find((s) => s.name === value)
+                    if (search) {
+                      // Apply the saved filters
+                      handleFilterChange(search.filters)
+                    }
+                  }}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Saved searches" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {savedSearches.map((search, index) => (
+                      <SelectItem key={index} value={search.name}>
+                        {search.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <h1 className="text-3xl font-bold tracking-tight mb-2">Explore Services</h1>
             <p className="text-muted-foreground">
               Find the perfect service for your needs from our talented providers.
@@ -476,6 +559,35 @@ export default function ExploreClientPage() {
           </div>
         </div>
       </main>
+      {/* Save search dialog */}
+      <Dialog open={showSaveSearchDialog} onOpenChange={setShowSaveSearchDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Save your search</DialogTitle>
+            <DialogDescription>Give your search a name to easily find it later.</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="search-name" className="text-right">
+                Name
+              </Label>
+              <Input
+                id="search-name"
+                value={searchName}
+                onChange={(e) => setSearchName(e.target.value)}
+                className="col-span-3"
+                placeholder="e.g., Web Development Services"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSaveSearchDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={saveCurrentSearch}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

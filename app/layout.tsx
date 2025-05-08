@@ -1,9 +1,17 @@
 import type React from "react"
-import "@/app/globals.css"
+import "./globals.css"
+import type { Metadata } from "next"
+import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider } from "@/context/auth-context"
-import { ToastProvider } from "@/components/ui/toast-provider"
-import { StripeProvider } from "@/components/payments/stripe-provider"
+
+const inter = Inter({ subsets: ["latin"] })
+
+export const metadata: Metadata = {
+  title: "Levl - Skill Marketplace",
+  description: "Connect with skilled professionals and grow your business",
+    generator: 'v0.dev'
+}
 
 export default function RootLayout({
   children,
@@ -11,36 +19,12 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-      </head>
-      <body>
-        <AuthProvider>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-            {/* Additional background color to ensure full coverage */}
-            <div
-              style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                width: "100vw",
-                height: "100vh",
-                zIndex: -30,
-              }}
-              className="bg-gradient-to-b from-purple-500/10 to-background"
-            />
-            <StripeProvider>{children}</StripeProvider>
-            <ToastProvider />
-          </ThemeProvider>
-        </AuthProvider>
+    <html lang="en">
+      <body className={inter.className}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <AuthProvider>{children}</AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   )
 }
-
-export const metadata = {
-      generator: 'v0.dev'
-    };
