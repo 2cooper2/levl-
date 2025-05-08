@@ -4,7 +4,6 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { EnhancedMainNav } from "@/components/enhanced-main-nav"
 import { AnimatedGradientBackground } from "@/components/animated-gradient-background"
-import { BackgroundPattern } from "@/components/background-pattern"
 import { motion } from "framer-motion"
 import { useEffect, useState } from "react"
 import { LevlLogo } from "@/components/levl-logo"
@@ -408,28 +407,14 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
       {/* Hero Section */}
       <section className="relative py-12 md:py-16 overflow-hidden border-b z-10">
         <div className="absolute inset-0 bg-gradient-to-b from-purple-500/10 via-purple-400/5 to-background z-0 animate-gradient-slow"></div>
-        <div className="absolute inset-0 bg-grid-pattern opacity-[0.015] z-0"></div>
-        <BackgroundPattern className="opacity-20 z-0" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/20 rounded-full filter blur-[100px] animate-pulse-slow"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/10 rounded-full filter blur-[100px] animate-pulse-slow-delay"></div>
         <div className="absolute top-1/2 left-1/4 w-64 h-64 bg-blue-500/10 rounded-full filter blur-[120px] animate-pulse-slow-delay-2"></div>
 
         {/* Add decorative elements */}
-        <div className="absolute top-10 left-10 w-6 h-6 rounded-full bg-purple-400/30 animate-[float_6s_ease-in-out_infinite]"></div>
-        <div className="absolute top-20 right-20 w-4 h-4 rounded-full bg-primary/30 animate-[float_8s_ease-in-out_infinite_0.5s]"></div>
-        <div className="absolute bottom-10 left-1/4 w-5 h-5 rounded-full bg-purple-500/30 animate-[float_7s_ease-in-out_infinite_1s]"></div>
         <div className="absolute top-1/3 right-1/3 w-3 h-3 rounded-full bg-primary/20 animate-[float_5s_ease-in-out_infinite_1.5s]"></div>
 
         {/* Add subtle particle effect */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-px h-px bg-primary/50 shadow-[0_0_10px_5px_rgba(147,51,234,0.3)] animate-[pulse_4s_ease-in-out_infinite]"></div>
-          <div className="absolute top-3/4 left-2/3 w-px h-px bg-purple-500/50 shadow-[0_0_8px_4px_rgba(147,51,234,0.2)] animate-[pulse_6s_ease-in-out_infinite_1s]"></div>
-          <div className="absolute top-1/2 left-1/6 w-px h-px bg-primary/50 shadow-[0_0_12px_6px_rgba(147,51,234,0.25)] animate-[pulse_5s_ease-in-out_infinite_2s]"></div>
-        </div>
 
         {/* Add subtle light beam effect */}
-        <div className="absolute -top-20 left-1/3 w-1 h-[300px] bg-gradient-to-b from-purple-500/0 via-purple-500/10 to-purple-500/0 rotate-[30deg] animate-[float_15s_ease-in-out_infinite]"></div>
-        <div className="absolute -top-20 right-1/4 w-1 h-[250px] bg-gradient-to-b from-primary/0 via-primary/10 to-primary/0 -rotate-[20deg] animate-[float_12s_ease-in-out_infinite_2s]"></div>
 
         <div className="container px-4 md:px-6 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
@@ -726,7 +711,6 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
       {/* Related Categories Section */}
       <section className="py-12 border-t relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-t from-purple-500/5 to-background/0"></div>
-        <BackgroundPattern className="opacity-10" />
 
         <div className="container px-4 md:px-6 relative z-10">
           <div className="text-center mb-10">
@@ -767,7 +751,6 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
       </section>
 
       <footer className="w-full border-t bg-background py-6 md:py-12 relative">
-        <BackgroundPattern className="opacity-30" />
         <div className="container px-4 md:px-6 relative z-10">
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-5">
             <div className="space-y-4 lg:col-span-2">
