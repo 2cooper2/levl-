@@ -52,6 +52,7 @@ import { BackgroundPattern } from "@/components/background-pattern"
 import { EnhancedCategoryCard } from "@/components/enhanced-category-card"
 import { useMobile } from "@/hooks/use-mobile"
 // Remove the existing import for ForumComponent
+import { FeatureBadge } from "@/components/ui/feature-badge"
 
 // Add keyframes for the shimmer animation
 const shimmerAnimation = {
@@ -1880,9 +1881,11 @@ export function EnhancedHeroSection() {
                         </div>
                         <h3 className="text-xl font-bold text-black dark:text-white">
                           Skill Accelerator
-                          <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-medium bg-primary/20 text-primary">
-                            <Sparkles className="h-3 w-3 mr-1" /> AI-Powered
-                          </span>
+                          <div className="ml-2 flex flex-wrap gap-1.5">
+                            <FeatureBadge type="ai" />
+                            <FeatureBadge type="founder" />
+                            <FeatureBadge type="fees" />
+                          </div>
                         </h3>
                       </div>
                     </div>
@@ -2129,7 +2132,7 @@ export function EnhancedHeroSection() {
                                   transition={{ type: "spring", stiffness: 500, damping: 30 }}
                                 >
                                   <div
-                                    className={`absolute top-0 right-0 h-20 w-20 bg-gradient-to-bl from-${stat.color}/10 to-transparent rounded-bl-full`}
+                                    className={`absolute top-0 right-0 h-20 w-20 bg-gradient-to-br from-${stat.color}/10 to-transparent rounded-bl-full`}
                                   ></div>
                                   <div className="absolute -bottom-2 -left-2 h-12 w-12 bg-gradient-to-tr from-${stat.color}/5 to-transparent rounded-tr-full"></div>
                                   <div className="flex flex-col items-center text-center">
@@ -3043,7 +3046,7 @@ export function EnhancedHeroSection() {
                                 ].map((achievement, i) => (
                                   <motion.div
                                     key={i}
-                                    className="flex items-start gap-3 p-2 rounded-md bg-white/5 dark:bg-black/10 hover:bg-white/10 dark:hover:bg-black/20 transition-colors cursor-pointer"
+                                    className="flex items-start gap-3 p-2 rounded-md bg-white/5 dark:bg-black/20 hover:bg-white/10 dark:hover:bg-black/20 transition-colors cursor-pointer"
                                     initial={{ opacity: 0, x: -10 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: 0.6 + i * 0.1 }}

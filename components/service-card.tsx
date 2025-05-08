@@ -11,6 +11,7 @@ import { motion } from "framer-motion"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/components/ui/use-toast"
+import { FeatureBadge } from "@/components/ui/feature-badge"
 
 interface ServiceCardProps {
   image: string
@@ -105,6 +106,10 @@ export function ServiceCard({
             <Badge variant="outline" className="ml-auto text-xs">
               {provider.level}
             </Badge>
+          </div>
+          <div className="flex flex-wrap gap-1 mb-2">
+            <FeatureBadge type="founder" size="sm" />
+            <FeatureBadge type="fees" size="sm" />
           </div>
           <h3 className="font-semibold line-clamp-2 mb-2">{title}</h3>
           <div className="flex flex-wrap gap-1 mb-2">

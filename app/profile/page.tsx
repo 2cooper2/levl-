@@ -89,59 +89,137 @@ export default function ProfilePage() {
   return (
     <div className="container py-10">
       <div className="relative mb-8 overflow-hidden rounded-xl bg-gradient-to-r from-primary/20 via-purple-500/20 to-blue-500/20 p-8">
-        <div className="absolute inset-0 bg-grid-white/10 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.5))]" />
-        <div className="relative z-10 flex flex-col md:flex-row gap-6 items-center md:items-start">
+        {/* Animated background pattern - hidden on mobile */}
+        <div className="absolute inset-0 bg-grid-white/10 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.5))] opacity-60 sm:block hidden" />
+        {/* Solid background for mobile */}
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-purple-500/10 to-blue-500/10 sm:hidden" />
+
+        <div className="relative z-10 flex flex-col md:flex-row gap-6 items-center md:items-start pb-10">
           <div className="relative">
-            <Avatar className="h-24 w-24 border-4 border-background shadow-xl">
+            <Avatar className="h-24 w-24 border-4 border-background shadow-xl ring-2 ring-primary/10 ring-offset-2 ring-offset-background">
               <AvatarImage src={profileData.avatar || "/placeholder.svg"} alt={profileData.name} />
               <AvatarFallback className="text-2xl">{profileData.name?.[0] || "U"}</AvatarFallback>
             </Avatar>
-            <div className="absolute -bottom-1 -right-1 rounded-full bg-primary p-1 text-white">
+            <div className="absolute -bottom-1 -right-1 rounded-full bg-primary p-1 text-white shadow-md">
               <CheckCircle className="h-5 w-5" />
             </div>
           </div>
-          <div className="text-center md:text-left">
-            <div className="flex flex-col md:flex-row items-center gap-2 mb-2">
-              <h1 className="text-3xl font-bold">{profileData.name}</h1>
-              <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
-                Verified Account
-              </Badge>
+
+          <div className="text-center md:text-left space-y-3">
+            <div className="flex flex-col md:flex-row items-center gap-2 mb-1">
+              <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600 dark:from-primary dark:to-purple-400">
+                {profileData.name}
+              </h1>
+              <div className="flex gap-2 flex-wrap justify-center">
+                <Badge
+                  variant="outline"
+                  className="bg-primary/10 text-primary border-primary/20 transition-all duration-300 hover:bg-primary/20"
+                >
+                  Verified Account
+                </Badge>
+                <Badge
+                  variant="outline"
+                  className="bg-green-500/10 text-green-600 border-green-500/20 transition-all duration-300 hover:bg-green-500/20"
+                >
+                  Top Rated
+                </Badge>
+              </div>
             </div>
-            <p className="text-muted-foreground mb-4">{profileData.email}</p>
-            <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-              <div className="flex items-center gap-1 text-sm">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
+
+            <p className="text-muted-foreground mb-2">{profileData.email}</p>
+
+            <div className="flex flex-wrap gap-3 justify-center md:justify-start max-w-full">
+              <div className="flex items-center gap-1.5 text-sm bg-background/50 sm:backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm transition-all duration-300 hover:bg-background hover:shadow">
+                <MapPin className="h-4 w-4 text-primary" />
                 <span>{profileData.location}</span>
               </div>
-              <div className="flex items-center gap-1 text-sm">
-                <Briefcase className="h-4 w-4 text-muted-foreground" />
+              <div className="flex items-center gap-1.5 text-sm bg-background/50 sm:backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm transition-all duration-300 hover:bg-background hover:shadow">
+                <Briefcase className="h-4 w-4 text-primary" />
                 <span>{profileData.profession}</span>
               </div>
-              <div className="flex items-center gap-1 text-sm">
-                <Clock className="h-4 w-4 text-muted-foreground" />
+              <div className="flex items-center gap-1.5 text-sm bg-background/50 sm:backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm transition-all duration-300 hover:bg-background hover:shadow">
+                <Clock className="h-4 w-4 text-primary" />
                 <span>Member since 2023</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-sm bg-background/50 sm:backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm transition-all duration-300 hover:bg-background hover:shadow">
+                <Star className="h-4 w-4 text-amber-500" />
+                <span>
+                  <span className="font-medium">42</span> Reviews
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 text-sm bg-background/50 sm:backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm transition-all duration-300 hover:bg-background hover:shadow">
+                <CheckCircle className="h-4 w-4 text-green-500" />
+                <span>
+                  <span className="font-medium">18</span> Jobs
+                </span>
               </div>
             </div>
           </div>
-          <div className="md:ml-auto flex gap-2">
-            <Button variant="outline" size="sm" className="gap-1" onClick={() => setIsEditProfileOpen(true)}>
+
+          <div className="md:ml-auto flex gap-2 mt-4 md:mt-0">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1 bg-background/50 sm:backdrop-blur-sm hover:bg-background transition-all duration-300 hover:shadow"
+              onClick={() => setIsEditProfileOpen(true)}
+            >
               <Edit className="h-4 w-4" />
               Edit Profile
             </Button>
-            <Button size="sm" className="gap-1">
+            <Button size="sm" className="gap-1 transition-all duration-300 hover:shadow-md">
               <MessageSquare className="h-4 w-4" />
               Messages
             </Button>
+          </div>
+        </div>
+
+        {/* Profile completion indicator */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <div className="relative h-2.5 bg-gray-100/30 dark:bg-gray-800/30 sm:backdrop-blur-sm">
+            <div
+              className="absolute top-0 left-0 h-full w-[85%] rounded-r-full"
+              style={{
+                background:
+                  "linear-gradient(90deg, rgba(124,58,237,0.7) 0%, rgba(139,92,246,0.8) 35%, rgba(124,58,237,0.9) 100%)",
+                boxShadow: "0 0 10px rgba(124,58,237,0.5), 0 0 20px rgba(124,58,237,0.3)",
+              }}
+            >
+              {/* Animated glow effect - hidden on mobile */}
+              <div className="absolute inset-0 rounded-r-full bg-white/10 animate-pulse opacity-70 sm:block hidden"></div>
+
+              {/* Progress markers - simplified on mobile */}
+              <div className="absolute top-0 bottom-0 left-[25%] w-0.5 bg-white/30 hidden sm:block"></div>
+              <div className="absolute top-0 bottom-0 left-[50%] w-0.5 bg-white/40 hidden sm:block"></div>
+              <div className="absolute top-0 bottom-0 left-[75%] w-0.5 bg-white/50 hidden sm:block"></div>
+            </div>
+          </div>
+
+          <div className="flex justify-between px-2 py-1.5 text-xs flex-wrap">
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-primary"></div>
+              <span className="font-medium text-primary dark:text-primary">Profile 85% complete</span>
+            </div>
+            <div className="flex items-center gap-1 sm:mt-0 mt-1 w-full sm:w-auto justify-end">
+              <span className="text-muted-foreground text-[10px] sm:text-xs">Complete profile for all features</span>
+              <svg
+                className="h-3.5 w-3.5 text-primary animate-bounce hidden sm:block"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+              </svg>
+            </div>
           </div>
         </div>
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
         <div className="relative">
-          <TabsList className="w-full max-w-md mx-auto flex justify-between bg-transparent p-0 h-auto">
+          <TabsList className="w-full max-w-md mx-auto flex justify-between bg-transparent p-0 h-auto overflow-x-auto">
             <TabsTrigger
               value="overview"
-              className="flex items-center gap-2 px-4 py-2.5 rounded-none bg-transparent data-[state=active]:bg-transparent relative"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-none bg-transparent data-[state=active]:bg-transparent relative whitespace-nowrap"
             >
               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary">
                 <User className="h-4 w-4" />
@@ -152,7 +230,7 @@ export default function ProfilePage() {
 
             <TabsTrigger
               value="activity"
-              className="flex items-center gap-2 px-4 py-2.5 rounded-none bg-transparent data-[state=active]:bg-transparent relative"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-none bg-transparent data-[state=active]:bg-transparent relative whitespace-nowrap"
             >
               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary">
                 <Clock className="h-4 w-4" />
@@ -163,7 +241,7 @@ export default function ProfilePage() {
 
             <TabsTrigger
               value="security"
-              className="flex items-center gap-2 px-4 py-2.5 rounded-none bg-transparent data-[state=active]:bg-transparent relative"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-none bg-transparent data-[state=active]:bg-transparent relative whitespace-nowrap"
             >
               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary">
                 <Shield className="h-4 w-4" />

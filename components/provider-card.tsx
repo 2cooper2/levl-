@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { useRouter } from "next/navigation"
+import { FeatureBadge } from "@/components/ui/feature-badge"
 
 interface Provider {
   id: string
@@ -86,6 +87,10 @@ export function ProviderCard({ provider, index, isLoaded, onSelect }: ProviderCa
                 <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                 <span className="ml-1 text-sm font-medium">{provider.rating}</span>
                 <span className="ml-1 text-xs text-muted-foreground">({provider.reviews})</span>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-1">
+                <FeatureBadge type="founder" size="sm" />
+                <FeatureBadge type="fees" size="sm" />
               </div>
               <div className="mt-1 flex items-center text-xs text-muted-foreground">
                 <MapPin className="h-3 w-3 mr-1" />

@@ -23,6 +23,7 @@ import {
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/context/auth-context" // Import the custom auth context
+import { ServiceBadges } from "@/components/services/service-badges"
 
 // Add these animation keyframes after the imports
 const fadeInAnimation = `
@@ -601,6 +602,9 @@ export default function ServicePage() {
                   </div>
                 </div>
               </div>
+            </div>
+            <div className="mt-4">
+              <ServiceBadges />
             </div>
 
             {/* Skills card with enhanced styling */}
