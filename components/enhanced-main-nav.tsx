@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils"
 import { LevlLogo } from "@/components/levl-logo"
 import { UserNav } from "@/components/dashboard/user-nav"
 import { useAuth } from "@/context/auth-context"
-import { MobileNav } from "@/components/mobile-nav"
 import { User, Menu, LayoutDashboard, Compass, Users, Info, LogIn, UserPlus } from "lucide-react"
 import { useState, useEffect, useRef } from "react"
 
@@ -62,7 +61,6 @@ export function EnhancedMainNav() {
           <LevlLogo className="h-12 w-12" />
           <span className="hidden text-2xl font-bold sm:inline-block">LevL</span>
         </Link>
-        <MobileNav className="ml-2" />
 
         <div className="flex flex-1 items-center justify-end space-x-4">
           <nav className="flex items-center space-x-3">
