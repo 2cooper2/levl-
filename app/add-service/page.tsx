@@ -35,6 +35,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useAuth } from "@/context/auth-context"
 import { useToast } from "@/hooks/use-toast"
+import { MobileNav } from "@/components/mobile-nav"
 
 const categories = [
   { id: "painting", name: "Painting", icon: <PaintBucket className="h-6 w-6" /> },
@@ -213,12 +214,17 @@ export default function AddServicePage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <AnimatedGradientBackground />
-      <EnhancedMainNav />
+      <div className="hidden md:block">
+        <EnhancedMainNav />
+      </div>
+      <div className="md:hidden p-4">
+        <MobileNav />
+      </div>
 
-      <main className="flex-1 container py-8 relative z-10">
+      <main className="flex-1 container py-8 relative z-10 px-4 md:px-8">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8 text-center">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-purple-400 bg-clip-text text-transparent">
+            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-600 to-purple-400 bg-clip-text text-transparent">
               Create a New Service
             </h1>
             <p className="text-muted-foreground mt-2">Share your skills with the world and start earning</p>
@@ -266,7 +272,7 @@ export default function AddServicePage() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
-                className="p-6"
+                className="p-4 md:p-6"
               >
                 <form onSubmit={handleSubmit}>
                   {/* Step 1: Basic Info */}
