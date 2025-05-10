@@ -73,7 +73,7 @@ export default function AddServicePage() {
 
   // Redirect if not authenticated
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated && typeof window !== "undefined") {
       router.push("/auth/login?redirect=/add-service")
     }
   }, [isAuthenticated, router])

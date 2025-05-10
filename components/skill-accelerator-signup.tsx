@@ -151,13 +151,13 @@ export function SkillAcceleratorSignup({ isOpen, onClose }: SkillAcceleratorSign
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md overflow-hidden bg-white border border-purple-200 shadow-md shadow-purple-100/50">
+      <DialogContent className="sm:max-w-md overflow-hidden bg-white border border-purple-200 shadow-md shadow-purple-100/50 max-h-[90vh] overflow-y-auto">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-white opacity-80 pointer-events-none"></div>
-        <DialogHeader className="pb-4 border-b border-purple-100 relative">
-          <DialogTitle className="text-xl font-bold text-center">
+        <DialogHeader className="pb-2 border-b border-purple-100 relative">
+          <DialogTitle className="text-lg font-bold text-center">
             {isSuccess ? "Registration Complete!" : "Join Skill Accelerator"}
           </DialogTitle>
-          <DialogDescription className="text-center">
+          <DialogDescription className="text-center text-sm">
             {isSuccess
               ? "You're now part of our community!"
               : "Accelerate your skills and grow your career with our AI-powered platform."}
@@ -200,11 +200,11 @@ export function SkillAcceleratorSignup({ isOpen, onClose }: SkillAcceleratorSign
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-5 relative">
-            <div className="flex justify-between mb-6">
+            <div className="flex justify-between mb-4">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="flex flex-col items-center">
                   <div
-                    className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300 ${
+                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium transition-all duration-300 ${
                       step === i
                         ? "bg-gradient-to-r from-primary to-purple-600 text-white shadow-md"
                         : step > i
@@ -212,10 +212,10 @@ export function SkillAcceleratorSignup({ isOpen, onClose }: SkillAcceleratorSign
                           : "bg-purple-50 text-purple-400"
                     }`}
                   >
-                    {step > i ? <CheckCircle className="h-4 w-4" /> : i}
+                    {step > i ? <CheckCircle className="h-3 w-3" /> : i}
                   </div>
-                  <span className="text-xs mt-2 text-muted-foreground">
-                    {i === 1 ? "Basic Info" : i === 2 ? "Details" : "Role"}
+                  <span className="text-[10px] mt-1 text-muted-foreground">
+                    {i === 1 ? "Info" : i === 2 ? "Details" : "Role"}
                   </span>
                 </div>
               ))}
@@ -229,7 +229,7 @@ export function SkillAcceleratorSignup({ isOpen, onClose }: SkillAcceleratorSign
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
                   transition={{ duration: 0.3 }}
-                  className="space-y-4"
+                  className="space-y-3"
                 >
                   <div className="space-y-2">
                     <Label htmlFor="name" className="text-sm font-medium">
@@ -279,7 +279,7 @@ export function SkillAcceleratorSignup({ isOpen, onClose }: SkillAcceleratorSign
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
                   transition={{ duration: 0.2 }}
-                  className="space-y-4"
+                  className="space-y-3"
                 >
                   <div className="space-y-2">
                     <Label htmlFor="dob">Date of Birth</Label>
@@ -322,7 +322,7 @@ export function SkillAcceleratorSignup({ isOpen, onClose }: SkillAcceleratorSign
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
                   transition={{ duration: 0.2 }}
-                  className="space-y-4"
+                  className="space-y-3"
                 >
                   <div className="space-y-3">
                     <Label>I want to join as</Label>
@@ -376,7 +376,7 @@ export function SkillAcceleratorSignup({ isOpen, onClose }: SkillAcceleratorSign
               )}
             </AnimatePresence>
 
-            <DialogFooter className="flex justify-between mt-6 gap-2">
+            <DialogFooter className="flex justify-between mt-4 gap-2">
               {step > 1 && (
                 <Button
                   type="button"

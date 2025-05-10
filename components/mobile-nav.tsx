@@ -7,6 +7,7 @@ import { LevlLogo } from "@/components/levl-logo"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/context/auth-context"
+import { Menu } from "lucide-react"
 
 export function MobileNav() {
   const pathname = usePathname()
@@ -15,46 +16,15 @@ export function MobileNav() {
   const isProvider = user?.role === "provider"
 
   return (
-    <div className="flex items-center md:hidden">
-      <Link href="/" className="mr-4 flex items-center">
-        <LevlLogo className="h-6 w-6 mr-2" />
-        <span className="font-bold">Levl</span>
+    <div className="flex items-center justify-between w-full md:hidden">
+      <Link href="/" className="flex items-center">
+        <LevlLogo className="h-8 w-8 mr-2" />
+        <span className="font-bold text-xl">Levl</span>
       </Link>
 
-      <div className="flex items-center space-x-2">
-        {isAuthenticated ? (
-          <>
-            <Link href="/dashboard">
-              <Button variant="ghost" size="sm">
-                Dashboard
-              </Button>
-            </Link>
-            <Link href="/messages">
-              <Button variant="ghost" size="sm">
-                Messages
-              </Button>
-            </Link>
-            <Link href="/profile">
-              <Button variant="ghost" size="sm">
-                Profile
-              </Button>
-            </Link>
-          </>
-        ) : (
-          <>
-            <Link href="/auth/login">
-              <Button variant="ghost" size="sm">
-                Login
-              </Button>
-            </Link>
-            <Link href="/auth/signup">
-              <Button variant="outline" size="sm">
-                Sign Up
-              </Button>
-            </Link>
-          </>
-        )}
-      </div>
+      <Button variant="ghost" size="icon" className="ml-auto">
+        <Menu className="h-6 w-6" />
+      </Button>
     </div>
   )
 }
