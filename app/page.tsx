@@ -2,7 +2,6 @@
 
 import Link from "next/link"
 import { EnhancedMainNav } from "@/components/enhanced-main-nav"
-import { AnimatedGradientBackground } from "@/components/animated-gradient-background"
 import { BackgroundPattern } from "@/components/background-pattern"
 import { EnhancedHeroSection } from "@/components/enhanced-hero-section"
 import { useEffect, useState } from "react"
@@ -11,6 +10,7 @@ import { LevlLogo } from "@/components/levl-logo"
 import { ThemeToggle } from "@/components/theme-toggle"
 // REMOVE THIS IMPORT
 // import { ValueProposition } from "@/components/value-proposition"
+import { SimpleBackground } from "@/components/simple-background"
 
 export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -23,10 +23,10 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <AnimatedGradientBackground />
       <EnhancedMainNav />
       <main className="flex-1">
         <EnhancedHeroSection />
+        <SimpleBackground />
 
         {/* REMOVE THIS SECTION */}
         {/* Value Proposition */}
