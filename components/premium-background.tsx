@@ -46,6 +46,17 @@ export function PremiumBackground() {
 
   return (
     <>
+      {/* Base layer with noise texture - extended width */}
+      <div
+        className="fixed -z-20 bg-background opacity-90"
+        style={{
+          width: "calc(100vw + 100px)",
+          height: "100vh",
+          left: "-50px",
+          right: "-50px",
+          top: 0,
+        }}
+      />
       <div
         className="fixed -z-20 bg-noise opacity-[0.03]"
         style={{
@@ -64,6 +75,34 @@ export function PremiumBackground() {
           background: `radial-gradient(circle at ${windowSize.width / 2 + blobOnePosition.x}px ${
             windowSize.height / 2 + blobOnePosition.y
           }px, rgba(var(--primary-rgb), 0.8) 0%, rgba(var(--primary-rgb), 0) 70%)`,
+          width: "calc(100vw + 100px)",
+          height: "100vh",
+          transform: "translate3d(0, 0, 0)",
+          left: "-50px",
+          right: "-50px",
+          top: 0,
+        }}
+      />
+      <div
+        className="fixed -z-10 opacity-20 dark:opacity-15 blur-[100px] md:blur-[130px] lg:blur-[160px]"
+        style={{
+          background: `radial-gradient(circle at ${windowSize.width / 3 + blobTwoPosition.x}px ${
+            windowSize.height / 3 + blobTwoPosition.y
+          }px, rgba(147, 51, 234, 0.8) 0%, rgba(147, 51, 234, 0) 70%)`,
+          width: "calc(100vw + 100px)",
+          height: "100vh",
+          transform: "translate3d(0, 0, 0)",
+          left: "-50px",
+          right: "-50px",
+          top: 0,
+        }}
+      />
+
+      {/* Additional gradient specifically for top-right corner */}
+      <div
+        className="fixed -z-10 opacity-20 dark:opacity-15 blur-[100px] md:blur-[130px] lg:blur-[160px]"
+        style={{
+          background: `radial-gradient(circle at 90% 10%, rgba(147, 51, 234, 0.8) 0%, rgba(147, 51, 234, 0) 70%)`,
           width: "calc(100vw + 100px)",
           height: "100vh",
           transform: "translate3d(0, 0, 0)",
@@ -94,13 +133,12 @@ export function PremiumBackground() {
 }
 
 function ParticlesEffect() {
-  // Reduce particle count significantly
-  const particles = Array.from({ length: 10 }).map((_, i) => ({
+  const particles = Array.from({ length: 30 }).map((_, i) => ({
     id: i,
     size: Math.random() * 3 + 1,
-    x: Math.random() * 120 - 10,
+    x: Math.random() * 120 - 10, // Extended range to cover potential gaps
     y: Math.random() * 100,
-    duration: Math.random() * 10 + 10, // Reduce max duration
+    duration: Math.random() * 20 + 10,
     delay: Math.random() * 5,
   }))
 
@@ -126,8 +164,8 @@ function ParticlesEffect() {
             top: `${particle.y}%`,
           }}
           animate={{
-            y: [0, -20, 0], // Reduce movement range
-            opacity: [0, 0.4, 0],
+            y: [0, -30, 0],
+            opacity: [0, 0.5, 0],
           }}
           transition={{
             duration: particle.duration,

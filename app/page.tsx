@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { EnhancedMainNav } from "@/components/enhanced-main-nav"
+import { AnimatedGradientBackground } from "@/components/animated-gradient-background"
 import { BackgroundPattern } from "@/components/background-pattern"
 import { EnhancedHeroSection } from "@/components/enhanced-hero-section"
 import { useEffect, useState } from "react"
@@ -22,6 +23,7 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen flex-col">
+      <AnimatedGradientBackground />
       <EnhancedMainNav />
       <main className="flex-1">
         <EnhancedHeroSection />
@@ -31,7 +33,7 @@ export default function Home() {
         {/* <ValueProposition /> */}
       </main>
       <footer className="w-full border-t bg-background py-6 md:py-12 relative">
-        <BackgroundPattern className="opacity-30 absolute inset-0" />
+        <BackgroundPattern className="opacity-30" />
         <div className="container px-4 md:px-6 relative z-10">
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-5">
             <div className="space-y-4 lg:col-span-2">

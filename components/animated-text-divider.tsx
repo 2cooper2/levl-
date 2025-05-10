@@ -5,9 +5,122 @@ import { useEffect, useRef, useState } from "react"
 
 // Add these keyframes after the imports
 const floatAnimation = `
+@keyframes float {
+  0% { transform: translateY(0) translateX(0); }
+  25% { transform: translateY(-10px) translateX(5px); }
+  50% { transform: translateY(0) translateX(10px); }
+  75% { transform: translateY(10px) translateX(5px); }
+  100% { transform: translateY(0) translateX(0); }
+}
+.animate-float {
+  animation: float linear infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.5; }
+}
+.animate-pulse {
+  animation: pulse 8s ease-in-out infinite;
+}
+
+/* Add 3D text effect styles */
+.text-3d {
+  position: relative;
+  transform-style: preserve-3d;
+}
+.text-3d::before,
+.text-3d::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+.text-3d::before {
+  text-shadow: 0 0 10px rgba(255,255,255,0.4);
+  z-index: -1;
+  transform: translateZ(-1px);
+}
+.text-3d::after {
+  color: rgba(128, 90, 213, 0.2);
+  z-index: -2;
+  transform: translateZ(-2px) translateY(2px);
+}
+
+/* Add refined shimmer effect */
+@keyframes shimmer {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+.text-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.7) 0%,
+    rgba(255,255,255,1) 20%,
+    rgba(255,255,255,1) 30%,
+    rgba(255,255,255,0.7) 40%,
+    rgba(255,255,255,0.7) 100%
+  );
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  animation: shimmer 12s infinite linear;
+}
+
+/* Add luxury animations */
+@keyframes subtleFade {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes lineGrow {
+  0% { width: 0; opacity: 0; }
+  100% { width: 100%; opacity: 1; }
+}
+
+@keyframes accentFade {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes dividerFloat {
+  0% { transform: translateZ(300px) translateY(-50%); }
+  50% { transform: translateZ(330px) translateY(-50%) translateY(-3px); }
+  100% { transform: translateZ(300px) translateY(-50%); }
+}
 `
 
 const enhanced3DStyles = `
+  /* Static positioning styles instead of animations */
+  .static-3d-front {
+    transform: translateZ(180px) rotateX(10deg);
+    transform-style: preserve-3d;
+    filter: drop-shadow(0 15px 20px rgba(0,0,0,0.4));
+  }
+  
+  .static-3d-middle {
+    transform: translateZ(40px) rotateX(5deg);
+    transform-style: preserve-3d;
+    filter: drop-shadow(0 8px 15px rgba(0,0,0,0.3));
+  }
+  
+  .static-3d-back {
+    transform: translateZ(-120px) rotateX(-10deg);
+    transform-style: preserve-3d;
+    filter: drop-shadow(0 -8px 15px rgba(0,0,0,0.25));
+  }
+  
+  .depth-container {
+    transform-style: preserve-3d;
+    transform: translateZ(0);
+  }
 `
 
 interface AnimatedTextDividerProps {
@@ -119,6 +232,24 @@ export function AnimatedTextDivider({
         {/* Add subtle color shifts */}
         <div className="absolute inset-0 bg-gradient-to-t from-transparent via-pink-300/5 to-transparent dark:via-pink-600/5"></div>
 
+        {/* Add subtle floating particles */}
+        <div className="absolute inset-0">
+          {Array.from({ length: 12 }).map((_, i) => (
+            <div
+              key={i}
+              className="absolute rounded-full bg-white/10 animate-float"
+              style={{
+                width: `${Math.random() * 4 + 1}px`,
+                height: `${Math.random() * 4 + 1}px`,
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDuration: `${Math.random() * 15 + 15}s`,
+                animationDelay: `${Math.random() * 5}s`,
+              }}
+            />
+          ))}
+        </div>
+
         {/* Add subtle light beam effect */}
         <div className="absolute -inset-[100px] opacity-40 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.2),transparent_70%)] animate-pulse"></div>
       </div>
@@ -133,7 +264,7 @@ export function AnimatedTextDivider({
           >
             {/* First word with luxury styling - positioned with depth - NO ANIMATION */}
             <div
-              className="relative mb-3 md:mb-4 group w-full"
+              className="relative mb-3 md:mb-4 group w-full static-3d-front"
               onClick={() => toggleExpanded(0)}
               onMouseEnter={() => setActiveIndex(0)}
               onMouseLeave={() => expandedInfo !== 0 && setActiveIndex(null)}
@@ -195,6 +326,7 @@ export function AnimatedTextDivider({
                     letterSpacing: "0.4em",
                     fontWeight: 300,
                     position: "relative",
+                    transform: "translateZ(210px)",
                     textShadow: "0 4px 8px rgba(0,0,0,0.5), 0 0 20px rgba(255,255,255,0.3)",
                     filter: "drop-shadow(0 10px 15px rgba(0,0,0,0.4))",
                   }}
@@ -274,7 +406,7 @@ export function AnimatedTextDivider({
 
             {/* Middle word - GROW YOUR BUSINESS - NO ANIMATION */}
             <div
-              className="relative mb-3 md:mb-4 group w-full"
+              className="relative mb-3 md:mb-4 group w-full static-3d-middle"
               onClick={() => toggleExpanded(1)}
               onMouseEnter={() => setActiveIndex(1)}
               onMouseLeave={() => expandedInfo !== 1 && setActiveIndex(null)}
@@ -367,7 +499,7 @@ export function AnimatedTextDivider({
 
             {/* Third word with luxury styling - positioned with depth - NO ANIMATION */}
             <div
-              className="relative group w-full"
+              className="relative group w-full static-3d-back"
               onClick={() => toggleExpanded(2)}
               onMouseEnter={() => setActiveIndex(2)}
               onMouseLeave={() => expandedInfo !== 2 && setActiveIndex(null)}

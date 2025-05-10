@@ -54,6 +54,12 @@ import { useMobile } from "@/hooks/use-mobile"
 // Remove the existing import for ForumComponent
 import { FeatureBadge } from "@/components/ui/feature-badge"
 
+// Add keyframes for the shimmer animation
+const shimmerAnimation = {
+  "0%": { transform: "translateX(-100%)" },
+  "100%": { transform: "translateX(100%)" },
+}
+
 // Add styles for hiding scrollbars
 const scrollbarHideStyles = `
 .scrollbar-hide::-webkit-scrollbar {
@@ -75,6 +81,11 @@ const detailedVisualStyles = `
  
  .grid-pattern {
    opacity: 0.7;
+ }
+
+ .tech-pattern {
+   opacity: 0.7;
+   
  }
  
  .circuit-lines {
@@ -196,6 +207,17 @@ const detailedVisualStyles = `
    opacity: 1;
  }
  
+ .tech-pattern {
+   position: absolute;
+   top: 0;
+   left: 0;
+   right: 0;
+   bottom: 0;
+   background-image: radial-gradient(circle at 10px 10px, rgba(255,255,255,0.05) 1px, transparent 1px);
+   background-size: 20px 20px;
+   pointer-events: none;
+   z-index: 1;
+ }
 
   .bg-grid-pattern {
     background-image:
@@ -316,7 +338,6 @@ const ForumTab = () => {
   const [replyContent, setReplyContent] = useState("")
   const [expandedTags, setExpandedTags] = useState(false)
   const [userBookmarks, setUserBookmarks] = useState<number[]>([])
-
   const [showOnlyBookmarked, setShowOnlyBookmarked] = useState(false)
 
   const [viewMode, setViewMode] = useState<"card" | "compact">("card")
@@ -540,10 +561,16 @@ const ForumTab = () => {
       {/* Notification toast */}
       <AnimatePresence>
         {showNotification && (
-          <div className="fixed top-4 right-4 z-50 bg-primary text-white px-4 py-2 rounded-lg shadow-lg flex items-center">
+          <motion.div
+            className="fixed top-4 right-4 z-50 bg-gradient-to-r from-primary to-purple-600 text-white px-4 py-2 rounded-lg shadow-lg flex items-center"
+            initial={{ opacity: 0, y: -20, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.8 }}
+            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+          >
             <CheckCircle className="h-4 w-4 mr-2" />
             {notificationMessage}
-          </div>
+          </motion.div>
         )}
       </AnimatePresence>
 
@@ -1226,6 +1253,57 @@ export function EnhancedHeroSection() {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
   const [showSignupModal, setShowSignupModal] = useState(false)
 
+  const [circuitLines, setCircuitLines] = useState<
+    Array<{
+      top: number
+      width: number
+      left: number
+    }>
+  >([])
+
+  const [circuitDots, setCircuitDots] = useState<
+    Array<{
+      top: number
+      left: number
+    }>
+  >([])
+
+  const [glowDots, setGlowDots] = useState<
+    Array<{
+      top: number
+      left: number
+      delay: number
+    }>
+  >([])
+
+  const [dataFlows, setDataFlows] = useState<
+    Array<{
+      top: number
+      left: number
+      delay: number
+    }>
+  >([])
+
+  const [particles, setParticles] = useState<
+    Array<{
+      id: number
+      x: number
+      y: number
+      size: number
+      duration: number
+    }>
+  >(
+    Array.from({ length: 20 }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 3 + 1,
+      duration: Math.random() * 6 + 4,
+    })),
+  )
+
+  // Initialize skills state with the skillsData
+  const [skills, setSkills] = useState(skillsData)
   const isMobile = useMobile()
   const [notificationMessage, setNotificationMessage] = useState("")
   const [showNotification, setShowNotification] = useState(false)
@@ -1237,6 +1315,38 @@ export function EnhancedHeroSection() {
   }
 
   // Generate decorative elements
+  useEffect(() => {
+    // Generate circuit lines
+    const lines = Array.from({ length: 8 }, (_, i) => ({
+      top: Math.random() * 100,
+      width: 50 + Math.random() * 150,
+      left: Math.random() * 100,
+    }))
+    setCircuitLines(lines)
+
+    // Generate circuit dots
+    const dots = Array.from({ length: 12 }, (_, i) => ({
+      top: Math.random() * 100,
+      left: Math.random() * 100,
+    }))
+    setCircuitDots(dots)
+
+    // Generate glow dots
+    const glows = Array.from({ length: 15 }, (_, i) => ({
+      top: Math.random() * 100,
+      left: Math.random() * 100,
+      delay: Math.random() * 5,
+    }))
+    setGlowDots(glows)
+
+    // Generate data flows
+    const flows = Array.from({ length: 10 }, (_, i) => ({
+      top: Math.random() * 100,
+      left: Math.random() * 100,
+      delay: Math.random() * 4,
+    }))
+    setDataFlows(flows)
+  }, [])
 
   // Removed auto-rotation of skills as requested
   useEffect(() => {
@@ -1266,9 +1376,9 @@ export function EnhancedHeroSection() {
 
     progressInterval.current = setInterval(() => {
       setProgress((prev) => {
-        if (prev >= skillsData[activeSkill].progress) {
+        if (prev >= skills[activeSkill].progress) {
           clearInterval(progressInterval.current)
-          return skillsData[activeSkill].progress
+          return skills[activeSkill].progress
         }
         return prev + 1
       })
@@ -1279,7 +1389,7 @@ export function EnhancedHeroSection() {
         clearInterval(progressInterval.current)
       }
     }
-  }, [activeSkill, skillsData])
+  }, [activeSkill, skills])
 
   // Animate the skill path visualization
   useEffect(() => {
@@ -1306,6 +1416,139 @@ export function EnhancedHeroSection() {
   }, [])
 
   // Draw the earnings growth chart
+  useEffect(() => {
+    if (!chartRef.current || activeTab !== "analytics") return
+
+    const canvas = chartRef.current
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return
+
+    // Set canvas dimensions with proper scaling
+    const dpr = window.devicePixelRatio || 1
+    const rect = canvas.getBoundingClientRect()
+
+    canvas.width = rect.width * dpr
+    canvas.height = rect.height * dpr
+
+    ctx.scale(dpr, dpr)
+
+    let animationId: number
+
+    const drawChart = () => {
+      try {
+        const width = rect.width
+        const height = rect.height
+
+        ctx.clearRect(0, 0, width, height)
+
+        // Draw grid lines
+        ctx.beginPath()
+        for (let i = 0; i < width; i += 20) {
+          ctx.moveTo(i, 0)
+          ctx.lineTo(i, height)
+        }
+        for (let i = 0; i < height; i += 20) {
+          ctx.moveTo(0, i)
+          ctx.lineTo(width, i)
+        }
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.05)"
+        ctx.stroke()
+
+        // Generate earnings data - simulating growth over time
+        const now = Date.now()
+        const points = 60
+        const data = Array.from({ length: points }, (_, i) => {
+          const x = (width / points) * i
+
+          // Current earnings line (with some fluctuation)
+          const baseY = height * 0.8 - (i / points) * height * 0.6
+          const currentY = baseY + Math.sin((now + i * 1000) / 2000) * 5
+
+          // Projected earnings with skill advancement (higher, less fluctuation)
+          const projectedY = baseY * 0.7 + Math.sin((now + i * 3000) / 6000) * 2
+
+          return { x, currentY, projectedY }
+        })
+
+        // Draw area under current earnings line
+        ctx.beginPath()
+        ctx.moveTo(0, height)
+        data.forEach((point) => {
+          ctx.lineTo(point.x, point.currentY)
+        })
+        ctx.lineTo(width, height)
+        ctx.closePath()
+        ctx.fillStyle = "rgba(76, 110, 245, 0.1)"
+        ctx.fill()
+
+        // Draw area under projected earnings line
+        ctx.beginPath()
+        data.forEach((point) => {
+          ctx.lineTo(point.x, point.projectedY)
+        })
+        ctx.lineTo(width, height)
+        ctx.closePath()
+        ctx.fillStyle = "rgba(121, 80, 242, 0.1)"
+        ctx.fill()
+
+        // Draw current earnings line
+        ctx.beginPath()
+        data.forEach((point, i) => {
+          if (i === 0) ctx.moveTo(point.x, point.currentY)
+          else ctx.lineTo(point.x, point.currentY)
+        })
+        ctx.strokeStyle = "#4C6EF5"
+        ctx.lineWidth = 2
+        ctx.stroke()
+
+        // Draw projected earnings line
+        ctx.beginPath()
+        data.forEach((point, i) => {
+          if (i === 0) ctx.moveTo(point.x, point.projectedY)
+          else ctx.lineTo(point.x, point.projectedY)
+        })
+        ctx.strokeStyle = "#7950F2"
+        ctx.lineWidth = 2
+        ctx.stroke()
+
+        // Add labels
+        ctx.fillStyle = "#4C6EF5"
+        ctx.font = "10px Arial"
+        ctx.fillText("Current Earnings", 10, 15)
+
+        ctx.fillStyle = "#7950F2"
+        ctx.font = "10px Arial"
+        ctx.fillText("Projected Earnings", 10, 30)
+
+        // Add data points with hover effect
+        data
+          .filter((_, i) => i % 10 === 0)
+          .forEach((point, i) => {
+            ctx.beginPath()
+            ctx.arc(point.x, point.currentY, 3, 0, Math.PI * 2)
+            ctx.fillStyle = "#4C6EF5"
+            ctx.fill()
+
+            ctx.beginPath()
+            ctx.arc(point.x, point.projectedY, 3, 0, Math.PI * 2)
+            ctx.fillStyle = "#7950F2"
+            ctx.fill()
+          })
+
+        animationId = requestAnimationFrame(drawChart)
+      } catch (error) {
+        console.error("Error drawing chart:", error)
+      }
+    }
+
+    drawChart()
+
+    return () => {
+      if (animationId) {
+        cancelAnimationFrame(animationId)
+      }
+    }
+  }, [activeTab, activeSkill])
 
   const handleGetStarted = () => {
     router.push("/waitlist")
@@ -1322,6 +1565,31 @@ export function EnhancedHeroSection() {
 
         {/* Enhanced gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-lavender-200/20 to-white/90 z-0" />
+
+        {/* Particle system */}
+        {particles.map((particle) => (
+          <motion.div
+            key={particle.id}
+            className="absolute rounded-full bg-primary/10 z-0"
+            style={{
+              left: `${particle.x}%`,
+              top: `${particle.y}%`,
+              width: particle.size,
+              height: particle.size,
+            }}
+            animate={{
+              x: [0, Math.random() * 100 - 50],
+              y: [0, Math.random() * 100 - 50],
+              opacity: [0, 0.5, 0],
+            }}
+            transition={{
+              duration: particle.duration,
+              repeat: Number.POSITIVE_INFINITY,
+              repeatType: "reverse",
+              ease: "easeInOut",
+            }}
+          />
+        ))}
 
         {/* 3D perspective container */}
         <div className="absolute inset-0 opacity-20 pointer-events-none bg-gradient-to-br from-purple-500/20 to-primary/20"></div>
@@ -1370,7 +1638,7 @@ export function EnhancedHeroSection() {
                 >
                   {/* Improved tech pattern overlay with subtle animation */}
                   <motion.div
-                    className="absolute inset-0 bg-[radial-gradient(circle_at_10px_10px,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none z-1"
+                    className="tech-pattern absolute inset-0 bg-[radial-gradient(circle_at_10px_10px,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none z-1"
                     animate={{
                       opacity: [0.3, 0.5, 0.3],
                       scale: [1, 1.02, 1],
@@ -1380,7 +1648,6 @@ export function EnhancedHeroSection() {
                       repeat: Number.POSITIVE_INFINITY,
                       repeatType: "reverse",
                       ease: "easeInOut",
-                      delay: 0.4,
                     }}
                   />
 
@@ -1402,6 +1669,57 @@ export function EnhancedHeroSection() {
                     }}
                   />
 
+                  {/* Circuit lines with improved styling */}
+                  <div className="circuit-lines">
+                    {circuitLines.map((line, i) => (
+                      <motion.div
+                        key={`line-${i}`}
+                        className="circuit-line"
+                        style={{
+                          top: `${line.top}%`,
+                          left: `${line.left}%`,
+                          width: `${line.width}px`,
+                          background:
+                            "linear-gradient(90deg, rgba(147, 51, 234, 0.05), rgba(147, 51, 234, 0.15), rgba(147, 51, 234, 0.05))",
+                        }}
+                        animate={{
+                          opacity: [0.3, 0.7, 0.3],
+                          width: [line.width, line.width + 20, line.width],
+                        }}
+                        transition={{
+                          duration: 5 + (i % 3),
+                          repeat: Number.POSITIVE_INFINITY,
+                          repeatType: "reverse",
+                          ease: "easeInOut",
+                          delay: i * 0.5,
+                        }}
+                      />
+                    ))}
+                    {circuitDots.map((dot, i) => (
+                      <motion.div
+                        key={`dot-${i}`}
+                        className="circuit-dot"
+                        style={{
+                          top: `${dot.top}%`,
+                          left: `${dot.left}%`,
+                          backgroundColor: "rgba(147, 51, 234, 0.2)",
+                          boxShadow: "0 0 5px rgba(147, 51, 234, 0.2)",
+                        }}
+                        animate={{
+                          scale: [1, 1.5, 1],
+                          opacity: [0.5, 0.8, 0.5],
+                        }}
+                        transition={{
+                          duration: 3 + (i % 2),
+                          repeat: Number.POSITIVE_INFINITY,
+                          repeatType: "reverse",
+                          ease: "easeInOut",
+                          delay: i * 0.3,
+                        }}
+                      />
+                    ))}
+                  </div>
+
                   {/* Success message toast with improved animation */}
                   <AnimatePresence>
                     {showSuccessMessage && (
@@ -1420,6 +1738,8 @@ export function EnhancedHeroSection() {
                   {/* Tech pattern overlay */}
 
                   {/* Even background overlay */}
+
+                  {/* Circuit lines */}
 
                   {/* Success message toast */}
 
@@ -1505,7 +1825,7 @@ export function EnhancedHeroSection() {
                     </p>
 
                     <div className="flex flex-wrap gap-2 md:flex-nowrap overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide lg:col-span-12">
-                      {skillsData.map((skill, index) => (
+                      {skills.map((skill, index) => (
                         <motion.button
                           key={index}
                           className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 flex items-center ${
@@ -1592,7 +1912,7 @@ export function EnhancedHeroSection() {
                           {/* Active Skill Card - Enhanced with better UI/UX */}
                           <div
                             className="bg-gradient-to-br from-white via-lavender-50/50 to-white backdrop-blur-sm rounded-lg p-5 border border-lavender-300/50 skill-card shadow-lg relative overflow-hidden group transition-all duration-300 hover:shadow-lavender-500/20 hover:border-lavender-400/50"
-                            style={{ borderLeft: `4px solid ${skillsData[activeSkill].color}` }}
+                            style={{ borderLeft: `4px solid ${skills[activeSkill].color}` }}
                           >
                             {/* Animated background elements */}
                             <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
@@ -1613,29 +1933,29 @@ export function EnhancedHeroSection() {
                                         repeatType: "reverse",
                                       }}
                                     >
-                                      {skillsData[activeSkill].icon}
+                                      {skills[activeSkill].icon}
                                     </motion.div>
                                     <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/50 to-purple-500/50 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                                   </div>
                                   <div>
                                     <h4 className="text-lg font-bold text-gray-800 flex items-center">
-                                      {skillsData[activeSkill].name}
+                                      {skills[activeSkill].name}
                                       <div className="ml-2 h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
                                     </h4>
                                     <div className="flex items-center mt-1 gap-2">
                                       <div className="px-2 py-0.5 rounded-full bg-white/10 dark:bg-black/30 text-xs font-medium">
-                                        {skillsData[activeSkill].level}
+                                        {skills[activeSkill].level}
                                       </div>
                                       <ArrowRight className="h-3 w-3 text-white/50" />
                                       <div className="px-2 py-0.5 rounded-full bg-gradient-to-r from-primary/50 to-purple-500/50 text-xs text-white font-medium">
-                                        {skillsData[activeSkill].nextLevel}
+                                        {skills[activeSkill].nextLevel}
                                       </div>
                                     </div>
                                   </div>
                                 </div>
 
                                 <p className="text-sm text-gray-700 mt-3 leading-relaxed">
-                                  {skillsData[activeSkill].description}
+                                  {skills[activeSkill].description}
                                   <span className="inline-flex items-center ml-2 text-xs text-primary font-medium">
                                     <Cpu className="h-3 w-3 mr-1" /> AI-optimized learning path
                                   </span>
@@ -1645,11 +1965,11 @@ export function EnhancedHeroSection() {
                               <div className="bg-white/10 dark:bg-black/20 rounded-lg p-3 shadow-inner min-w-[140px]">
                                 <div className="text-xs text-gray-500">Current Earnings</div>
                                 <div className="font-bold text-xl text-gray-800 mt-1">
-                                  {skillsData[activeSkill].earnings}
+                                  {skills[activeSkill].earnings}
                                 </div>
                                 <div className="text-xs text-green-500 mt-1 flex items-center">
                                   <TrendingUp className="h-3 w-3 mr-0.5" />
-                                  <span className="font-medium">{skillsData[activeSkill].nextEarnings}</span>
+                                  <span className="font-medium">{skills[activeSkill].nextEarnings}</span>
                                 </div>
                               </div>
                             </div>
@@ -1658,7 +1978,7 @@ export function EnhancedHeroSection() {
                             <div className="mb-5">
                               <div className="flex justify-between text-xs mb-1.5">
                                 <span className="text-gray-500 font-medium">
-                                  Progress to {skillsData[activeSkill].nextLevel}
+                                  Progress to {skills[activeSkill].nextLevel}
                                 </span>
                                 <span className="font-semibold text-primary">{progress}%</span>
                               </div>
@@ -1714,22 +2034,17 @@ export function EnhancedHeroSection() {
                             {/* Stats - Enhanced with better layout and hover effects */}
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                               {[
-                                {
-                                  label: "Mentors",
-                                  value: skillsData[activeSkill].mentors,
-                                  icon: Users,
-                                  color: "primary",
-                                },
+                                { label: "Mentors", value: skills[activeSkill].mentors, icon: Users, color: "primary" },
                                 {
                                   label: "Projects",
-                                  value: skillsData[activeSkill].projects,
+                                  value: skills[activeSkill].projects,
                                   icon: Layers,
                                   color: "purple-500",
                                 },
                                 { label: "Rating", value: "4.8", icon: Star, color: "yellow-400", showStar: true },
                                 {
                                   label: "Clients",
-                                  value: skillsData[activeSkill].stats.repeatClients,
+                                  value: skills[activeSkill].stats.repeatClients,
                                   icon: Users,
                                   color: "green-500",
                                 },
@@ -1777,8 +2092,8 @@ export function EnhancedHeroSection() {
 
                             <div className="flex items-start gap-4">
                               <div className="h-12 w-12 rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 flex items-center justify-center text-sm font-bold text-primary shadow-inner relative">
-                                {skillsData[activeSkill].testimonial.author.split(" ")[0][0]}
-                                {skillsData[activeSkill].testimonial.author.split(" ")[1][0]}
+                                {skills[activeSkill].testimonial.author.split(" ")[0][0]}
+                                {skills[activeSkill].testimonial.author.split(" ")[1][0]}
                                 <motion.div
                                   className="absolute inset-0 rounded-full border border-primary/30"
                                   animate={{ scale: [1, 1.1, 1] }}
@@ -1788,7 +2103,7 @@ export function EnhancedHeroSection() {
                               <div className="flex-1">
                                 <div className="flex items-center mb-2">
                                   <div className="text-sm font-medium text-gray-800 mr-2">
-                                    {skillsData[activeSkill].testimonial.author}
+                                    {skills[activeSkill].testimonial.author}
                                   </div>
                                   <div className="flex">
                                     {[...Array(5)].map((_, i) => (
@@ -1799,7 +2114,7 @@ export function EnhancedHeroSection() {
                                         transition={{ delay: i * 0.1, duration: 0.3 }}
                                       >
                                         <Star
-                                          className={`h-3.5 w-3.5 ${i < skillsData[activeSkill].testimonial.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
+                                          className={`h-3.5 w-3.5 ${i < skills[activeSkill].testimonial.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
                                         />
                                       </motion.div>
                                     ))}
@@ -1809,7 +2124,7 @@ export function EnhancedHeroSection() {
                                   </div>
                                 </div>
                                 <p className="text-sm text-gray-700 italic leading-relaxed">
-                                  "{skillsData[activeSkill].testimonial.text}"
+                                  "{skills[activeSkill].testimonial.text}"
                                 </p>
                                 <div className="flex items-center justify-end mt-2 text-xs text-gray-500">
                                   <Clock className="h-3 w-3 mr-1" /> 2 months ago
@@ -1865,16 +2180,13 @@ export function EnhancedHeroSection() {
                           <div className="flex items-center justify-between mb-2">
                             <h4 className="text-sm font-semibold text-gray-800">Learning Path</h4>
                             <div className="text-xs text-primary">
-                              {
-                                skillsData[activeSkill].learningPath.filter((item) => item.status === "completed")
-                                  .length
-                              }{" "}
-                              / {skillsData[activeSkill].learningPath.length} Completed
+                              {skills[activeSkill].learningPath.filter((item) => item.status === "completed").length} /{" "}
+                              {skills[activeSkill].learningPath.length} Completed
                             </div>
                           </div>
 
                           <div className="space-y-2">
-                            {skillsData[activeSkill].learningPath.map((item, index) => (
+                            {skills[activeSkill].learningPath.map((item, index) => (
                               <div
                                 key={index}
                                 className="flex items-center p-2 rounded-lg bg-white/5 dark:bg-black/10 border border-white/10 hover:border-primary/30 transition-all duration-300 relative overflow-hidden"
@@ -1922,7 +2234,7 @@ export function EnhancedHeroSection() {
                           <div className="mt-4">
                             <h4 className="text-sm font-semibold text-gray-800 mb-2">Skill Breakdown</h4>
                             <div className="space-y-2">
-                              {skillsData[activeSkill].skills.map((skill, index) => (
+                              {skills[activeSkill].skills.map((skill, index) => (
                                 <div key={index} className="space-y-1">
                                   <div className="flex justify-between text-xs">
                                     <span className="text-gray-800">{skill.name}</span>
@@ -1954,7 +2266,7 @@ export function EnhancedHeroSection() {
                           </div>
 
                           <div className="space-y-2">
-                            {skillsData[activeSkill].skillProjects.map((project, index) => (
+                            {skills[activeSkill].skillProjects.map((project, index) => (
                               <div
                                 key={index}
                                 className="p-3 rounded-lg bg-white/5 dark:bg-black/10 border border-white/10 hover:border-primary/30 transition-all duration-300 relative overflow-hidden"
@@ -2085,7 +2397,6 @@ export function EnhancedHeroSection() {
                               <motion.button
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
-                                className="h-7 px-2 text-xs rounded-md bg-white/5 dark:bg-black/20 border border-white/10 flex items-center gap-1"
                                 className="h-7 px-2 text-xs rounded-md bg-white/5 dark:bg-black/20 border border-white/10 flex items-center gap-1"
                               >
                                 <Share2 className="h-3.5 w-3.5 text-primary" />
@@ -2264,6 +2575,181 @@ export function EnhancedHeroSection() {
                                 </div>
                               </div>
                             </div>
+
+                            {/* Interactive Chart */}
+                            <div className="h-[180px] relative">
+                              <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent rounded-md"></div>
+
+                              {/* Y-axis labels */}
+                              <div className="absolute left-0 top-0 bottom-0 w-8 flex flex-col justify-between text-xs text-gray-500 py-2">
+                                <div>100%</div>
+                                <div>75%</div>
+                                <div>50%</div>
+                                <div>25%</div>
+                                <div>0%</div>
+                              </div>
+
+                              {/* Chart grid */}
+                              <div className="absolute left-8 right-0 top-0 bottom-0">
+                                {[0, 1, 2, 3, 4].map((i) => (
+                                  <div
+                                    key={i}
+                                    className="absolute left-0 right-0 border-t border-white/5"
+                                    style={{ top: `${i * 25}%` }}
+                                  ></div>
+                                ))}
+
+                                {/* Chart data */}
+                                <div className="absolute inset-0 flex items-end">
+                                  {/* Progress line */}
+                                  <svg className="absolute inset-0" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                    <defs>
+                                      <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stopColor="rgba(147, 51, 234, 0.5)" />
+                                        <stop offset="100%" stopColor="rgba(147, 51, 234, 0.8)" />
+                                      </linearGradient>
+                                    </defs>
+                                    <path
+                                      d="M0,100 L10,80 L20,75 L30,65 L40,60 L50,50 L60,40 L70,35 L80,25 L90,20 L100,15"
+                                      fill="none"
+                                      stroke="url(#progressGradient)"
+                                      strokeWidth="2"
+                                    />
+                                    <path
+                                      d="M0,100 L10,80 L20,75 L30,65 L40,60 L50,50 L60,40 L70,35 L80,25 L90,20 L100,15"
+                                      fill="url(#progressGradient)"
+                                      fillOpacity="0.1"
+                                    />
+                                  </svg>
+
+                                  {/* Earnings line */}
+                                  <svg className="absolute inset-0" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                    <defs>
+                                      <linearGradient id="earningsGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stopColor="rgba(34, 197, 94, 0.5)" />
+                                        <stop offset="100%" stopColor="rgba(34, 197, 94, 0.8)" />
+                                      </linearGradient>
+                                    </defs>
+                                    <path
+                                      d="M0,90 L10,85 L20,80 L30,75 L40,65 L50,60 L60,50 L70,45 L80,35 L90,30 L100,25"
+                                      fill="none"
+                                      stroke="url(#earningsGradient)"
+                                      strokeWidth="2"
+                                    />
+                                  </svg>
+
+                                  {/* Projected line */}
+                                  <svg className="absolute inset-0" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                    <path
+                                      d="M60,40 L70,30 L80,20 L90,15 L100,5"
+                                      fill="none"
+                                      stroke="rgba(147, 51, 234, 0.5)"
+                                      strokeWidth="2"
+                                      strokeDasharray="4 2"
+                                    />
+                                  </svg>
+
+                                  {/* Data points with hover effect */}
+                                  {[
+                                    { x: 10, y: 80, value: "15%" },
+                                    { x: 20, y: 75, value: "25%" },
+                                    { x: 30, y: 65, value: "35%" },
+                                    { x: 40, y: 60, value: "40%" },
+                                    { x: 50, y: 50, value: "50%" },
+                                    { x: 60, y: 40, value: "60%" },
+                                    { x: 70, y: 35, value: "65%" },
+                                    { x: 80, y: 25, value: "75%" },
+                                    { x: 90, y: 20, value: "80%" },
+                                    { x: 100, y: 15, value: "85%" },
+                                  ].map((point, i) => (
+                                    <motion.div
+                                      key={i}
+                                      className="absolute h-2 w-2 rounded-full bg-primary border-2 border-white cursor-pointer"
+                                      style={{
+                                        left: `${point.x - 1}%`,
+                                        bottom: `${point.y - 1}%`,
+                                      }}
+                                      whileHover={{ scale: 2 }}
+                                      onMouseEnter={() => {
+                                        setTooltipContent({
+                                          title: "Skill Progress",
+                                          description: point.value,
+                                        })
+                                        setTooltipPosition({
+                                          x: point.x,
+                                          y: point.y,
+                                        })
+                                        setShowTooltip(true)
+                                      }}
+                                      onMouseLeave={() => setShowTooltip(false)}
+                                    />
+                                  ))}
+
+                                  {/* Earnings data points */}
+                                  {[
+                                    { x: 10, y: 85, value: "$200" },
+                                    { x: 20, y: 80, value: "$350" },
+                                    { x: 30, y: 75, value: "$500" },
+                                    { x: 40, y: 65, value: "$750" },
+                                    { x: 50, y: 60, value: "$1,000" },
+                                    { x: 60, y: 50, value: "$1,250" },
+                                    { x: 70, y: 45, value: "$1,500" },
+                                    { x: 80, y: 35, value: "$1,800" },
+                                    { x: 90, y: 30, value: "$2,100" },
+                                    { x: 100, y: 25, value: "$2,450" },
+                                  ].map((point, i) => (
+                                    <motion.div
+                                      key={i}
+                                      className="absolute h-2 w-2 rounded-full bg-green-500 border-2 border-white cursor-pointer"
+                                      style={{
+                                        left: `${point.x - 1}%`,
+                                        bottom: `${point.y - 1}%`,
+                                      }}
+                                      whileHover={{ scale: 2 }}
+                                      onMouseEnter={() => {
+                                        setTooltipContent({
+                                          title: "Earnings",
+                                          description: point.value,
+                                        })
+                                        setTooltipPosition({
+                                          x: point.x,
+                                          y: point.y,
+                                        })
+                                        setShowTooltip(true)
+                                      }}
+                                      onMouseLeave={() => setShowTooltip(false)}
+                                    />
+                                  ))}
+                                </div>
+
+                                {/* X-axis labels */}
+                                <div className="absolute left-0 right-0 bottom-0 flex justify-between text-xs text-gray-500 pt-2">
+                                  <div>Jan</div>
+                                  <div>Feb</div>
+                                  <div>Mar</div>
+                                  <div>Apr</div>
+                                  <div>May</div>
+                                  <div>Jun</div>
+                                </div>
+                              </div>
+
+                              {/* Tooltip */}
+                              {showTooltip && (
+                                <motion.div
+                                  className="absolute bg-black/80 text-white rounded-md px-2 py-1 text-xs z-10 pointer-events-none"
+                                  style={{
+                                    left: `${tooltipPosition.x}%`,
+                                    bottom: `${tooltipPosition.y + 5}%`,
+                                    transform: "translateX(-50%)",
+                                  }}
+                                  initial={{ opacity: 0, y: 5 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                >
+                                  <div className="font-medium">{tooltipContent.title}</div>
+                                  <div>{tooltipContent.description}</div>
+                                </motion.div>
+                              )}
+                            </div>
                           </motion.div>
 
                           {/* Skills Breakdown and Competency Radar */}
@@ -2285,11 +2771,11 @@ export function EnhancedHeroSection() {
                                   </div>
                                   <div className="text-sm font-medium text-gray-800">Skills Breakdown</div>
                                 </div>
-                                <div className="text-xs text-gray-500">{skillsData[activeSkill].name}</div>
+                                <div className="text-xs text-gray-500">{skills[activeSkill].name}</div>
                               </div>
 
                               <div className="space-y-3">
-                                {skillsData[activeSkill].skills.map((skill, index) => (
+                                {skills[activeSkill].skills.map((skill, index) => (
                                   <motion.div
                                     key={index}
                                     className="relative"
@@ -2340,12 +2826,10 @@ export function EnhancedHeroSection() {
                                 <div className="flex items-center justify-between">
                                   <div className="text-xs font-medium text-gray-800">Overall Proficiency</div>
 
-                                  <div className="text-xs text-primary font-medium">
-                                    {skillsData[activeSkill].level}
-                                  </div>
+                                  <div className="text-xs text-primary font-medium">{skills[activeSkill].level}</div>
                                 </div>
                                 <div className="mt-1 text-xs text-gray-500">
-                                  {skillsData[activeSkill].progress}% progress to {skillsData[activeSkill].nextLevel}
+                                  {skills[activeSkill].progress}% progress to {skills[activeSkill].nextLevel}
                                 </div>
                               </div>
                             </motion.div>

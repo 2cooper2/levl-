@@ -16,6 +16,24 @@ export function MainNav() {
       </Link>
       <nav className="flex items-center space-x-6 text-sm font-medium">
         <Link
+          href="/explore"
+          className={cn(
+            "transition-colors hover:text-foreground/80",
+            pathname === "/explore" ? "text-foreground" : "text-foreground/60",
+          )}
+        >
+          Explore
+        </Link>
+        <Link
+          href="/providers"
+          className={cn(
+            "transition-colors hover:text-foreground/80",
+            pathname?.startsWith("/providers") ? "text-foreground" : "text-foreground/60",
+          )}
+        >
+          Providers
+        </Link>
+        <Link
           href="/about"
           className={cn(
             "transition-colors hover:text-foreground/80",
@@ -25,7 +43,12 @@ export function MainNav() {
           About
         </Link>
         <div className="flex items-center space-x-3">
-          {/* Sign Up button removed from here */}
+          <Link
+            href="/auth/signup"
+            className="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 hover:shadow-md"
+          >
+            Sign Up
+          </Link>
           <Link
             href="/auth/login"
             className="border border-primary text-primary hover:bg-primary/10 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200"

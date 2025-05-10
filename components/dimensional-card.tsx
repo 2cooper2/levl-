@@ -2,8 +2,8 @@
 
 import type React from "react"
 
-import { useState, useRef } from "react"
-import { motion, useMotionValue, useTransform } from "framer-motion"
+import { useState, useRef, useEffect } from "react"
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion"
 import { cn } from "@/lib/utils"
 
 interface DimensionalCardProps {
@@ -26,13 +26,18 @@ export function DimensionalCard({
   const cardRef = useRef<HTMLDivElement>(null)
   const [isHovered, setIsHovered] = useState(false)
 
-  // Mouse position values - simplified with fewer transformations
+  // Mouse position values
   const mouseX = useMotionValue(0)
   const mouseY = useMotionValue(0)
 
-  // Use direct transforms instead of springs for better performance
-  const rotateX = useTransform(mouseY, [-100, 100], [5, -5]) // Reduce rotation range
-  const rotateY = useTransform(mouseX, [-100, 100], [-5, 5]) // Reduce rotation range
+  // Smooth spring physics for mouse movement
+  const springConfig = { damping: 20, stiffness: 300 }
+  const springX = useSpring(mouseX, springConfig)
+  const springY = useSpring(mouseY, springConfig)
+
+  // Transform mouse position into rotation values
+  const rotateX = useTransform(springY, [-100, 100], [10, -10])
+  const rotateY = useTransform(springX, [-100, 100], [-10, 10])
 
   // Handle mouse move for 3D effect
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -53,6 +58,14 @@ export function DimensionalCard({
     mouseY.set(0)
   }
 
+  // Clean up animation values
+  useEffect(() => {
+    return () => {
+      mouseX.destroy()
+      mouseY.destroy()
+    }
+  }, [mouseX, mouseY])
+
   return (
     <motion.div
       ref={cardRef}
@@ -65,12 +78,12 @@ export function DimensionalCard({
         transformStyle: "preserve-3d",
       }}
     >
-      {/* Simplified glow effect - static instead of dynamic position */}
+      {/* Glow effect */}
       <motion.div
         className="absolute -inset-px rounded-xl opacity-0"
         style={{
-          background: `radial-gradient(circle at 50% 50%, ${glowColor} 0%, transparent 70%)`,
-          opacity: isHovered ? 0.7 : 0,
+          background: `radial-gradient(circle at ${mouseX.get()}px ${mouseY.get()}px, ${glowColor} 0%, transparent 70%)`,
+          opacity: isHovered ? 1 : 0,
           transition: "opacity 0.3s",
         }}
       />

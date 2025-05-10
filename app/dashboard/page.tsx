@@ -2,6 +2,7 @@
 import { PersonalizedDashboard } from "@/components/learning/personalized-dashboard"
 import { SkillAssessmentTool } from "@/components/skill-assessment/assessment-tool"
 import { CollaborationHub } from "@/components/collaboration/collaboration-hub"
+import { MarketplaceAnalytics } from "@/components/provider/marketplace-analytics"
 import { SkillChallenges } from "@/components/community/skill-challenges"
 import { motion } from "framer-motion"
 import { Sparkles, LayoutDashboard, ChevronRight } from "lucide-react"
@@ -479,6 +480,14 @@ const DashboardPage = () => {
             transition={{ duration: 0.5, delay: 0.3 }}
           >
             <CollaborationHub />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
+            <MarketplaceAnalytics />
           </motion.div>
 
           <motion.div

@@ -546,6 +546,3 @@ export function SkillProgressDashboard({ userId }: SkillProgressProps) {
     </div>
   )
 }
-
-// Add the missing export that's required for deployment
-export const ProgressDashboard = SkillProgressDashboard

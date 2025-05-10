@@ -7,8 +7,7 @@ import { motion, useMotionTemplate, useMotionValue } from "framer-motion"
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowRight } from "lucide-react"
-import { useRef, useState } from "react"
-import { Skeleton } from "@/components/ui/skeleton"
+import { useRef } from "react"
 
 interface CategoryCardProps {
   icon: LucideIcon
@@ -45,8 +44,6 @@ export function EnhancedCategoryCard({ icon: Icon, name, index, featured = false
     mouseX.set(x)
     mouseY.set(y)
   }
-
-  const [loading, setLoading] = useState(true)
 
   // Generate a placeholder image URL based on the category name
   const imageUrl = `/placeholder.svg?height=400&width=400&query=${encodeURIComponent(`${name} category abstract pattern purple`)}`
@@ -94,22 +91,16 @@ export function EnhancedCategoryCard({ icon: Icon, name, index, featured = false
 
             {/* Background image with overlay */}
             <div className="absolute inset-0 opacity-20 mix-blend-overlay overflow-hidden">
-              {loading ? (
-                <Skeleton className="w-full h-full" />
-              ) : (
-                <Image
-                  src={imageUrl || "/placeholder.svg"}
-                  alt=""
-                  fill
-                  className="object-cover"
-                  style={{
-                    transition: "transform 1.2s ease-in-out",
-                  }}
-                  aria-hidden="true"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  onLoadingComplete={() => setLoading(false)}
-                />
-              )}
+              <Image
+                src={imageUrl || "/placeholder.svg"}
+                alt=""
+                fill
+                className="object-cover"
+                style={{
+                  transition: "transform 1.2s ease-in-out",
+                }}
+                aria-hidden="true"
+              />
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/30 to-purple-700/30"></div>
             </div>
 

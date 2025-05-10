@@ -35,7 +35,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from "@/components/ui/input"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useMobile } from "@/hooks/use-mobile"
-import { Skeleton } from "@/components/ui/skeleton"
 
 // Types
 type Author = {
@@ -189,7 +188,7 @@ const PortfolioProject = {
     title: "How to handle complex animations in React?",
     author: {
       name: "ReactDeveloper",
-      avatar: "/avatar-developer-tech.png",
+      avatar: "/placeholder.svg?height=40&width=40&query=avatar%20developer%20tech",
       reputation: 890,
       badge: "Rising Talent",
       level: 3,
@@ -208,7 +207,7 @@ const PortfolioProject = {
     recentActivityUsers: [
       {
         name: "AnimationGuru",
-        avatar: "/avatar-animation-expert.png",
+        avatar: "/placeholder.svg?height=32&width=32&query=avatar%20animation%20expert",
         reputation: 2340,
         badge: "Specialist",
       },
@@ -218,7 +217,7 @@ const PortfolioProject = {
         id: 201,
         author: {
           name: "AnimationGuru",
-          avatar: "/avatar-animation-specialist.png",
+          avatar: "/placeholder.svg?height=48&width=48&query=avatar%20animation%20specialist",
           reputation: 2340,
           badge: "Specialist",
           level: 5,
@@ -254,7 +253,7 @@ function AnimatedComponent() {
     title: "Transitioning from graphic design to UX design",
     author: {
       name: "GraphicArtist",
-      avatar: "/creative-avatar-artist.png",
+      avatar: "/placeholder.svg?height=40&width=40&query=avatar%20artist%20creative",
       reputation: 560,
       badge: "Member",
       level: 2,
@@ -274,13 +273,13 @@ function AnimatedComponent() {
       { name: "UXMaster", avatar: "/professional-avatar.png", reputation: 3420, badge: "Mentor" },
       {
         name: "CareerCoach",
-        avatar: "/avatar-coach.png",
+        avatar: "/placeholder.svg?height=32&width=32&query=avatar%20coach",
         reputation: 1850,
         badge: "Career Advisor",
       },
       {
         name: "UXNewbie",
-        avatar: "/avatar-student.png",
+        avatar: "/placeholder.svg?height=32&width=32&query=avatar%20student",
         reputation: 340,
         badge: "Member",
       },
@@ -301,8 +300,8 @@ const trendingTopics = [
 const activeUsers = [
   { name: "UXMaster", avatar: "/professional-avatar.png", status: "online" },
   { name: "DesignDirector", avatar: "/avatar-executive.png", status: "online" },
-  { name: "ReactDeveloper", avatar: "/avatar-developer.png", status: "away" },
-  { name: "GraphicArtist", avatar: "/avatar-artist.png", status: "online" },
+  { name: "ReactDeveloper", avatar: "/placeholder.svg?height=32&width=32&query=avatar%20developer", status: "away" },
+  { name: "GraphicArtist", avatar: "/placeholder.svg?height=32&width=32&query=avatar%20artist", status: "online" },
 ]
 
 // Components
@@ -454,7 +453,7 @@ const TopicCard = ({
         <div className="p-4 bg-slate-50 dark:bg-slate-800/50">
           <div className="flex items-start gap-3">
             <Avatar className="h-8 w-8 border-2 border-white shadow-sm">
-              <AvatarImage src="/stylized-user-avatar.png" alt="You" />
+              <AvatarImage src="/placeholder.svg?height=32&width=32&query=avatar%20user" alt="You" />
               <AvatarFallback>YO</AvatarFallback>
             </Avatar>
             <div className="flex-1">
@@ -597,7 +596,6 @@ export default function ForumComponent() {
   const [filteredTopics, setFilteredTopics] = useState(mockTopics)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const isMobile = useMobile()
-  const [loading, setLoading] = useState(true)
 
   // Filter topics based on category and search
   useEffect(() => {
@@ -620,7 +618,6 @@ export default function ForumComponent() {
     }
 
     setFilteredTopics(filtered)
-    setLoading(false)
   }, [selectedCategory, searchQuery])
 
   // Handle topic click for expansion
@@ -900,46 +897,40 @@ export default function ForumComponent() {
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="latest">
-                {loading ? (
-                  <div className="space-y-4">
-                    <Skeleton className="h-12 w-full" />
-                    <Skeleton className="h-12 w-full" />
-                    <Skeleton className="h-12 w-full" />
-                  </div>
-                ) : filteredTopics.length > 0 ? (
-                  filteredTopics.map((topic) => {
-                    return (
+              <TabsContent value="latest" className="mt-0">
+                <motion.div variants={staggerContainer} initial="initial" animate="animate" className="space-y-4">
+                  {filteredTopics.length > 0 ? (
+                    filteredTopics.map((topic) => (
                       <TopicCard
                         key={topic.id}
                         topic={topic}
                         isExpanded={expandedTopic === topic.id}
                         onClick={() => handleTopicClick(topic.id)}
                       />
-                    )
-                  })
-                ) : (
-                  <div className="text-center py-8">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 mb-4">
-                      <Search className="h-8 w-8 text-slate-400" />
+                    ))
+                  ) : (
+                    <div className="text-center py-8">
+                      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 mb-4">
+                        <Search className="h-8 w-8 text-slate-400" />
+                      </div>
+                      <h3 className="text-lg font-medium mb-2">No topics found</h3>
+                      <p className="text-slate-500 dark:text-slate-400 mb-4">
+                        Try adjusting your search or filter to find what you're looking for.
+                      </p>
+                      <Button
+                        onClick={() => {
+                          setSearchQuery("")
+                          setSelectedCategory("all")
+                        }}
+                      >
+                        Reset filters
+                      </Button>
                     </div>
-                    <h3 className="text-lg font-medium mb-2">No topics found</h3>
-                    <p className="text-slate-500 dark:text-slate-400 mb-4">
-                      Try adjusting your search or filter to find what you're looking for.
-                    </p>
-                    <Button
-                      onClick={() => {
-                        setSearchQuery("")
-                        setSelectedCategory("all")
-                      }}
-                    >
-                      Reset filters
-                    </Button>
-                  </div>
-                )}
+                  )}
+                </motion.div>
               </TabsContent>
 
-              <TabsContent value="popular">
+              <TabsContent value="popular" className="mt-0">
                 <div className="text-center py-12">
                   <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 mb-4">
                     <TrendingUp className="h-8 w-8 text-slate-400" />
@@ -951,7 +942,7 @@ export default function ForumComponent() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="unsolved">
+              <TabsContent value="unsolved" className="mt-0">
                 <div className="text-center py-12">
                   <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 mb-4">
                     <MessageCircle className="h-8 w-8 text-slate-400" />

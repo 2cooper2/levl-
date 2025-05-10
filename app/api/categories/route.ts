@@ -1,26 +1,12 @@
 import { NextResponse } from "next/server"
-import { createClient } from "@supabase/supabase-js"
-import type { Database } from "@/types/database.types"
-
-// Create a server-side only Supabase client for this API route
-const getServerSupabase = () => {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-  if (!supabaseUrl || !supabaseServiceKey) {
-    throw new Error("Missing Supabase server credentials")
-  }
-
-  return createClient<Database>(supabaseUrl, supabaseServiceKey, {
-    auth: {
-      persistSession: false,
-    },
-  })
-}
+import { createServerDatabaseClient } from "@/lib/database"
 
 export async function GET(request: Request) {
   try {
-    const supabase = getServerSupabase()
+    const supabase = createServerDatabaseClient()
+    if (!supabase) {
+      return NextResponse.json({ error: "Database connection failed" }, { status: 500 })
+    }
 
     const { data: categories, error } = await supabase.from("categories").select("*").order("name")
 
@@ -38,7 +24,10 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const supabase = getServerSupabase()
+    const supabase = createServerDatabaseClient()
+    if (!supabase) {
+      return NextResponse.json({ error: "Database connection failed" }, { status: 500 })
+    }
 
     // Get current user
     const {

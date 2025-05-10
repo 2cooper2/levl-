@@ -7,8 +7,6 @@ const PROVIDER_ROUTES = ["/skill-progress", "/dashboard/services/new", "/portfol
 
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next()
-
-  // Create a new middleware client for each request (this is necessary for middleware)
   const supabase = createMiddlewareClient({ req: request, res: response })
 
   // Check if user is authenticated

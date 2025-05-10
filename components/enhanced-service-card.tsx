@@ -11,8 +11,6 @@ import { Star, Heart, MessageSquare } from "lucide-react"
 import { motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/components/ui/use-toast"
-import { Skeleton } from "@/components/ui/skeleton"
-import Image from "next/image"
 
 interface ServiceCardProps {
   image: string
@@ -44,7 +42,6 @@ export function EnhancedServiceCard({
   const router = useRouter()
   const { toast } = useToast()
   const [isSaved, setIsSaved] = useState(false)
-  const [loading, setLoading] = useState(true)
 
   const handleSave = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -75,18 +72,11 @@ export function EnhancedServiceCard({
     >
       <EnhancedCard interactive elevation="low" className="overflow-hidden h-full flex flex-col">
         <div className="relative aspect-[4/3] overflow-hidden group">
-          {loading ? (
-            <Skeleton className="w-full h-full" />
-          ) : (
-            <Image
-              src={image || "/placeholder.svg"}
-              alt={title}
-              className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
-              fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              onLoadingComplete={() => setLoading(false)}
-            />
-          )}
+          <img
+            src={image || "/placeholder.svg"}
+            alt={title}
+            className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
+          />
           <div className="absolute top-3 right-3">
             <Badge variant="secondary" className="font-medium shadow-sm">
               {price}

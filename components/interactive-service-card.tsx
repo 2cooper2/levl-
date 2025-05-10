@@ -10,8 +10,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Star, Heart, MessageSquare, ArrowRight } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { Skeleton } from "@/components/ui/skeleton"
-import Image from "next/image"
 
 interface ServiceCardProps {
   id: string
@@ -44,7 +42,6 @@ export function InteractiveServiceCard({
   const [isHovered, setIsHovered] = useState(false)
   const [isSaved, setIsSaved] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
-  const [loading, setLoading] = useState(true)
 
   // Mouse position values for 3D effect
   const x = useMotionValue(0)
@@ -116,25 +113,18 @@ export function InteractiveServiceCard({
           </AnimatePresence>
 
           <div className="relative aspect-[4/3] overflow-hidden">
-            {loading ? (
-              <Skeleton className="w-full h-full" />
-            ) : (
-              <Image
-                src={image || "/placeholder.svg"}
-                alt={title}
-                className="object-cover w-full h-full"
-                style={{
-                  z: 20,
-                  transformStyle: "preserve-3d",
-                  transform: "translateZ(20px)",
-                }}
-                whileHover={{ scale: 1.05 }}
-                transition={{ duration: 0.4 }}
-                fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                onLoadingComplete={() => setLoading(false)}
-              />
-            )}
+            <motion.img
+              src={image || "/placeholder.svg"}
+              alt={title}
+              className="object-cover w-full h-full"
+              style={{
+                z: 20,
+                transformStyle: "preserve-3d",
+                transform: "translateZ(20px)",
+              }}
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.4 }}
+            />
 
             <motion.div className="absolute top-3 right-3 z-20" style={{ transform: "translateZ(40px)" }}>
               <Badge variant="secondary" className="font-medium shadow-sm">
