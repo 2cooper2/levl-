@@ -4,9 +4,12 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { LevlLogo } from "@/components/levl-logo"
 import { cn } from "@/lib/utils"
+import { useAuth } from "@/context/auth-context"
 
 export function MainNav() {
   const pathname = usePathname()
+  const { user } = useAuth()
+  const isProvider = user?.role === "provider"
 
   return (
     <div className="mr-4 flex">
@@ -53,6 +56,17 @@ export function MainNav() {
         >
           Bookings
         </Link>
+        {isProvider && (
+          <Link
+            href="/skill-progress"
+            className={cn(
+              "transition-colors hover:text-primary",
+              pathname === "/skill-progress" ? "text-primary" : "text-muted-foreground",
+            )}
+          >
+            Skills
+          </Link>
+        )}
       </nav>
     </div>
   )

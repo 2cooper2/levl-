@@ -2,14 +2,14 @@
 
 import Link from "next/link"
 import { EnhancedMainNav } from "@/components/enhanced-main-nav"
-import { AnimatedGradientBackground } from "@/components/animated-gradient-background"
 import { BackgroundPattern } from "@/components/background-pattern"
 import { EnhancedHeroSection } from "@/components/enhanced-hero-section"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { LevlLogo } from "@/components/levl-logo"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { DollarSign, Users, Zap } from "lucide-react"
+// REMOVE THIS IMPORT
+// import { ValueProposition } from "@/components/value-proposition"
 
 export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -22,59 +22,16 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <AnimatedGradientBackground />
       <EnhancedMainNav />
       <main className="flex-1">
         <EnhancedHeroSection />
 
-        <section className="py-16 bg-gradient-to-br from-white via-lavender-50/30 to-white relative">
-          <div className="container px-4 md:px-6 relative z-10">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500">
-                Why Choose Levl?
-              </h2>
-              <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-                The all-in-one platform where you can both hire skilled professionals and offer your own services, all
-                with lower fees than competitors.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="bg-white rounded-xl p-6 shadow-lg border border-lavender-200/50 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <DollarSign className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-xl font-semibold mb-2">Lower Fees</h3>
-                <p className="text-muted-foreground">
-                  Keep more of what you earn with our industry-leading low commission rates.
-                </p>
-              </div>
-
-              <div className="bg-white rounded-xl p-6 shadow-lg border border-lavender-200/50 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <Zap className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-xl font-semibold mb-2">Skill Accelerator</h3>
-                <p className="text-muted-foreground">
-                  Learn while you earn with our AI-powered skill development program.
-                </p>
-              </div>
-
-              <div className="bg-white rounded-xl p-6 shadow-lg border border-lavender-200/50 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <Users className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-xl font-semibold mb-2">Community Support</h3>
-                <p className="text-muted-foreground">
-                  Join a thriving community of professionals who help each other succeed.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* REMOVE THIS SECTION */}
+        {/* Value Proposition */}
+        {/* <ValueProposition /> */}
       </main>
       <footer className="w-full border-t bg-background py-6 md:py-12 relative">
-        <BackgroundPattern className="opacity-30" />
+        <BackgroundPattern className="opacity-30 absolute inset-0" />
         <div className="container px-4 md:px-6 relative z-10">
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-5">
             <div className="space-y-4 lg:col-span-2">

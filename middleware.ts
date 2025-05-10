@@ -1,57 +1,47 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
+import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs"
 
-// Define public paths that don't require authentication
-const publicPaths = [
-  "/",
-  "/auth/login",
-  "/auth/signup",
-  "/auth/forgot-password",
-  "/auth/reset-password",
-  "/auth/callback",
-  "/explore",
-  "/about",
-  "/how-it-works",
-  "/profile", // Add profile to public paths
-]
+// Provider-only routes
+const PROVIDER_ROUTES = ["/skill-progress", "/dashboard/services/new", "/portfolio/edit"]
 
-// Check if a path starts with any of these prefixes
-const publicPathPrefixes = ["/services/", "/category/", "/checkout", "/api/"]
+export async function middleware(request: NextRequest) {
+  const response = NextResponse.next()
+  const supabase = createMiddlewareClient({ req: request, res: response })
 
-export function middleware(request: NextRequest) {
-  const path = request.nextUrl.pathname
+  // Check if user is authenticated
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
 
-  // Check if the path is public
-  const isPublicPath = publicPaths.includes(path) || publicPathPrefixes.some((prefix) => path.startsWith(prefix))
+  // For provider-only routes, check user role
+  const pathname = request.nextUrl.pathname
+  if (PROVIDER_ROUTES.some((route) => pathname.startsWith(route))) {
+    if (!session) {
+      // Redirect to login if not authenticated
+      return NextResponse.redirect(new URL("/auth/login", request.url))
+    }
 
-  if (isPublicPath) {
-    return NextResponse.next()
+    // Get user role
+    const { data: userProfile } = await supabase.from("users").select("role").eq("id", session.user.id).single()
+
+    // Redirect clients away from provider-only routes
+    if (!userProfile || userProfile.role !== "provider") {
+      return NextResponse.redirect(new URL("/dashboard", request.url))
+    }
   }
 
-  // Check for Supabase session - the only reliable way to verify authentication
-  const supabaseSession =
-    request.cookies.get("sb-access-token")?.value || request.cookies.get("sb-refresh-token")?.value
-
-  // If no session exists, redirect to login
-  if (!supabaseSession) {
-    // Redirect to login is removed. Instead, return a 401 Unauthorized response.
-    return new NextResponse(JSON.stringify({ success: false, message: "authentication failed" }), {
-      status: 401,
-      headers: { "content-type": "application/json" },
-    })
-  }
-
-  return NextResponse.next()
+  return response
 }
 
-// Configure the middleware to run on specific paths
 export const config = {
   matcher: [
     "/dashboard/:path*",
-    "/profile/:path*",
+    "/skill-progress/:path*",
+    "/portfolio/:path*",
     "/messages/:path*",
     "/bookings/:path*",
     "/settings/:path*",
-    "/auth/:path*",
+    "/profile/:path*",
   ],
 }

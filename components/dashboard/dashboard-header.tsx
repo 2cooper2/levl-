@@ -1,4 +1,8 @@
 import type React from "react"
+import { Button } from "@/components/ui/button"
+import { PlusCircle } from "lucide-react"
+import Link from "next/link"
+
 interface DashboardHeaderProps {
   heading: string
   text?: string
@@ -16,7 +20,19 @@ export function DashboardHeader({ heading, text, children, actions }: DashboardH
         {text && <p className="text-slate-500 max-w-2xl">{text}</p>}
         {children}
       </div>
-      {actions && <div className="flex items-center gap-3">{actions}</div>}
+      <div className="flex items-center gap-3">
+        <Button
+          asChild
+          variant="gradient"
+          className="gap-1 bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90"
+        >
+          <Link href="/dashboard/services/new">
+            <PlusCircle className="h-4 w-4" />
+            Service+
+          </Link>
+        </Button>
+        {actions}
+      </div>
     </div>
   )
 }

@@ -35,6 +35,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from "@/components/ui/input"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useMobile } from "@/hooks/use-mobile"
+import { Skeleton } from "@/components/ui/skeleton"
 
 // Types
 type Author = {
@@ -188,7 +189,7 @@ const PortfolioProject = {
     title: "How to handle complex animations in React?",
     author: {
       name: "ReactDeveloper",
-      avatar: "/placeholder.svg?height=40&width=40&query=avatar%20developer%20tech",
+      avatar: "/avatar-developer-tech.png",
       reputation: 890,
       badge: "Rising Talent",
       level: 3,
@@ -207,7 +208,7 @@ const PortfolioProject = {
     recentActivityUsers: [
       {
         name: "AnimationGuru",
-        avatar: "/placeholder.svg?height=32&width=32&query=avatar%20animation%20expert",
+        avatar: "/avatar-animation-expert.png",
         reputation: 2340,
         badge: "Specialist",
       },
@@ -217,7 +218,7 @@ const PortfolioProject = {
         id: 201,
         author: {
           name: "AnimationGuru",
-          avatar: "/placeholder.svg?height=48&width=48&query=avatar%20animation%20specialist",
+          avatar: "/avatar-animation-specialist.png",
           reputation: 2340,
           badge: "Specialist",
           level: 5,
@@ -253,7 +254,7 @@ function AnimatedComponent() {
     title: "Transitioning from graphic design to UX design",
     author: {
       name: "GraphicArtist",
-      avatar: "/placeholder.svg?height=40&width=40&query=avatar%20artist%20creative",
+      avatar: "/creative-avatar-artist.png",
       reputation: 560,
       badge: "Member",
       level: 2,
@@ -273,7 +274,7 @@ function AnimatedComponent() {
       { name: "UXMaster", avatar: "/professional-avatar.png", reputation: 3420, badge: "Mentor" },
       {
         name: "CareerCoach",
-        avatar: "/placeholder.svg?height=32&width=32&query=avatar%20coach",
+        avatar: "/avatar-coach.png",
         reputation: 1850,
         badge: "Career Advisor",
       },
@@ -596,6 +597,7 @@ export default function ForumComponent() {
   const [filteredTopics, setFilteredTopics] = useState(mockTopics)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const isMobile = useMobile()
+  const [loading, setLoading] = useState(true)
 
   // Filter topics based on category and search
   useEffect(() => {
@@ -618,6 +620,7 @@ export default function ForumComponent() {
     }
 
     setFilteredTopics(filtered)
+    setLoading(false)
   }, [selectedCategory, searchQuery])
 
   // Handle topic click for expansion
@@ -897,89 +900,93 @@ export default function ForumComponent() {
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="latest" className="mt-0">
-                <motion.div variants={staggerContainer} initial="initial" animate="animate" className="space-y-4">
-                  {filteredTopics.length > 0 ? (
-                    filteredTopics.map((topic) => (
-                      <TopicCard
-                        key={topic.id}
-                        topic={topic}
-                        isExpanded={expandedTopic === topic.id}
-                        onClick={() => handleTopicClick(topic.id)}
-                      />
-                    ))
-                  ) : (
-                    <div className="text-center py-8">
-                      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 mb-4">
-                        <Search className="h-8 w-8 text-slate-400" />
-                      </div>
-                      <h3 className="text-lg font-medium mb-2">No topics found</h3>
-                      <p className="text-slate-500 dark:text-slate-400 mb-4">
-                        Try adjusting your search or filter to find what you're looking for.
-                      </p>
-                      <Button
-                        onClick={() => {
-                          setSearchQuery("")
-                          setSelectedCategory("all")
-                        }}
-                      >
-                        Reset filters
-                      </Button>
-                    </div>
-                  )}
-                </motion.div>
-              </TabsContent>
-
-              <TabsContent value="popular" className="mt-0">
-                <div className="text-center py-12">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 mb-4">
-                    <TrendingUp className="h-8 w-8 text-slate-400" />
-                  </div>
-                  <h3 className="text-lg font-medium mb-2">Popular Topics</h3>
-                  <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto">
-                    This section will show the most popular topics based on views, likes, and engagement.
-                  </p>
+              {loading ? (
+                <div className="space-y-4">
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-12 w-full" />
                 </div>
-              </TabsContent>
-
-              <TabsContent value="unsolved" className="mt-0">
-                <div className="text-center py-12">
+              ) : filteredTopics.length > 0 ? (
+                filteredTopics.map((topic) => {
+                  return (
+                    <TopicCard
+                      key={topic.id}
+                      topic={topic}
+                      isExpanded={expandedTopic === topic.id}
+                      onClick={() => handleTopicClick(topic.id)}
+                    />
+                  )
+                })
+              ) : (
+                <div className="text-center py-8">
                   <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 mb-4">
-                    <MessageCircle className="h-8 w-8 text-slate-400" />
+                    <Search className="h-8 w-8 text-slate-400" />
                   </div>
-                  <h3 className="text-lg font-medium mb-2">Unsolved Questions</h3>
-                  <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto">
-                    Help the community by answering questions that haven't been solved yet.
+                  <h3 className="text-lg font-medium mb-2">No topics found</h3>
+                  <p className="text-slate-500 dark:text-slate-400 mb-4">
+                    Try adjusting your search or filter to find what you're looking for.
                   </p>
+                  <Button
+                    onClick={() => {
+                      setSearchQuery("")
+                      setSelectedCategory("all")
+                    }}
+                  >
+                    Reset filters
+                  </Button>
                 </div>
-              </TabsContent>
-            </Tabs>
+              )}
+            </TabsContent>
 
-            {/* Pagination */}
-            <div className="flex justify-between items-center mt-6">
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                Showing <span className="font-medium">{filteredTopics.length}</span> of{" "}
-                <span className="font-medium">{mockTopics.length}</span> topics
-              </p>
-              <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm" disabled className="h-8 w-8 p-0">
-                  <span className="sr-only">Previous</span>
-                  <ChevronRight className="h-4 w-4 rotate-180" />
-                </Button>
-                <Button variant="outline" size="sm" className="h-8 w-8 p-0 bg-slate-100 dark:bg-slate-800">
-                  <span>1</span>
-                </Button>
-                <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                  <span>2</span>
-                </Button>
-                <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                  <span>3</span>
-                </Button>
-                <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                  <span className="sr-only">Next</span>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
+            <TabsContent value="popular" className="mt-0">
+              <div className="text-center py-12">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 mb-4">
+                  <TrendingUp className="h-8 w-8 text-slate-400" />
+                </div>
+                <h3 className="text-lg font-medium mb-2">Popular Topics</h3>
+                <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+                  This section will show the most popular topics based on views, likes, and engagement.
+                </p>
               </div>
+            </TabsContent>
+
+            <TabsContent value="unsolved" className="mt-0">
+              <div className="text-center py-12">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 mb-4">
+                  <MessageCircle className="h-8 w-8 text-slate-400" />
+                </div>
+                <h3 className="text-lg font-medium mb-2">Unsolved Questions</h3>
+                <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+                  Help the community by answering questions that haven't been solved yet.
+                </p>
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          {/* Pagination */}
+          <div className="flex justify-between items-center mt-6">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Showing <span className="font-medium">{filteredTopics.length}</span> of{" "}
+              <span className="font-medium">{mockTopics.length}</span> topics
+            </p>
+            <div className="flex items-center space-x-2">
+              <Button variant="outline" size="sm" disabled className="h-8 w-8 p-0">
+                <span className="sr-only">Previous</span>
+                <ChevronRight className="h-4 w-4 rotate-180" />
+              </Button>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0 bg-slate-100 dark:bg-slate-800">
+                <span>1</span>
+              </Button>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                <span>2</span>
+              </Button>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                <span>3</span>
+              </Button>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                <span className="sr-only">Next</span>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         </div>

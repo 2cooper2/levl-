@@ -1,154 +1,174 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { LevlLogo } from "@/components/levl-logo"
-import { Menu, Moon, Sun, User } from "lucide-react"
+import * as React from "react"
 import Link from "next/link"
-import { useState } from "react"
+import { usePathname } from "next/navigation"
+import { LevlLogo } from "@/components/levl-logo"
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Menu, PlusCircle } from "lucide-react"
 import { useAuth } from "@/context/auth-context"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useTheme } from "next-themes"
 
 export function MobileNav() {
-  const [open, setOpen] = useState(false)
-  const { user, isAuthenticated, logout } = useAuth()
-  const { setTheme, theme } = useTheme()
+  const pathname = usePathname()
+  const [open, setOpen] = React.useState(false)
+  const { user, isAuthenticated } = useAuth()
+  const isProvider = user?.role === "provider"
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="md:hidden">
-          <Menu className="h-5 w-5" />
-          <span className="sr-only">Toggle menu</span>
+        <Button
+          variant="ghost"
+          className="mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden"
+        >
+          <Menu className="h-6 w-6" />
+          <span className="sr-only">Toggle Menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="flex flex-col">
-        <div className="flex items-center justify-between gap-2 border-b pb-4">
-          <div className="flex items-center relative">
-            <LevlLogo className="h-12 w-12" />
-            <span className="text-xl font-bold absolute left-12 bottom-2 z-10">LevL</span>
+      <SheetContent side="left" className="pr-0">
+        <MobileLink href="/" className="flex items-center" onOpenChange={setOpen}>
+          <LevlLogo className="mr-2 h-4 w-4" />
+          <span className="font-bold">Levl</span>
+        </MobileLink>
+        <ScrollArea className="my-4 h-[calc(100vh-8rem)] pb-10 pl-6">
+          <div className="flex flex-col space-y-3">
+            {isAuthenticated ? (
+              <>
+                <MobileLink
+                  href="/dashboard"
+                  className={cn(
+                    "transition-colors hover:text-foreground/80",
+                    pathname === "/dashboard" ? "text-foreground" : "text-foreground/60",
+                  )}
+                  onOpenChange={setOpen}
+                >
+                  Dashboard
+                </MobileLink>
+                <MobileLink
+                  href="/dashboard/services/new"
+                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-white bg-gradient-to-r from-purple-600 to-purple-400 transition-all hover:from-purple-700 hover:to-purple-500"
+                  onOpenChange={setOpen}
+                >
+                  <PlusCircle className="h-5 w-5" />
+                  <span>Add Service</span>
+                </MobileLink>
+                <MobileLink
+                  href="/messages"
+                  className={cn(
+                    "transition-colors hover:text-foreground/80",
+                    pathname?.startsWith("/messages") ? "text-foreground" : "text-foreground/60",
+                  )}
+                  onOpenChange={setOpen}
+                >
+                  Messages
+                </MobileLink>
+                <MobileLink
+                  href="/bookings"
+                  className={cn(
+                    "transition-colors hover:text-foreground/80",
+                    pathname?.startsWith("/bookings") ? "text-foreground" : "text-foreground/60",
+                  )}
+                  onOpenChange={setOpen}
+                >
+                  Bookings
+                </MobileLink>
+                {isProvider && (
+                  <MobileLink
+                    href="/skill-progress"
+                    className={cn(
+                      "transition-colors hover:text-foreground/80",
+                      pathname?.startsWith("/skill-progress") ? "text-foreground" : "text-foreground/60",
+                    )}
+                    onOpenChange={setOpen}
+                  >
+                    Skills
+                  </MobileLink>
+                )}
+                <MobileLink
+                  href="/profile"
+                  className={cn(
+                    "transition-colors hover:text-foreground/80",
+                    pathname?.startsWith("/profile") ? "text-foreground" : "text-foreground/60",
+                  )}
+                  onOpenChange={setOpen}
+                >
+                  Profile
+                </MobileLink>
+                <MobileLink
+                  href="/settings"
+                  className={cn(
+                    "transition-colors hover:text-foreground/80",
+                    pathname?.startsWith("/settings") ? "text-foreground" : "text-foreground/60",
+                  )}
+                  onOpenChange={setOpen}
+                >
+                  Settings
+                </MobileLink>
+              </>
+            ) : (
+              <>
+                <MobileLink
+                  href="/about"
+                  className={cn(
+                    "transition-colors hover:text-foreground/80",
+                    pathname?.startsWith("/about") ? "text-foreground" : "text-foreground/60",
+                  )}
+                  onOpenChange={setOpen}
+                >
+                  About
+                </MobileLink>
+                <MobileLink
+                  href="/auth/login"
+                  className={cn(
+                    "transition-colors hover:text-foreground/80",
+                    pathname?.startsWith("/auth/login") ? "text-foreground" : "text-foreground/60",
+                  )}
+                  onOpenChange={setOpen}
+                >
+                  Log In
+                </MobileLink>
+                <MobileLink
+                  href="/auth/signup"
+                  className={cn(
+                    "transition-colors hover:text-foreground/80",
+                    pathname?.startsWith("/auth/signup") ? "text-foreground" : "text-foreground/60",
+                  )}
+                  onOpenChange={setOpen}
+                >
+                  Sign Up
+                </MobileLink>
+              </>
+            )}
           </div>
-        </div>
-        {isAuthenticated && (
-          <div className="flex items-center gap-3 my-4 py-4 border-b">
-            <Avatar className="h-10 w-10">
-              <AvatarImage src={user?.avatar || "/placeholder.svg"} alt={user?.name || "User"} />
-              <AvatarFallback>{user?.name?.[0] || "U"}</AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="font-medium">{user?.name || "User"}</p>
-              <p className="text-xs text-muted-foreground">{user?.email || "user@example.com"}</p>
-            </div>
-          </div>
-        )}
-        <nav className="flex flex-col gap-4 mt-4">
-          <Link
-            href="/explore"
-            className="text-lg font-medium transition-colors hover:text-primary"
-            onClick={() => setOpen(false)}
-          >
-            Find Services
-          </Link>
-          <Link
-            href="/providers"
-            className="text-lg font-medium transition-colors hover:text-primary"
-            onClick={() => setOpen(false)}
-          >
-            Become a Provider
-          </Link>
-          <Link
-            href="/how-it-works"
-            className="text-lg font-medium transition-colors hover:text-primary"
-            onClick={() => setOpen(false)}
-          >
-            How it Works
-          </Link>
-          <Link
-            href="/about"
-            className="text-lg font-medium transition-colors hover:text-primary"
-            onClick={() => setOpen(false)}
-          >
-            About
-          </Link>
-          {isAuthenticated && (
-            <>
-              <Link
-                href="/dashboard"
-                className="text-lg font-medium transition-colors hover:text-primary"
-                onClick={() => setOpen(false)}
-              >
-                Dashboard
-              </Link>
-              <Link
-                href="/messages"
-                className="text-lg font-medium transition-colors hover:text-primary"
-                onClick={() => setOpen(false)}
-              >
-                Messages
-              </Link>
-              <Link
-                href="/bookings"
-                className="text-lg font-medium transition-colors hover:text-primary"
-                onClick={() => setOpen(false)}
-              >
-                Bookings
-              </Link>
-              <Link
-                href="/profile"
-                className="text-lg font-medium transition-colors hover:text-primary flex items-center gap-2 bg-primary/10 px-3 py-2 rounded-md"
-                onClick={() => {
-                  setOpen(false)
-                }}
-              >
-                <User className="h-5 w-5 text-primary" />
-                My Profile
-              </Link>
-              <Link
-                href="/settings"
-                className="text-lg font-medium transition-colors hover:text-primary"
-                onClick={() => setOpen(false)}
-              >
-                Settings
-              </Link>
-            </>
-          )}
-          <div className="flex items-center justify-between border-t pt-4 mt-2">
-            <span className="text-lg font-medium">Dark Mode</span>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="rounded-full"
-            >
-              {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-              <span className="sr-only">Toggle theme</span>
-            </Button>
-          </div>
-        </nav>
-        <div className="mt-auto flex flex-col gap-2 pt-4 border-t">
-          {isAuthenticated ? (
-            <Button
-              variant="outline"
-              onClick={() => {
-                logout()
-                setOpen(false)
-              }}
-            >
-              Log Out
-            </Button>
-          ) : (
-            <>
-              <Button variant="outline" onClick={() => setOpen(false)} asChild>
-                <Link href="/auth/login">Sign In</Link>
-              </Button>
-              <Button onClick={() => setOpen(false)} asChild>
-                <Link href="/auth/signup">Sign Up</Link>
-              </Button>
-            </>
-          )}
-        </div>
+        </ScrollArea>
       </SheetContent>
     </Sheet>
+  )
+}
+
+interface MobileLinkProps {
+  href: string
+  onOpenChange?: (open: boolean) => void
+  className?: string
+  children: React.ReactNode
+}
+
+function MobileLink({ href, onOpenChange, className, children }: MobileLinkProps) {
+  const pathname = usePathname()
+  const isActive = pathname === href
+
+  return (
+    <Link
+      href={href}
+      className={cn(className)}
+      onClick={() => {
+        onOpenChange?.(false)
+      }}
+    >
+      {children}
+    </Link>
   )
 }
