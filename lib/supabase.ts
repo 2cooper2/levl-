@@ -1,30 +1,10 @@
 "use client"
 
-import { createClient as createSupabaseClient } from "@supabase/supabase-js"
+import { supabase, createClientSupabase } from "./supabase-client"
 
-// Get environment variables
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-// Create a singleton instance for the client
-let clientInstance: ReturnType<typeof createSupabaseClient> | null = null
-
+// Re-export the singleton instance and creation function
 export const createClient = () => {
-  if (clientInstance) return clientInstance
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    console.error("Missing Supabase credentials for client")
-    return null
-  }
-
-  clientInstance = createSupabaseClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      persistSession: true,
-      storageKey: "levl-supabase-auth",
-    },
-  })
-
-  return clientInstance
+  return supabase || createClientSupabase()
 }
 
 // For backward compatibility

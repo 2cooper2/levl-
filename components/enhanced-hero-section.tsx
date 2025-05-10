@@ -1,6 +1,12 @@
 "use client"
-import { useState, useEffect, useRef, lazy } from "react"
+
+import type React from "react"
+
+import { Button } from "@/components/ui/button"
+import { useState, useEffect, useRef } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import { EnhancedButton } from "@/components/ui/enhanced-button"
+import { Input } from "@/components/ui/input"
 import { ArrowRight, Sparkles } from "lucide-react"
 import { useRouter } from "next/navigation"
 import {
@@ -8,6 +14,7 @@ import {
   Rocket,
   Star,
   BookOpen,
+  CheckCircle,
   Clock,
   TrendingUp,
   MessageSquare,
@@ -16,6 +23,7 @@ import {
   BarChart,
   Layers,
   Cpu,
+  ThumbsUp,
   Users,
   Target,
   Zap,
@@ -25,6 +33,13 @@ import {
   WrenchIcon as ScrewDriver,
   Hammer,
   Paintbrush,
+  Eye,
+  Share2,
+  Download,
+  DollarSign,
+  Award,
+  PlusCircle,
+  Filter,
   CreditCard,
   HomeIcon,
   Heart,
@@ -36,13 +51,8 @@ import Link from "next/link"
 import { BackgroundPattern } from "@/components/background-pattern"
 import { EnhancedCategoryCard } from "@/components/enhanced-category-card"
 import { useMobile } from "@/hooks/use-mobile"
+// Remove the existing import for ForumComponent
 import { FeatureBadge } from "@/components/ui/feature-badge"
-import { Skeleton } from "@/components/ui/skeleton"
-
-// Lazy load the ForumTab component
-const ForumTab = lazy(() =>
-  import("./skill-accelerator/forum-component").then((module) => ({ default: module.ForumTab })),
-)
 
 // Add styles for hiding scrollbars
 const scrollbarHideStyles = `
@@ -55,6 +65,152 @@ const scrollbarHideStyles = `
 }
 `
 
+// Add detailed visual styles
+const detailedVisualStyles = `
+ .detailed-card {
+   position: relative;
+   overflow: hidden;
+   isolation: isolate;
+ }
+ 
+ .grid-pattern {
+   opacity: 0.7;
+ }
+ 
+ .circuit-lines {
+   position: absolute;
+   top: 0;
+   left: 0;
+   right: 0;
+   bottom: 0;
+   overflow: hidden;
+   pointer-events: none;
+   z-index: 1;
+ }
+ 
+ .circuit-line {
+   position: absolute;
+   background: linear-gradient(90deg, rgba(var(--primary-rgb), 0.1), rgba(var(--primary-rgb), 0.3), rgba(var(--primary-rgb), 0.1));
+   height: 1px;
+   opacity: 0.3;
+ }
+ 
+ .circuit-dot {
+   position: absolute;
+   width: 4px;
+   height: 4px;
+   height: 4px;
+   border-radius: 50%;
+   background-color: rgba(var(--primary-rgb), 0.5);
+   box-shadow: 0 0 5px rgba(var(--primary-rgb), 0.5);
+ }
+ 
+ .glow-dot {
+   position: absolute;
+   width: 2px;
+   height: 2px;
+   border-radius: 50%;
+   background-color: white;
+   opacity: 0.6;
+   box-shadow: 0 0 5px 2px rgba(255, 255, 255, 0.3);
+   animation: pulse-glow 3s infinite;
+ }
+ 
+ @keyframes pulse-glow {
+   0%, 100% { opacity: 0.2; transform: scale(1); }
+   50% { opacity: 0.8; transform: scale(1.5); }
+ }
+ 
+ .geometric-shape {
+   position: absolute;
+   opacity: 0.15;
+   pointer-events: none;
+   z-index: 1;
+ }
+ 
+ .skill-card {
+   position: relative;
+   overflow: hidden;
+ }
+ 
+ .skill-card::before {
+   content: '';
+   position: absolute;
+   top: 0;
+   left: 0;
+   right: 0;
+   bottom: 0;
+   background: radial-gradient(circle at 50% 0%, rgba(var(--primary-rgb), 0.1), transparent 70%);
+   pointer-events: none;
+   z-index: 1;
+ }
+ 
+ .progress-track {
+   position: relative;
+   overflow: hidden;
+   border-radius: 9999px;
+ }
+ 
+ .progress-track::after {
+   content: '';
+   position: absolute;
+   top: 0;
+   left: 0;
+   right: 0;
+   bottom: 0;
+   background-image: linear-gradient(90deg, 
+     rgba(255,255,255,0) 0%, 
+     rgba(255,255,255,0.2) 20%, 
+     rgba(255,255,255,0.2) 80%, 
+     rgba(255,255,255,0) 100%);
+   background-size: 200% 100%;
+   animation: shimmer 2s infinite;
+   pointer-events: none;
+ }
+ 
+ @keyframes shimmer {
+   0% { background-position: -200% 0; }
+   100% { background-position: 200% 0; }
+ }
+ 
+ .detailed-tab {
+   position: relative;
+ }
+ 
+ .detailed-tab::after {
+   content: '';
+   position: absolute;
+   bottom: -2px;
+   left: 0;
+   right: 0;
+   height: 2px;
+   background: linear-gradient(90deg, 
+     rgba(var(--primary-rgb), 0) 0%, 
+     rgba(var(--primary-rgb), 1) 50%, 
+     rgba(var(--primary-rgb), 0) 100%);
+   opacity: 0;
+   transition: opacity 0.3s ease;
+ }
+ 
+ .detailed-tab.active::after {
+   opacity: 1;
+ }
+ 
+
+  .bg-grid-pattern {
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+`
+
+// Custom function to format the last active time
+const formatLastActive = (lastActive: string): string => {
+  // Implement your formatting logic here
+  return lastActive
+}
+
 // Define the FounderIcon component
 const FounderIcon = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -65,16 +221,818 @@ const FounderIcon = () => (
   </svg>
 )
 
-// Forum Tab
-const ForumTabPlaceholder = () => (
-  <div className="space-y-4">
-    <Skeleton className="h-10 w-full rounded-md" />
-    <Skeleton className="h-40 w-full rounded-md" />
-    <Skeleton className="h-10 w-32 rounded-md" />
-  </div>
-)
+// Define forumTopics
+const forumTopics = [
+  {
+    id: 1,
+    title: "Best drill for mounting?",
+    author: "ToolLover",
+    replies: 12,
+    likes: 25,
+    lastActive: "1 day ago",
+    tags: ["mounting", "tools", "drilling"],
+    preview: "I'm looking for a reliable drill for mounting shelves and TVs. Any recommendations?",
+    responses: [
+      {
+        author: "HandyMan",
+        time: "1 day ago",
+        content: "I recommend the Dewalt DCD791D2. It's powerful and versatile.",
+        likes: 5,
+      },
+      {
+        author: "DrillMaster",
+        time: "1 day ago",
+        content: "I prefer the Milwaukee M18. It's a bit more expensive, but it's worth it.",
+        likes: 3,
+      },
+    ],
+  },
+  {
+    id: 2,
+    title: "How to find studs in a wall?",
+    author: "DIYNewbie",
+    replies: 8,
+    likes: 15,
+    lastActive: "3 days ago",
+    tags: ["studs", "walls", "mounting"],
+    preview: "What's the best way to locate studs behind drywall?",
+    responses: [
+      {
+        author: "WallExpert",
+        time: "3 days ago",
+        content:
+          "A stud finder is the easiest way. You can also try tapping on the wall and listening for a solid sound.",
+        likes: 7,
+      },
+      {
+        author: "DIYPro",
+        time: "3 days ago",
+        content: "Don't forget to check for electrical wires before drilling!",
+        likes: 2,
+      },
+    ],
+  },
+  {
+    id: 3,
+    title: "Best way to hide cables?",
+    author: "CableGuy",
+    replies: 5,
+    likes: 10,
+    lastActive: "1 week ago",
+    tags: ["cables", "tv", "mounting"],
+    preview: "What are some creative ways to hide TV cables after mounting?",
+    responses: [
+      {
+        author: "HomeTheaterPro",
+        time: "1 week ago",
+        content: "You can use cable sleeves or in-wall cable management kits.",
+        likes: 4,
+      },
+      {
+        author: "TechGuru",
+        time: "1 week ago",
+        content: "Consider using a power bridge to safely run cables behind the wall.",
+        likes: 1,
+      },
+    ],
+  },
+]
 
-const SkillsData = [
+// Forum Tab
+const ForumTab = () => {
+  const [searchQuery, setSearchQuery] = useState("")
+  const [activeTopic, setActiveTopic] = useState<number | null>(null)
+  const [topics, setTopics] = useState(forumTopics)
+  const [isLoading, setIsLoading] = useState(false)
+  const [activeCategory, setActiveCategory] = useState("all")
+  const [showNewTopicForm, setShowNewTopicForm] = useState(false)
+  const [newTopicTitle, setNewTopicTitle] = useState("")
+  const [newTopicContent, setNewTopicContent] = useState("")
+  const [newTopicTags, setNewTopicTags] = useState("")
+  const [sortBy, setSortBy] = useState("recent")
+  const [userVotes, setUserVotes] = useState<Record<string, Record<string, boolean>>>({})
+  const [showNotification, setShowNotification] = useState(false)
+  const [notificationMessage, setNotificationMessage] = useState("")
+  const [replyContent, setReplyContent] = useState("")
+  const [expandedTags, setExpandedTags] = useState(false)
+  const [userBookmarks, setUserBookmarks] = useState<number[]>([])
+
+  const [showOnlyBookmarked, setShowOnlyBookmarked] = useState(false)
+
+  const [viewMode, setViewMode] = useState<"card" | "compact">("card")
+  const [showUserTooltip, setShowUserTooltip] = useState<number | null>(null)
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value)
+  }
+
+  const filteredTopics = topics
+    .filter((topic) => {
+      const matchesSearch = topic.title.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesCategory = activeCategory === "all" || topic.tags.includes(activeCategory)
+      const matchesBookmark = showOnlyBookmarked ? userBookmarks.includes(topic.id) : true
+      return matchesSearch && matchesCategory && matchesBookmark
+    })
+    .sort((a, b) => {
+      if (sortBy === "recent") {
+        return new Date(b.lastActive).getTime() - new Date(a.lastActive).getTime()
+      } else if (sortBy === "popular") {
+        return b.likes - a.likes
+      } else if (sortBy === "replies") {
+        return b.replies - a.replies
+      }
+      return 0
+    })
+
+  const loadMoreTopics = () => {
+    setIsLoading(true)
+    setTimeout(() => {
+      // Simulate loading more topics
+      const newTopics = [
+        {
+          id: 4,
+          title: "How to choose the right drill bit for mounting?",
+          author: "DrillMaster",
+          replies: 4,
+          likes: 6,
+          lastActive: "5 days ago",
+          tags: ["mounting", "tools", "drilling"],
+          preview: "What type of drill bit should I use for different wall materials?",
+          responses: [],
+        },
+        {
+          id: 5,
+          title: "Best anchors for heavy items?",
+          author: "WallMountPro",
+          replies: 7,
+          likes: 12,
+          lastActive: "2 days ago",
+          tags: ["mounting", "anchors", "heavy-duty"],
+          preview: "I need to hang a 50lb mirror. What anchors should I use for drywall?",
+          responses: [
+            {
+              author: "HardwareExpert",
+              time: "2 days ago",
+              content:
+                "Toggle bolts are your best bet for heavy items on drywall. They can hold up to 100lbs when installed correctly.",
+              likes: 5,
+            },
+          ],
+        },
+      ]
+      setTopics([...topics, ...newTopics])
+      setIsLoading(false)
+    }, 1000)
+  }
+
+  const handleCreateTopic = () => {
+    if (!newTopicTitle.trim() || !newTopicContent.trim()) return
+
+    const newTopic = {
+      id: Math.floor(Math.random() * 1000) + 10,
+      title: newTopicTitle,
+      author: "You",
+      replies: 0,
+      likes: 0,
+      lastActive: "Just now",
+      tags: newTopicTags.split(",").map((tag) => tag.trim().toLowerCase()),
+      preview: newTopicContent,
+      responses: [],
+    }
+
+    setTopics([newTopic, ...topics])
+    setNewTopicTitle("")
+    setNewTopicContent("")
+    setNewTopicTags("")
+    setShowNewTopicForm(false)
+
+    // Show success notification
+    setNotificationMessage("Topic created successfully!")
+    setShowNotification(true)
+    setTimeout(() => setShowNotification(false), 3000)
+  }
+
+  const handleVote = (topicId: number, responseIndex: number | null, type: "up" | "down") => {
+    // Create a unique ID for the vote target
+    const targetId = responseIndex !== null ? `${topicId}-${responseIndex}` : `${topicId}`
+
+    // Check if user has already voted
+    const hasVoted = userVotes[targetId]?.[type]
+
+    // Update user votes state
+    setUserVotes((prev) => {
+      const newVotes = { ...prev }
+      if (!newVotes[targetId]) newVotes[targetId] = {}
+
+      // If already voted this type, remove vote
+      if (hasVoted) {
+        newVotes[targetId][type] = false
+      }
+      // If voted opposite type, switch vote
+      else if (newVotes[targetId][type === "up" ? "down" : "up"]) {
+        newVotes[targetId][type === "up" ? "down" : "up"] = false
+        newVotes[targetId][type] = true
+      }
+      // New vote
+      else {
+        newVotes[targetId][type] = true
+      }
+
+      return newVotes
+    })
+
+    // Update topic/response likes count
+    setTopics((prev) => {
+      return prev.map((topic) => {
+        if (topic.id === topicId) {
+          if (responseIndex === null) {
+            // Voting on the topic itself
+            let newLikes = topic.likes
+            if (hasVoted && type === "up") newLikes--
+            else if (!hasVoted && type === "up") newLikes++
+            else if (hasVoted && type === "down") newLikes++
+            else if (!hasVoted && type === "down") newLikes--
+
+            return { ...topic, likes: newLikes }
+          } else {
+            // Voting on a response
+            const newResponses = [...(topic.responses || [])]
+            if (newResponses[responseIndex]) {
+              let newLikes = newResponses[responseIndex].likes
+              if (hasVoted && type === "up") newLikes--
+              else if (!hasVoted && type === "up") newLikes++
+              else if (hasVoted && type === "down") newLikes++
+              else if (!hasVoted && type === "down") newLikes--
+
+              newResponses[responseIndex] = { ...newResponses[responseIndex], likes: newLikes }
+            }
+            return { ...topic, responses: newResponses }
+          }
+        }
+        return topic
+      })
+    })
+  }
+
+  const handleReply = (topicId: number) => {
+    if (!replyContent.trim()) return
+
+    setTopics((prev) => {
+      return prev.map((topic) => {
+        if (topic.id === topicId) {
+          const newResponses = [
+            ...(topic.responses || []),
+            {
+              author: "You",
+              time: "Just now",
+              content: replyContent,
+              likes: 0,
+            },
+          ]
+          return {
+            ...topic,
+            responses: newResponses,
+            replies: topic.replies + 1,
+            lastActive: "Just now",
+          }
+        }
+        return topic
+      })
+    })
+
+    setReplyContent("")
+
+    // Show success notification
+    setNotificationMessage("Reply posted successfully!")
+    setShowNotification(true)
+    setTimeout(() => setShowNotification(false), 3000)
+  }
+
+  const toggleBookmark = (topicId: number) => {
+    setUserBookmarks((prev) => {
+      if (prev.includes(topicId)) {
+        return prev.filter((id) => id !== topicId)
+      } else {
+        return [...prev, topicId]
+      }
+    })
+
+    // Show notification
+    setNotificationMessage(userBookmarks.includes(topicId) ? "Bookmark removed" : "Topic bookmarked!")
+    setShowNotification(true)
+    setTimeout(() => setShowNotification(false), 3000)
+  }
+
+  const categories = [
+    { id: "all", name: "All Topics", icon: <Layers className="h-3.5 w-3.5" /> },
+    { id: "mounting", name: "Mounting", icon: <Hammer className="h-3.5 w-3.5" /> },
+    { id: "tools", name: "Tools", icon: <ScrewDriver className="h-3.5 w-3.5" /> },
+    { id: "drilling", name: "Drilling", icon: <Target className="h-3.5 w-3.5" /> },
+    { id: "anchors", name: "Anchors", icon: <Shield className="h-3.5 w-3.5" /> },
+  ]
+
+  const allTags = Array.from(new Set(topics.flatMap((topic) => topic.tags)))
+    .filter((tag) => !categories.some((cat) => cat.id === tag))
+    .slice(0, expandedTags ? undefined : 5)
+
+  return (
+    <div className="space-y-4">
+      {/* Notification toast */}
+      <AnimatePresence>
+        {showNotification && (
+          <div className="fixed top-4 right-4 z-50 bg-primary text-white px-4 py-2 rounded-lg shadow-lg flex items-center">
+            <CheckCircle className="h-4 w-4 mr-2" />
+            {notificationMessage}
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Header with search and new topic button */}
+      {/* Header with search and new topic button - Enhanced with Levl UI/UX */}
+      <div className="bg-gradient-to-br from-purple-50/90 via-lavender-100/80 to-white/90 backdrop-blur-sm rounded-xl p-5 shadow-lg border border-lavender-300/50 transition-all duration-300 hover:shadow-lavender-200/30">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+          <div className="relative flex-1 group">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-4 w-4 text-primary/70 group-hover:text-primary transition-colors duration-200" />
+            </div>
+            <Input
+              type="text"
+              placeholder="Search forum topics..."
+              className="pl-10 pr-4 py-2.5 w-full rounded-lg border border-lavender-200 focus:border-primary/60 focus:ring-2 focus:ring-primary/20 bg-white/80 hover:bg-white transition-all duration-200 text-sm placeholder:text-gray-400"
+            />
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <span className="text-xs text-gray-400">Press / to search</span>
+            </div>
+          </div>
+          <button className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary/90 to-purple-500 hover:from-primary hover:to-purple-400 text-white rounded-lg font-medium text-sm transition-all duration-200 hover:shadow-md hover:shadow-primary/20 active:scale-[0.98] group">
+            <PlusCircle className="h-4 w-4 group-hover:rotate-90 transition-transform duration-300" />
+            <span>New Topic</span>
+          </button>
+        </div>
+
+        {/* Forum categories */}
+        <div className="flex flex-wrap gap-2 mb-2">
+          {["All Topics", "Announcements", "Discussions", "Questions", "Resources", "Events"].map((category) => (
+            <button
+              key={category}
+              className={`px-3 py-1.5 text-xs rounded-full transition-all duration-200 ${
+                category === "All Topics"
+                  ? "bg-primary/10 text-primary font-medium border-2 border-primary/20"
+                  : "bg-lavender-50 text-gray-600 hover:bg-lavender-100 border border-lavender-200/50"
+              }`}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+
+        {/* Sort options */}
+        <div className="flex items-center justify-between text-xs text-gray-500">
+          <div className="flex items-center gap-3">
+            <span className="font-medium">Sort by:</span>
+            <div className="flex items-center gap-3">
+              {["Latest", "Popular", "Unanswered"].map((option, index) => (
+                <button
+                  key={option}
+                  className={`transition-colors duration-200 ${
+                    index === 0 ? "text-primary font-medium" : "hover:text-gray-700"
+                  }`}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Filter className="h-3 w-3" />
+            <span>Filters</span>
+          </div>
+        </div>
+      </div>
+
+      {/* New Topic Form */}
+      <AnimatePresence>
+        {showNewTopicForm && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm rounded-xl p-4 border border-primary/20 mb-4 relative overflow-hidden"
+          >
+            {/* Background pattern */}
+            <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_10px_10px,rgba(var(--primary-rgb),0.4)_1px,transparent_1px)] bg-[length:20px_20px] pointer-events-none"></div>
+
+            <h3 className="text-sm font-semibold text-gray-800 mb-3 flex items-center">
+              <Sparkles className="h-4 w-4 mr-2 text-primary" />
+              Create New Discussion
+            </h3>
+
+            <div className="space-y-3">
+              <div className="relative">
+                <Input
+                  placeholder="Topic title"
+                  className="text-sm bg-white/5 dark:bg-black/20 border-white/10 pr-16"
+                  value={newTopicTitle}
+                  onChange={(e) => setNewTopicTitle(e.target.value)}
+                />
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-500">
+                  {newTopicTitle.length}/100
+                </div>
+              </div>
+
+              <div className="relative">
+                <textarea
+                  placeholder="What would you like to discuss?"
+                  className="w-full h-24 px-3 py-2 text-sm bg-white/5 dark:bg-black/20 rounded-md border border-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/30 outline-none transition-colors resize-none text-gray-800"
+                  value={newTopicContent}
+                  onChange={(e) => setNewTopicContent(e.target.value)}
+                />
+                <div className="absolute right-2 bottom-2 text-xs text-gray-500">{newTopicContent.length}/500</div>
+              </div>
+
+              <div className="flex items-center">
+                <div className="relative flex-1">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Target className="h-3.5 w-3.5 text-primary/60" />
+                  </div>
+                  <Input
+                    placeholder="Tags (comma separated)"
+                    className="pl-10 text-sm bg-white/5 dark:bg-black/20 border-white/10"
+                    value={newTopicTags}
+                    onChange={(e) => setNewTopicTags(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center">
+                <div className="text-xs text-gray-500">Use tags to help others find your topic</div>
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="gap-1 text-xs bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white"
+                  onClick={handleCreateTopic}
+                  disabled={!newTopicTitle.trim() || !newTopicContent.trim()}
+                >
+                  <MessageSquare className="h-3.5 w-3.5" />
+                  Post Topic
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Category tabs */}
+      {/* Category tabs - Enhanced with Levl UI/UX */}
+      <div className="flex overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide space-x-1 mb-3 relative">
+        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
+
+        {categories.map((category) => (
+          <motion.button
+            key={category.id}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 flex items-center relative ${
+              activeCategory === category.id
+                ? "bg-gradient-to-r from-primary to-purple-500 text-white shadow-lg shadow-primary/20"
+                : "bg-white/80 text-gray-700 hover:bg-lavender-50 border border-lavender-200/70"
+            }`}
+            onClick={() => setActiveCategory(category.id)}
+            whileHover={{ scale: 1.05, y: -1 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <span className="mr-1.5">{category.icon}</span>
+            {category.name}
+            {activeCategory === category.id && (
+              <>
+                <span className="ml-1.5 flex items-center">
+                  <motion.div
+                    className="h-1.5 w-1.5 rounded-full bg-white"
+                    animate={{ scale: [1, 1.5, 1] }}
+                    transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
+                  />
+                </span>
+                <motion.div
+                  className="absolute inset-0 rounded-full opacity-0"
+                  animate={{
+                    boxShadow: [
+                      "0 0 0px 0px rgba(147, 51, 234, 0)",
+                      "0 0 8px 2px rgba(147, 51, 234, 0.3)",
+                      "0 0 0px 0px rgba(147, 51, 234, 0)",
+                    ],
+                    opacity: [0, 0.7, 0],
+                  }}
+                  transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
+                />
+              </>
+            )}
+          </motion.button>
+        ))}
+      </div>
+
+      {/* Tags cloud */}
+      {/* Trending Topics - Enhanced with Levl UI/UX */}
+      <div className="bg-gradient-to-br from-white/80 via-lavender-50/80 to-white/80 backdrop-blur-sm rounded-xl p-3 mb-3 border border-lavender-200/50 relative overflow-hidden">
+        {/* Decorative elements */}
+        <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-purple-500/10 to-transparent rounded-bl-full"></div>
+        <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-gradient-to-tr from-primary/10 to-transparent rounded-tr-full"></div>
+
+        <div className="flex items-center justify-between mb-3 relative z-10">
+          <h4 className="text-xs font-medium text-gray-800 flex items-center">
+            <div className="h-5 w-5 rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 flex items-center justify-center mr-1.5">
+              <TrendingUp className="h-3 w-3 text-primary" />
+            </div>
+            Trending Topics
+          </h4>
+          <motion.button
+            whileHover={{ scale: 1.05, x: 1 }}
+            whileTap={{ scale: 0.95 }}
+            className="text-xs text-primary flex items-center"
+          >
+            View All <ArrowRight className="h-3 w-3 ml-1" />
+          </motion.button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          {[
+            { title: "Best power drill for beginners", views: 342, hot: true },
+            { title: "How to find studs without a stud finder", views: 289 },
+            { title: "Wall anchors vs. toggle bolts", views: 215 },
+            { title: "Mounting a TV on drywall safely", views: 198 },
+          ].map((topic, i) => (
+            <motion.div
+              key={i}
+              className="group cursor-pointer bg-white/50 hover:bg-white rounded-lg p-2 border border-transparent hover:border-lavender-200/70 transition-all duration-200"
+              whileHover={{ y: -2, boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}
+            >
+              <div className="flex justify-between items-start">
+                <div className="text-xs text-gray-700 group-hover:text-primary transition-colors line-clamp-1 font-medium">
+                  {topic.title}
+                  {topic.hot && (
+                    <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] bg-primary/10 text-primary">
+                      <TrendingUp className="h-2 w-2 mr-0.5" /> Hot
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center justify-between mt-1">
+                <div className="flex items-center text-xs text-gray-500">
+                  <Eye className="h-3 w-3 mr-1 text-gray-400" />
+                  {topic.views} views
+                </div>
+                <div className="text-xs text-gray-400">3h ago</div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      {/* Topics list */}
+      <div className="space-y-3">
+        {filteredTopics.length > 0 ? (
+          filteredTopics.map((topic) => (
+            <motion.div
+              key={topic.id}
+              className={`${
+                viewMode === "card" ? "p-5" : "p-4"
+              } rounded-xl bg-gradient-to-br from-white/95 via-lavender-50/80 to-white/90 backdrop-blur-sm border hover:border-primary/40 transition-all duration-300 relative overflow-hidden cursor-pointer shadow-sm hover:shadow-md ${
+                activeTopic === topic.id ? "border-primary/40 bg-primary/5 shadow-primary/10" : "border-lavender-200/50"
+              }`}
+              onClick={() => setActiveTopic(activeTopic === topic.id ? null : topic.id)}
+              whileHover={{ scale: 1.01, y: -2, boxShadow: "0 8px 24px rgba(147, 51, 234, 0.08)" }}
+              layout
+            >
+              {/* Decorative elements */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-purple-500/5 to-transparent rounded-bl-full"></div>
+              <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-gradient-to-tr from-primary/5 to-transparent rounded-tr-full"></div>
+
+              {/* Background pattern */}
+              <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_10px_10px,rgba(var(--primary-rgb),0.4)_1px,transparent_1px)] bg-[length:20px_20px] pointer-events-none"></div>
+
+              {/* Bookmark button */}
+              <div
+                className="absolute top-3 right-3 z-10"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  toggleBookmark(topic.id)
+                }}
+              >
+                <motion.button
+                  whileHover={{ scale: 1.2 }}
+                  whileTap={{ scale: 0.9 }}
+                  className="h-7 w-7 flex items-center justify-center rounded-full bg-white shadow-sm hover:shadow-md transition-all duration-200"
+                >
+                  <Star
+                    className={`h-4 w-4 ${userBookmarks.includes(topic.id) ? "text-yellow-500 fill-yellow-500" : "text-gray-400"}`}
+                  />
+                </motion.button>
+              </div>
+
+              {viewMode === "card" ? (
+                <>
+                  <div className="flex justify-between items-start pr-8">
+                    <div>
+                      <div className="flex items-center">
+                        <div className="text-base font-medium text-gray-800 group-hover:text-primary transition-colors duration-200">
+                          {topic.title}
+                        </div>
+                        {topic.replies > 10 && (
+                          <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-primary/10 text-primary rounded-full flex items-center">
+                            <TrendingUp className="h-3 w-3 mr-1" /> Hot
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap gap-1.5 mt-2.5">
+                        {topic.tags.map((tag) => (
+                          <div
+                            key={tag}
+                            className="px-2.5 py-0.5 rounded-full bg-lavender-100/80 text-xs flex items-center text-primary/80 font-medium border border-lavender-200/50"
+                          >
+                            <span className="h-1.5 w-1.5 rounded-full bg-primary/70 mr-1.5"></span>
+                            {tag}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="text-right text-xs">
+                      <div className="text-gray-500 font-medium">{topic.lastActive}</div>
+                      <div className="flex items-center justify-end mt-1.5 space-x-3">
+                        <div className="flex items-center px-2 py-1 rounded-full bg-lavender-50/80 border border-lavender-200/30">
+                          <MessageSquare className="h-3 w-3 mr-1 text-primary" />
+                          <span className="text-gray-700 font-medium">{topic.replies}</span>
+                        </div>
+                        <div className="flex items-center px-2 py-1 rounded-full bg-lavender-50/80 border border-lavender-200/30">
+                          <ThumbsUp className="h-3 w-3 mr-1 text-primary/70" />
+                          <span className="text-gray-700 font-medium">{topic.likes}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Preview text */}
+                  <div className="mt-3 text-sm text-gray-600 line-clamp-2 leading-relaxed">{topic.preview}</div>
+
+                  {/* Author info */}
+                  <div
+                    className="flex items-center mt-4 pt-3 border-t border-lavender-200/30"
+                    onMouseEnter={() => setShowUserTooltip(topic.id)}
+                    onMouseLeave={() => setShowUserTooltip(null)}
+                  >
+                    <div className="relative">
+                      <div className="h-8 w-8 rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 flex items-center justify-center text-sm font-bold text-primary border border-lavender-200/50 shadow-sm">
+                        {topic.author.charAt(0)}
+                      </div>
+
+                      {/* User tooltip */}
+                      {showUserTooltip === topic.id && (
+                        <motion.div
+                          className="absolute bottom-full left-0 mb-2 w-56 bg-white rounded-lg shadow-lg p-3 z-50 border border-lavender-200"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className="h-10 w-10 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center text-sm font-bold text-white">
+                              {topic.author.charAt(0)}
+                            </div>
+                            <div>
+                              <div className="font-medium text-gray-800">{topic.author}</div>
+                              <div className="text-xs text-gray-500">Member since 2023</div>
+                              <div className="flex items-center mt-1 text-xs text-gray-600">
+                                <Star className="h-3 w-3 text-yellow-500 fill-yellow-500 mr-0.5" />
+                                <span>4.8</span>
+                                <span className="mx-1">•</span>
+                                <span>42 topics</span>
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </div>
+                    <div className="ml-2">
+                      <span className="text-sm font-medium text-gray-700">{topic.author}</span>
+                      <div className="text-xs text-gray-500">Active contributor</div>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                // Compact view
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="h-9 w-9 rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 flex items-center justify-center text-sm font-bold text-primary border border-lavender-200/50 shadow-sm">
+                      {topic.author.charAt(0)}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium text-gray-800 truncate">{topic.title}</div>
+                      <div className="flex items-center text-xs text-gray-500">
+                        <span className="font-medium">{topic.author}</span>
+                        <span className="mx-1.5">•</span>
+                        <span>{topic.lastActive}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 ml-2">
+                    <div className="flex items-center px-2 py-1 rounded-full bg-lavender-50/80 border border-lavender-200/30">
+                      <MessageSquare className="h-3 w-3 mr-1 text-primary" />
+                      <span className="text-xs text-gray-700 font-medium">{topic.replies}</span>
+                    </div>
+                    <div className="flex items-center px-2 py-1 rounded-full bg-lavender-50/80 border border-lavender-200/30">
+                      <ThumbsUp className="h-3 w-3 mr-1 text-primary/70" />
+                      <span className="text-xs text-gray-700 font-medium">{topic.likes}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          ))
+        ) : (
+          <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50 text-center">
+            <MessageSquare className="h-8 w-8 mx-auto mb-2 text-primary/50" />
+            <h3 className="text-sm font-medium text-gray-800 mb-1">No topics found</h3>
+            <p className="text-xs text-gray-500 mb-3">
+              {searchQuery ? "Try adjusting your search or filters" : "Be the first to start a discussion"}
+            </p>
+            <Button
+              variant="default"
+              size="sm"
+              className="mx-auto gap-1 text-xs bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white"
+              onClick={() => setShowNewTopicForm(true)}
+            >
+              <MessageSquare className="h-3.5 w-3.5" />
+              Create New Topic
+            </Button>
+          </div>
+        )}
+
+        {/* Load more button */}
+        {filteredTopics.length > 0 && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full relative overflow-hidden group border-white/10 text-gray-600 hover:text-gray-800"
+              onClick={loadMoreTopics}
+              disabled={isLoading}
+            >
+              {/* Animated gradient background on hover */}
+              <div className="absolute inset-0 w-full bg-gradient-to-r from-primary/0 via-primary/20 to-primary/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+
+              {isLoading ? (
+                <span className="flex items-center">
+                  <svg
+                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-primary"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Loading more topics...
+                </span>
+              ) : (
+                <span className="flex items-center">
+                  <ArrowRight className="mr-2 h-4 w-4 text-primary" />
+                  Load More Topics
+                </span>
+              )}
+            </Button>
+          </motion.div>
+        )}
+      </div>
+    </div>
+  )
+}
+// Define fadeIn animation
+const fadeIn = {
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: "easeInOut",
+    },
+  },
+}
+
+const handleApplyForProject = (projectName: string) => {
+  alert(`Applying for project: ${projectName}`)
+  // Add your logic here to handle the project application
+}
+
+// Mock skills data
+const skillsData = [
   {
     name: "Mounting",
     icon: <Hammer className="h-5 w-5 text-white" />,
@@ -91,11 +1049,49 @@ const SkillsData = [
     stats: {
       repeatClients: 15,
     },
+    learningPath: [
+      { name: "Wall Types & Materials", duration: "4h 30m", status: "completed" },
+      { name: "Mounting Hardware Selection", duration: "3h 15m", status: "completed" },
+      { name: "TV Mounting Techniques", duration: "5h 0m", status: "in-progress" },
+      { name: "Advanced Mounting Solutions", duration: "4h 45m", status: "upcoming" },
+    ],
+    skills: [
+      { name: "Stud Finding", level: 75 },
+      { name: "Hardware Selection", level: 60 },
+      { name: "Level Mounting", level: 50 },
+      { name: "Cable Management", level: 80 },
+    ],
+    skillProjects: [
+      {
+        name: "Mount a 65-inch TV on drywall",
+        difficulty: "Intermediate",
+        earnings: "$500",
+        status: "completed",
+      },
+      {
+        name: "Install floating shelves in a living room",
+        difficulty: "Advanced",
+        earnings: "$800",
+        status: "in-progress",
+      },
+      {
+        name: "Mount a projector and screen in home theater",
+        difficulty: "Intermediate",
+        earnings: "$600",
+        status: "available",
+      },
+    ],
     testimonial: {
       author: "Jane Smith",
       rating: 5,
       text: "The Mounting skill accelerator helped me start my own TV mounting business. The techniques I learned were professional-grade and the projects gave me real-world experience.",
     },
+    milestones: [
+      { name: "Complete Wall Types & Materials", progress: 100, total: 100 },
+      { name: "Complete Mounting Hardware Selection", progress: 100, total: 100 },
+      { name: "Complete TV Mounting Techniques", progress: 75, total: 100 },
+      { name: "Complete Advanced Mounting Solutions", progress: 0, total: 100 },
+    ],
   },
   {
     name: "Painting",
@@ -113,11 +1109,39 @@ const SkillsData = [
     stats: {
       repeatClients: 8,
     },
+    learningPath: [
+      { name: "Surface Preparation", duration: "3h 0m", status: "completed" },
+      { name: "Paint Types & Selection", duration: "4h 0m", status: "in-progress" },
+      { name: "Brush & Roller Techniques", duration: "6h 0m", status: "upcoming" },
+      { name: "Advanced Finishes & Effects", duration: "5h 30m", status: "upcoming" },
+    ],
+    skills: [
+      { name: "Surface Prep", level: 80 },
+      { name: "Color Matching", level: 70 },
+      { name: "Brush Technique", level: 40 },
+      { name: "Spray Painting", level: 20 },
+    ],
+    skillProjects: [
+      { name: "Paint a bedroom with accent wall", difficulty: "Beginner", earnings: "$300", status: "completed" },
+      {
+        name: "Refinish kitchen cabinets",
+        difficulty: "Intermediate",
+        earnings: "$500",
+        status: "available",
+      },
+      { name: "Paint exterior of small house", difficulty: "Advanced", earnings: "$700", status: "available" },
+    ],
     testimonial: {
       author: "John Davis",
       rating: 4,
       text: "The Painting skill accelerator gave me the foundation I needed to start taking on painting jobs. The instructors were knowledgeable and the projects were practical.",
     },
+    milestones: [
+      { name: "Complete Surface Preparation", progress: 100, total: 100 },
+      { name: "Complete Paint Types & Selection", progress: 50, total: 100 },
+      { name: "Complete Brush & Roller Techniques", progress: 0, total: 100 },
+      { name: "Complete Advanced Finishes & Effects", progress: 0, total: 100 },
+    ],
   },
   {
     name: "Furniture Assembly",
@@ -135,11 +1159,49 @@ const SkillsData = [
     stats: {
       repeatClients: 12,
     },
+    learningPath: [
+      { name: "Basic Assembly Tools", duration: "4h 0m", status: "completed" },
+      { name: "Reading Assembly Instructions", duration: "3h 30m", status: "completed" },
+      { name: "Complex Furniture Types", duration: "5h 0m", status: "completed" },
+      { name: "Custom Modifications", duration: "4h 30m", status: "in-progress" },
+    ],
+    skills: [
+      { name: "Tool Proficiency", level: 85 },
+      { name: "Instruction Reading", level: 75 },
+      { name: "Problem Solving", level: 65 },
+      { name: "Finishing Touches", level: 55 },
+    ],
+    skillProjects: [
+      {
+        name: "Assemble a complete bedroom set",
+        difficulty: "Intermediate",
+        earnings: "$600",
+        status: "completed",
+      },
+      {
+        name: "Build a complex entertainment center",
+        difficulty: "Advanced",
+        earnings: "$900",
+        status: "available",
+      },
+      {
+        name: "Assemble office furniture for small business",
+        difficulty: "Intermediate",
+        earnings: "$700",
+        status: "available",
+      },
+    ],
     testimonial: {
       author: "Emily Wilson",
       rating: 5,
       text: "The Furniture Assembly skill accelerator helped me grow my assembly business exponentially. The techniques I learned made me much more efficient and the support from mentors was invaluable.",
     },
+    milestones: [
+      { name: "Complete Basic Assembly Tools", progress: 100, total: 100 },
+      { name: "Complete Reading Assembly Instructions", progress: 100, total: 100 },
+      { name: "Complete Complex Furniture Types", progress: 100, total: 100 },
+      { name: "Complete Custom Modifications", progress: 60, total: 100 },
+    ],
   },
 ]
 
@@ -149,15 +1211,50 @@ export function EnhancedHeroSection() {
   const [activeSkill, setActiveSkill] = useState(0)
   const [activeTab, setActiveTab] = useState("overview")
   const [progress, setProgress] = useState(0)
+  const [isAnimating, setIsAnimating] = useState(false)
   const skillsRef = useRef<HTMLDivElement>(null)
   const progressInterval = useRef<NodeJS.Timeout>()
+  const chartRef = useRef<HTMLCanvasElement>(null)
+  const chartAnimationRef = useRef<number>(0)
+  const [showTooltip, setShowTooltip] = useState(false)
+  const [tooltipContent, setTooltipContent] = useState({ title: "", description: "" })
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 })
+  const [selectedMilestone, setSelectedMilestone] = useState(0)
+  const [showDiamondGlint, setShowDiamondGlint] = useState(false)
   const [hoverSkill, setHoverSkill] = useState<number | null>(null)
+
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false)
+  const [showSignupModal, setShowSignupModal] = useState(false)
+
   const isMobile = useMobile()
+  const [notificationMessage, setNotificationMessage] = useState("")
+  const [showNotification, setShowNotification] = useState(false)
+  const [timeRange, setTimeRange] = useState("1m")
 
   // Define handleHireNow function inside the component
   const handleHireNow = () => {
     router.push("/stripe-checkout")
   }
+
+  // Generate decorative elements
+
+  // Removed auto-rotation of skills as requested
+  useEffect(() => {
+    // Skills will now stay on the selected skill without auto-rotating
+    // User can still manually switch between skills by clicking
+  }, [])
+
+  // Diamond glint effect
+  useEffect(() => {
+    const glintInterval = setInterval(() => {
+      setShowDiamondGlint(true)
+      setTimeout(() => {
+        setShowDiamondGlint(false)
+      }, 800)
+    }, 3000)
+
+    return () => clearInterval(glintInterval)
+  }, [])
 
   // Animate progress bar when skill changes
   useEffect(() => {
@@ -169,9 +1266,9 @@ export function EnhancedHeroSection() {
 
     progressInterval.current = setInterval(() => {
       setProgress((prev) => {
-        if (prev >= SkillsData[activeSkill].progress) {
+        if (prev >= skillsData[activeSkill].progress) {
           clearInterval(progressInterval.current)
-          return SkillsData[activeSkill].progress
+          return skillsData[activeSkill].progress
         }
         return prev + 1
       })
@@ -182,35 +1279,211 @@ export function EnhancedHeroSection() {
         clearInterval(progressInterval.current)
       }
     }
-  }, [activeSkill])
+  }, [activeSkill, skillsData])
+
+  // Animate the skill path visualization
+  useEffect(() => {
+    if (!skillsRef.current) return
+
+    const animateNodes = () => {
+      const nodes = skillsRef.current?.querySelectorAll(".skill-node") || []
+
+      nodes.forEach((node, index) => {
+        const delay = index * 300
+        setTimeout(() => {
+          node.classList.add("animate-pulse")
+          setTimeout(() => {
+            node.classList.remove("animate-pulse")
+          }, 1000)
+        }, delay)
+      })
+    }
+
+    animateNodes()
+    const interval = setInterval(animateNodes, 5000)
+
+    return () => clearInterval(interval)
+  }, [])
+
+  // Draw the earnings growth chart
+
+  const handleGetStarted = () => {
+    router.push("/waitlist")
+  }
 
   return (
     <>
       <section className="w-full relative overflow-hidden bg-gradient-to-br from-white via-lavender-100/30 to-white">
-        {/* Simplified background elements */}
+        {/* Animated background elements */}
         <div className="absolute inset-0 bg-gradient-to-br from-white via-lavender-50 to-white/90 z-0" />
+
+        {/* Subtle noise texture */}
         <div className="absolute inset-0 bg-noise opacity-5 dark:opacity-10 z-0"></div>
-        <div className="absolute inset-0 bg-grid-pattern opacity-20 pointer-events-none"></div>
+
+        {/* Enhanced gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-lavender-200/20 to-white/90 z-0" />
+
+        {/* 3D perspective container */}
+        <div className="absolute inset-0 opacity-20 pointer-events-none bg-gradient-to-br from-purple-500/20 to-primary/20"></div>
 
         <AnimatedTextDivider firstText="Learn. Earn." secondText="Grow Your Business" className="mb-12 text-gray-800" />
+        {/* Animated background elements */}
+        <div
+          className="absolute -left-64 -top-64 h-[500px] w-[500px] rounded-full bg-primary/10 blur-3xl opacity-50 animate-pulse"
+          style={{ animationDuration: "15s" }}
+        ></div>
+        <div
+          className="absolute -right-64 -bottom-64 h-[500px] w-[500px] rounded-full bg-purple-500/10 blur-3xl opacity-50 animate-pulse"
+          style={{ animationDuration: "20s" }}
+        ></div>
+
+        {/* Futuristic grid lines */}
+        <div className="absolute inset-0 bg-grid-pattern opacity-20 pointer-events-none"></div>
 
         <div className="container px-3 md:px-6 relative z-10">
+          {/* Changed grid layout to be a flex column on all screen sizes */}
           <div className="flex flex-col gap-6 md:gap-10 lg:gap-12">
-            {/* Enhanced Skill Accelerator UI */}
-            <div className="flex items-center justify-center w-full">
+            {/* Hero content */}
+
+            {/* Enhanced Skill Accelerator UI - Now below the hero content and more horizontal */}
+            <motion.div
+              className="flex items-center justify-center w-full"
+              variants={fadeIn}
+              initial="hidden"
+              animate="visible"
+              transition={{ delay: 0.3 }}
+            >
               <div className="relative w-full max-w-full">
-                <div
-                  className="relative rounded-xl overflow-hidden bg-gradient-to-br from-white via-lavender-50/50 to-white backdrop-blur-md p-3 sm:p-4 md:p-6 shadow-xl border border-lavender-200/50 hover:shadow-lavender-300/30 transition-all duration-300"
+                <motion.div
+                  className={`relative rounded-xl overflow-hidden bg-gradient-to-br from-white via-lavender-50/50 to-white backdrop-blur-md p-3 sm:p-4 md:p-6 shadow-xl border border-lavender-200/50 detailed-card hover:shadow-lavender-300/30 transition-all duration-300 ${isMobile ? "simple-card" : ""}`}
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{
+                    duration: 0.8,
+                    ease: [0.16, 1, 0.3, 1],
+                    delay: 0.4,
+                  }}
                   style={{
                     border: "1px solid rgba(147, 51, 234, 0.2)",
                     boxShadow: "0 10px 30px -5px rgba(147, 51, 234, 0.1), 0 0 20px -10px rgba(147, 51, 234, 0.2)",
                   }}
                 >
+                  {/* Improved tech pattern overlay with subtle animation */}
+                  <motion.div
+                    className="absolute inset-0 bg-[radial-gradient(circle_at_10px_10px,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none z-1"
+                    animate={{
+                      opacity: [0.3, 0.5, 0.3],
+                      scale: [1, 1.02, 1],
+                    }}
+                    transition={{
+                      duration: 8,
+                      repeat: Number.POSITIVE_INFINITY,
+                      repeatType: "reverse",
+                      ease: "easeInOut",
+                      delay: 0.4,
+                    }}
+                  />
+
+                  {/* Enhanced background overlay with gradient animation */}
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-br from-purple-50/10 via-transparent to-purple-100/10 pointer-events-none"
+                    animate={{
+                      background: [
+                        "radial-gradient(circle at 20% 30%, rgba(233, 213, 255, 0.1), transparent 70%)",
+                        "radial-gradient(circle at 70% 60%, rgba(233, 213, 255, 0.1), transparent 70%)",
+                        "radial-gradient(circle at 20% 30%, rgba(233, 213, 255, 0.1), transparent 70%)",
+                      ],
+                    }}
+                    transition={{
+                      duration: 15,
+                      repeat: Number.POSITIVE_INFINITY,
+                      repeatType: "reverse",
+                      ease: "easeInOut",
+                    }}
+                  />
+
+                  {/* Success message toast with improved animation */}
+                  <AnimatePresence>
+                    {showSuccessMessage && (
+                      <motion.div
+                        className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50 bg-gradient-to-r from-green-500/90 to-emerald-500/90 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center shadow-lg shadow-green-500/20"
+                        initial={{ opacity: 0, y: -20, scale: 0.8 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -20, scale: 0.8 }}
+                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      >
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Application submitted successfully!
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                  {/* Tech pattern overlay */}
+
+                  {/* Even background overlay */}
+
+                  {/* Success message toast */}
+
                   <div className="space-y-3 md:space-y-4 relative z-10 lg:grid lg:grid-cols-12 lg:gap-4 lg:space-y-0">
                     <div className="flex items-center justify-between lg:col-span-12">
                       <div className="flex items-center">
                         <div className="h-10 w-10 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center mr-3 relative group">
-                          <Rocket className="h-5 w-5 text-white" />
+                          <motion.div
+                            animate={
+                              !isMobile
+                                ? {
+                                    y: [0, -3, 0],
+                                    rotate: [0, 2, -2, 0],
+                                  }
+                                : {}
+                            }
+                            transition={{
+                              duration: 4,
+                              repeat: Number.POSITIVE_INFINITY,
+                              repeatType: "reverse",
+                              ease: "easeInOut",
+                            }}
+                          >
+                            <Rocket className="h-5 w-5 text-white" />
+                          </motion.div>
+                          <motion.div
+                            className="absolute inset-0 rounded-full bg-white/30 scale-0"
+                            whileHover={!isMobile ? { scale: 1.5, opacity: [0, 0.5, 0] } : {}}
+                            transition={{ duration: 1 }}
+                          />
+                          {/* Orbital rings around the rocket icon */}
+                          <motion.div
+                            className="absolute inset-0 rounded-full border border-white/20"
+                            animate={
+                              !isMobile
+                                ? {
+                                    scale: [1.1, 1.3, 1.1],
+                                    opacity: [0.7, 1, 0.7],
+                                  }
+                                : {}
+                            }
+                            transition={{
+                              duration: 3,
+                              repeat: Number.POSITIVE_INFINITY,
+                              ease: "easeInOut",
+                            }}
+                          />
+                          <motion.div
+                            className="absolute inset-0 rounded-full border border-white/10"
+                            animate={
+                              !isMobile
+                                ? {
+                                    scale: [1.4, 1.6, 1.4],
+                                    opacity: [0.5, 0.8, 0.5],
+                                  }
+                                : {}
+                            }
+                            transition={{
+                              duration: 3.5,
+                              repeat: Number.POSITIVE_INFINITY,
+                              ease: "easeInOut",
+                              delay: 0.2,
+                            }}
+                          />
                         </div>
                         <h3 className="text-xl font-bold text-gray-800">
                           Skill Accelerator
@@ -232,8 +1505,8 @@ export function EnhancedHeroSection() {
                     </p>
 
                     <div className="flex flex-wrap gap-2 md:flex-nowrap overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide lg:col-span-12">
-                      {SkillsData.map((skill, index) => (
-                        <button
+                      {skillsData.map((skill, index) => (
+                        <motion.button
                           key={index}
                           className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 flex items-center ${
                             activeSkill === index
@@ -243,27 +1516,50 @@ export function EnhancedHeroSection() {
                           onClick={() => setActiveSkill(index)}
                           onMouseEnter={() => setHoverSkill(index)}
                           onMouseLeave={() => setHoverSkill(null)}
+                          whileHover={
+                            !isMobile
+                              ? {
+                                  scale: 1.05,
+                                  boxShadow: "0 10px 25px -5px rgba(147, 51, 234, 0.3)",
+                                }
+                              : {}
+                          }
+                          whileTap={{ scale: 0.98 }}
                         >
                           <span className="mr-1.5">{skill.icon}</span>
                           {skill.name}
-                          {hoverSkill === index && <span className="ml-1.5 text-xs opacity-70">{skill.level}</span>}
+                          {hoverSkill === index && (
+                            <motion.span
+                              className="ml-1.5 text-xs opacity-0"
+                              animate={{ opacity: 0.7 }}
+                              transition={{ duration: 0.2 }}
+                            >
+                              {skill.level}
+                            </motion.span>
+                          )}
                           {activeSkill === index && (
                             <span className="ml-1.5 flex items-center">
-                              <div className="h-1.5 w-1.5 rounded-full bg-white" />
+                              <motion.div
+                                className="h-1.5 w-1.5 rounded-full bg-white"
+                                animate={{ scale: [1, 1.5, 1] }}
+                                transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
+                              />
                             </span>
                           )}
-                        </button>
+                        </motion.button>
                       ))}
                     </div>
 
                     <div className="flex border-b border-white/10 overflow-x-auto -mx-1 px-1 scrollbar-hide md:justify-start lg:col-span-12">
                       {["overview", "learning", "projects", "forum", "analytics", "milestones"].map((tab) => (
-                        <button
+                        <motion.button
                           key={tab}
-                          className={`px-2 sm:px-3 py-2 text-xs font-medium capitalize whitespace-nowrap transition-all duration-300 ${
-                            activeTab === tab ? "text-primary relative" : "text-gray-500 hover:text-gray-800"
+                          className={`px-2 sm:px-3 py-2 text-xs font-medium capitalize whitespace-nowrap transition-all duration-300 detailed-tab ${
+                            activeTab === tab ? "active text-primary relative" : "text-gray-500 hover:text-gray-800"
                           }`}
                           onClick={() => setActiveTab(tab)}
+                          whileHover={{ y: -1 }}
+                          whileTap={{ y: 0 }}
                         >
                           {tab === "overview" && <Compass className="h-3 w-3 inline mr-1" />}
                           {tab === "learning" && <BookOpen className="h-3 w-3 inline mr-1" />}
@@ -273,46 +1569,73 @@ export function EnhancedHeroSection() {
                           {tab === "milestones" && <Trophy className="h-3 w-3 inline mr-1" />}
                           {tab}
                           {activeTab === tab && (
-                            <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/50 via-primary to-primary/50" />
+                            <motion.span
+                              className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/50 via-primary to-primary/50"
+                              layoutId="activeTabLine"
+                              transition={{
+                                type: "spring",
+                                stiffness: 500,
+                                damping: 30,
+                              }}
+                            />
                           )}
-                        </button>
+                        </motion.button>
                       ))}
                     </div>
 
                     <div className="min-h-[280px] md:min-h-[260px] lg:min-h-[240px] lg:col-span-8">
+                      {/* Tab Content */}
                       {/* Overview Tab */}
+
                       {activeTab === "overview" && (
                         <div className="space-y-4">
-                          {/* Active Skill Card */}
+                          {/* Active Skill Card - Enhanced with better UI/UX */}
                           <div
-                            className="bg-gradient-to-br from-white via-lavender-50/50 to-white backdrop-blur-sm rounded-lg p-5 border border-lavender-300/50 shadow-lg relative overflow-hidden transition-all duration-300 hover:shadow-lavender-500/20 hover:border-lavender-400/50"
-                            style={{ borderLeft: `4px solid ${SkillsData[activeSkill].color}` }}
+                            className="bg-gradient-to-br from-white via-lavender-50/50 to-white backdrop-blur-sm rounded-lg p-5 border border-lavender-300/50 skill-card shadow-lg relative overflow-hidden group transition-all duration-300 hover:shadow-lavender-500/20 hover:border-lavender-400/50"
+                            style={{ borderLeft: `4px solid ${skillsData[activeSkill].color}` }}
                           >
+                            {/* Animated background elements */}
+                            <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
+                            <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-gradient-to-br from-primary/20 to-purple-500/10 blur-3xl group-hover:opacity-70 transition-opacity duration-500 opacity-50"></div>
+                            <div className="absolute -left-10 -bottom-10 w-40 h-40 rounded-full bg-gradient-to-tr from-primary/10 to-purple-500/20 blur-3xl group-hover:opacity-70 transition-opacity duration-500 opacity-40"></div>
+
                             <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4 relative z-10">
                               <div className="flex-1">
                                 <div className="flex items-center">
-                                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center mr-3 relative shadow-md shadow-primary/20">
-                                    {SkillsData[activeSkill].icon}
+                                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center mr-3 relative group shadow-md shadow-primary/20">
+                                    <motion.div
+                                      animate={{
+                                        scale: [1, 1.1, 1],
+                                      }}
+                                      transition={{
+                                        duration: 2,
+                                        repeat: Number.POSITIVE_INFINITY,
+                                        repeatType: "reverse",
+                                      }}
+                                    >
+                                      {skillsData[activeSkill].icon}
+                                    </motion.div>
+                                    <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/50 to-purple-500/50 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                                   </div>
                                   <div>
                                     <h4 className="text-lg font-bold text-gray-800 flex items-center">
-                                      {SkillsData[activeSkill].name}
-                                      <div className="ml-2 h-2 w-2 rounded-full bg-green-500"></div>
+                                      {skillsData[activeSkill].name}
+                                      <div className="ml-2 h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
                                     </h4>
                                     <div className="flex items-center mt-1 gap-2">
                                       <div className="px-2 py-0.5 rounded-full bg-white/10 dark:bg-black/30 text-xs font-medium">
-                                        {SkillsData[activeSkill].level}
+                                        {skillsData[activeSkill].level}
                                       </div>
                                       <ArrowRight className="h-3 w-3 text-white/50" />
                                       <div className="px-2 py-0.5 rounded-full bg-gradient-to-r from-primary/50 to-purple-500/50 text-xs text-white font-medium">
-                                        {SkillsData[activeSkill].nextLevel}
+                                        {skillsData[activeSkill].nextLevel}
                                       </div>
                                     </div>
                                   </div>
                                 </div>
 
                                 <p className="text-sm text-gray-700 mt-3 leading-relaxed">
-                                  {SkillsData[activeSkill].description}
+                                  {skillsData[activeSkill].description}
                                   <span className="inline-flex items-center ml-2 text-xs text-primary font-medium">
                                     <Cpu className="h-3 w-3 mr-1" /> AI-optimized learning path
                                   </span>
@@ -322,57 +1645,109 @@ export function EnhancedHeroSection() {
                               <div className="bg-white/10 dark:bg-black/20 rounded-lg p-3 shadow-inner min-w-[140px]">
                                 <div className="text-xs text-gray-500">Current Earnings</div>
                                 <div className="font-bold text-xl text-gray-800 mt-1">
-                                  {SkillsData[activeSkill].earnings}
+                                  {skillsData[activeSkill].earnings}
                                 </div>
                                 <div className="text-xs text-green-500 mt-1 flex items-center">
                                   <TrendingUp className="h-3 w-3 mr-0.5" />
-                                  <span className="font-medium">{SkillsData[activeSkill].nextEarnings}</span>
+                                  <span className="font-medium">{skillsData[activeSkill].nextEarnings}</span>
                                 </div>
                               </div>
                             </div>
 
-                            {/* Progress Bar */}
+                            {/* Progress Bar - Enhanced */}
                             <div className="mb-5">
                               <div className="flex justify-between text-xs mb-1.5">
                                 <span className="text-gray-500 font-medium">
-                                  Progress to {SkillsData[activeSkill].nextLevel}
+                                  Progress to {skillsData[activeSkill].nextLevel}
                                 </span>
                                 <span className="font-semibold text-primary">{progress}%</span>
                               </div>
-                              <div className="h-3 w-full bg-black/10 dark:bg-white/5 rounded-full overflow-hidden shadow-inner relative">
-                                <div
+                              <div className="h-3 w-full bg-black/10 dark:bg-white/5 rounded-full overflow-hidden progress-track shadow-inner relative">
+                                <motion.div
                                   className="h-full rounded-full bg-gradient-to-r from-primary via-purple-500/80 to-primary relative"
                                   style={{ width: `${progress}%` }}
-                                />
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${progress}%` }}
+                                  transition={{
+                                    duration: 1.5,
+                                    ease: [0.34, 1.56, 0.64, 1],
+                                  }}
+                                >
+                                  {/* Animated shine effect */}
+                                  <motion.div
+                                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+                                    animate={{
+                                      x: ["-100%", "100%"],
+                                    }}
+                                    transition={{
+                                      repeat: Number.POSITIVE_INFINITY,
+                                      repeatType: "loop",
+                                      duration: 2,
+                                      ease: "easeInOut",
+                                    }}
+                                  />
+                                </motion.div>
+
+                                {/* Progress markers with tooltips */}
+                                {[25, 50, 75].map((marker) => (
+                                  <div
+                                    key={marker}
+                                    className={`absolute top-0 bottom-0 w-0.5 ${
+                                      progress >= marker ? "bg-white/30" : "bg-white/10"
+                                    }`}
+                                    style={{ left: `${marker}%` }}
+                                  >
+                                    <div
+                                      className={`absolute -top-7 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded text-[10px] ${
+                                        progress >= marker
+                                          ? "bg-primary text-white"
+                                          : "bg-white/10 dark:bg-black/30 text-gray-500"
+                                      } opacity-0 group-hover:opacity-100 transition-opacity duration-200`}
+                                    >
+                                      {marker}%
+                                    </div>
+                                  </div>
+                                ))}
                               </div>
                             </div>
 
-                            {/* Stats */}
+                            {/* Stats - Enhanced with better layout and hover effects */}
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                               {[
                                 {
                                   label: "Mentors",
-                                  value: SkillsData[activeSkill].mentors,
+                                  value: skillsData[activeSkill].mentors,
                                   icon: Users,
+                                  color: "primary",
                                 },
                                 {
                                   label: "Projects",
-                                  value: SkillsData[activeSkill].projects,
+                                  value: skillsData[activeSkill].projects,
                                   icon: Layers,
+                                  color: "purple-500",
                                 },
-                                { label: "Rating", value: "4.8", icon: Star, showStar: true },
+                                { label: "Rating", value: "4.8", icon: Star, color: "yellow-400", showStar: true },
                                 {
                                   label: "Clients",
-                                  value: SkillsData[activeSkill].stats.repeatClients,
+                                  value: skillsData[activeSkill].stats.repeatClients,
                                   icon: Users,
+                                  color: "green-500",
                                 },
                               ].map((stat, i) => (
-                                <div
+                                <motion.div
                                   key={i}
-                                  className="bg-white rounded-lg p-3 relative overflow-hidden hover:bg-lavender-50 transition-colors duration-200 shadow-sm border border-lavender-100"
+                                  className="bg-white rounded-lg p-3 relative overflow-hidden hover:bg-lavender-50 transition-colors duration-200 shadow-sm border border-lavender-100 group/stat"
+                                  whileHover={{ y: -2 }}
+                                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
                                 >
+                                  <div
+                                    className={`absolute top-0 right-0 h-20 w-20 bg-gradient-to-br from-${stat.color}/10 to-transparent rounded-bl-full`}
+                                  ></div>
+                                  <div className="absolute -bottom-2 -left-2 h-12 w-12 bg-gradient-to-tr from-${stat.color}/5 to-transparent rounded-tr-full"></div>
                                   <div className="flex flex-col items-center text-center">
-                                    <div className="mb-1 opacity-80">
+                                    <div
+                                      className={`text-${stat.color} mb-1 opacity-80 group-hover/stat:opacity-100 transition-opacity`}
+                                    >
                                       <stat.icon className="h-4 w-4" />
                                     </div>
                                     <div className="text-lg font-bold text-gray-800 flex items-center">
@@ -383,29 +1758,50 @@ export function EnhancedHeroSection() {
                                     </div>
                                     <div className="text-xs text-gray-500 mt-0.5">{stat.label}</div>
                                   </div>
-                                </div>
+                                </motion.div>
                               ))}
                             </div>
                           </div>
 
-                          {/* Testimonial */}
-                          <div className="bg-white rounded-lg p-4 border border-lavender-200/50 relative overflow-hidden shadow-sm">
+                          {/* Testimonial - Enhanced */}
+                          <motion.div
+                            className="bg-white rounded-lg p-4 border border-lavender-200/50 relative overflow-hidden group hover:border-primary/30 transition-all duration-300 shadow-sm"
+                            whileHover={{ y: -2, boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1)" }}
+                          >
+                            {/* Quote marks */}
+                            <div className="absolute top-2 left-2 text-4xl text-primary/10 font-serif">"</div>
+                            <div className="absolute bottom-2 right-2 text-4xl text-primary/10 font-serif">"</div>
+
+                            {/* Background pattern */}
+                            <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_10px_10px,rgba(var(--primary-rgb),0.4)_1px,transparent_1px)] bg-[length:20px_20px] pointer-events-none"></div>
+
                             <div className="flex items-start gap-4">
                               <div className="h-12 w-12 rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 flex items-center justify-center text-sm font-bold text-primary shadow-inner relative">
-                                {SkillsData[activeSkill].testimonial.author.split(" ")[0][0]}
-                                {SkillsData[activeSkill].testimonial.author.split(" ")[1][0]}
+                                {skillsData[activeSkill].testimonial.author.split(" ")[0][0]}
+                                {skillsData[activeSkill].testimonial.author.split(" ")[1][0]}
+                                <motion.div
+                                  className="absolute inset-0 rounded-full border border-primary/30"
+                                  animate={{ scale: [1, 1.1, 1] }}
+                                  transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
+                                />
                               </div>
                               <div className="flex-1">
                                 <div className="flex items-center mb-2">
                                   <div className="text-sm font-medium text-gray-800 mr-2">
-                                    {SkillsData[activeSkill].testimonial.author}
+                                    {skillsData[activeSkill].testimonial.author}
                                   </div>
                                   <div className="flex">
                                     {[...Array(5)].map((_, i) => (
-                                      <Star
+                                      <motion.div
                                         key={i}
-                                        className={`h-3.5 w-3.5 ${i < SkillsData[activeSkill].testimonial.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
-                                      />
+                                        initial={{ opacity: 0, scale: 0 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ delay: i * 0.1, duration: 0.3 }}
+                                      >
+                                        <Star
+                                          className={`h-3.5 w-3.5 ${i < skillsData[activeSkill].testimonial.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
+                                        />
+                                      </motion.div>
                                     ))}
                                   </div>
                                   <div className="ml-2 px-1.5 py-0.5 text-xs bg-primary/10 text-primary rounded-full">
@@ -413,40 +1809,782 @@ export function EnhancedHeroSection() {
                                   </div>
                                 </div>
                                 <p className="text-sm text-gray-700 italic leading-relaxed">
-                                  "{SkillsData[activeSkill].testimonial.text}"
+                                  "{skillsData[activeSkill].testimonial.text}"
                                 </p>
                                 <div className="flex items-center justify-end mt-2 text-xs text-gray-500">
                                   <Clock className="h-3 w-3 mr-1" /> 2 months ago
                                 </div>
                               </div>
                             </div>
-                          </div>
+                          </motion.div>
 
-                          {/* Quick Actions */}
+                          {/* Quick Actions - New section */}
                           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                            <button className="bg-white hover:bg-lavender-50 rounded-lg p-3 flex flex-col items-center text-center transition-colors duration-200 border border-lavender-100 shadow-sm">
+                            <motion.button
+                              className="bg-white hover:bg-lavender-50 rounded-lg p-3 flex flex-col items-center text-center transition-colors duration-200 border border-lavender-100 shadow-sm"
+                              whileHover={{ y: -2 }}
+                              whileTap={{ y: 0 }}
+                            >
                               <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center mb-2">
                                 <BookOpen className="h-4 w-4 text-primary" />
                               </div>
                               <div className="text-xs font-medium text-gray-800">Continue Learning</div>
                               <div className="text-[10px] text-gray-500 mt-1">4 lessons left</div>
-                            </button>
+                            </motion.button>
 
-                            <button className="bg-white hover:bg-lavender-50 rounded-lg p-3 flex flex-col items-center text-center transition-colors duration-200 border border-lavender-100 shadow-sm">
+                            <motion.button
+                              className="bg-white hover:bg-lavender-50 rounded-lg p-3 flex flex-col items-center text-center transition-colors duration-200 border border-lavender-100 shadow-sm"
+                              whileHover={{ y: -2 }}
+                              whileTap={{ y: 0 }}
+                            >
                               <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center mb-2">
                                 <Layers className="h-4 w-4 text-primary" />
                               </div>
                               <div className="text-xs font-medium text-gray-800">Find Projects</div>
                               <div className="text-[10px] text-gray-500 mt-1">12 available</div>
-                            </button>
+                            </motion.button>
 
-                            <button className="bg-white hover:bg-lavender-50 rounded-lg p-3 flex flex-col items-center text-center transition-colors duration-200 border border-lavender-100 shadow-sm">
+                            <motion.button
+                              className="bg-white hover:bg-lavender-50 rounded-lg p-3 flex flex-col items-center text-center transition-colors duration-200 border border-lavender-100 shadow-sm"
+                              whileHover={{ y: -2 }}
+                              whileTap={{ y: 0 }}
+                            >
                               <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center mb-2">
                                 <MessageSquare className="h-4 w-4 text-primary" />
                               </div>
                               <div className="text-xs font-medium text-gray-800">Community</div>
                               <div className="text-[10px] text-gray-500 mt-1">3 new topics</div>
-                            </button>
+                            </motion.button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Learning Tab */}
+                      {activeTab === "learning" && (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="text-sm font-semibold text-gray-800">Learning Path</h4>
+                            <div className="text-xs text-primary">
+                              {
+                                skillsData[activeSkill].learningPath.filter((item) => item.status === "completed")
+                                  .length
+                              }{" "}
+                              / {skillsData[activeSkill].learningPath.length} Completed
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            {skillsData[activeSkill].learningPath.map((item, index) => (
+                              <div
+                                key={index}
+                                className="flex items-center p-2 rounded-lg bg-white/5 dark:bg-black/10 border border-white/10 hover:border-primary/30 transition-all duration-300 relative overflow-hidden"
+                              >
+                                {/* Background pattern */}
+                                <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_10px_10px,rgba(var(--primary-rgb),0.4)_1px,transparent_1px)] bg-[length:20px_20px] pointer-events-none"></div>
+
+                                <div
+                                  className={`h-6 w-6 rounded-full flex items-center justify-center mr-3 ${
+                                    item.status === "completed"
+                                      ? "bg-green-500/20"
+                                      : item.status === "in-progress"
+                                        ? "bg-primary/20"
+                                        : "bg-white/10"
+                                  }`}
+                                >
+                                  {item.status === "completed" ? (
+                                    <CheckCircle className="h-4 w-4 text-green-500" />
+                                  ) : item.status === "in-progress" ? (
+                                    <Clock className="h-4 w-4 text-primary" />
+                                  ) : (
+                                    <BookOpen className="h-4 w-4 text-white/50" />
+                                  )}
+                                </div>
+                                <div className="flex-1">
+                                  <div className="text-sm font-medium text-gray-800">{item.name}</div>
+                                  <div className="text-xs text-gray-500">
+                                    {item.duration} •{" "}
+                                    {item.status === "completed"
+                                      ? "Completed"
+                                      : item.status === "in-progress"
+                                        ? "In Progress"
+                                        : "Upcoming"}
+                                  </div>
+                                </div>
+                                {item.status !== "completed" && (
+                                  <EnhancedButton variant="outline" size="sm" className="h-8 text-xs bg-white/5">
+                                    {item.status === "in-progress" ? "Continue" : "Start"}
+                                  </EnhancedButton>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+
+                          <div className="mt-4">
+                            <h4 className="text-sm font-semibold text-gray-800 mb-2">Skill Breakdown</h4>
+                            <div className="space-y-2">
+                              {skillsData[activeSkill].skills.map((skill, index) => (
+                                <div key={index} className="space-y-1">
+                                  <div className="flex justify-between text-xs">
+                                    <span className="text-gray-800">{skill.name}</span>
+                                    <span className="text-gray-500">{skill.level}%</span>
+                                  </div>
+                                  <div className="h-1.5 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden progress-track">
+                                    <div
+                                      className="h-full rounded-full bg-gradient-to-r from-primary to-purple-500"
+                                      style={{ width: `${skill.level}%` }}
+                                    ></div>
+                                    {/* Skill level markers */}
+                                    <div className="absolute top-0 left-1/4 h-full w-0.5 bg-white/10"></div>
+                                    <div className="absolute top-0 left-1/2 h-full w-0.5 bg-white/10"></div>
+                                    <div className="absolute top-0 left-3/4 h-full w-0.5 bg-white/10"></div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Projects Tab */}
+                      {activeTab === "projects" && (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="text-sm font-semibold text-gray-800">Available Projects</h4>
+                            <div className="text-xs text-primary">Earn while you learn</div>
+                          </div>
+
+                          <div className="space-y-2">
+                            {skillsData[activeSkill].skillProjects.map((project, index) => (
+                              <div
+                                key={index}
+                                className="p-3 rounded-lg bg-white/5 dark:bg-black/10 border border-white/10 hover:border-primary/30 transition-all duration-300 relative overflow-hidden"
+                              >
+                                <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_10px_10px,rgba(var(--primary-rgb),0.4)_1px,transparent_1px)] bg-[length:20px_20px] pointer-events-none"></div>
+
+                                <div className="flex justify-between items-start">
+                                  <div>
+                                    <div className="text-sm font-medium text-gray-800">{project.name}</div>
+                                    <div className="flex items-center mt-1">
+                                      <div className="px-2 py-0.5 rounded-full bg-white/10 dark:bg-black/30 text-xs">
+                                        {project.difficulty}
+                                      </div>
+                                      <div className="text-xs text-gray-500">Est. earnings: {project.earnings}</div>
+                                    </div>
+                                  </div>
+                                  <EnhancedButton
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 text-xs bg-white/5"
+                                    onClick={() => handleApplyForProject(project.name)}
+                                  >
+                                    {project.status === "in-progress" ? "Continue" : "Apply"}
+                                  </EnhancedButton>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+
+                          <div className="mt-4 p-3 rounded-lg bg-primary/10 border border-primary/20">
+                            <div className="flex items-start">
+                              <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center mr-3 text-primary">
+                                <Lightbulb className="h-4 w-4" />
+                              </div>
+                              <div>
+                                <h4 className="text-sm font-semibold text-gray-800">AI-Matched Projects</h4>
+                                <p className="text-xs text-gray-700">
+                                  Projects are matched to your skill level to maximize learning and earning potential.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Forum Tab */}
+
+                      {activeTab === "forum" && (
+                        <div className="space-y-4">
+                          <ForumTab />
+                        </div>
+                      )}
+
+                      {/* Analytics Tab */}
+                      {activeTab === "analytics" && (
+                        <div className="space-y-4">
+                          {/* Analytics Header with Filters */}
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                            <div className="flex items-center gap-2">
+                              <div className="bg-white/5 dark:bg-black/20 rounded-md border border-white/10 p-1 flex">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className={`h-7 px-2 text-xs rounded-sm ${timeRange === "7d" ? "bg-white/10 dark:bg-black/30" : ""}`}
+                                  onClick={() => setTimeRange("7d")}
+                                >
+                                  7D
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className={`h-7 px-2 text-xs rounded-sm ${timeRange === "1m" ? "bg-white/10 dark:bg-black/30" : ""}`}
+                                  onClick={() => setTimeRange("1m")}
+                                >
+                                  1M
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className={`h-7 px-2 text-xs rounded-sm ${timeRange === "3m" ? "bg-white/10 dark:bg-black/30" : ""}`}
+                                  onClick={() => setTimeRange("3m")}
+                                >
+                                  3M
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className={`h-7 px-2 text-xs rounded-sm ${timeRange === "6m" ? "bg-white/10 dark:bg-black/30" : ""}`}
+                                  onClick={() => setTimeRange("6m")}
+                                >
+                                  6M
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className={`h-7 px-2 text-xs rounded-sm ${timeRange === "1y" ? "bg-white/10 dark:bg-black/30" : ""}`}
+                                  onClick={() => setTimeRange("1y")}
+                                >
+                                  1Y
+                                </Button>
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {timeRange === "7d"
+                                  ? "Last 7 days"
+                                  : timeRange === "1m"
+                                    ? "Last month"
+                                    : timeRange === "3m"
+                                      ? "Last 3 months"
+                                      : timeRange === "6m"
+                                        ? "Last 6 months"
+                                        : "Last year"}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                className="h-7 px-2 text-xs rounded-md bg-white/5 dark:bg-black/20 border border-white/10 flex items-center gap-1"
+                                onClick={() => {
+                                  setNotificationMessage("Analytics report downloaded!")
+                                  setShowNotification(true)
+                                  setTimeout(() => setShowNotification(false), 3000)
+                                }}
+                              >
+                                <Download className="h-3.5 w-3.5 text-primary" />
+                                Export
+                              </motion.button>
+                              <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                className="h-7 px-2 text-xs rounded-md bg-white/5 dark:bg-black/20 border border-white/10 flex items-center gap-1"
+                                className="h-7 px-2 text-xs rounded-md bg-white/5 dark:bg-black/20 border border-white/10 flex items-center gap-1"
+                              >
+                                <Share2 className="h-3.5 w-3.5 text-primary" />
+                                Share
+                              </motion.button>
+                            </div>
+                          </div>
+
+                          {/* Key Metrics Cards */}
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            <motion.div
+                              className="bg-white/5 dark:bg-black/20 rounded-lg p-3 border border-white/10 relative overflow-hidden"
+                              whileHover={{ y: -2, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}
+                            >
+                              <div className="absolute top-0 right-0 h-16 w-16 bg-gradient-to-br from-primary/10 to-transparent rounded-bl-full"></div>
+                              <div className="absolute -bottom-2 -left-2 h-12 w-12 bg-gradient-to-tr from-primary/5 to-transparent rounded-tr-full"></div>
+                              <div className="flex items-center mb-1">
+                                <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2">
+                                  <TrendingUp className="h-3.5 w-3.5 text-primary" />
+                                </div>
+                                <div className="text-xs text-gray-500">Skill Growth</div>
+                              </div>
+                              <div className="flex items-baseline">
+                                <div className="text-xl font-bold text-gray-800">+45%</div>
+                                <div className="ml-1 text-xs text-green-500 flex items-center">
+                                  <TrendingUp className="h-3 w-3 mr-0.5" /> 12%
+                                </div>
+                              </div>
+                              <div className="text-xs text-gray-500 mt-1">vs. last period</div>
+
+                              {/* Mini Sparkline */}
+                              <div className="h-6 mt-1 relative">
+                                <div className="absolute inset-0 flex items-end">
+                                  {[3, 5, 4, 7, 5, 8, 9, 8, 10, 12].map((value, i) => (
+                                    <div
+                                      key={i}
+                                      className="flex-1 bg-primary/40 rounded-sm mx-0.5"
+                                      style={{ height: `${value * 8}%` }}
+                                    ></div>
+                                  ))}
+                                </div>
+                              </div>
+                            </motion.div>
+
+                            <motion.div
+                              className="bg-white/5 dark:bg-black/20 rounded-lg p-3 border border-white/10 relative overflow-hidden"
+                              whileHover={{ y: -2, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}
+                            >
+                              <div className="absolute top-0 right-0 h-16 w-16 bg-gradient-to-br from-green-500/10 to-transparent rounded-bl-full"></div>
+                              <div className="absolute -bottom-2 -left-2 h-12 w-12 bg-gradient-to-tr from-green-500/5 to-transparent rounded-tr-full"></div>
+                              <div className="flex items-center mb-1">
+                                <div className="h-6 w-6 rounded-full bg-green-500/20 flex items-center justify-center mr-2">
+                                  <DollarSign className="h-3.5 w-3.5 text-green-500" />
+                                </div>
+                                <div className="text-xs text-gray-500">Earnings</div>
+                              </div>
+                              <div className="flex items-baseline">
+                                <div className="text-xl font-bold text-gray-800">$2,450</div>
+                                <div className="ml-1 text-xs text-green-500 flex items-center">
+                                  <TrendingUp className="h-3 w-3 mr-0.5" /> 8%
+                                </div>
+                              </div>
+                              <div className="text-xs text-gray-500 mt-1">this period</div>
+
+                              {/* Mini Sparkline */}
+                              <div className="h-6 mt-1 relative">
+                                <div className="absolute inset-0 flex items-end">
+                                  {[5, 7, 6, 8, 9, 7, 10, 11, 9, 12].map((value, i) => (
+                                    <div
+                                      key={i}
+                                      className="flex-1 bg-green-500/40 rounded-sm mx-0.5"
+                                      style={{ height: `${value * 8}%` }}
+                                    ></div>
+                                  ))}
+                                </div>
+                              </div>
+                            </motion.div>
+
+                            <motion.div
+                              className="bg-white/5 dark:bg-black/20 rounded-lg p-3 border border-white/10 relative overflow-hidden"
+                              whileHover={{ y: -2, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}
+                            >
+                              <div className="absolute top-0 right-0 h-16 w-16 bg-gradient-to-br from-blue-500/10 to-transparent rounded-bl-full"></div>
+                              <div className="absolute -bottom-2 -left-2 h-12 w-12 bg-gradient-to-tr from-blue-500/5 to-transparent rounded-tr-full"></div>
+                              <div className="flex items-center mb-1">
+                                <div className="h-6 w-6 rounded-full bg-blue-500/20 flex items-center justify-center mr-2">
+                                  <Clock className="h-3.5 w-3.5 text-blue-500" />
+                                </div>
+                                <div className="text-xs text-gray-500">Learning Hours</div>
+                              </div>
+                              <div className="flex items-baseline">
+                                <div className="text-xl font-bold text-gray-800">80</div>
+                                <div className="ml-1 text-xs text-red-500 flex items-center">
+                                  <TrendingUp className="h-3 w-3 mr-0.5 rotate-180" /> 5%
+                                </div>
+                              </div>
+                              <div className="text-xs text-gray-500 mt-1">this period</div>
+
+                              {/* Mini Sparkline */}
+                              <div className="h-6 mt-1 relative">
+                                <div className="absolute inset-0 flex items-end">
+                                  {[12, 10, 11, 9, 8, 7, 9, 8, 7, 6].map((value, i) => (
+                                    <div
+                                      key={i}
+                                      className="flex-1 bg-blue-500/40 rounded-sm mx-0.5"
+                                      style={{ height: `${value * 8}%` }}
+                                    ></div>
+                                  ))}
+                                </div>
+                              </div>
+                            </motion.div>
+
+                            <motion.div
+                              className="bg-white/5 dark:bg-black/20 rounded-lg p-3 border border-white/10 relative overflow-hidden"
+                              whileHover={{ y: -2, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}
+                            >
+                              <div className="absolute top-0 right-0 h-16 w-16 bg-gradient-to-br from-purple-500/10 to-transparent rounded-bl-full"></div>
+                              <div className="absolute -bottom-2 -left-2 h-12 w-12 bg-gradient-to-tr from-purple-500/5 to-transparent rounded-tr-full"></div>
+                              <div className="flex items-center mb-1">
+                                <div className="h-6 w-6 rounded-full bg-purple-500/20 flex items-center justify-center mr-2">
+                                  <Users className="h-3.5 w-3.5 text-purple-500" />
+                                </div>
+                                <div className="text-xs text-gray-500">Clients</div>
+                              </div>
+                              <div className="flex items-baseline">
+                                <div className="text-xl font-bold text-gray-800">15</div>
+                                <div className="ml-1 text-xs text-green-500 flex items-center">
+                                  <TrendingUp className="h-3 w-3 mr-0.5" /> 20%
+                                </div>
+                              </div>
+                              <div className="text-xs text-gray-500 mt-1">this period</div>
+
+                              {/* Mini Sparkline */}
+                              <div className="h-6 mt-1 relative">
+                                <div className="absolute inset-0 flex items-end">
+                                  {[4, 5, 6, 5, 7, 8, 9, 10, 12, 15].map((value, i) => (
+                                    <div
+                                      key={i}
+                                      className="flex-1 bg-purple-500/40 rounded-sm mx-0.5"
+                                      style={{ height: `${value * 6}%` }}
+                                    ></div>
+                                  ))}
+                                </div>
+                              </div>
+                            </motion.div>
+                          </div>
+
+                          {/* Main Chart */}
+                          <motion.div
+                            className="bg-white/5 dark:bg-black/20 rounded-lg p-3 border border-white/10 relative overflow-hidden"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.1 }}
+                          >
+                            <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_10px_10px,rgba(var(--primary-rgb),0.4)_1px,transparent_1px)] bg-[length:20px_20px] pointer-events-none"></div>
+
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center">
+                                <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2">
+                                  <TrendingUp className="h-3.5 w-3.5 text-primary" />
+                                </div>
+                                <div className="text-sm font-medium text-gray-800">Skill Progress & Earnings</div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-1">
+                                  <div className="h-2 w-2 rounded-full bg-primary"></div>
+                                  <div className="text-xs text-gray-500">Progress</div>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                                  <div className="text-xs text-gray-500">Earnings</div>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <div className="h-2 w-2 rounded-full bg-purple-500/50 border border-purple-500"></div>
+                                  <div className="text-xs text-gray-500">Projected</div>
+                                </div>
+                              </div>
+                            </div>
+                          </motion.div>
+
+                          {/* Skills Breakdown and Competency Radar */}
+                          {/* Skills Breakdown */}
+                          <div className="grid grid-cols-1 gap-3">
+                            {/* Skills Breakdown */}
+                            <motion.div
+                              className="bg-white/5 dark:bg-black/20 rounded-lg p-3 border border-white/10 relative overflow-hidden"
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 0.2 }}
+                            >
+                              <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_10px_10px,rgba(var(--primary-rgb),0.4)_1px,transparent_1px)] bg-[length:20px_20px] pointer-events-none"></div>
+
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center">
+                                  <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2">
+                                    <Target className="h-3.5 w-3.5 text-primary" />
+                                  </div>
+                                  <div className="text-sm font-medium text-gray-800">Skills Breakdown</div>
+                                </div>
+                                <div className="text-xs text-gray-500">{skillsData[activeSkill].name}</div>
+                              </div>
+
+                              <div className="space-y-3">
+                                {skillsData[activeSkill].skills.map((skill, index) => (
+                                  <motion.div
+                                    key={index}
+                                    className="relative"
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.1 + index * 0.1 }}
+                                  >
+                                    <div className="flex justify-between items-center mb-1">
+                                      <div className="text-xs font-medium text-gray-800">{skill.name}</div>
+                                      <div className="text-xs text-gray-500">{skill.level}%</div>
+                                    </div>
+                                    <div className="h-2 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden progress-track">
+                                      <motion.div
+                                        className="h-full rounded-full"
+                                        style={{
+                                          width: `${skill.level}%`,
+                                          background: `linear-gradient(90deg, ${index % 2 === 0 ? "#9333ea" : "#4f46e5"}, ${index % 2 === 0 ? "#a855f7" : "#6366f1"})`,
+                                        }}
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${skill.level}%` }}
+                                        transition={{ duration: 1, delay: 0.2 + index * 0.1 }}
+                                      >
+                                        <motion.div
+                                          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                                          animate={{ x: ["-100%", "100%"] }}
+                                          transition={{
+                                            duration: 1.5,
+                                            repeat: Number.POSITIVE_INFINITY,
+                                            repeatType: "loop",
+                                            ease: "linear",
+                                            delay: index * 0.2,
+                                          }}
+                                        />
+                                      </motion.div>
+                                    </div>
+
+                                    {/* Skill level indicators */}
+                                    <div className="flex justify-between mt-1 px-1">
+                                      <div className="text-[10px] text-gray-500">Beginner</div>
+                                      <div className="text-[10px] text-gray-500">Intermediate</div>
+                                      <div className="text-[10px] text-gray-500">Advanced</div>
+                                    </div>
+                                  </motion.div>
+                                ))}
+                              </div>
+
+                              <div className="mt-4 pt-3 border-t border-white/10">
+                                <div className="flex items-center justify-between">
+                                  <div className="text-xs font-medium text-gray-800">Overall Proficiency</div>
+
+                                  <div className="text-xs text-primary font-medium">
+                                    {skillsData[activeSkill].level}
+                                  </div>
+                                </div>
+                                <div className="mt-1 text-xs text-gray-500">
+                                  {skillsData[activeSkill].progress}% progress to {skillsData[activeSkill].nextLevel}
+                                </div>
+                              </div>
+                            </motion.div>
+                          </div>
+
+                          {/* Time Investment and Achievements */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {/* Time Investment */}
+                            <motion.div
+                              className="bg-white/5 dark:bg-black/20 rounded-lg p-3 border border-white/10 relative overflow-hidden"
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 0.4 }}
+                            >
+                              <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_10px_10px,rgba(var(--primary-rgb),0.4)_1px,transparent_1px)] bg-[length:20px_20px] pointer-events-none"></div>
+
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center">
+                                  <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2">
+                                    <Clock className="h-3.5 w-3.5 text-primary" />
+                                  </div>
+                                  <div className="text-sm font-medium text-gray-800">Time Investment</div>
+                                </div>
+                                <div className="text-xs text-gray-500">Last 30 days</div>
+                              </div>
+
+                              {/* Time breakdown chart */}
+                              <div className="h-[120px] relative">
+                                <div className="absolute inset-0 flex items-end">
+                                  {[
+                                    { label: "Learning", hours: 25, color: "#9333ea" },
+                                    { label: "Client Work", hours: 40, color: "#4f46e5" },
+                                    { label: "Networking", hours: 10, color: "#8b5cf6" },
+                                    { label: "Admin", hours: 5, color: "#a855f7" },
+                                  ].map((item, i) => (
+                                    <motion.div
+                                      key={i}
+                                      className="flex-1 mx-1 flex flex-col items-center"
+                                      initial={{ opacity: 0, y: 20 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                      transition={{ delay: 0.5 + i * 0.1 }}
+                                    >
+                                      <div className="text-xs text-gray-500 mb-1">{item.hours}h</div>
+                                      <motion.div
+                                        className="w-full rounded-t-md"
+                                        style={{
+                                          height: `${(item.hours / 40) * 100}%`,
+                                          backgroundColor: item.color,
+                                        }}
+                                        initial={{ height: 0 }}
+                                        animate={{ height: `${(item.hours / 40) * 100}%` }}
+                                        transition={{ duration: 1, delay: 0.6 + i * 0.1 }}
+                                      >
+                                        <motion.div
+                                          className="absolute inset-0 bg-gradient-to-t from-transparent via-white/20 to-transparent"
+                                          animate={{ y: ["-100%", "100%"] }}
+                                          transition={{
+                                            duration: 2,
+                                            repeat: Number.POSITIVE_INFINITY,
+                                            repeatType: "loop",
+                                            ease: "linear",
+                                            delay: i * 0.2,
+                                          }}
+                                        />
+                                      </motion.div>
+                                      <div className="text-xs text-gray-500 mt-1 truncate w-full text-center">
+                                        {item.label}
+                                      </div>
+                                    </motion.div>
+                                  ))}
+                                </div>
+                              </div>
+
+                              <div className="mt-4 pt-3 border-t border-white/10">
+                                <div className="flex items-center justify-between">
+                                  <div className="text-xs font-medium text-gray-800">Total Hours</div>
+                                  <div className="text-xs text-primary font-medium">80 hours</div>
+                                </div>
+                                <div className="mt-1 text-xs text-gray-500">+15% vs. previous period</div>
+                              </div>
+                            </motion.div>
+
+                            {/* Achievements */}
+                            <motion.div
+                              className="bg-white/5 dark:bg-black/20 rounded-lg p-3 border border-white/10 relative overflow-hidden"
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 0.5 }}
+                            >
+                              <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_10px_10px,rgba(var(--primary-rgb),0.4)_1px,transparent_1px)] bg-[length:20px_20px] pointer-events-none"></div>
+
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center">
+                                  <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2">
+                                    <Trophy className="h-3.5 w-3.5 text-primary" />
+                                  </div>
+                                  <div className="text-sm font-medium text-gray-800">Recent Achievements</div>
+                                </div>
+                                <div className="text-xs text-primary">View All</div>
+                              </div>
+
+                              <div className="space-y-2">
+                                {[
+                                  {
+                                    icon: Award,
+                                    color: "blue",
+                                    title: "Web Development Certification",
+                                    time: "2 weeks ago",
+                                    badge: "Advanced",
+                                  },
+                                  {
+                                    icon: Users,
+                                    color: "green",
+                                    title: "10 Client Projects Completed",
+                                    time: "1 month ago",
+                                    badge: "Milestone",
+                                  },
+                                  {
+                                    icon: Target,
+                                    color: "purple",
+                                    title: "UI/UX Design Fundamentals",
+                                    time: "2 months ago",
+                                    badge: "Intermediate",
+                                  },
+                                ].map((achievement, i) => (
+                                  <motion.div
+                                    key={i}
+                                    className="flex items-start gap-3 p-2 rounded-md bg-white/5 dark:bg-black/20 hover:bg-white/10 dark:hover:bg-black/20 transition-colors cursor-pointer"
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.6 + i * 0.1 }}
+                                    whileHover={{ x: 3 }}
+                                  >
+                                    <div
+                                      className={`bg-${achievement.color}-100 dark:bg-${achievement.color}-900 p-2 rounded-full`}
+                                    >
+                                      <achievement.icon
+                                        className={`h-4 w-4 text-${achievement.color}-600 dark:text-${achievement.color}-300`}
+                                      />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <div className="text-xs font-medium text-gray-800 truncate">
+                                        {achievement.title}
+                                      </div>
+                                      <div className="text-xs text-gray-500">{achievement.time}</div>
+                                    </div>
+                                    <div className="px-1.5 py-0.5 text-xs bg-white/10 dark:bg-black/20 rounded-full">
+                                      {achievement.badge}
+                                    </div>
+                                  </motion.div>
+                                ))}
+                              </div>
+
+                              <div className="mt-3">
+                                <motion.button
+                                  className="w-full py-1.5 text-xs bg-white/5 dark:bg-black/20 rounded-md border border-white/10 hover:bg-white/10 dark:hover:bg-black/30 transition-colors"
+                                  whileHover={{ y: -1 }}
+                                  whileTap={{ y: 0 }}
+                                >
+                                  View All Achievements
+                                </motion.button>
+                              </div>
+                            </motion.div>
+
+                            {/* Growth Opportunities */}
+                            <motion.div
+                              className="bg-white/5 dark:bg-black/20 rounded-lg p-3 border border-white/10 relative overflow-hidden"
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 0.6 }}
+                            >
+                              <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_10px_10px,rgba(var(--primary-rgb),0.4)_1px,transparent_1px)] bg-[length:20px_20px] pointer-events-none"></div>
+
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center">
+                                  <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2">
+                                    <Lightbulb className="h-3.5 w-3.5 text-primary" />
+                                  </div>
+                                  <div className="text-sm font-medium text-gray-800">Growth Opportunities</div>
+                                </div>
+                                <div className="text-xs text-primary">AI-Recommended</div>
+                              </div>
+
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                {[
+                                  {
+                                    title: "Advanced React Patterns",
+                                    description: "Learn advanced React patterns to build more scalable applications",
+                                    tag: "Technical",
+                                    impact: "High",
+                                    time: "10 hours",
+                                  },
+                                  {
+                                    title: "Client Communication Workshop",
+                                    description: "Improve your client communication skills for better project outcomes",
+                                    tag: "Soft Skills",
+                                    impact: "Medium",
+                                    time: "5 hours",
+                                  },
+                                ].map((opportunity, i) => (
+                                  <motion.div
+                                    key={i}
+                                    className="p-3 rounded-md bg-white/5 dark:bg-black/20 border border-white/10 hover:border-primary/30 transition-all cursor-pointer relative overflow-hidden"
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.7 + i * 0.1 }}
+                                    whileHover={{ y: -2, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}
+                                  >
+                                    <div className="absolute top-0 right-0 h-16 w-16 bg-gradient-to-bl from-primary/10 to-transparent rounded-bl-full"></div>
+
+                                    <div className="text-sm font-medium text-gray-800 mb-1">{opportunity.title}</div>
+                                    <div className="text-xs text-gray-700 mb-2">{opportunity.description}</div>
+
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex items-center gap-2">
+                                        <div className="px-1.5 py-0.5 text-xs bg-white/10 dark:bg-black/20 rounded-full">
+                                          {opportunity.tag}
+                                        </div>
+                                        <div className="px-1.5 py-0.5 text-xs bg-white/10 dark:bg-black/20 rounded-full flex items-center">
+                                          <TrendingUp className="h-3 w-3 mr-0.5 text-green-500" />
+                                          {opportunity.impact} Impact
+                                        </div>
+                                      </div>
+                                      <div className="text-xs text-gray-500">{opportunity.time}</div>
+                                    </div>
+                                  </motion.div>
+                                ))}
+                              </div>
+
+                              <div className="mt-3">
+                                <motion.button
+                                  className="w-full py-1.5 text-xs bg-gradient-to-r from-primary/80 to-purple-500/80 hover:from-primary hover:to-purple-500 text-white rounded-md transition-colors"
+                                  whileHover={{ y: -1 }}
+                                  whileTap={{ y: 0 }}
+                                >
+                                  Explore All Growth Opportunities
+                                </motion.button>
+                              </div>
+                            </motion.div>
                           </div>
                         </div>
                       )}
@@ -501,18 +2639,36 @@ export function EnhancedHeroSection() {
                       </EnhancedButton>
                     </div>
                   </div>
-                </div>
+                  {/* Futuristic decorative elements */}
+                  <div className="absolute top-1/4 right-6 w-2 h-2 rounded-full bg-primary/50 animate-pulse"></div>
+                  <div
+                    className="absolute bottom-1/3 left-8 w-1.5 h-1.5 rounded-full bg-purple-500/50 animate-ping"
+                    style={{ animationDuration: "3s" }}
+                  ></div>
+                </motion.div>
               </div>
-            </div>
+            </motion.div>
 
-            {/* Find the perfect service section */}
+            {/* Find the perfect service section - enhanced with matching background */}
+
             <section className="w-screen max-w-none py-16 md:py-24 lg-py-32 relative">
               <BackgroundPattern className="opacity-50" />
               <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
               <div className="container mx-auto px-4 md:px-6 relative z-10">
-                <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
+                <motion.div
+                  className="flex flex-col items-center justify-center space-y-4 text-center mb-12"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5 }}
+                >
                   <div className="w-full max-w-md mx-auto mt-8 relative">
                     <div className="relative group">
+                      <div className="absolute inset-0 bg-gradient-to-r from-primary/30 to-purple-500/30 rounded-full blur-md opacity-0 group-hover:opacity-70 transition-opacity duration-300"></div>
+                      <div
+                        className="absolute inset-0 bg-gradient-to-r from-primary/10 via-purple-500/10 to-primary/10 rounded-full animate-pulse"
+                        style={{ animationDuration: "3s" }}
+                      ></div>
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
                       <input
                         type="search"
@@ -527,7 +2683,7 @@ export function EnhancedHeroSection() {
 
                   <div className="flex flex-wrap justify-center gap-3 mt-10">
                     {["all", "trending", "popular", "new"].map((tab) => (
-                      <button
+                      <motion.button
                         key={tab}
                         className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 relative overflow-hidden ${
                           activeTab === tab
@@ -535,7 +2691,22 @@ export function EnhancedHeroSection() {
                             : "bg-white/5 dark:bg-black/20 border border-white/10 hover:border-primary/40 hover:bg-white/10 dark:hover:bg-black/30"
                         }`}
                         onClick={() => setActiveTab(tab)}
+                        whileHover={{ scale: 1.05, boxShadow: "0 10px 25px -5px rgba(147, 51, 234, 0.3)" }}
+                        whileTap={{ scale: 0.98 }}
                       >
+                        {activeTab === tab && (
+                          <motion.div
+                            className="absolute inset-0 bg-gradient-to-r from-primary/20 via-transparent to-purple-500/20"
+                            animate={{
+                              x: ["-100%", "100%"],
+                            }}
+                            transition={{
+                              repeat: Number.POSITIVE_INFINITY,
+                              duration: 2,
+                              ease: "linear",
+                            }}
+                          />
+                        )}
                         {tab === "all" && (
                           <span className="flex items-center">
                             <Layers className="mr-1.5 h-3.5 w-3.5" /> All Categories
@@ -556,13 +2727,33 @@ export function EnhancedHeroSection() {
                             <Sparkles className="mr-1.5 h-3.5 w-3.5" /> New
                           </span>
                         )}
-                      </button>
+                        {activeTab === tab && (
+                          <>
+                            <motion.div
+                              className="absolute top-0 left-0 right-0 h-full w-full bg-gradient-to-r from-primary/10 to-purple-500/10 blur-md -z-10"
+                              layoutId="activeTabGlow"
+                              transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                            />
+                            <motion.div
+                              className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 h-1 w-1/2 bg-white rounded-full"
+                              layoutId="activeTabIndicator"
+                              transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                            />
+                          </>
+                        )}
+                      </motion.button>
                     ))}
                   </div>
-                </div>
+                </motion.div>
 
                 {/* Featured categories */}
-                <div className="mb-12">
+                <motion.div
+                  className="mb-12"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5 }}
+                >
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-xl font-semibold">Featured Categories</h3>
                     <Link
@@ -625,7 +2816,7 @@ export function EnhancedHeroSection() {
                       />
                     </div>
                   </div>
-                </div>
+                </motion.div>
 
                 {/* All categories */}
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
@@ -645,13 +2836,7 @@ export function EnhancedHeroSection() {
                           Coming Soon
                         </span>
                       </div>
-                      <EnhancedCategoryCard
-                        key={index}
-                        icon={category.icon}
-                        name={category.name}
-                        count={category.count}
-                        index={index}
-                      />
+                      <EnhancedCategoryCard key={index} icon={category.icon} name={category.name} />
                     </div>
                   ))}
                 </div>

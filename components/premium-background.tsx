@@ -2,41 +2,142 @@
 
 import type React from "react"
 
+import { useEffect, useState } from "react"
+import { motion } from "framer-motion"
+
 export function PremiumBackground() {
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const [windowSize, setWindowSize] = useState({
+    width: typeof window !== "undefined" ? window.innerWidth : 0,
+    height: typeof window !== "undefined" ? window.innerHeight : 0,
+  })
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY })
+    }
+
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      })
+    }
+
+    window.addEventListener("mousemove", handleMouseMove)
+    window.addEventListener("resize", handleResize)
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove)
+      window.removeEventListener("resize", handleResize)
+    }
+  }, [])
+
+  // Calculate positions for the gradient blobs that follow mouse movement
+  const blobOnePosition = {
+    x: mousePosition.x * 0.05,
+    y: mousePosition.y * 0.05,
+  }
+
+  const blobTwoPosition = {
+    x: -mousePosition.x * 0.03,
+    y: -mousePosition.y * 0.03,
+  }
+
   return (
     <>
       <div
         className="fixed -z-20 bg-noise opacity-[0.03]"
         style={{
-          width: "100vw",
+          width: "calc(100vw + 100px)",
           height: "100vh",
+          left: "-50px",
+          right: "-50px",
           top: 0,
         }}
       />
 
-      {/* Gradient blob */}
+      {/* Gradient blobs that subtly move with mouse - extended width */}
       <div
-        className="fixed -z-10 opacity-20 dark:opacity-15 blur-[100px]"
+        className="fixed -z-10 opacity-20 dark:opacity-15 blur-[100px] md:blur-[130px] lg:blur-[160px]"
         style={{
-          background: `radial-gradient(circle at 50% 50%, rgba(var(--primary-rgb), 0.8) 0%, rgba(var(--primary-rgb), 0) 70%)`,
-          width: "100vw",
+          background: `radial-gradient(circle at ${windowSize.width / 2 + blobOnePosition.x}px ${
+            windowSize.height / 2 + blobOnePosition.y
+          }px, rgba(var(--primary-rgb), 0.8) 0%, rgba(var(--primary-rgb), 0) 70%)`,
+          width: "calc(100vw + 100px)",
           height: "100vh",
+          transform: "translate3d(0, 0, 0)",
+          left: "-50px",
+          right: "-50px",
           top: 0,
         }}
       />
 
-      {/* Grid pattern */}
+      {/* Animated grid pattern - extended width */}
       <div
         className="fixed -z-10"
         style={{
-          width: "100vw",
+          width: "calc(100vw + 100px)",
           height: "100vh",
+          left: "-50px",
+          right: "-50px",
           top: 0,
         }}
       >
         <div className="absolute inset-0 bg-grid-pattern opacity-[0.02] dark:opacity-[0.03]" />
       </div>
+
+      {/* Subtle floating particles */}
+      <ParticlesEffect />
     </>
+  )
+}
+
+function ParticlesEffect() {
+  // Reduce particle count significantly
+  const particles = Array.from({ length: 10 }).map((_, i) => ({
+    id: i,
+    size: Math.random() * 3 + 1,
+    x: Math.random() * 120 - 10,
+    y: Math.random() * 100,
+    duration: Math.random() * 10 + 10, // Reduce max duration
+    delay: Math.random() * 5,
+  }))
+
+  return (
+    <div
+      className="fixed -z-10 overflow-hidden pointer-events-none"
+      style={{
+        width: "calc(100vw + 100px)",
+        height: "100vh",
+        left: "-50px",
+        right: "-50px",
+        top: 0,
+      }}
+    >
+      {particles.map((particle) => (
+        <motion.div
+          key={particle.id}
+          className="absolute rounded-full bg-primary/20 dark:bg-primary/10"
+          style={{
+            width: particle.size,
+            height: particle.size,
+            left: `${particle.x}%`,
+            top: `${particle.y}%`,
+          }}
+          animate={{
+            y: [0, -20, 0], // Reduce movement range
+            opacity: [0, 0.4, 0],
+          }}
+          transition={{
+            duration: particle.duration,
+            repeat: Number.POSITIVE_INFINITY,
+            delay: particle.delay,
+            ease: "easeInOut",
+          }}
+        />
+      ))}
+    </div>
   )
 }
 
@@ -75,6 +176,7 @@ export function GlassCard({ children, className = "" }: { children: React.ReactN
 export function GradientBorder({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
     <div className={`gradient-border-container ${className}`}>
+      <div className="gradient-border-animation"></div>
       <div className="gradient-border-content">{children}</div>
     </div>
   )

@@ -1,28 +1,10 @@
-import { createClient } from "@supabase/supabase-js"
-import type { Database } from "@/types/database.types"
+"use client"
 
-// Create a singleton instance for the client
-let clientInstance: ReturnType<typeof createClient<Database>> | null = null
+import { supabase } from "./supabase-client"
 
+// Export a function that returns the singleton instance
 export const createDatabaseClient = () => {
-  if (clientInstance) return clientInstance
-
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    console.error("Missing Supabase credentials")
-    return null
-  }
-
-  clientInstance = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      persistSession: true,
-      storageKey: "levl-supabase-auth",
-    },
-  })
-
-  return clientInstance
+  return supabase
 }
 
 // For server-side usage
@@ -35,9 +17,5 @@ export const createServerDatabaseClient = () => {
     return null
   }
 
-  return createClient<Database>(supabaseUrl, supabaseServiceKey, {
-    auth: {
-      persistSession: false,
-    },
-  })
+  return supabase
 }
