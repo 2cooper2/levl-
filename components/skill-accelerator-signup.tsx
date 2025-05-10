@@ -151,62 +151,56 @@ export function SkillAcceleratorSignup({ isOpen, onClose }: SkillAcceleratorSign
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md overflow-hidden bg-white border border-purple-200 shadow-md shadow-purple-100/50 max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-md overflow-hidden bg-white border border-purple-200 shadow-md shadow-purple-100/50 max-h-[80vh] overflow-y-auto">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-white opacity-80 pointer-events-none"></div>
-        <DialogHeader className="pb-2 border-b border-purple-100 relative">
-          <DialogTitle className="text-lg font-bold text-center">
+        <DialogHeader className="pb-1 border-b border-purple-100 relative">
+          <DialogTitle className="text-base font-bold text-center">
             {isSuccess ? "Registration Complete!" : "Join Skill Accelerator"}
           </DialogTitle>
-          <DialogDescription className="text-center text-sm">
-            {isSuccess
-              ? "You're now part of our community!"
-              : "Accelerate your skills and grow your career with our AI-powered platform."}
+          <DialogDescription className="text-center text-xs">
+            {isSuccess ? "You're now part of our community!" : "Accelerate your skills and grow your career"}
           </DialogDescription>
         </DialogHeader>
 
         {isSuccess ? (
-          <div className="flex flex-col items-center justify-center py-6 relative">
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="rounded-full bg-green-100 p-3 text-green-600 mb-4"
-            >
-              <CheckCircle className="h-8 w-8" />
-            </motion.div>
-            <motion.p
-              initial={{ y: 10, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.1 }}
-              className="text-center text-lg font-medium mb-2"
-            >
-              Thank you for joining!
-            </motion.p>
-            <motion.p
-              initial={{ y: 10, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="text-sm text-muted-foreground text-center mb-6"
-            >
-              We'll be in touch soon with next steps.
-            </motion.p>
-            <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }}>
-              <Button
-                onClick={handleClose}
-                className="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90"
+          <div className="flex items-center justify-center py-3 relative">
+            <div className="flex items-center gap-3">
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="rounded-full bg-green-100 p-2 text-green-600"
               >
-                Return to Home
-              </Button>
-            </motion.div>
+                <CheckCircle className="h-5 w-5" />
+              </motion.div>
+              <div>
+                <motion.p
+                  initial={{ y: 5, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.1 }}
+                  className="text-sm font-medium"
+                >
+                  Thank you for joining!
+                </motion.p>
+                <motion.p
+                  initial={{ y: 5, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="text-xs text-muted-foreground"
+                >
+                  We'll be in touch soon with next steps.
+                </motion.p>
+              </div>
+            </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-5 relative">
-            <div className="flex justify-between mb-4">
+          <form onSubmit={handleSubmit} className="space-y-3 relative">
+            <div className="flex justify-between mb-2">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="flex flex-col items-center">
+                <div key={i} className="flex items-center gap-1">
                   <div
-                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium transition-all duration-300 ${
+                    className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-medium transition-all duration-300 ${
                       step === i
-                        ? "bg-gradient-to-r from-primary to-purple-600 text-white shadow-md"
+                        ? "bg-gradient-to-r from-primary to-purple-600 text-white shadow-sm"
                         : step > i
                           ? "bg-purple-100 text-purple-600"
                           : "bg-purple-50 text-purple-400"
@@ -214,7 +208,7 @@ export function SkillAcceleratorSignup({ isOpen, onClose }: SkillAcceleratorSign
                   >
                     {step > i ? <CheckCircle className="h-3 w-3" /> : i}
                   </div>
-                  <span className="text-[10px] mt-1 text-muted-foreground">
+                  <span className="text-[10px] text-muted-foreground">
                     {i === 1 ? "Info" : i === 2 ? "Details" : "Role"}
                   </span>
                 </div>
@@ -225,49 +219,45 @@ export function SkillAcceleratorSignup({ isOpen, onClose }: SkillAcceleratorSign
               {step === 1 && (
                 <motion.div
                   key="step1"
-                  initial={{ opacity: 0, x: -20 }}
+                  initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  transition={{ duration: 0.3 }}
-                  className="space-y-3"
+                  exit={{ opacity: 0, x: 10 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-2"
                 >
-                  <div className="space-y-2">
-                    <Label htmlFor="name" className="text-sm font-medium">
-                      Full Name
-                    </Label>
-                    <Input
-                      id="name"
-                      name="name"
-                      placeholder="John Doe"
-                      value={formData.name}
-                      onChange={handleChange}
-                      className={`transition-all duration-200 ${errors.name ? "border-red-500 ring-1 ring-red-500" : "focus:border-purple-400 focus:ring-1 focus:ring-purple-400"}`}
-                    />
-                    {errors.name && (
-                      <motion.p
-                        initial={{ opacity: 0, y: -5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-sm text-red-500 flex items-center"
-                      >
-                        <span className="mr-1">⚠️</span> {errors.name}
-                      </motion.p>
-                    )}
-                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label htmlFor="name" className="text-xs font-medium">
+                        Full Name
+                      </Label>
+                      <Input
+                        id="name"
+                        name="name"
+                        placeholder="John Doe"
+                        value={formData.name}
+                        onChange={handleChange}
+                        className={`h-8 text-sm ${errors.name ? "border-red-500 ring-1 ring-red-500" : "focus:border-purple-400 focus:ring-1 focus:ring-purple-400"}`}
+                      />
+                      {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
+                    </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="name@example.com"
-                      value={formData.email}
-                      onChange={handleChange}
-                      className={
-                        errors.email ? "border-red-500" : "focus:border-purple-400 focus:ring-1 focus:ring-purple-400"
-                      }
-                    />
-                    {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
+                    <div>
+                      <Label htmlFor="email" className="text-xs font-medium">
+                        Email
+                      </Label>
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        placeholder="name@example.com"
+                        value={formData.email}
+                        onChange={handleChange}
+                        className={`h-8 text-sm ${
+                          errors.email ? "border-red-500" : "focus:border-purple-400 focus:ring-1 focus:ring-purple-400"
+                        }`}
+                      />
+                      {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
+                    </div>
                   </div>
                 </motion.div>
               )}
@@ -275,42 +265,48 @@ export function SkillAcceleratorSignup({ isOpen, onClose }: SkillAcceleratorSign
               {step === 2 && (
                 <motion.div
                   key="step2"
-                  initial={{ opacity: 0, x: -20 }}
+                  initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
+                  exit={{ opacity: 0, x: 10 }}
                   transition={{ duration: 0.2 }}
-                  className="space-y-3"
+                  className="space-y-2"
                 >
-                  <div className="space-y-2">
-                    <Label htmlFor="dob">Date of Birth</Label>
-                    <Input
-                      id="dob"
-                      name="dob"
-                      type="date"
-                      value={formData.dob}
-                      onChange={handleChange}
-                      className={
-                        errors.dob ? "border-red-500" : "focus:border-purple-400 focus:ring-1 focus:ring-purple-400"
-                      }
-                    />
-                    {errors.dob && <p className="text-sm text-red-500">{errors.dob}</p>}
-                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label htmlFor="dob" className="text-xs font-medium">
+                        Date of Birth
+                      </Label>
+                      <Input
+                        id="dob"
+                        name="dob"
+                        type="date"
+                        value={formData.dob}
+                        onChange={handleChange}
+                        className={`h-8 text-sm ${
+                          errors.dob ? "border-red-500" : "focus:border-purple-400 focus:ring-1 focus:ring-purple-400"
+                        }`}
+                      />
+                      {errors.dob && <p className="text-xs text-red-500 mt-1">{errors.dob}</p>}
+                    </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="location">Location</Label>
-                    <Input
-                      id="location"
-                      name="location"
-                      placeholder="City, Country"
-                      value={formData.location}
-                      onChange={handleChange}
-                      className={
-                        errors.location
-                          ? "border-red-500"
-                          : "focus:border-purple-400 focus:ring-1 focus:ring-purple-400"
-                      }
-                    />
-                    {errors.location && <p className="text-sm text-red-500">{errors.location}</p>}
+                    <div>
+                      <Label htmlFor="location" className="text-xs font-medium">
+                        Location
+                      </Label>
+                      <Input
+                        id="location"
+                        name="location"
+                        placeholder="City, Country"
+                        value={formData.location}
+                        onChange={handleChange}
+                        className={`h-8 text-sm ${
+                          errors.location
+                            ? "border-red-500"
+                            : "focus:border-purple-400 focus:ring-1 focus:ring-purple-400"
+                        }`}
+                      />
+                      {errors.location && <p className="text-xs text-red-500 mt-1">{errors.location}</p>}
+                    </div>
                   </div>
                 </motion.div>
               )}
@@ -318,57 +314,59 @@ export function SkillAcceleratorSignup({ isOpen, onClose }: SkillAcceleratorSign
               {step === 3 && (
                 <motion.div
                   key="step3"
-                  initial={{ opacity: 0, x: -20 }}
+                  initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
+                  exit={{ opacity: 0, x: 10 }}
                   transition={{ duration: 0.2 }}
-                  className="space-y-3"
+                  className="space-y-2"
                 >
-                  <div className="space-y-3">
-                    <Label>I want to join as</Label>
+                  <div>
+                    <Label className="text-xs font-medium">I want to join as</Label>
                     <RadioGroup
                       value={formData.role}
                       onValueChange={handleRoleChange}
-                      className="flex flex-col space-y-3"
+                      className="grid grid-cols-3 gap-2 mt-1"
                     >
-                      <div className="flex items-center space-x-2 rounded-lg border border-purple-100 p-4 hover:bg-purple-50 transition-colors cursor-pointer group">
-                        <RadioGroupItem value="worker" id="worker" className="text-purple-600" />
-                        <Label htmlFor="worker" className="font-normal cursor-pointer flex-1">
-                          <div className="font-medium group-hover:text-purple-600 transition-colors">
-                            Service Provider
+                      <div className="flex flex-col items-center rounded-lg border border-purple-100 p-2 hover:bg-purple-50 transition-colors cursor-pointer group">
+                        <RadioGroupItem value="worker" id="worker" className="text-purple-600 sr-only" />
+                        <Label htmlFor="worker" className="font-normal cursor-pointer text-center">
+                          <div className="font-medium text-xs group-hover:text-purple-600 transition-colors">
+                            Provider
                           </div>
-                          <div className="text-sm text-muted-foreground">Offer your skills and earn money</div>
+                          <div className="text-[10px] text-muted-foreground">Offer skills</div>
                         </Label>
                       </div>
 
-                      <div className="flex items-center space-x-2 rounded-lg border border-purple-100 p-4 hover:bg-purple-50 transition-colors cursor-pointer group">
-                        <RadioGroupItem value="client" id="client" className="text-purple-600" />
-                        <Label htmlFor="client" className="font-normal cursor-pointer flex-1">
-                          <div className="font-medium group-hover:text-purple-600 transition-colors">Client</div>
-                          <div className="text-sm text-muted-foreground">Hire skilled professionals</div>
+                      <div className="flex flex-col items-center rounded-lg border border-purple-100 p-2 hover:bg-purple-50 transition-colors cursor-pointer group">
+                        <RadioGroupItem value="client" id="client" className="text-purple-600 sr-only" />
+                        <Label htmlFor="client" className="font-normal cursor-pointer text-center">
+                          <div className="font-medium text-xs group-hover:text-purple-600 transition-colors">
+                            Client
+                          </div>
+                          <div className="text-[10px] text-muted-foreground">Hire talent</div>
                         </Label>
                       </div>
 
-                      <div className="flex items-center space-x-2 rounded-lg border border-purple-100 p-4 hover:bg-purple-50 transition-colors cursor-pointer group">
-                        <RadioGroupItem value="both" id="both" className="text-purple-600" />
-                        <Label htmlFor="both" className="font-normal cursor-pointer flex-1">
-                          <div className="font-medium group-hover:text-purple-600 transition-colors">Both</div>
-                          <div className="text-sm text-muted-foreground">I want to do both</div>
+                      <div className="flex flex-col items-center rounded-lg border border-purple-100 p-2 hover:bg-purple-50 transition-colors cursor-pointer group">
+                        <RadioGroupItem value="both" id="both" className="text-purple-600 sr-only" />
+                        <Label htmlFor="both" className="font-normal cursor-pointer text-center">
+                          <div className="font-medium text-xs group-hover:text-purple-600 transition-colors">Both</div>
+                          <div className="text-[10px] text-muted-foreground">Do both</div>
                         </Label>
                       </div>
                     </RadioGroup>
                   </div>
 
-                  <div className="flex items-center space-x-2 mt-4">
+                  <div className="flex items-center space-x-2 mt-2">
                     <input
                       type="checkbox"
                       id="terms"
-                      className="rounded border-purple-300 text-purple-600 focus:ring-purple-500"
+                      className="rounded border-purple-300 text-purple-600 focus:ring-purple-500 h-3 w-3"
                       checked={termsAccepted}
                       onChange={(e) => setTermsAccepted(e.target.checked)}
                       required
                     />
-                    <Label htmlFor="terms" className="text-sm font-normal">
+                    <Label htmlFor="terms" className="text-xs font-normal">
                       I agree to the Terms of Service and Privacy Policy
                     </Label>
                   </div>
@@ -376,13 +374,13 @@ export function SkillAcceleratorSignup({ isOpen, onClose }: SkillAcceleratorSign
               )}
             </AnimatePresence>
 
-            <DialogFooter className="flex justify-between mt-4 gap-2">
+            <DialogFooter className="flex justify-between mt-2 gap-2 pt-2 border-t border-gray-100">
               {step > 1 && (
                 <Button
                   type="button"
                   variant="outline"
                   onClick={handleBack}
-                  className="border-purple-200 text-purple-700 hover:bg-purple-50"
+                  className="border-purple-200 text-purple-700 hover:bg-purple-50 h-8 text-xs px-3"
                 >
                   Back
                 </Button>
@@ -392,23 +390,23 @@ export function SkillAcceleratorSignup({ isOpen, onClose }: SkillAcceleratorSign
                 <Button
                   type="button"
                   onClick={handleNext}
-                  className="ml-auto bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90"
+                  className="ml-auto bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 h-8 text-xs px-3"
                 >
                   Next
                 </Button>
               ) : (
                 <Button
                   type="submit"
-                  className="ml-auto bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90"
+                  className="ml-auto bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 h-8 text-xs"
                   disabled={isSubmitting || !termsAccepted}
                 >
                   {isSubmitting ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="mr-1 h-3 w-3 animate-spin" />
                       Submitting...
                     </>
                   ) : (
-                    "Complete Registration"
+                    "Complete"
                   )}
                 </Button>
               )}

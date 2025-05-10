@@ -71,10 +71,17 @@ export default function AddServicePage() {
     requirements: [],
   })
 
-  // Redirect if not authenticated
+  // Redirect if not authenticated - but only after component mounts
   useEffect(() => {
-    if (!isAuthenticated && typeof window !== "undefined") {
+    let mounted = true
+
+    // Only redirect after component is mounted to avoid SSR issues
+    if (mounted && typeof window !== "undefined" && !isAuthenticated) {
       router.push("/auth/login?redirect=/add-service")
+    }
+
+    return () => {
+      mounted = false
     }
   }, [isAuthenticated, router])
 
@@ -217,7 +224,7 @@ export default function AddServicePage() {
       <div className="hidden md:block">
         <EnhancedMainNav />
       </div>
-      <div className="md:hidden p-4">
+      <div className="md:hidden">
         <MobileNav />
       </div>
 
