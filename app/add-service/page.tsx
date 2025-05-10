@@ -62,13 +62,13 @@ export default function AddServicePage() {
     title: "",
     category: "",
     description: "",
-    tags: [],
+    tags: [] as string[],
     price: 50,
     deliveryTime: 3,
     revisions: 2,
-    features: [],
-    images: [],
-    requirements: [],
+    features: [] as string[],
+    images: [] as Array<{ id: string; url: string; name: string }>,
+    requirements: [] as Array<{ id: string; question: string; type: string }>,
   })
 
   // Redirect if not authenticated - but only after component mounts

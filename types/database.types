@@ -1,90 +1,96 @@
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
 
 export interface Database {
   public: {
     Tables: {
       users: {
         Row: {
-          id: string;
-          email: string;
-          name: string;
-          avatar_url: string | null;
-          bio: string | null;
-          role: string;
-          created_at: string;
-          updated_at: string;
-          social_links: Json | null;
-          privacy_settings: Json | null;
-          headline: string | null;
-          skills: string | null;
-          email_verified: boolean | null;
-          stripe_customer_id: string | null;
-          stripe_account_id: string | null;
-          account_balance: number | null;
-          onboarding_completed: boolean | null;
-          is_active: boolean | null;
-          is_verified: boolean | null;
-          last_login_at: string | null;
-          verification_level: string | null;
-        };
+          id: string
+          email: string
+          name: string
+          avatar_url: string | null
+          bio: string | null
+          role: string
+          created_at: string
+          updated_at: string
+          social_links: Json | null
+          privacy_settings: Json | null
+          headline: string | null
+          skills: string | null
+          email_verified: boolean | null
+          stripe_customer_id: string | null
+          stripe_account_id: string | null
+          account_balance: number | null
+          onboarding_completed: boolean | null
+          is_active: boolean | null
+          is_verified: boolean | null
+          last_login_at: string | null
+          verification_level: string | null
+        }
         Insert: {
-          id?: string;
-          email: string;
-          name: string;
-          avatar_url?: string | null;
-          bio?: string | null;
-          role: string;
-          created_at?: string;
-          updated_at?: string;
-          social_links?: Json | null;
-          privacy_settings?: Json | null;
-          headline?: string | null;
-          skills?: string | null;
-          email_verified?: boolean | null;
-          stripe_customer_id?: string | null;
-          stripe_account_id?: string | null;
-          account_balance?: number | null;
-          onboarding_completed?: boolean | null;
-          is_active?: boolean | null;
-          is_verified?: boolean | null;
-          last_login_at?: string | null;
-          verification_level?: string | null;
-        };
+          id?: string
+          email: string
+          name: string
+          avatar_url?: string | null
+          bio?: string | null
+          role: string
+          created_at?: string
+          updated_at?: string
+          social_links?: Json | null
+          privacy_settings?: Json | null
+          headline?: string | null
+          skills?: string | null
+          email_verified?: boolean | null
+          stripe_customer_id?: string | null
+          stripe_account_id?: string | null
+          account_balance?: number | null
+          onboarding_completed?: boolean | null
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          last_login_at?: string | null
+          verification_level?: string | null
+        }
         Update: {
-          id?: string;
-          email?: string;
-          name?: string;
-          avatar_url?: string | null;
-          bio?: string | null;
-          role?: string;
-          created_at?: string;
-          updated_at?: string;
-          social_links?: Json | null;
-          privacy_settings?: Json | null;
-          headline?: string | null;
-          skills?: string | null;
-          email_verified?: boolean | null;
-          stripe_customer_id?: string | null;
-          stripe_account_id?: string | null;
-          account_balance?: number | null;
-          onboarding_completed?: boolean | null;
-          is_active?: boolean | null;
-          is_verified?: boolean | null;
-          last_login_at?: string | null;
-          verification_level?: string | null;
-        };
-      };
-    };
+          id?: string
+          email?: string
+          name?: string
+          avatar_url?: string | null
+          bio?: string | null
+          role?: string
+          created_at?: string
+          updated_at?: string
+          social_links?: Json | null
+          privacy_settings?: Json | null
+          headline?: string | null
+          skills?: string | null
+          email_verified?: boolean | null
+          stripe_customer_id?: string | null
+          stripe_account_id?: string | null
+          account_balance?: number | null
+          onboarding_completed?: boolean | null
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          last_login_at?: string | null
+          verification_level?: string | null
+        }
+      }
+    }
     Views: {
-      [_ in never]: never;
-    };
+      [_ in never]: never
+    }
     Functions: {
-      [_ in never]: never;
-    };
+      [_ in never]: never
+    }
     Enums: {
-      [_ in never]: never;
-    };
-  };
+      [_ in never]: never
+    }
+  }
 }
 
-export type User = Database["public"]["Tables"]["users"]["Row"];
+export type User = Database["public"]["Tables"]["users"]["Row"]
