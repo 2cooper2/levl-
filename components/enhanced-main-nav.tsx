@@ -58,7 +58,7 @@ export function EnhancedMainNav() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-16 items-center px-2">
         <Link href="/" className="flex items-center space-x-2 ml-0">
-          <LevlLogo className="h-12 w-12" />
+          <LevlLogo className="h-14 w-14 sm:h-12 sm:w-12" />
           <span className="hidden text-2xl font-bold sm:inline-block">LevL</span>
         </Link>
 
