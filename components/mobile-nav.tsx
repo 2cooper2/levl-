@@ -28,7 +28,7 @@ export function MobileNav() {
           <span className="sr-only">Toggle Menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="pr-0">
+      <SheetContent side="left" className="pr-0 bg-white dark:bg-background">
         <MobileLink href="/" className="flex items-center" onOpenChange={setOpen}>
           <LevlLogo className="mr-2 h-4 w-4" />
           <span className="font-bold">Levl</span>
