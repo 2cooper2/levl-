@@ -25,6 +25,15 @@ export function MainNav() {
           Explore
         </Link>
         <Link
+          href="/matchmaker"
+          className={cn(
+            "transition-colors hover:text-foreground/80",
+            pathname === "/matchmaker" ? "text-foreground" : "text-foreground/60",
+          )}
+        >
+          AI Matchmaker
+        </Link>
+        <Link
           href="/providers"
           className={cn(
             "transition-colors hover:text-foreground/80",

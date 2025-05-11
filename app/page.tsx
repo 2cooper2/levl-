@@ -9,8 +9,8 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { LevlLogo } from "@/components/levl-logo"
 import { ThemeToggle } from "@/components/theme-toggle"
-// REMOVE THIS IMPORT
-// import { ValueProposition } from "@/components/value-proposition"
+// Import the new AI Service Matchmaker component
+import { AIServiceMatchmaker } from "@/components/ai-matchmaker/ai-service-matchmaker"
 
 export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -26,11 +26,13 @@ export default function Home() {
       <AnimatedGradientBackground />
       <EnhancedMainNav />
       <main className="flex-1">
+        {/* AI Service Matchmaker - Moved to the top */}
+        <AIServiceMatchmaker />
+
         <EnhancedHeroSection />
 
-        {/* REMOVE THIS SECTION */}
-        {/* Value Proposition */}
-        {/* <ValueProposition /> */}
+        {/* Add any skill accelerator component here */}
+        {/* For example: <SkillAcceleratorSignup /> */}
       </main>
       <footer className="w-full border-t bg-background py-6 md:py-12 relative">
         <BackgroundPattern className="opacity-30" />
