@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useRef } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -50,25 +50,27 @@ export function AIMatchmakerContainer() {
   const chatContainerRef = useRef<HTMLDivElement>(null)
 
   // Scroll to bottom of messages
-  const scrollToBottom = () => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "end",
-        inline: "nearest",
-      })
-      // Prevent page from scrolling
-      setTimeout(() => {
-        if (chatContainerRef.current) {
-          chatContainerRef.current.scrollIntoView({ block: "nearest" })
-        }
-      }, 100)
-    }
-  }
+  // Remove this function
+  // const scrollToBottom = () => {
+  //   if (messagesEndRef.current) {
+  //     messagesEndRef.current.scrollIntoView({
+  //       behavior: "smooth",
+  //       block: "end",
+  //       inline: "nearest",
+  //     })
+  //     // Prevent page from scrolling
+  //     setTimeout(() => {
+  //       if (chatContainerRef.current) {
+  //         chatContainerRef.current.scrollIntoView({ block: "nearest" })
+  //       }
+  //     }, 100)
+  //   }
+  // }
 
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
+  // Remove this useEffect
+  // useEffect(() => {
+  //   scrollToBottom()
+  // }, [messages])
 
   // Handle preference changes
   const handlePreferenceChange = (name: string, value: string) => {
@@ -129,7 +131,7 @@ export function AIMatchmakerContainer() {
       <div className="container relative z-10 overflow-x-hidden">
         {/* AI Matchmaker Interface */}
         <motion.div
-          className="max-w-4xl mx-auto"
+          className="w-full md:max-w-4xl mx-auto"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}

@@ -168,7 +168,7 @@ export function BookingFlow({ service, onComplete, onCancel }: BookingFlowProps)
                         className="bg-indigo-600 hover:bg-indigo-700 text-white"
                       >
                         Continue
-                        <ChevronRight className="ml-2 h-4 w-4" />
+                        <ChevronRight className="hidden md:block ml-2 h-4 w-4" />
                       </Button>
                     </div>
                   </motion.div>
@@ -218,7 +218,7 @@ export function BookingFlow({ service, onComplete, onCancel }: BookingFlowProps)
 
                     <div className="flex justify-between">
                       <Button variant="outline" onClick={() => setStep(1)}>
-                        <ChevronLeft className="mr-2 h-4 w-4" />
+                        <ChevronLeft className="hidden md:block mr-2 h-4 w-4" />
                         Back
                       </Button>
                       <Button
@@ -227,7 +227,7 @@ export function BookingFlow({ service, onComplete, onCancel }: BookingFlowProps)
                         className="bg-indigo-600 hover:bg-indigo-700 text-white"
                       >
                         Continue
-                        <ChevronRight className="ml-2 h-4 w-4" />
+                        <ChevronRight className="hidden md:block ml-2 h-4 w-4" />
                       </Button>
                     </div>
                   </motion.div>
@@ -291,7 +291,7 @@ export function BookingFlow({ service, onComplete, onCancel }: BookingFlowProps)
 
                     <div className="flex justify-between">
                       <Button variant="outline" onClick={() => setStep(2)}>
-                        <ChevronLeft className="mr-2 h-4 w-4" />
+                        <ChevronLeft className="hidden md:block mr-2 h-4 w-4" />
                         Back
                       </Button>
                       <Button
@@ -300,7 +300,7 @@ export function BookingFlow({ service, onComplete, onCancel }: BookingFlowProps)
                         className="bg-indigo-600 hover:bg-indigo-700 text-white"
                       >
                         {isSubmitting ? "Processing..." : "Confirm Booking"}
-                        {!isSubmitting && <CheckCircle className="ml-2 h-4 w-4" />}
+                        {!isSubmitting && <CheckCircle className="hidden md:block ml-2 h-4 w-4" />}
                       </Button>
                     </div>
                   </motion.div>

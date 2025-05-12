@@ -135,7 +135,7 @@ export function ProviderMatching({ userModel, categoryId, onSelectProvider }: Pr
 
               <Button size="sm" className="flex items-center" onClick={() => onSelectProvider(provider.id)}>
                 View Profile
-                <ChevronRight className="ml-1 h-4 w-4" />
+                <ChevronRight className="hidden md:block ml-1 h-4 w-4" />
               </Button>
             </div>
           </div>
