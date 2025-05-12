@@ -48,16 +48,6 @@ export function MobileNav() {
                   Dashboard
                 </MobileLink>
                 <MobileLink
-                  href="/explore"
-                  className={cn(
-                    "transition-colors hover:text-foreground/80",
-                    pathname?.startsWith("/explore") ? "text-foreground" : "text-foreground/60",
-                  )}
-                  onOpenChange={setOpen}
-                >
-                  Explore
-                </MobileLink>
-                <MobileLink
                   href="/messages"
                   className={cn(
                     "transition-colors hover:text-foreground/80",
@@ -112,26 +102,6 @@ export function MobileNav() {
               </>
             ) : (
               <>
-                <MobileLink
-                  href="/explore"
-                  className={cn(
-                    "transition-colors hover:text-foreground/80",
-                    pathname === "/explore" ? "text-foreground" : "text-foreground/60",
-                  )}
-                  onOpenChange={setOpen}
-                >
-                  Explore
-                </MobileLink>
-                <MobileLink
-                  href="/providers"
-                  className={cn(
-                    "transition-colors hover:text-foreground/80",
-                    pathname?.startsWith("/providers") ? "text-foreground" : "text-foreground/60",
-                  )}
-                  onOpenChange={setOpen}
-                >
-                  Providers
-                </MobileLink>
                 <MobileLink
                   href="/about"
                   className={cn(

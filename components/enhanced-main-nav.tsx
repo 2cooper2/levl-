@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 import { LevlLogo } from "@/components/levl-logo"
 import { UserNav } from "@/components/dashboard/user-nav"
 import { useAuth } from "@/context/auth-context"
-import { User, Menu, LayoutDashboard, Compass, Users, Info, LogIn, UserPlus } from "lucide-react"
+import { User, Menu, LayoutDashboard, Info, LogIn, UserPlus, MessageSquare } from "lucide-react"
 import { useState, useEffect, useRef } from "react"
 
 export function EnhancedMainNav() {
@@ -98,32 +98,6 @@ export function EnhancedMainNav() {
                       Dashboard
                     </Link>
                     <Link
-                      href="/explore"
-                      className={cn(
-                        "flex items-center px-3 py-2 text-sm rounded-md transition-colors",
-                        pathname === "/explore"
-                          ? "bg-primary/10 text-primary font-medium"
-                          : "text-foreground/70 hover:text-foreground hover:bg-accent",
-                      )}
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      <Compass className="mr-2 h-4 w-4" />
-                      Explore
-                    </Link>
-                    <Link
-                      href="/providers"
-                      className={cn(
-                        "flex items-center px-3 py-2 text-sm rounded-md transition-colors",
-                        pathname?.startsWith("/providers")
-                          ? "bg-primary/10 text-primary font-medium"
-                          : "text-foreground/70 hover:text-foreground hover:bg-accent",
-                      )}
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      <Users className="mr-2 h-4 w-4" />
-                      Providers
-                    </Link>
-                    <Link
                       href="/profile"
                       className={cn(
                         "flex items-center px-3 py-2 text-sm rounded-md transition-colors",
@@ -135,6 +109,19 @@ export function EnhancedMainNav() {
                     >
                       <User className="mr-2 h-4 w-4" />
                       Profile
+                    </Link>
+                    <Link
+                      href="/forum"
+                      className={cn(
+                        "flex items-center px-3 py-2 text-sm rounded-md transition-colors",
+                        pathname?.startsWith("/forum")
+                          ? "bg-primary/10 text-primary font-medium"
+                          : "text-foreground/70 hover:text-foreground hover:bg-accent",
+                      )}
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <MessageSquare className="mr-2 h-4 w-4" />
+                      Forum
                     </Link>
                     <Link
                       href="/about"

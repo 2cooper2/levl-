@@ -16,9 +16,17 @@ interface CategoryCardProps {
   index: number
   featured?: boolean
   className?: string
+  size?: "default" | "small" // Add size prop
 }
 
-export function EnhancedCategoryCard({ icon: Icon, name, index, featured = false, className = "" }: CategoryCardProps) {
+export function EnhancedCategoryCard({
+  icon: Icon,
+  name,
+  index,
+  featured = false,
+  className = "",
+  size = "default", // Default to the original size
+}: CategoryCardProps) {
   // Convert the category name to a URL-friendly slug
   const categorySlug = name.toLowerCase().replace(/\s+/g, "-")
 
@@ -48,6 +56,15 @@ export function EnhancedCategoryCard({ icon: Icon, name, index, featured = false
   // Generate a placeholder image URL based on the category name
   const imageUrl = `/placeholder.svg?height=400&width=400&query=${encodeURIComponent(`${name} category abstract pattern purple`)}`
 
+  // Adjust the icon size based on the size prop
+  const iconSize = size === "small" ? "h-5 w-5" : "h-7 w-7"
+
+  // Adjust the padding based on the size prop
+  const cardPadding = size === "small" ? "p-3" : "p-6"
+
+  // Adjust the text size based on the size prop
+  const textSize = size === "small" ? "text-sm" : "text-xl"
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -60,7 +77,7 @@ export function EnhancedCategoryCard({ icon: Icon, name, index, featured = false
         ref={cardRef}
         onMouseMove={handleMouseMove}
         whileHover={{
-          y: -8,
+          y: size === "small" ? -4 : -8,
           transition: { duration: 0.2 },
         }}
         className="h-full perspective-1000"
@@ -145,13 +162,13 @@ export function EnhancedCategoryCard({ icon: Icon, name, index, featured = false
 
             {/* Content wrapper with 3D effect */}
             <div
-              className="p-6 flex flex-col items-center justify-between text-center relative z-10 h-full"
+              className={`${cardPadding} flex flex-col items-center justify-between text-center relative z-10 h-full`}
               style={{ transform: "translateZ(10px)" }}
             >
               {/* Enhanced glossy icon container with 3D effect */}
               <motion.div
-                className="relative rounded-full bg-gradient-to-br from-white/90 to-purple-200/80 p-4 
-                shadow-lg overflow-hidden"
+                className={`relative rounded-full bg-gradient-to-br from-white/90 to-purple-200/80 ${size === "small" ? "p-2" : "p-4"} 
+                shadow-lg overflow-hidden`}
                 style={{ transform: "translateZ(25px)" }}
                 whileHover={{
                   scale: 1.1,
@@ -165,36 +182,44 @@ export function EnhancedCategoryCard({ icon: Icon, name, index, featured = false
                 {/* Icon shine effect */}
                 <div className="absolute -inset-full h-20 w-20 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-100 transform -rotate-45 group-hover:translate-x-full transition-all duration-700 ease-in-out"></div>
 
-                <Icon className="h-7 w-7 text-primary relative z-10" />
+                <Icon className={`${iconSize} text-primary relative z-10`} />
               </motion.div>
 
               {/* Flexible spacer */}
-              <div className="flex-grow"></div>
+              <div className={`flex-grow ${size === "small" ? "my-1" : ""}`}></div>
 
               {/* Category name with enhanced styling */}
-              <motion.div className="my-4" whileHover={{ scale: 1.03 }} transition={{ duration: 0.2 }}>
-                <h3 className="font-semibold text-xl text-white group-hover:text-white transition-colors duration-200 drop-shadow-md">
+              <motion.div
+                className={size === "small" ? "my-2" : "my-4"}
+                whileHover={{ scale: 1.03 }}
+                transition={{ duration: 0.2 }}
+              >
+                <h3
+                  className={`font-semibold ${textSize} text-white group-hover:text-white transition-colors duration-200 drop-shadow-md`}
+                >
                   {name}
                 </h3>
               </motion.div>
 
               {/* Flexible spacer */}
-              <div className="flex-grow"></div>
+              <div className={`flex-grow ${size === "small" ? "my-1" : ""}`}></div>
 
-              {/* Explore button with enhanced styling */}
-              <motion.div
-                className="flex items-center justify-center space-x-1.5 text-sm font-medium text-white/90 bg-purple-500/30 hover:bg-purple-500/40 backdrop-blur-sm px-4 py-2 rounded-full border border-purple-400/30 transition-all duration-200"
-                whileHover={{
-                  scale: 1.05,
-                  backgroundColor: "rgba(168, 85, 247, 0.4)",
-                }}
-                style={{ transform: "translateZ(20px)" }}
-              >
-                <span>Explore</span>
-                <motion.div whileHover={{ x: 3 }} transition={{ duration: 0.2 }}>
-                  <ArrowRight className="h-3.5 w-3.5" />
+              {/* Explore button with enhanced styling - Only show for default size */}
+              {size === "default" && (
+                <motion.div
+                  className="flex items-center justify-center space-x-1.5 text-sm font-medium text-white/90 bg-purple-500/30 hover:bg-purple-500/40 backdrop-blur-sm px-4 py-2 rounded-full border border-purple-400/30 transition-all duration-200"
+                  whileHover={{
+                    scale: 1.05,
+                    backgroundColor: "rgba(168, 85, 247, 0.4)",
+                  }}
+                  style={{ transform: "translateZ(20px)" }}
+                >
+                  <span>Explore</span>
+                  <motion.div whileHover={{ x: 3 }} transition={{ duration: 0.2 }}>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </motion.div>
                 </motion.div>
-              </motion.div>
+              )}
             </div>
           </div>
         </Link>

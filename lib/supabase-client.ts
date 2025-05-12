@@ -30,3 +30,5 @@ export const createClientSupabase = () => {
 
 // Export a singleton instance
 export const supabase = createClientSupabase()
+
+export const createClientDatabaseClient = createClientSupabase

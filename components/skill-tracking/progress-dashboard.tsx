@@ -546,3 +546,5 @@ export function SkillProgressDashboard({ userId }: SkillProgressProps) {
     </div>
   )
 }
+
+export { SkillProgressDashboard as ProgressDashboard }

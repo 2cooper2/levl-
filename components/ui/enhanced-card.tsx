@@ -70,3 +70,12 @@ export {
   EnhancedCardDescription,
   EnhancedCardContent,
 }
+
+export {
+  EnhancedCard as Card,
+  EnhancedCardHeader as CardHeader,
+  EnhancedCardFooter as CardFooter,
+  EnhancedCardTitle as CardTitle,
+  EnhancedCardDescription as CardDescription,
+  EnhancedCardContent as CardContent,
+}

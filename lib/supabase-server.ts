@@ -36,3 +36,6 @@ export const createServerClient = () => {
     },
   })
 }
+
+export const createServerDatabaseClient = createServerClient
+export { createServerClient as createClient }

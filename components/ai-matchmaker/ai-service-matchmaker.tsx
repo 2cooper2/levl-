@@ -9,6 +9,10 @@ import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 
+// Add import for EnhancedCategoryCard
+import { EnhancedCategoryCard } from "@/components/enhanced-category-card"
+import { Briefcase, Wrench, Camera, Code, PaintBucket, Lightbulb } from "lucide-react"
+
 // Define service types
 type ServiceProvider = {
   id: number
@@ -511,16 +515,8 @@ const initialMessages: Message[] = [
   {
     id: "welcome",
     type: "ai",
-    content:
-      "Hi there! I'm your AI service matchmaker. I can help you find the perfect service for your needs. What are you looking for today?",
+    content: "Hi there! I'm your AI service matchmaker. Please select one of the service cards above to get started.",
     timestamp: new Date(),
-    options: [
-      "I need help mounting a TV",
-      "I need furniture assembly",
-      "I need home painting",
-      "I need smart home setup",
-      "Something else",
-    ],
   },
 ]
 
@@ -3139,7 +3135,7 @@ Would you like to book this service or compare it with other options?
             <div className="absolute inset-0 bg-gradient-to-r from-violet-500/20 via-indigo-600/15 to-purple-600/20 opacity-90"></div>
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzMjI2NTkiIGZpbGwtb3BhY2l0eT0iMC4wNCI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgzNnptMCAxMnY2aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgyNHptMCAxMnY2aDE4di02SDI0em0wIDEydjZoMTh2LTZIMjR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgxMnptMCAxMnY2aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY2aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] animate-[pulse_15s_ease-in-out_infinite] opacity-70"></div>
 
-            {/* Enhanced header content */}
+            {/* Enhanced header content - simplified with icon in top left */}
             <div className="relative flex items-center justify-between p-5 border-b border-gray-200/50 dark:border-gray-800/50 backdrop-blur-sm mb-0">
               <div className="flex items-center">
                 <div className="relative">
@@ -3195,28 +3191,39 @@ Would you like to book this service or compare it with other options?
                           xmlns="http://www.w3.org/2000/svg"
                           viewBox="0 0 24 24"
                           fill="none"
-                          stroke="url(#robot-gradient)"
-                          strokeWidth="2"
+                          stroke="url(#ai-brain-gradient)"
+                          strokeWidth="1.5"
                           strokeLinecap="round"
                           strokeLinejoin="round"
                           className="h-full w-full drop-shadow-md"
                         >
                           <defs>
-                            <linearGradient id="robot-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <linearGradient id="ai-brain-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
                               <stop offset="0%" stopColor="#8b5cf6" />
                               <stop offset="50%" stopColor="#6366f1" />
                               <stop offset="100%" stopColor="#a855f7" />
                             </linearGradient>
                           </defs>
-                          <rect x="3" y="11" width="18" height="10" rx="2" />
-                          <rect x="8" y="8" width="8" height="5" rx="1" />
-                          <path d="M12 16v3" />
-                          <path d="M8 16v1" />
-                          <path d="M16 16v1" />
-                          <path d="M9 3v5" />
-                          <path d="M15 3v5" />
-                          <circle cx="9" cy="6" r="1" />
-                          <circle cx="15" cy="6" r="1" />
+                          {/* Brain with circuit paths */}
+                          <path d="M9.5 2a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5Z" />
+                          <path d="M14.5 4a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z" />
+                          <path d="M17.5 11a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z" />
+                          <path d="M6.5 11a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5Z" />
+                          <path d="M12 22a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
+                          <path d="M10 7v3" />
+                          <path d="M14 7v3" />
+                          <path d="M9 17l1.5-3" />
+                          <path d="M15 17l-1.5-3" />
+                          <path d="M9 11h6" />
+                          <path d="M17 14h-4" />
+                          <path d="M7 14h4" />
+                          {/* Pulse circles */}
+                          <circle
+                            cx="12"
+                            cy="12"
+                            r="9"
+                            className="opacity-10 animate-[pulse_3s_ease-in-out_infinite]"
+                          />
                         </svg>
                       </div>
                     </div>
@@ -3224,7 +3231,7 @@ Would you like to book this service or compare it with other options?
                 </div>
                 <div className="ml-4">
                   <h3 className="font-bold text-lg bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent drop-shadow-sm">
-                    AI Service Matchmaker
+                    LEVL AI
                   </h3>
                   <div className="flex items-center text-xs font-medium">
                     <span className="flex h-2.5 w-2.5 relative mr-2">
@@ -3264,6 +3271,62 @@ Would you like to book this service or compare it with other options?
                     <path d="M3 3v5h5" />
                   </svg>
                 </Button>
+              </div>
+            </div>
+
+            {/* Service cards section */}
+            <div className="p-4 border-b border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-r from-gray-50/80 via-white/80 to-gray-50/80 dark:from-gray-900/80 dark:via-gray-900/90 dark:to-gray-900/80">
+              <div className="overflow-x-auto pb-2">
+                <div className="flex space-x-3">
+                  <EnhancedCategoryCard
+                    icon={Wrench}
+                    name="Home Services"
+                    count={0}
+                    index={0}
+                    size="small"
+                    className="w-32 h-32 flex-shrink-0"
+                  />
+                  <EnhancedCategoryCard
+                    icon={Code}
+                    name="Development"
+                    count={0}
+                    index={1}
+                    size="small"
+                    className="w-32 h-32 flex-shrink-0"
+                  />
+                  <EnhancedCategoryCard
+                    icon={Camera}
+                    name="Photography"
+                    count={0}
+                    index={2}
+                    size="small"
+                    className="w-32 h-32 flex-shrink-0"
+                  />
+                  <EnhancedCategoryCard
+                    icon={PaintBucket}
+                    name="Design"
+                    count={0}
+                    index={3}
+                    size="small"
+                    className="w-32 h-32 flex-shrink-0"
+                  />
+                  <EnhancedCategoryCard
+                    icon={Briefcase}
+                    name="Business"
+                    count={0}
+                    index={4}
+                    size="small"
+                    className="w-32 h-32 flex-shrink-0"
+                  />
+                  <EnhancedCategoryCard
+                    icon={Lightbulb}
+                    name="Marketing"
+                    count={0}
+                    index={5}
+                    size="small"
+                    className="w-32 h-32 flex-shrink-0"
+                  />
+                </div>
               </div>
             </div>
 
