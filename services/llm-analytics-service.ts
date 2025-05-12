@@ -3,7 +3,6 @@
  */
 
 import { createClientDatabaseClient } from "@/lib/supabase-client"
-import { createServerDatabaseClient } from "@/lib/supabase-server"
 
 export interface LLMUsageMetrics {
   totalRequests: number
@@ -52,14 +51,14 @@ export async function recordLLMFeedback(
   }
 }
 
-// Get LLM usage metrics for analytics
+// Get LLM usage metrics for analytics - Client-safe version
 export async function getLLMUsageMetrics(
   startDate?: Date,
   endDate?: Date,
   provider?: string,
 ): Promise<LLMUsageMetrics> {
   try {
-    const supabase = createServerDatabaseClient()
+    const supabase = createClientDatabaseClient()
 
     // Build query with optional filters
     let query = supabase.from("llm_requests").select("*")
@@ -122,10 +121,10 @@ export async function getLLMUsageMetrics(
   }
 }
 
-// Get feedback statistics for LLM responses
+// Get feedback statistics for LLM responses - Client-safe version
 export async function getLLMFeedbackStats(): Promise<LLMFeedbackStats> {
   try {
-    const supabase = createServerDatabaseClient()
+    const supabase = createClientDatabaseClient()
 
     const { data, error } = await supabase.from("llm_response_feedback").select("rating")
 
