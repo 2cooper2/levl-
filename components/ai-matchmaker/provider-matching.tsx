@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { Star, Clock, CheckCircle, ChevronRight } from "lucide-react"
+import { Star, Clock, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -135,7 +135,6 @@ export function ProviderMatching({ userModel, categoryId, onSelectProvider }: Pr
 
               <Button size="sm" className="flex items-center" onClick={() => onSelectProvider(provider.id)}>
                 View Profile
-                <ChevronRight className="hidden md:block ml-1 h-4 w-4" />
               </Button>
             </div>
           </div>

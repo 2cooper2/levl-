@@ -2,7 +2,6 @@
 
 import { useState, useRef } from "react"
 import { AnimatePresence, motion } from "framer-motion"
-import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useMatchmaker } from "@/hooks/use-matchmaker"
 import { AIMatchmakerMessages } from "@/components/ai-matchmaker/ai-matchmaker-messages"
@@ -121,17 +120,17 @@ export function AIMatchmakerContainer() {
   }
 
   return (
-    <section className="w-full pt-4 pb-8 md:pt-6 md:pb-12 relative overflow-hidden order-first z-20">
+    <section className="w-full pt-4 pb-8 md:pt-6 md:pb-12 relative overflow-hidden order-first z-20 px-0 mx-0">
       {/* Enhanced background elements */}
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/80 via-white/90 to-violet-50/80 dark:from-gray-900/90 dark:via-gray-900/95 dark:to-indigo-950/80 z-0" />
 
       {/* Enhanced grid pattern background */}
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5MDkwOTAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgzNnptMCAxMnY2aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgyNHptMCAxMnY2aDE4di02SDI0em0wIDEydjZoMTh2LTZIMjR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgxMnptMCAxMnY2aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY2aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] bg-[size:30px_30px] z-0 opacity-30" />
 
-      <div className="container relative z-10 overflow-x-hidden">
+      <div className="w-full relative z-10 overflow-x-hidden px-0 mx-0">
         {/* AI Matchmaker Interface */}
         <motion.div
-          className="w-full md:max-w-4xl mx-auto"
+          className="w-full mx-0 px-0"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -185,7 +184,7 @@ export function AIMatchmakerContainer() {
                       className="absolute top-4 left-4"
                       onClick={() => setShowBookingFlow(false)}
                     >
-                      <ArrowLeft className="mr-2 h-4 w-4" /> Back to chat
+                      Back to chat
                     </Button>
                     <BookingFlow service={selectedService} onComplete={handleBookingComplete} />
                   </div>
@@ -215,7 +214,7 @@ export function AIMatchmakerContainer() {
                     ref={chatContainerRef}
                     className="h-[500px] overflow-y-auto p-6 bg-gradient-to-b from-gray-50/80 to-white/90 dark:from-gray-900/90 dark:to-gray-950/80 backdrop-blur-sm"
                   >
-                    <div className="space-y-6 max-w-3xl mx-auto">
+                    <div className="space-y-6 w-full mx-auto">
                       <AIMatchmakerMessages
                         messages={messages}
                         isTyping={isTyping}

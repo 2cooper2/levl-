@@ -414,17 +414,17 @@ interface ServiceSpecificQuestions {
   }
   plumbing: {
     questions: string[]
-    options: { [key: string]: string[] }
+    options: string[]
     required: boolean[]
   }
   painting: {
     questions: string[]
-    options: { [key: string]: string[] }
+    options: string[]
     required: boolean[]
   }
   furniture: {
     questions: string[]
-    options: { [key: string]: string[] }
+    options: string[]
     required: boolean[]
   }
   [key: string]: {
@@ -3460,15 +3460,15 @@ Would you like to book this service or compare it with other options?
       {/* Enhanced grid pattern background */}
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5MDkwOTAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgzNnptMCAxMnY2aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgyNHptMCAxMnY2aDE4di02SDI0em0wIDEydjZoMTh2LTZIMjR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgxMnptMCAxMnY2aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY2aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] bg-[size:30px_30px] z-0 opacity-30" />
 
-      <div className="container relative z-10 overflow-x-hidden">
+      <div className="w-full relative z-10 overflow-x-hidden px-0 mx-0">
         {/* AI Matchmaker Interface */}
         <motion.div
-          className="max-w-4xl mx-auto"
+          className="w-full mx-0 px-0"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-200/50 dark:border-gray-800/50 overflow-hidden">
+          <div className="w-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm shadow-2xl border border-gray-200/50 dark:border-gray-800/50 overflow-hidden">
             {/* Enhanced background gradient with animated pattern */}
             <div className="absolute inset-0 bg-gradient-to-r from-violet-500/20 via-indigo-600/15 to-purple-600/20 opacity-90"></div>
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzMjI2NTkiIGZpbGwtb3BhY2l0eT0iMC4wNCI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgzNnptMCAxMnY2aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgyNHptMCAxMnY2aDE4di02SDI0em0wIDEydjZoMTh2LTZIMjR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgxMnptMCAxMnY2aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY2aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] animate-[pulse_15s_ease-in-out_infinite] opacity-70"></div>
@@ -3498,7 +3498,7 @@ Would you like to book this service or compare it with other options?
                             strokeLinecap="round"
                             strokeLinejoin="round"
                             strokeWidth="0.4"
-                            d="M12 2a4 4 0 0 0-4 4v2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-2V6a4 4 0 0 0-4-4z"
+                            d="M12 2a4 4 0 0 0-4 4v2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-2V6a4 4 4 0 0 0-4-4z"
                             className="text-indigo-600 dark:text-indigo-400 animate-[pulse_4s_ease-in-out_infinite]"
                           />
                           <circle
@@ -3871,7 +3871,7 @@ Would you like to book this service or compare it with other options?
               ref={chatContainerRef}
               className="h-[500px] overflow-y-auto p-6 bg-gradient-to-b from-gray-50/80 to-white/90 dark:from-gray-900/90 dark:to-gray-950/80 backdrop-blur-sm"
             >
-              <div className="space-y-6 max-w-3xl mx-auto">
+              <div className="space-y-6 w-full">
                 {messages.map((message, index) => (
                   <motion.div
                     key={message.id}
@@ -3881,10 +3881,11 @@ Would you like to book this service or compare it with other options?
                   >
                     {message.type === "user" && (
                       <div className="flex justify-end">
-                        <div className="bg-gradient-to-br from-indigo-600 to-violet-600 text-white rounded-2xl rounded-tr-none px-5 py-3 max-w-[80%] shadow-lg shadow-indigo-500/20 relative">
-                          <div className="absolute top-0 right-0 h-3 w-3 bg-indigo-600 transform translate-x-1/2 -translate-y-1/2 rotate-45"></div>
-                          <p className="text-sm">{message.content}</p>
-                          <div className="text-[10px] text-white/70 text-right mt-1">
+                        <div className="relative bg-gradient-to-br from-indigo-50/95 via-indigo-100/90 to-violet-50/90 dark:from-indigo-900/95 dark:via-indigo-900/90 dark:to-violet-900/90 backdrop-blur-sm rounded-2xl rounded-tr-none px-5 py-3 max-w-[80%] shadow-lg border border-indigo-200/50 dark:border-indigo-700/50 hover:shadow-indigo-100/20 dark:hover:shadow-indigo-900/20 transition-all duration-300">
+                          <div className="absolute top-0 right-0 h-3 w-3 bg-gradient-to-br from-indigo-50/95 to-violet-50/90 dark:from-indigo-900/95 dark:to-violet-900/90 border-r border-t border-indigo-200/50 dark:border-indigo-700/50 transform translate-x-1/2 -translate-y-1/2 rotate-45"></div>
+                          <div className="absolute inset-0 rounded-2xl rounded-tr-none bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-violet-500/10 dark:from-indigo-500/20 dark:via-purple-500/20 dark:to-violet-500/20 opacity-70"></div>
+                          <p className="text-sm text-gray-800 dark:text-gray-100 relative z-10">{message.content}</p>
+                          <div className="text-[10px] text-indigo-600/60 dark:text-indigo-400/60 text-right mt-1 relative z-10">
                             {new Date(message.timestamp).toLocaleTimeString([], {
                               hour: "2-digit",
                               minute: "2-digit",
@@ -3896,15 +3897,16 @@ Would you like to book this service or compare it with other options?
 
                     {message.type === "ai" && (
                       <div className="flex">
-                        <div className="relative bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl rounded-tl-none px-5 py-3 max-w-[80%] shadow-lg border border-gray-100/50 dark:border-gray-700/50">
-                          <div className="absolute top-0 left-0 h-3 w-3 bg-white/90 dark:bg-gray-800/90 border-l border-t border-gray-100/50 dark:border-gray-700/50 transform -translate-x-1/2 -translate-y-1/2 rotate-45"></div>
-                          <p className="text-sm">{message.content}</p>
+                        <div className="relative bg-gradient-to-br from-white/95 via-white/90 to-indigo-50/90 dark:from-gray-800/95 dark:via-gray-800/90 dark:to-indigo-950/90 backdrop-blur-sm rounded-2xl rounded-tl-none px-5 py-3 max-w-[80%] shadow-lg border border-indigo-100/50 dark:border-indigo-800/50 hover:shadow-indigo-100/20 dark:hover:shadow-indigo-900/20 transition-all duration-300">
+                          <div className="absolute top-0 left-0 h-3 w-3 bg-gradient-to-br from-white/95 to-indigo-50/90 dark:from-gray-800/95 dark:to-indigo-950/90 border-l border-t border-indigo-100/50 dark:border-indigo-800/50 transform -translate-x-1/2 -translate-y-1/2 rotate-45"></div>
+                          <div className="absolute inset-0 rounded-2xl rounded-tl-none bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-violet-500/5 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-violet-500/10 opacity-70"></div>
+                          <p className="text-sm relative z-10">{message.content}</p>
                           {message.options && (
-                            <div className="mt-4 flex flex-wrap gap-2">
+                            <div className="mt-4 flex flex-wrap gap-2 relative z-10">
                               {message.options.map((option) => (
                                 <button
                                   key={option}
-                                  className="px-3 py-1.5 bg-gray-100/80 dark:bg-gray-700/80 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 rounded-full text-xs font-medium transition-all duration-200 border border-gray-200/50 dark:border-gray-600/50 hover:border-indigo-300 dark:hover:border-indigo-700/50 backdrop-blur-sm hover:shadow-md"
+                                  className="px-3 py-1.5 bg-white/90 dark:bg-gray-800/90 hover:bg-indigo-100/90 dark:hover:bg-indigo-900/40 rounded-full text-xs font-medium transition-all duration-200 border border-indigo-200/70 dark:border-indigo-700/50 hover:border-indigo-300 dark:hover:border-indigo-600/70 backdrop-blur-sm hover:shadow-md"
                                   onClick={() => handleOptionSelect(option)}
                                 >
                                   {option}
@@ -3913,12 +3915,12 @@ Would you like to book this service or compare it with other options?
                             </div>
                           )}
                           {message.services && (
-                            <div className="mt-5 space-y-4">
+                            <div className="mt-5 space-y-4 relative z-10">
                               {message.services.map((service) => renderEnhancedServiceCard(service))}
                               {renderShowMoreButton()}
                             </div>
                           )}
-                          <div className="text-[10px] text-gray-400 mt-1">
+                          <div className="text-[10px] text-indigo-600/60 dark:text-indigo-400/60 mt-1 relative z-10">
                             {new Date(message.timestamp).toLocaleTimeString([], {
                               hour: "2-digit",
                               minute: "2-digit",

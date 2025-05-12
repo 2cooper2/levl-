@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { CreditCard, CheckCircle, ChevronLeft, ChevronRight, X } from "lucide-react"
+import { CreditCard, CheckCircle, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
@@ -168,7 +168,6 @@ export function BookingFlow({ service, onComplete, onCancel }: BookingFlowProps)
                         className="bg-indigo-600 hover:bg-indigo-700 text-white"
                       >
                         Continue
-                        <ChevronRight className="hidden md:block ml-2 h-4 w-4" />
                       </Button>
                     </div>
                   </motion.div>
@@ -218,7 +217,6 @@ export function BookingFlow({ service, onComplete, onCancel }: BookingFlowProps)
 
                     <div className="flex justify-between">
                       <Button variant="outline" onClick={() => setStep(1)}>
-                        <ChevronLeft className="hidden md:block mr-2 h-4 w-4" />
                         Back
                       </Button>
                       <Button
@@ -227,7 +225,6 @@ export function BookingFlow({ service, onComplete, onCancel }: BookingFlowProps)
                         className="bg-indigo-600 hover:bg-indigo-700 text-white"
                       >
                         Continue
-                        <ChevronRight className="hidden md:block ml-2 h-4 w-4" />
                       </Button>
                     </div>
                   </motion.div>
@@ -291,7 +288,6 @@ export function BookingFlow({ service, onComplete, onCancel }: BookingFlowProps)
 
                     <div className="flex justify-between">
                       <Button variant="outline" onClick={() => setStep(2)}>
-                        <ChevronLeft className="hidden md:block mr-2 h-4 w-4" />
                         Back
                       </Button>
                       <Button
