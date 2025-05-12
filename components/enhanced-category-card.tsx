@@ -4,7 +4,6 @@ import type React from "react"
 
 import type { LucideIcon } from "lucide-react"
 import { motion, useMotionTemplate, useMotionValue } from "framer-motion"
-import Link from "next/link"
 import Image from "next/image"
 import { ArrowRight } from "lucide-react"
 import { useRef } from "react"
@@ -17,6 +16,7 @@ interface CategoryCardProps {
   featured?: boolean
   className?: string
   size?: "default" | "small" // Add size prop
+  onClick?: () => void // Add onClick prop
 }
 
 export function EnhancedCategoryCard({
@@ -26,6 +26,7 @@ export function EnhancedCategoryCard({
   featured = false,
   className = "",
   size = "default", // Default to the original size
+  onClick, // Add onClick prop
 }: CategoryCardProps) {
   // Convert the category name to a URL-friendly slug
   const categorySlug = name.toLowerCase().replace(/\s+/g, "-")
@@ -82,9 +83,9 @@ export function EnhancedCategoryCard({
         }}
         className="h-full perspective-1000"
       >
-        <Link
-          href={`/category/${categorySlug}`}
-          className="block h-full transform-gpu focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 rounded-xl"
+        <div
+          onClick={onClick}
+          className="block h-full transform-gpu focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 rounded-xl cursor-pointer"
           aria-label={`Explore ${name} category`}
         >
           <div
@@ -222,7 +223,7 @@ export function EnhancedCategoryCard({
               )}
             </div>
           </div>
-        </Link>
+        </div>
       </motion.div>
     </motion.div>
   )

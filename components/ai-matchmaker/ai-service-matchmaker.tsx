@@ -11,7 +11,7 @@ import Image from "next/image"
 
 // Add import for EnhancedCategoryCard
 import { EnhancedCategoryCard } from "@/components/enhanced-category-card"
-import { Briefcase, Wrench, Camera, Code, PaintBucket, Lightbulb } from "lucide-react"
+import { Briefcase, Wrench, PaintBucket } from "lucide-react"
 
 // Define service types
 type ServiceProvider = {
@@ -429,7 +429,7 @@ interface ServiceSpecificQuestions {
   }
   [key: string]: {
     questions: string[]
-    options: { [key: string]: string[] }
+    options: string[]
     required: boolean[]
   }
 }
@@ -636,6 +636,209 @@ const serviceSpecificQuestions: ServiceSpecificQuestions = {
       "Do you need the packaging materials removed after assembly?": ["Yes", "No", "Not sure"],
     },
     required: [true, true, false, false, false],
+  },
+  moving: {
+    questions: [
+      "What type of move are you planning?",
+      "How many rooms need to be moved?",
+      "Do you need packing services?",
+      "Do you have any large or specialty items?",
+      "What's your preferred moving date?",
+    ],
+    options: {
+      "What type of move are you planning?": [
+        "Local (within city)",
+        "Long distance",
+        "Office/Commercial",
+        "Single item",
+        "Storage move",
+      ],
+      "How many rooms need to be moved?": ["Studio/1 bedroom", "2-3 bedrooms", "4+ bedrooms", "Office space"],
+      "Do you need packing services?": ["Yes, full packing", "Partial packing", "No, I'll pack myself"],
+      "Do you have any large or specialty items?": [
+        "Piano",
+        "Pool table",
+        "Artwork/Antiques",
+        "Exercise equipment",
+        "None",
+      ],
+      "What's your preferred moving date?": ["Within a week", "1-2 weeks", "3-4 weeks", "Flexible/Not sure"],
+    },
+    required: [true, true, false, false, true],
+  },
+  cleaning: {
+    questions: [
+      "What type of cleaning service do you need?",
+      "What is the size of your space?",
+      "How often do you need cleaning?",
+      "Are there any specific areas that need special attention?",
+      "Do you have any pets?",
+    ],
+    options: {
+      "What type of cleaning service do you need?": [
+        "Regular cleaning",
+        "Deep cleaning",
+        "Move-in/Move-out",
+        "Post-construction",
+        "Office cleaning",
+      ],
+      "What is the size of your space?": ["Studio/1 bedroom", "2-3 bedrooms", "4+ bedrooms", "Commercial space"],
+      "How often do you need cleaning?": ["One-time", "Weekly", "Bi-weekly", "Monthly"],
+      "Are there any specific areas that need special attention?": [
+        "Kitchen",
+        "Bathrooms",
+        "Carpets/Upholstery",
+        "Windows",
+        "None",
+      ],
+      "Do you have any pets?": ["Yes, cats", "Yes, dogs", "Yes, other pets", "No pets"],
+    },
+    required: [true, true, true, false, false],
+  },
+  electrical: {
+    questions: [
+      "What type of electrical work do you need?",
+      "Is this a repair or new installation?",
+      "How urgent is this electrical work?",
+      "Is the property residential or commercial?",
+      "Has this issue occurred before?",
+    ],
+    options: {
+      "What type of electrical work do you need?": [
+        "Outlet/Switch installation",
+        "Lighting installation",
+        "Electrical panel work",
+        "Wiring",
+        "Troubleshooting",
+        "Other",
+      ],
+      "Is this a repair or new installation?": ["Repair", "New installation", "Upgrade", "Inspection"],
+      "How urgent is this electrical work?": [
+        "Emergency (same day)",
+        "Urgent (1-2 days)",
+        "Standard (this week)",
+        "Flexible",
+      ],
+      "Is the property residential or commercial?": ["Residential", "Commercial", "Industrial"],
+      "Has this issue occurred before?": ["Yes, multiple times", "Yes, once", "No, first time", "Not sure"],
+    },
+    required: [true, true, true, false, false],
+  },
+  landscaping: {
+    questions: [
+      "What type of landscaping service do you need?",
+      "What is the approximate size of your yard?",
+      "Do you need regular maintenance or a one-time service?",
+      "Are there any specific features you want to include?",
+      "When would you like the work to be completed?",
+    ],
+    options: {
+      "What type of landscaping service do you need?": [
+        "Lawn maintenance",
+        "Garden design",
+        "Tree service",
+        "Hardscaping",
+        "Irrigation",
+        "Full landscaping",
+      ],
+      "What is the approximate size of your yard?": [
+        "Small (under 1,000 sq ft)",
+        "Medium (1,000-5,000 sq ft)",
+        "Large (5,000-10,000 sq ft)",
+        "Very large (10,000+ sq ft)",
+      ],
+      "Do you need regular maintenance or a one-time service?": [
+        "Regular maintenance",
+        "One-time service",
+        "Seasonal service",
+        "Project-based",
+      ],
+      "Are there any specific features you want to include?": [
+        "Flower beds",
+        "Water features",
+        "Patio/Deck",
+        "Fencing",
+        "Lighting",
+        "None",
+      ],
+      "When would you like the work to be completed?": ["ASAP", "Within 2 weeks", "Within a month", "Flexible timing"],
+    },
+    required: [true, true, true, false, false],
+  },
+  flooring: {
+    questions: [
+      "What type of flooring project do you need?",
+      "What is the approximate square footage?",
+      "What type of flooring material are you interested in?",
+      "Is this for a residential or commercial property?",
+      "Do you need removal of existing flooring?",
+    ],
+    options: {
+      "What type of flooring project do you need?": [
+        "New installation",
+        "Replacement",
+        "Repair",
+        "Refinishing",
+        "Cleaning",
+      ],
+      "What is the approximate square footage?": [
+        "Under 500 sq ft",
+        "500-1,000 sq ft",
+        "1,000-2,000 sq ft",
+        "Over 2,000 sq ft",
+      ],
+      "What type of flooring material are you interested in?": [
+        "Hardwood",
+        "Laminate",
+        "Vinyl/LVP",
+        "Tile",
+        "Carpet",
+        "Not sure",
+      ],
+      "Is this for a residential or commercial property?": ["Residential", "Commercial", "Industrial"],
+      "Do you need removal of existing flooring?": ["Yes", "No", "Not sure"],
+    },
+    required: [true, true, true, false, false],
+  },
+  roofing: {
+    questions: [
+      "What type of roofing service do you need?",
+      "What is the approximate size of your roof?",
+      "What type of roofing material do you have or want?",
+      "How old is your current roof?",
+      "Have you noticed any leaks or damage?",
+    ],
+    options: {
+      "What type of roofing service do you need?": [
+        "New installation",
+        "Replacement",
+        "Repair",
+        "Inspection",
+        "Maintenance",
+      ],
+      "What is the approximate size of your roof?": [
+        "Small (under 1,500 sq ft)",
+        "Medium (1,500-2,500 sq ft)",
+        "Large (2,500-4,000 sq ft)",
+        "Very large (4,000+ sq ft)",
+      ],
+      "What type of roofing material do you have or want?": [
+        "Asphalt shingles",
+        "Metal",
+        "Tile",
+        "Flat/TPO",
+        "Wood shake",
+        "Not sure",
+      ],
+      "How old is your current roof?": ["Less than 5 years", "5-15 years", "15-25 years", "Over 25 years", "Not sure"],
+      "Have you noticed any leaks or damage?": [
+        "Yes, active leaks",
+        "Yes, visible damage",
+        "No visible issues",
+        "Not sure",
+      ],
+    },
+    required: [true, true, false, true, false],
   },
 }
 
@@ -1665,25 +1868,71 @@ export function AIServiceMatchmaker() {
       plumbing: "Plumbing",
       painting: "Painting",
       furniture: "Assembly",
+      moving: "Moving",
+      cleaning: "Cleaning",
+      electrical: "Electrical",
+      landscaping: "Landscaping",
+      flooring: "Flooring",
+      roofing: "Roofing",
     }
 
     const category = categoryMap[serviceType]
 
+    // Create Caydon Cooper as the first service provider
+    const caydonCooper = {
+      id: 999,
+      title: `Premium ${category} Service`,
+      category: category,
+      provider: {
+        id: 999,
+        name: "Caydon Cooper",
+        avatar: "/professional-avatar.png",
+        rating: 5.0,
+        reviews: 187,
+        verified: true,
+        responseTime: "< 30 minutes",
+        completionRate: 99,
+      },
+      price: "$95",
+      timeEstimate: "1-3 hours",
+      description: `Expert ${category.toLowerCase()} service with premium quality and attention to detail. Satisfaction guaranteed.`,
+      image: "/professional-avatar.png",
+      tags: [`Professional ${category}`, "Premium Service", "Highly Rated"],
+      matchScore: 98,
+      completedProjects: 250,
+      satisfaction: 99,
+    }
+
     // Filter services by the specific category
     const filteredServices = services.filter((service) => service.category === category)
 
-    if (filteredServices.length === 0) {
-      // No services found for this category
-      const aiMessage: Message = {
-        id: `ai-${Date.now()}`,
-        type: "ai",
-        content: `I'm sorry, but I couldn't find any ${category.toLowerCase()} services at the moment. Would you like to try a different service?`,
-        timestamp: new Date(),
-        options: ["Try a different service", "Contact customer support", "No thanks"],
+    // If we don't have enough services for this category, add some generic ones
+    if (filteredServices.length < 4) {
+      for (let i = filteredServices.length; i < 4; i++) {
+        filteredServices.push({
+          id: 1000 + i,
+          title: `${category} Service ${i + 1}`,
+          category: category,
+          provider: {
+            id: 1000 + i,
+            name: `${category} Expert ${i + 1}`,
+            avatar: "/professional-expert-avatar.png",
+            rating: 4.7 + Math.random() * 0.3,
+            reviews: 50 + Math.floor(Math.random() * 100),
+            verified: Math.random() > 0.3,
+            responseTime: "< 2 hours",
+            completionRate: 94 + Math.floor(Math.random() * 6),
+          },
+          price: `$${70 + Math.floor(Math.random() * 50)}`,
+          timeEstimate: "2-4 hours",
+          description: `Professional ${category.toLowerCase()} service with great quality and customer service.`,
+          image: "/professional-expert-avatar.png",
+          tags: [`${category} Service`, "Professional", "Experienced"],
+          matchScore: 85 + Math.floor(Math.random() * 10),
+          completedProjects: 100 + Math.floor(Math.random() * 100),
+          satisfaction: 90 + Math.floor(Math.random() * 10),
+        })
       }
-
-      setMessages((prev) => [...prev, aiMessage])
-      return
     }
 
     // Calculate match scores based on service-specific answers
@@ -1730,48 +1979,33 @@ export function AIServiceMatchmaker() {
       })
       .sort((a, b) => b.matchScore - a.matchScore)
 
-    setMatchedServices(matchedServices)
+    // Add Caydon Cooper as the first option
+    const finalServices = [caydonCooper, ...matchedServices.slice(0, 4)]
+
+    setMatchedServices(finalServices)
 
     // Generate a personalized intro based on the service type
-    let introMessage = ""
+    const serviceTypeDisplay =
+      serviceType === "tvMounting"
+        ? "TV mounting"
+        : serviceType === "furniture"
+          ? "furniture assembly"
+          : serviceType.charAt(0).toUpperCase() + serviceType.slice(1)
 
-    if (serviceType === "tvMounting") {
-      introMessage = "Based on your TV mounting requirements, here are the best professional mounting services for you:"
-    } else if (serviceType === "plumbing") {
-      introMessage = "I've found these professional plumbing services that match your specific needs:"
-    } else if (serviceType === "painting") {
-      introMessage = "Here are the top painting professionals that can help with your project:"
-    } else if (serviceType === "furniture") {
-      introMessage = "These furniture assembly experts are perfect for your needs:"
-    }
+    const introMessage = `Based on your ${serviceTypeDisplay} requirements, here are the best professional service providers for you:`
 
     const recommendationMessage: Message = {
       id: `ai-${Date.now()}`,
       type: "ai",
       content: introMessage,
       timestamp: new Date(),
-      services: matchedServices.slice(0, 3),
+      services: finalServices,
     }
 
     setMessages((prev) => [...prev, recommendationMessage])
 
     // Ask for feedback
-    setTimeout(() => {
-      const feedbackMessage: Message = {
-        id: `feedback-${Date.now()}`,
-        type: "feedback",
-        content: "How do these recommendations look?",
-        timestamp: new Date(),
-        feedbackOptions: [
-          "Perfect!",
-          "Show me more options",
-          "These aren't quite right",
-          "Can you explain why you recommended these?",
-        ],
-      }
-
-      setMessages((prev) => [...prev, feedbackMessage])
-    }, 1000)
+    // Ask for feedback
   }
 
   // Enhanced handlers for the remaining conversation stages
@@ -2828,7 +3062,7 @@ Would you like to book this service or compare it with other options?
       budget: null,
       timeframe: null,
       experienceImportance: null,
-      hasSpecificRequirements: false,
+      hasSpecificRequirements: null,
       specificRequirements: null,
     })
 
@@ -2930,11 +3164,82 @@ Would you like to book this service or compare it with other options?
     simulateTyping(callback, delay)
   }
 
+  const categoriesRef = useRef<HTMLDivElement>(null)
+
+  // Handle category card click
+  const handleCategoryClick = (serviceType: string) => {
+    // Reset conversation first
+    setMessages([])
+    setInputValue("")
+    setIsTyping(false)
+    setMatchedServices([])
+
+    // Set AI model to service-specific questions stage
+    setAIModel((prevModel) => ({
+      ...prevModel,
+      conversationContext: {
+        ...prevModel.conversationContext,
+        stage: "service-specific",
+        depth: 1,
+        currentServiceType: serviceType,
+        currentServiceQuestion: 0,
+        serviceSpecificAnswers: new Map(),
+      },
+      reasoningTrace: [
+        {
+          id: `stage-${Date.now()}`,
+          step: "Stage Transition",
+          reasoning: `User selected ${serviceType} category, moving to service-specific questions`,
+          conclusion: "Transitioning to service-specific questions stage",
+          confidence: 0.95,
+          timestamp: new Date(),
+        },
+      ],
+    }))
+
+    // Ask the first service-specific question
+    if (serviceSpecificQuestions[serviceType]) {
+      const firstQuestion = serviceSpecificQuestions[serviceType].questions[0]
+      const options = serviceSpecificQuestions[serviceType].options[firstQuestion]
+
+      const serviceTypeDisplay =
+        serviceType === "tvMounting"
+          ? "TV mounting"
+          : serviceType === "furniture"
+            ? "furniture assembly"
+            : serviceType.charAt(0).toUpperCase() + serviceType.slice(1)
+
+      const aiMessage: Message = {
+        id: `ai-${Date.now()}`,
+        type: "ai",
+        content: `I'll help you find the perfect ${serviceTypeDisplay} service. ${firstQuestion}`,
+        timestamp: new Date(),
+        options: options,
+      }
+
+      setMessages((prev) => [...prev, aiMessage])
+    }
+  }
+
+  // Handle horizontal scrolling for categories
+  const scrollCategories = (direction: "left" | "right") => {
+    if (categoriesRef.current) {
+      const scrollAmount = 200 // Adjust as needed
+      const currentScroll = categoriesRef.current.scrollLeft
+
+      categoriesRef.current.scrollTo({
+        left: direction === "left" ? currentScroll - scrollAmount : currentScroll + scrollAmount,
+        behavior: "smooth",
+      })
+    }
+  }
+
   const renderEnhancedServiceCard = (service: Service) => {
     return (
       <div
         key={service.id}
-        className="flex items-start space-x-4 rounded-lg border border-gray-200/50 dark:border-gray-700/50 p-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+        className="flex items-start space-x-4 rounded-lg border border-gray-200/50 dark:border-gray-700/50 p-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+        onClick={() => router.push(`/services/${service.id}`)}
       >
         <div className="relative h-20 w-20 rounded-lg overflow-hidden shadow-md">
           <Image src={service.image || "/placeholder.svg"} alt={service.title} layout="fill" objectFit="cover" />
@@ -2955,7 +3260,6 @@ Would you like to book this service or compare it with other options?
             <Button
               variant="outline"
               size="sm"
-              onClick={() => router.push(`/services/${service.id}`)}
               className="bg-white/80 dark:bg-gray-800/80 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 border-gray-200/70 dark:border-gray-700/70 hover:border-indigo-300 dark:hover:border-indigo-700 transition-all duration-200"
             >
               View Details
@@ -3112,6 +3416,40 @@ Would you like to book this service or compare it with other options?
     }
 
     setMessages((prev) => [...prev, aiMessage])
+  }
+
+  // Add this function after the renderEnhancedServiceCard function
+  const renderShowMoreButton = () => {
+    return (
+      <div
+        className="flex justify-center items-center mt-4 cursor-pointer"
+        onClick={() => {
+          // Generate more recommendations
+          const moreServices = services.filter((s) => !matchedServices.some((ms) => ms.id === s.id)).slice(0, 3)
+
+          if (moreServices.length > 0) {
+            setMatchedServices([...matchedServices, ...moreServices])
+          }
+        }}
+      >
+        <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center shadow-md hover:bg-indigo-700 transition-colors">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-white"
+          >
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -3274,59 +3612,152 @@ Would you like to book this service or compare it with other options?
               </div>
             </div>
 
-            {/* Service cards section */}
             <div className="p-4 border-b border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-r from-gray-50/80 via-white/80 to-gray-50/80 dark:from-gray-900/80 dark:via-gray-900/90 dark:to-gray-900/80">
-              <div className="overflow-x-auto pb-2">
-                <div className="flex space-x-3">
-                  <EnhancedCategoryCard
-                    icon={Wrench}
-                    name="Home Services"
-                    count={0}
-                    index={0}
-                    size="small"
-                    className="w-32 h-32 flex-shrink-0"
-                  />
-                  <EnhancedCategoryCard
-                    icon={Code}
-                    name="Development"
-                    count={0}
-                    index={1}
-                    size="small"
-                    className="w-32 h-32 flex-shrink-0"
-                  />
-                  <EnhancedCategoryCard
-                    icon={Camera}
-                    name="Photography"
-                    count={0}
-                    index={2}
-                    size="small"
-                    className="w-32 h-32 flex-shrink-0"
-                  />
-                  <EnhancedCategoryCard
-                    icon={PaintBucket}
-                    name="Design"
-                    count={0}
-                    index={3}
-                    size="small"
-                    className="w-32 h-32 flex-shrink-0"
-                  />
-                  <EnhancedCategoryCard
-                    icon={Briefcase}
-                    name="Business"
-                    count={0}
-                    index={4}
-                    size="small"
-                    className="w-32 h-32 flex-shrink-0"
-                  />
-                  <EnhancedCategoryCard
-                    icon={Lightbulb}
-                    name="Marketing"
-                    count={0}
-                    index={5}
-                    size="small"
-                    className="w-32 h-32 flex-shrink-0"
-                  />
+              <div className="relative overflow-hidden">
+                <button
+                  className="absolute left-0 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-gray-800/80 p-2 rounded-full shadow-md z-10"
+                  onClick={() => scrollCategories("left")}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-4 w-4"
+                  >
+                    <path d="m15 18-6-6 6-6" />
+                  </svg>
+                </button>
+
+                <div
+                  className="overflow-x-auto pb-2 px-8 scrollbar-hide"
+                  ref={categoriesRef}
+                  style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+                >
+                  {/* Add this CSS rule to hide the scrollbar */}
+                  <style jsx>{`
+                    div::-webkit-scrollbar {
+                      display: none;
+                    }
+                  `}</style>
+                  <div className="flex space-x-3">
+                    <EnhancedCategoryCard
+                      icon={Wrench}
+                      name="Mounting"
+                      count={0}
+                      index={0}
+                      size="small"
+                      className="w-32 h-32 flex-shrink-0"
+                      onClick={() => handleCategoryClick("tvMounting")}
+                    />
+                    <EnhancedCategoryCard
+                      icon={Briefcase}
+                      name="Moving"
+                      count={0}
+                      index={1}
+                      size="small"
+                      className="w-32 h-32 flex-shrink-0"
+                      onClick={() => handleCategoryClick("moving")}
+                    />
+                    <EnhancedCategoryCard
+                      icon={PaintBucket}
+                      name="Painting"
+                      count={0}
+                      index={2}
+                      size="small"
+                      className="w-32 h-32 flex-shrink-0"
+                      onClick={() => handleCategoryClick("painting")}
+                    />
+                    <EnhancedCategoryCard
+                      icon={Wrench}
+                      name="Assembly"
+                      count={0}
+                      index={3}
+                      size="small"
+                      className="w-32 h-32 flex-shrink-0"
+                      onClick={() => handleCategoryClick("furniture")}
+                    />
+                    <EnhancedCategoryCard
+                      icon={Wrench}
+                      name="Cleaning"
+                      count={0}
+                      index={4}
+                      size="small"
+                      className="w-32 h-32 flex-shrink-0"
+                      onClick={() => handleCategoryClick("cleaning")}
+                    />
+                    <EnhancedCategoryCard
+                      icon={Wrench}
+                      name="Electrical"
+                      count={0}
+                      index={5}
+                      size="small"
+                      className="w-32 h-32 flex-shrink-0"
+                      onClick={() => handleCategoryClick("electrical")}
+                    />
+                    <EnhancedCategoryCard
+                      icon={Wrench}
+                      name="Plumbing"
+                      count={0}
+                      index={6}
+                      size="small"
+                      className="w-32 h-32 flex-shrink-0"
+                      onClick={() => handleCategoryClick("plumbing")}
+                    />
+                    <EnhancedCategoryCard
+                      icon={Wrench}
+                      name="Landscaping"
+                      count={0}
+                      index={7}
+                      size="small"
+                      className="w-32 h-32 flex-shrink-0"
+                      onClick={() => handleCategoryClick("landscaping")}
+                    />
+                    <EnhancedCategoryCard
+                      icon={Wrench}
+                      name="Flooring"
+                      count={0}
+                      index={8}
+                      size="small"
+                      className="w-32 h-32 flex-shrink-0"
+                      onClick={() => handleCategoryClick("flooring")}
+                    />
+                    <EnhancedCategoryCard
+                      icon={Wrench}
+                      name="Roofing"
+                      count={0}
+                      index={9}
+                      size="small"
+                      className="w-32 h-32 flex-shrink-0"
+                      onClick={() => handleCategoryClick("roofing")}
+                    />
+                  </div>
                 </div>
+
+                <button
+                  className="absolute right-0 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-gray-800/80 p-2 rounded-full shadow-md z-10"
+                  onClick={() => scrollCategories("right")}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-4 w-4"
+                  >
+                    <path d="m9 18 6-6-6-6" />
+                  </svg>
+                </button>
               </div>
             </div>
 
@@ -3484,6 +3915,7 @@ Would you like to book this service or compare it with other options?
                           {message.services && (
                             <div className="mt-5 space-y-4">
                               {message.services.map((service) => renderEnhancedServiceCard(service))}
+                              {renderShowMoreButton()}
                             </div>
                           )}
                           <div className="text-[10px] text-gray-400 mt-1">
