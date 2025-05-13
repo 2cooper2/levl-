@@ -973,14 +973,6 @@ export function AIServiceMatchmaker() {
         selfCritique: true,
         uncertaintyHandling: 0.8,
         explorationFactor: 0.3,
-        longTerm: new Map(),
-        conversationFlow: [],
-      },
-      reasoningCapabilities: {
-        chainOfThought: true,
-        selfCritique: true,
-        uncertaintyHandling: 0.8,
-        explorationFactor: 0.3,
       },
       adaptivePersonalization: {
         learningRate: 0.2,
@@ -1014,24 +1006,28 @@ export function AIServiceMatchmaker() {
 
   // Scroll to bottom of messages
   const scrollToBottom = () => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "end",
-        inline: "nearest",
-      })
-      // Prevent page from scrolling
-      setTimeout(() => {
-        if (chatContainerRef.current) {
-          chatContainerRef.current.scrollIntoView({ block: "nearest" })
-        }
-      }, 100)
+    try {
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "end",
+          inline: "nearest",
+        })
+        // Prevent page from scrolling
+        setTimeout(() => {
+          if (chatContainerRef.current) {
+            chatContainerRef.current.scrollIntoView({ block: "nearest" })
+          }
+        }, 100)
+      }
+    } catch (error) {
+      console.error("Error scrolling to bottom:", error)
     }
   }
 
   useEffect(() => {
-    // Only scroll if the chat is open
-    if (showMatchmaker && messages.length > 0) {
+    // Only scroll if the chat is open AND we have more than the initial welcome message
+    if (showMatchmaker && messages.length > 1) {
       scrollToBottom()
     }
   }, [messages, showMatchmaker])
@@ -1249,7 +1245,7 @@ export function AIServiceMatchmaker() {
         contextualMemory: {
           ...prevModel.enhancedReasoning.contextualMemory,
           shortTerm: new Map([
-            ...Array.from(prevModel.enhancedReasoning.contextualMemory.entries()),
+            ...Array.from(prevModel.enhancedReasoning.contextualMemory.shortTerm || new Map()),
             ["lastProcessedInput", input],
             ["lastIntent", enhancedIntent],
           ]),
@@ -1882,6 +1878,13 @@ export function AIServiceMatchmaker() {
       tvMounting: "Mounting",
       plumbing: "Plumbing",
       painting: "Painting",
+    }
+
+    // Map service type to category
+    const serviceCategoryMap: { [key: string]: string } = {
+      tvMounting: "Mounting",
+      plumbing: "Plumbing",
+      painting: "Painting",
       furniture: "Assembly",
       moving: "Moving",
       cleaning: "Cleaning",
@@ -1898,7 +1901,7 @@ export function AIServiceMatchmaker() {
       roofing: "Roofing",
     }
 
-    const category = categoryMap[serviceType]
+    const category = serviceCategoryMap[serviceType]
 
     // Create Caydon Cooper as the first service provider
     const caydonCooper = {
@@ -2526,6 +2529,11 @@ export function AIServiceMatchmaker() {
     // Ensure we don't have more than 3 matches
     if (enhancedMatches.length > 3) {
       enhancedMatches = enhancedMatches.slice(0, 3)
+    }
+
+    // Ensure diversityFocus is defined
+    if (!diversityFocus) {
+      diversityFocus = "balanced"
     }
 
     // Add reasoning step about diversity focus
@@ -3479,7 +3487,7 @@ Would you like to book this service or compare it with other options?
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/80 via-white/90 to-violet-50/80 dark:from-gray-900/90 dark:via-gray-900/95 dark:to-indigo-950/80 z-0" />
 
       {/* Enhanced grid pattern background */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5MDkwOTAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgzNnptMC0xMnY6aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgyNHptMC0xMnY6aDE4di02SDI0em0wIDEydjZoMTh2LTZIMjR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgxMnptMC0xMnY6aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY6aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] bg-[size:30px_30px] z-0 opacity-30" />
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5MDkwOTAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgzNnptMC0xMnY6aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDI0em0wIDEydjZoMTh2LTZIMjR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY6aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] bg-[size:30px_30px] z-0 opacity-30" />
 
       <div className="w-full relative z-10 overflow-x-hidden px-0 mx-0">
         {/* AI Matchmaker Interface */}
@@ -3492,7 +3500,7 @@ Would you like to book this service or compare it with other options?
           <div className="w-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm shadow-2xl border border-gray-200/50 dark:border-gray-800/50 overflow-hidden">
             {/* Enhanced background gradient with animated pattern */}
             <div className="absolute inset-0 bg-gradient-to-r from-violet-500/20 via-indigo-600/15 to-purple-600/20 opacity-90"></div>
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzMjI2NTkiIGZpbGwtb3BhY2l0eT0iMC4wNCI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgzNnptMC0xMnY6aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgyNHptMC0xMnY6aDE4di02SDI0em0wIDEydjZoMTh2LTZIMjR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgxMnptMC0xMnY6aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY6aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] animate-[pulse_15s_ease-in-out_infinite] opacity-70"></div>
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzMjI2NTkiIGZpbGwtb3BhY2l0eT0iMC4wNCI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgzNnptMC0xMnY6aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDI0em0wIDEydjZoMTh2LTZIMjR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY6aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] animate-[pulse_15s_ease-in-out_infinite] opacity-70"></div>
 
             {/* Enhanced header content - simplified with icon in top left */}
             <div className="relative flex items-center justify-between p-5 border-b border-gray-200/50 dark:border-gray-800/50 backdrop-blur-sm mb-0 mt-8">
