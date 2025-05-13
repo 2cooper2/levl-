@@ -4,7 +4,7 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider } from "@/context/auth-context"
-import ExampleComponent from "./components/example-component"
+// Remove ExampleComponent import
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -20,11 +20,11 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
+    <html lang="en" style={{ margin: 0, padding: 0 }}>
+      <body className={inter.className} style={{ margin: 0, padding: 0 }}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <AuthProvider>
-            <ExampleComponent />
+            {/* Remove ExampleComponent */}
             {children}
           </AuthProvider>
         </ThemeProvider>

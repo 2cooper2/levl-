@@ -169,7 +169,7 @@
 
   /* Add a focus visible utility for better accessibility */
   .focus-ring {
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2;
+    @apply focus-visible:outline-none focus-visible:ring-primary focus-visible:ring-offset-2;
   }
 
   /* Add a subtle hover effect for interactive elements */
@@ -369,12 +369,14 @@
 @layer base {
   * {
     @apply border-border;
+    margin: 0;
+    padding: 0;
   }
 
   html,
   body {
     @apply bg-background text-foreground;
-    /* Add these properties to prevent background flickering */
+    /* Remove all spacing */
     min-height: 100vh;
     min-width: 100vw;
     position: relative;
@@ -436,9 +438,13 @@
   }
 }
 
-/* Fixed header spacing */
+/* Remove ALL spacing from body */
 body {
-  padding-top: 4rem; /* 64px, matches the header height */
+  padding: 0;
+  margin: 0;
+  overflow-x: hidden;
+  width: 100%;
+  background-color: hsl(var(--background));
 }
 
 /* Enhanced glassmorphic effect for header */
@@ -452,17 +458,50 @@ header.fixed {
   background: rgba(0, 0, 0, 0.7);
 }
 
-html,
-body {
-  overflow-x: hidden;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  background-color: hsl(var(--background));
-}
-
 /* Ensure all fixed elements cover the entire viewport */
 .fixed {
   width: 100vw;
   min-height: 100vh;
+}
+
+/* Fix header positioning */
+header.sticky {
+  top: 0;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+/* Remove any top margin from first child elements */
+main > *:first-child {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+/* Ensure the page content starts at the very top */
+#__next,
+main {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+/* Add these rules at the end of the file */
+html,
+body,
+#__next,
+main {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body > div {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* Ensure the page content starts at the very top */
+#__next,
+main,
+body > div:first-child {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
 }

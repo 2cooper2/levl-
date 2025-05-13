@@ -21,15 +21,15 @@ export default function Home() {
   }, [])
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col" style={{ margin: 0, padding: 0 }}>
       <AnimatedGradientBackground />
 
-      {/* AI Service Matchmaker - Moved to the very top with negative margin */}
-      <div className="relative z-50">
+      {/* AI Service Matchmaker */}
+      <div className="relative z-50" style={{ marginTop: 0 }}>
         <AIServiceMatchmaker />
       </div>
 
-      <main className="flex-1 mt-[-80px] pt-[80px]">
+      <main className="flex-1" style={{ marginTop: 0, paddingTop: 0 }}>
         <EnhancedHeroSection />
 
         {/* Add any skill accelerator component here */}

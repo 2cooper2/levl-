@@ -46,11 +46,11 @@ export function EnhancedMainNav() {
     setIsMenuOpen(!isMenuOpen)
   }
 
+  // Modify the navItems array to remove the AI Matchmaker button and adjust the order
   const navItems = [
     { href: "/", label: "Home" },
     { href: "/services", label: "Services" },
     { href: "/providers", label: "Providers" },
-    { href: "/matchmaker", label: "AI Matchmaker" },
     { href: "/about", label: "About" },
   ]
 
@@ -60,12 +60,14 @@ export function EnhancedMainNav() {
         "sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md transition-all duration-200",
         isScrolled && "shadow-sm",
       )}
+      style={{ marginTop: 0, paddingTop: 0, paddingBottom: "0.5rem" }}
     >
-      <div className="container flex h-16 items-center justify-between">
+      <div className="container flex h-20 items-center justify-between">
         <div className="flex items-center gap-2">
-          <Link href="/" className="flex items-center gap-2">
-            <LevlLogo className="h-8 w-8" />
-            <span className="text-xl font-bold bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
+          <Link href="/" className="flex items-center gap-2 relative">
+            <div className="absolute inset-0 bg-white/20 dark:bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 dark:border-white/10 shadow-sm pointer-events-none"></div>
+            <LevlLogo className="h-8 w-8 relative z-10" />
+            <span className="text-xl font-bold bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent relative z-10">
               LevL
             </span>
           </Link>

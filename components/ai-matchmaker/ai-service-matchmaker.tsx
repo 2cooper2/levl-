@@ -973,6 +973,14 @@ export function AIServiceMatchmaker() {
         selfCritique: true,
         uncertaintyHandling: 0.8,
         explorationFactor: 0.3,
+        longTerm: new Map(),
+        conversationFlow: [],
+      },
+      reasoningCapabilities: {
+        chainOfThought: true,
+        selfCritique: true,
+        uncertaintyHandling: 0.8,
+        explorationFactor: 0.3,
       },
       adaptivePersonalization: {
         learningRate: 0.2,
@@ -1241,7 +1249,7 @@ export function AIServiceMatchmaker() {
         contextualMemory: {
           ...prevModel.enhancedReasoning.contextualMemory,
           shortTerm: new Map([
-            ...Array.from(prevModel.enhancedReasoning.contextualMemory.shortTerm.entries()),
+            ...Array.from(prevModel.enhancedReasoning.contextualMemory.entries()),
             ["lastProcessedInput", input],
             ["lastIntent", enhancedIntent],
           ]),
@@ -3075,7 +3083,7 @@ Would you like to book this service or compare it with other options?
       budget: null,
       timeframe: null,
       experienceImportance: null,
-      hasSpecificRequirements: null,
+      hasSpecificRequirements: false,
       specificRequirements: null,
     })
 
@@ -3466,7 +3474,7 @@ Would you like to book this service or compare it with other options?
   }
 
   return (
-    <section className="w-full pb-8 md:pb-12 relative overflow-hidden order-first z-20 -mt-4">
+    <section className="w-full pb-8 md:pb-12 relative overflow-hidden order-first z-20 -mt-8">
       {/* Enhanced background elements */}
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/80 via-white/90 to-violet-50/80 dark:from-gray-900/90 dark:via-gray-900/95 dark:to-indigo-950/80 z-0" />
 
@@ -3487,17 +3495,11 @@ Would you like to book this service or compare it with other options?
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzMjI2NTkiIGZpbGwtb3BhY2l0eT0iMC4wNCI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgzNnptMC0xMnY6aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgyNHptMC0xMnY6aDE4di02SDI0em0wIDEydjZoMTh2LTZIMjR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgxMnptMC0xMnY6aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY6aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] animate-[pulse_15s_ease-in-out_infinite] opacity-70"></div>
 
             {/* Enhanced header content - simplified with icon in top left */}
-            <div className="relative flex items-center justify-between p-5 -mt-2 border-b border-gray-200/50 dark:border-gray-800/50 backdrop-blur-sm mb-0">
+            <div className="relative flex items-center justify-between p-5 border-b border-gray-200/50 dark:border-gray-800/50 backdrop-blur-sm mb-0 mt-8">
               <div className="flex items-center">
                 <LevlLogo className="h-16 w-16" />
               </div>
               <div className="flex items-center gap-3">
-                <Link
-                  href="/matchmaker"
-                  className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium text-foreground/80 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                >
-                  AI Matchmaker
-                </Link>
                 <Link
                   href="/dashboard"
                   className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium text-foreground/80 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
@@ -3518,9 +3520,9 @@ Would you like to book this service or compare it with other options?
                 </Link>
                 <Link
                   href="/forum"
-                  className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium text-foreground/80 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 >
-                  Community Forum
+                  Forum
                 </Link>
               </div>
             </div>
