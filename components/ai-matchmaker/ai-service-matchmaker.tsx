@@ -852,8 +852,8 @@ const serviceSpecificQuestions: ServiceSpecificQuestions = {
       ],
     },
     required: [true, true, false, true, false],
-  }\
-]
+  },
+}
 
 export function AIServiceMatchmaker() {
   const [messages, setMessages] = useState<Message[]>(initialMessages)
