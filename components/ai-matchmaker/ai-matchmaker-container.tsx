@@ -48,29 +48,6 @@ export function AIMatchmakerContainer() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
 
-  // Scroll to bottom of messages
-  // Remove this function
-  // const scrollToBottom = () => {
-  //   if (messagesEndRef.current) {
-  //     messagesEndRef.current.scrollIntoView({
-  //       behavior: "smooth",
-  //       block: "end",
-  //       inline: "nearest",
-  //     })
-  //     // Prevent page from scrolling
-  //     setTimeout(() => {
-  //       if (chatContainerRef.current) {
-  //         chatContainerRef.current.scrollIntoView({ block: "nearest" })
-  //       }
-  //     }, 100)
-  //   }
-  // }
-
-  // Remove this useEffect
-  // useEffect(() => {
-  //   scrollToBottom()
-  // }, [messages])
-
   // Handle preference changes
   const handlePreferenceChange = (name: string, value: string) => {
     setPreferences((prev) => ({
@@ -121,13 +98,46 @@ export function AIMatchmakerContainer() {
 
   return (
     <section className="w-full pt-4 pb-8 md:pt-6 md:pb-12 relative overflow-hidden order-first z-20 px-0 mx-0">
+      {/* LEVL Logo at the top */}
+      <div className="flex justify-center mb-4 relative z-50">
+        <div className="relative">
+          {/* Enhanced animated glow effect with pulsing rings */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-600 rounded-full blur-md opacity-70 animate-pulse"></div>
+          <div className="absolute -inset-2 bg-gradient-to-r from-violet-400/20 to-indigo-600/20 rounded-full blur-lg animate-[pulse_3s_ease-in-out_infinite]"></div>
+          <div className="absolute -inset-3 bg-gradient-to-r from-indigo-400/10 to-purple-600/10 rounded-full blur-xl animate-[pulse_4s_ease-in-out_infinite_1s]"></div>
+
+          {/* Enhanced logo with 3D effect and animated gradient */}
+          <div className="relative h-20 w-20 rounded-full bg-gradient-to-br from-violet-600 via-indigo-600 to-purple-600 p-[2px] shadow-lg shadow-indigo-500/30 group">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-violet-600 via-indigo-600 to-purple-600 opacity-75 blur-sm group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="relative h-full w-full rounded-full bg-white dark:bg-gray-900 flex items-center justify-center backdrop-blur-sm overflow-hidden">
+              {/* Animated background effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-violet-500/10 animate-[spin_10s_linear_infinite]"></div>
+
+              {/* LEVL Logo */}
+              <div className="relative z-10 h-12 w-12 transform transition-transform duration-300 group-hover:scale-110 flex items-center justify-center">
+                <img
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/8FA8E082-14C4-45EA-B6C8-4546E2E5148B_1_105_c-vkgBBR2PfAl9KdJIcEU2v2Zs5dPV6b.jpeg"
+                  alt="LEVL Logo"
+                  className="h-10 w-10 drop-shadow-md"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="ml-3 self-center">
+          <h2 className="font-bold text-2xl bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent drop-shadow-sm">
+            LEVL AI Assistant
+          </h2>
+          <div className="text-sm font-medium text-gray-600 dark:text-gray-300">Your personal service matchmaker</div>
+        </div>
+      </div>
       {/* Enhanced background elements */}
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/80 via-white/90 to-violet-50/80 dark:from-gray-900/90 dark:via-gray-900/95 dark:to-indigo-950/80 z-0" />
+      <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/80 via-white/90 to-violet-50/80 dark:from-gray-900/90 dark:via-gray-900/95 dark:to-indigo-950/80 z-10" />
 
       {/* Enhanced grid pattern background */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5MDkwOTAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgzNnptMCAxMnY2aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgyNHptMCAxMnY2aDE4di02SDI0em0wIDEydjZoMTh2LTZIMjR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgxMnptMCAxMnY2aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY2aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] bg-[size:30px_30px] z-0 opacity-30" />
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5MDkwOTAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgzNnptMCAxMnY2aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgyNHptMCAxMnY2aDE4di02SDI0em0wIDEydjZoMTh2LTZIMjR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgxMnptMCAxMnY2aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY2aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] bg-[size:30px_30px] z-10 opacity-30" />
 
-      <div className="w-full relative z-10 overflow-x-hidden px-0 mx-0">
+      <div className="w-full relative z-20 overflow-x-hidden px-0 mx-0">
         {/* AI Matchmaker Interface */}
         <motion.div
           className="w-full mx-0 px-0"
@@ -142,7 +152,6 @@ export function AIMatchmakerContainer() {
 
             {/* Enhanced header content */}
             <AIMatchmakerHeader
-              onResetConversation={resetConversation}
               onTogglePreferences={() => setShowPreferences(!showPreferences)}
               useGroqLLM={useGroqLLM}
               onToggleGroqLLM={toggleGroqLLM}
@@ -233,10 +242,6 @@ export function AIMatchmakerContainer() {
                     <div className="px-6 pb-2">
                       <Card className="p-3 bg-indigo-50/50 dark:bg-indigo-950/30 border border-indigo-200/50 dark:border-indigo-800/30">
                         <div className="flex items-center text-xs text-indigo-700 dark:text-indigo-300">
-                          <div className="flex h-3 w-3 relative mr-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-3 w-3 bg-indigo-500"></span>
-                          </div>
                           <span>
                             <span className="font-semibold">Groq LLama-3 8B</span> - Powered by Groq's ultra-fast LLM
                             for enhanced, personalized responses

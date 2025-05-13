@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import { EnhancedMainNav } from "@/components/enhanced-main-nav"
 import { AnimatedGradientBackground } from "@/components/animated-gradient-background"
 import { BackgroundPattern } from "@/components/background-pattern"
 import { EnhancedHeroSection } from "@/components/enhanced-hero-section"
@@ -24,11 +23,13 @@ export default function Home() {
   return (
     <div className="flex min-h-screen flex-col">
       <AnimatedGradientBackground />
-      <EnhancedMainNav />
-      <main className="flex-1">
-        {/* AI Service Matchmaker - Moved to the top */}
-        <AIServiceMatchmaker />
 
+      {/* AI Service Matchmaker - Moved to the very top with negative margin */}
+      <div className="relative z-50">
+        <AIServiceMatchmaker />
+      </div>
+
+      <main className="flex-1 mt-[-80px] pt-[80px]">
         <EnhancedHeroSection />
 
         {/* Add any skill accelerator component here */}

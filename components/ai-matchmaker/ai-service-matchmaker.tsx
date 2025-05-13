@@ -3,15 +3,28 @@
 import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { Filter, Sliders, Star } from "lucide-react"
+import { motion } from "framer-motion"
+import { Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
+import Link from "next/link"
 
 // Add import for EnhancedCategoryCard
 import { EnhancedCategoryCard } from "@/components/enhanced-category-card"
-import { Briefcase, Wrench, PaintBucket } from "lucide-react"
+import {
+  Briefcase,
+  Tv,
+  Droplet,
+  SprayCanIcon as Spray,
+  Home,
+  Zap,
+  Scissors,
+  Leaf,
+  Construction,
+  HardHat,
+} from "lucide-react"
+import { LevlLogo } from "@/components/levl-logo"
 
 // Define service types
 type ServiceProvider = {
@@ -839,21 +852,14 @@ const serviceSpecificQuestions: ServiceSpecificQuestions = {
       ],
     },
     required: [true, true, false, true, false],
-  },
-}
+  },\
+]
 
 export function AIServiceMatchmaker() {
   const [messages, setMessages] = useState<Message[]>(initialMessages)
   const [inputValue, setInputValue] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const [showMatchmaker, setShowMatchmaker] = useState(true) // Changed to true to show by default
-  const [preferences, setPreferences] = useState({
-    budget: "medium",
-    timeframe: "flexible",
-    quality: "high",
-    experience: "experienced",
-  })
-  const [showPreferences, setShowPreferences] = useState(false)
   const [matchedServices, setMatchedServices] = useState<Service[]>([])
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [conversationStage, setConversationStage] = useState<
@@ -1092,7 +1098,7 @@ export function AIServiceMatchmaker() {
   // Add this function after the existing detectUserIntent function
   const detectAdvancedIntent = (
     input: string,
-    conversationHistory: Message[],
+    messages,
     userModel: UserPreferenceModel,
     contextualMemory: EnhancedReasoning["contextualMemory"],
   ): UserIntent & { subIntents: string[]; contextualFactors: Map<string, any> } => {
@@ -1130,6 +1136,7 @@ export function AIServiceMatchmaker() {
     }
 
     // Consider conversation context
+    const conversationHistory = messages
     if (conversationHistory.length > 1) {
       const recentMessages = conversationHistory.slice(-3)
       const recentUserMessages = recentMessages.filter((msg) => msg.type === "user")
@@ -1864,6 +1871,13 @@ export function AIServiceMatchmaker() {
 
     // Map service type to category
     const categoryMap: { [key: string]: string } = {
+      tvMounting: "Mounting",
+      plumbing: "Plumbing",
+      painting: "Painting",
+      furniture: "Assembly",
+      moving: "Moving",
+      cleaning: "Cleaning",
+      electrical: "Electrical",
       tvMounting: "Mounting",
       plumbing: "Plumbing",
       painting: "Painting",
@@ -3052,7 +3066,6 @@ Would you like to book this service or compare it with other options?
     setMessages(initialMessages)
     setInputValue("")
     setIsTyping(false)
-    setShowPreferences(false)
     setMatchedServices([])
     setCurrentQuestion(0)
     setConversationStage("initial")
@@ -3453,12 +3466,12 @@ Would you like to book this service or compare it with other options?
   }
 
   return (
-    <section className="w-full pt-4 pb-8 md:pt-6 md:pb-12 relative overflow-hidden order-first z-20">
+    <section className="w-full pb-8 md:pb-12 relative overflow-hidden order-first z-20 -mt-4">
       {/* Enhanced background elements */}
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/80 via-white/90 to-violet-50/80 dark:from-gray-900/90 dark:via-gray-900/95 dark:to-indigo-950/80 z-0" />
 
       {/* Enhanced grid pattern background */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5MDkwOTAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgzNnptMCAxMnY2aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgyNHptMCAxMnY2aDE4di02SDI0em0wIDEydjZoMTh2LTZIMjR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgxMnptMCAxMnY2aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY2aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] bg-[size:30px_30px] z-0 opacity-30" />
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5MDkwOTAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgzNnptMC0xMnY6aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgyNHptMC0xMnY6aDE4di02SDI0em0wIDEydjZoMTh2LTZIMjR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgxMnptMC0xMnY6aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY6aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] bg-[size:30px_30px] z-0 opacity-30" />
 
       <div className="w-full relative z-10 overflow-x-hidden px-0 mx-0">
         {/* AI Matchmaker Interface */}
@@ -3471,171 +3484,51 @@ Would you like to book this service or compare it with other options?
           <div className="w-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm shadow-2xl border border-gray-200/50 dark:border-gray-800/50 overflow-hidden">
             {/* Enhanced background gradient with animated pattern */}
             <div className="absolute inset-0 bg-gradient-to-r from-violet-500/20 via-indigo-600/15 to-purple-600/20 opacity-90"></div>
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzMjI2NTkiIGZpbGwtb3BhY2l0eT0iMC4wNCI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgzNnptMCAxMnY2aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgyNHptMCAxMnY2aDE4di02SDI0em0wIDEydjZoMTh2LTZIMjR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgxMnptMCAxMnY2aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY2aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] animate-[pulse_15s_ease-in-out_infinite] opacity-70"></div>
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzMjI2NTkiIGZpbGwtb3BhY2l0eT0iMC4wNCI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgzNnptMC0xMnY6aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgyNHptMC0xMnY6aDE4di02SDI0em0wIDEydjZoMTh2LTZIMjR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgxMnptMC0xMnY6aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY6aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] animate-[pulse_15s_ease-in-out_infinite] opacity-70"></div>
 
             {/* Enhanced header content - simplified with icon in top left */}
-            <div className="relative flex items-center justify-between p-5 border-b border-gray-200/50 dark:border-gray-800/50 backdrop-blur-sm mb-0">
+            <div className="relative flex items-center justify-between p-5 -mt-2 border-b border-gray-200/50 dark:border-gray-800/50 backdrop-blur-sm mb-0">
               <div className="flex items-center">
-                <div className="relative">
-                  {/* Enhanced animated glow effect with pulsing rings */}
-                  <div className="absolute -inset-1 bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-600 rounded-full blur-md opacity-70 animate-pulse"></div>
-                  <div className="absolute -inset-2 bg-gradient-to-r from-violet-400/20 to-indigo-600/20 rounded-full blur-lg animate-[pulse_3s_ease-in-out_infinite]"></div>
-                  <div className="absolute -inset-3 bg-gradient-to-r from-indigo-400/10 to-purple-600/10 rounded-full blur-xl animate-[pulse_4s_ease-in-out_infinite_1s]"></div>
-
-                  {/* Enhanced bot avatar with 3D effect and animated gradient */}
-                  <div className="relative h-12 w-12 rounded-full bg-gradient-to-br from-violet-600 via-indigo-600 to-purple-600 p-[2px] shadow-lg shadow-indigo-500/30 group">
-                    <div className="absolute inset-0 rounded-full bg-gradient-to-br from-violet-600 via-indigo-600 to-purple-600 opacity-75 blur-sm group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div className="relative h-full w-full rounded-full bg-white dark:bg-gray-900 flex items-center justify-center backdrop-blur-sm overflow-hidden">
-                      {/* Animated background effect */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-violet-500/10 animate-[spin_10s_linear_infinite]"></div>
-
-                      {/* Animated circuit pattern */}
-                      <div className="absolute inset-0 opacity-20 dark:opacity-30">
-                        <svg viewBox="0 0 24 24" className="h-full w-full" xmlns="http://www.w3.org/2000/svg">
-                          <path
-                            fill="none"
-                            stroke="currentColor"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="0.4"
-                            d="M12 2a4 4 0 0 0-4 4v2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-2V6a4 4 4 0 0 0-4-4z"
-                            className="text-indigo-600 dark:text-indigo-400 animate-[pulse_4s_ease-in-out_infinite]"
-                          />
-                          <circle
-                            cx="12"
-                            cy="12"
-                            r="3"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="0.4"
-                            className="text-violet-600 dark:text-violet-400 animate-[pulse_3s_ease-in-out_infinite_0.5s]"
-                          />
-                          <path
-                            d="M12 8v1M12 15v1M8 12h1M15 12h1"
-                            stroke="currentColor"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="0.4"
-                            className="text-purple-600 dark:text-purple-400 animate-[pulse_5s_ease-in-out_infinite_1s]"
-                          />
-                        </svg>
-                      </div>
-
-                      {/* Enhanced robot icon with 3D effect */}
-                      <div className="relative z-10 h-7 w-7 transform transition-transform duration-300 group-hover:scale-110">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="url(#ai-brain-gradient)"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="h-full w-full drop-shadow-md"
-                        >
-                          <defs>
-                            <linearGradient id="ai-brain-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                              <stop offset="0%" stopColor="#8b5cf6" />
-                              <stop offset="50%" stopColor="#6366f1" />
-                              <stop offset="100%" stopColor="#a855f7" />
-                            </linearGradient>
-                          </defs>
-                          {/* Brain with circuit paths */}
-                          <path d="M9.5 2a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5Z" />
-                          <path d="M14.5 4a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z" />
-                          <path d="M17.5 11a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z" />
-                          <path d="M6.5 11a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5Z" />
-                          <path d="M12 22a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
-                          <path d="M10 7v3" />
-                          <path d="M14 7v3" />
-                          <path d="M9 17l1.5-3" />
-                          <path d="M15 17l-1.5-3" />
-                          <path d="M9 11h6" />
-                          <path d="M17 14h-4" />
-                          <path d="M7 14h4" />
-                          {/* Pulse circles */}
-                          <circle
-                            cx="12"
-                            cy="12"
-                            r="9"
-                            className="opacity-10 animate-[pulse_3s_ease-in-out_infinite]"
-                          />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="ml-4">
-                  <h3 className="font-bold text-lg bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent drop-shadow-sm">
-                    LEVL AI
-                  </h3>
-                  <div className="flex items-center text-xs font-medium">
-                    <span className="flex h-2.5 w-2.5 relative mr-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
-                    </span>
-                    <span className="text-green-600 dark:text-green-400">Active now</span>
-                  </div>
-                </div>
+                <LevlLogo className="h-16 w-16" />
               </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="rounded-full hover:bg-white/20 dark:hover:bg-gray-800/50 transition-colors backdrop-blur-sm"
-                  onClick={() => setShowPreferences(!showPreferences)}
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/matchmaker"
+                  className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium text-foreground/80 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 >
-                  <Sliders className="h-5 w-5" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="rounded-full hover:bg-white/20 dark:hover:bg-gray-800/50 transition-colors backdrop-blur-sm"
-                  onClick={resetConversation}
+                  AI Matchmaker
+                </Link>
+                <Link
+                  href="/dashboard"
+                  className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium text-foreground/80 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-5 w-5"
-                  >
-                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                    <path d="M3 3v5h5" />
-                  </svg>
-                </Button>
+                  Dashboard
+                </Link>
+                <Link
+                  href="/profile"
+                  className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium text-foreground/80 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                >
+                  Profile
+                </Link>
+                <Link
+                  href="/about"
+                  className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium text-foreground/80 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                >
+                  About
+                </Link>
+                <Link
+                  href="/forum"
+                  className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                >
+                  Community Forum
+                </Link>
               </div>
             </div>
 
             <div className="p-4 border-b border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-r from-gray-50/80 via-white/80 to-gray-50/80 dark:from-gray-900/80 dark:via-gray-900/90 dark:to-gray-900/80">
               <div className="relative overflow-hidden">
-                <button
-                  className="absolute left-0 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-gray-800/80 p-2 rounded-full shadow-md z-10"
-                  onClick={() => scrollCategories("left")}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-4 w-4"
-                  >
-                    <path d="m15 18-6-6 6-6" />
-                  </svg>
-                </button>
-
                 <div
-                  className="overflow-x-auto pb-2 px-8 scrollbar-hide"
+                  className="overflow-x-auto pb-2 px-6 pt-2 scrollbar-hide"
                   ref={categoriesRef}
                   style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
                 >
@@ -3645,14 +3538,14 @@ Would you like to book this service or compare it with other options?
                       display: none;
                     }
                   `}</style>
-                  <div className="flex space-x-3">
+                  <div className="flex space-x-4">
                     <EnhancedCategoryCard
-                      icon={Wrench}
+                      icon={Tv}
                       name="Mounting"
                       count={0}
                       index={0}
                       size="small"
-                      className="w-32 h-32 flex-shrink-0"
+                      className="w-36 h-36 flex-shrink-0 my-2 mx-1 transform-gpu hover:translate-y-0"
                       onClick={() => handleCategoryClick("tvMounting")}
                     />
                     <EnhancedCategoryCard
@@ -3661,210 +3554,85 @@ Would you like to book this service or compare it with other options?
                       count={0}
                       index={1}
                       size="small"
-                      className="w-32 h-32 flex-shrink-0"
+                      className="w-36 h-36 flex-shrink-0 my-2 mx-1 transform-gpu hover:translate-y-0"
                       onClick={() => handleCategoryClick("moving")}
                     />
                     <EnhancedCategoryCard
-                      icon={PaintBucket}
+                      icon={Spray}
                       name="Painting"
                       count={0}
                       index={2}
                       size="small"
-                      className="w-32 h-32 flex-shrink-0"
+                      className="w-36 h-36 flex-shrink-0 my-2 mx-1 transform-gpu hover:translate-y-0"
                       onClick={() => handleCategoryClick("painting")}
                     />
                     <EnhancedCategoryCard
-                      icon={Wrench}
+                      icon={Home}
                       name="Assembly"
                       count={0}
                       index={3}
                       size="small"
-                      className="w-32 h-32 flex-shrink-0"
+                      className="w-36 h-36 flex-shrink-0 my-2 mx-1 transform-gpu hover:translate-y-0"
                       onClick={() => handleCategoryClick("furniture")}
                     />
                     <EnhancedCategoryCard
-                      icon={Wrench}
+                      icon={Scissors}
                       name="Cleaning"
                       count={0}
                       index={4}
                       size="small"
-                      className="w-32 h-32 flex-shrink-0"
+                      className="w-36 h-36 flex-shrink-0 my-2 mx-1 transform-gpu hover:translate-y-0"
                       onClick={() => handleCategoryClick("cleaning")}
                     />
                     <EnhancedCategoryCard
-                      icon={Wrench}
+                      icon={Zap}
                       name="Electrical"
                       count={0}
                       index={5}
                       size="small"
-                      className="w-32 h-32 flex-shrink-0"
+                      className="w-36 h-36 flex-shrink-0 my-2 mx-1 transform-gpu hover:translate-y-0"
                       onClick={() => handleCategoryClick("electrical")}
                     />
                     <EnhancedCategoryCard
-                      icon={Wrench}
+                      icon={Droplet}
                       name="Plumbing"
                       count={0}
                       index={6}
                       size="small"
-                      className="w-32 h-32 flex-shrink-0"
+                      className="w-36 h-36 flex-shrink-0 my-2 mx-1 transform-gpu hover:translate-y-0"
                       onClick={() => handleCategoryClick("plumbing")}
                     />
                     <EnhancedCategoryCard
-                      icon={Wrench}
+                      icon={Leaf}
                       name="Landscaping"
                       count={0}
                       index={7}
                       size="small"
-                      className="w-32 h-32 flex-shrink-0"
+                      className="w-36 h-36 flex-shrink-0 my-2 mx-1 transform-gpu hover:translate-y-0"
                       onClick={() => handleCategoryClick("landscaping")}
                     />
                     <EnhancedCategoryCard
-                      icon={Wrench}
+                      icon={Construction}
                       name="Flooring"
                       count={0}
                       index={8}
                       size="small"
-                      className="w-32 h-32 flex-shrink-0"
+                      className="w-36 h-36 flex-shrink-0 my-2 mx-1 transform-gpu hover:translate-y-0"
                       onClick={() => handleCategoryClick("flooring")}
                     />
                     <EnhancedCategoryCard
-                      icon={Wrench}
+                      icon={HardHat}
                       name="Roofing"
                       count={0}
                       index={9}
                       size="small"
-                      className="w-32 h-32 flex-shrink-0"
+                      className="w-36 h-36 flex-shrink-0 my-2 mx-1 transform-gpu hover:translate-y-0"
                       onClick={() => handleCategoryClick("roofing")}
                     />
                   </div>
                 </div>
-
-                <button
-                  className="absolute right-0 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-gray-800/80 p-2 rounded-full shadow-md z-10"
-                  onClick={() => scrollCategories("right")}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-4 w-4"
-                  >
-                    <path d="m9 18 6-6-6-6" />
-                  </svg>
-                </button>
               </div>
             </div>
-
-            {/* Preferences panel */}
-            <AnimatePresence>
-              {showPreferences && (
-                <motion.div
-                  className="border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900"
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <div className="p-4">
-                    <h4 className="font-medium mb-3 flex items-center">
-                      <Filter className="h-4 w-4 mr-2" />
-                      Matchmaking Preferences
-                    </h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium mb-1 block">Budget Range</label>
-                        <select
-                          className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm"
-                          value={preferences.budget}
-                          onChange={(e) => setPreferences({ ...preferences, budget: e.target.value })}
-                        >
-                          <option value="low">Budget-friendly</option>
-                          <option value="medium">Mid-range</option>
-                          <option value="high">Premium</option>
-                          <option value="any">No preference</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium mb-1 block">Timeframe</label>
-                        <select
-                          className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm"
-                          value={preferences.timeframe}
-                          onChange={(e) => setPreferences({ ...preferences, timeframe: e.target.value })}
-                        >
-                          <option value="urgent">As soon as as possible</option>
-                          <option value="soon">Within a week</option>
-                          <option value="planned">Within a month</option>
-                          <option value="flexible">Flexible</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium mb-1 block">Quality Importance</label>
-                        <select
-                          className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm"
-                          value={preferences.quality}
-                          onChange={(e) => setPreferences({ ...preferences, quality: e.target.value })}
-                        >
-                          <option value="high">Very important</option>
-                          <option value="medium">Somewhat important</option>
-                          <option value="low">Not very important</option>
-                          <option value="any">No preference</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium mb-1 block">Provider Experience</label>
-                        <select
-                          className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm"
-                          value={preferences.experience}
-                          onChange={(e) => setPreferences({ ...preferences, experience: e.target.value })}
-                        >
-                          <option value="expert">Expert level</option>
-                          <option value="experienced">Experienced</option>
-                          <option value="intermediate">Intermediate</option>
-                          <option value="any">No preference</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div className="mt-4 flex justify-end">
-                      <Button variant="outline" size="sm" className="mr-2" onClick={() => setShowPreferences(false)}>
-                        Cancel
-                      </Button>
-                      <Button
-                        variant="default"
-                        size="sm"
-                        onClick={() => {
-                          setShowPreferences(false)
-                          // In a real app, this would trigger a re-evaluation of recommendations
-                          if (conversationStage === "recommending" || conversationStage === "finalizing") {
-                            simulateTyping(() => {
-                              const refinedMessage: Message = {
-                                id: `ai-${Date.now()}`,
-                                type: "ai",
-                                content:
-                                  "I've updated your preferences. Here are some new recommendations that might better match your needs:",
-                                timestamp: new Date(),
-                                services: services
-                                  .sort(() => 0.5 - Math.random()) // Shuffle for demo purposes
-                                  .slice(0, 3),
-                              }
-
-                              setMessages((prev) => [...prev, refinedMessage])
-                            })
-                          }
-                        }}
-                      >
-                        Apply Preferences
-                      </Button>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
 
             {/* Chat messages */}
             <div

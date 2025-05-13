@@ -58,13 +58,13 @@ export function EnhancedCategoryCard({
   const imageUrl = `/placeholder.svg?height=400&width=400&query=${encodeURIComponent(`${name} category abstract pattern purple`)}`
 
   // Adjust the icon size based on the size prop
-  const iconSize = size === "small" ? "h-5 w-5" : "h-7 w-7"
+  const iconSize = size === "small" ? "h-6 w-6" : "h-7 w-7"
 
   // Adjust the padding based on the size prop
   const cardPadding = size === "small" ? "p-3" : "p-6"
 
   // Adjust the text size based on the size prop
-  const textSize = size === "small" ? "text-sm" : "text-xl"
+  const textSize = size === "small" ? "text-base" : "text-xl"
 
   return (
     <motion.div
