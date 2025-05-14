@@ -96,10 +96,18 @@ export function ServiceCard({
             <span className="sr-only">{isSaved ? "Unsave" : "Save"}</span>
           </Button>
         </div>
-        <CardContent className="flex-1 pt-4">
+        <CardContent className="flex-1 pt-5 px-5">
           <div className="flex items-center gap-2 mb-2">
             <Avatar className="h-6 w-6">
-              <AvatarImage src={provider.avatar || "/placeholder.svg"} alt={provider.name} />
+              {provider.level === "Expert" ? (
+                <AvatarImage src="/professional-expert-avatar.png" alt={provider.name} />
+              ) : provider.level === "Professional" ? (
+                <AvatarImage src="/professional-avatar.png" alt={provider.name} />
+              ) : provider.level === "Executive" ? (
+                <AvatarImage src="/avatar-executive.png" alt={provider.name} />
+              ) : (
+                <AvatarImage src="/avatar-executive-professional.png" alt={provider.name} />
+              )}
               <AvatarFallback>{provider.name[0]}</AvatarFallback>
             </Avatar>
             <span className="text-sm font-medium">{provider.name}</span>
@@ -111,20 +119,20 @@ export function ServiceCard({
             <FeatureBadge type="founder" size="sm" />
             <FeatureBadge type="fees" size="sm" />
           </div>
-          <h3 className="font-semibold line-clamp-2 mb-2">{title}</h3>
+          <h3 className="font-semibold text-base leading-tight line-clamp-2 mb-3 tracking-tight">{title}</h3>
           <div className="flex flex-wrap gap-1 mb-2">
             {tags.map((tag, i) => (
-              <Badge key={i} variant="outline" className="text-xs font-normal">
+              <Badge key={i} variant="outline" className="text-xs font-medium px-2.5 py-0.5 rounded-md">
                 {tag}
               </Badge>
             ))}
           </div>
         </CardContent>
-        <CardFooter className="border-t pt-4 flex items-center justify-between">
-          <div className="flex items-center">
-            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
+        <CardFooter className="border-t pt-4 pb-3 px-5 flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
             <span className="text-sm font-medium">{rating.toFixed(1)}</span>
-            <span className="text-xs text-muted-foreground ml-1">({reviews})</span>
+            <span className="text-xs text-muted-foreground">({reviews})</span>
           </div>
           <Button variant="ghost" size="sm" className="h-8 gap-1 text-xs" onClick={handleContact}>
             <MessageSquare className="h-3 w-3" />

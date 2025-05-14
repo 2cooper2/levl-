@@ -83,6 +83,7 @@ export interface Database {
           last_login_at?: string | null
         }
       }
+      // Other tables remain the same...
     }
     Views: {
       [_ in never]: never

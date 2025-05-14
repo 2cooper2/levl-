@@ -69,6 +69,7 @@ export function EnhancedServiceCard({
       transition={{ duration: 0.5, delay: delay * 0.1 }}
       onClick={handleCardClick}
       className="cursor-pointer h-full"
+      whileHover={{ y: -4, transition: { duration: 0.2 } }}
     >
       <EnhancedCard interactive elevation="low" className="overflow-hidden h-full flex flex-col">
         <div className="relative aspect-[4/3] overflow-hidden group">
@@ -95,9 +96,17 @@ export function EnhancedServiceCard({
           </EnhancedButton>
         </div>
         <EnhancedCardContent className="flex-1 pt-5">
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-2.5 mb-3.5">
             <Avatar className="h-7 w-7 border-2 border-background">
-              <AvatarImage src={provider.avatar || "/placeholder.svg"} alt={provider.name} />
+              {provider.level === "Expert" ? (
+                <AvatarImage src="/professional-expert-avatar.png" alt={provider.name} />
+              ) : provider.level === "Professional" ? (
+                <AvatarImage src="/professional-avatar.png" alt={provider.name} />
+              ) : provider.level === "Executive" ? (
+                <AvatarImage src="/avatar-executive.png" alt={provider.name} />
+              ) : (
+                <AvatarImage src="/avatar-executive-professional.png" alt={provider.name} />
+              )}
               <AvatarFallback>{provider.name[0]}</AvatarFallback>
             </Avatar>
             <span className="text-sm font-medium">{provider.name}</span>
@@ -105,12 +114,16 @@ export function EnhancedServiceCard({
               {provider.level}
             </Badge>
           </div>
-          <h3 className="font-semibold text-lg leading-tight line-clamp-2 mb-3 group-hover:text-primary transition-colors">
+          <h3 className="font-semibold text-lg leading-tight line-clamp-2 mb-3.5 group-hover:text-primary transition-colors tracking-tight">
             {title}
           </h3>
           <div className="flex flex-wrap gap-1.5 mb-3">
             {tags.map((tag, i) => (
-              <Badge key={i} variant="outline" className="text-xs font-normal bg-background/50">
+              <Badge
+                key={i}
+                variant="outline"
+                className="text-xs font-medium bg-background/60 px-2.5 py-0.5 rounded-md"
+              >
                 {tag}
               </Badge>
             ))}

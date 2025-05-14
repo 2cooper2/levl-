@@ -855,6 +855,20 @@ const serviceSpecificQuestions: ServiceSpecificQuestions = {
   },
 }
 
+// Map service type to category
+const serviceCategoryMap: { [key: string]: string } = {
+  tvMounting: "Mounting",
+  plumbing: "Plumbing",
+  painting: "Painting",
+  furniture: "Assembly",
+  moving: "Moving",
+  cleaning: "Cleaning",
+  electrical: "Electrical",
+  landscaping: "Landscaping",
+  flooring: "Flooring",
+  roofing: "Roofing",
+}
+
 export function AIServiceMatchmaker() {
   const [messages, setMessages] = useState<Message[]>(initialMessages)
   const [inputValue, setInputValue] = useState("")
@@ -1875,13 +1889,6 @@ export function AIServiceMatchmaker() {
 
     // Map service type to category
     const categoryMap: { [key: string]: string } = {
-      tvMounting: "Mounting",
-      plumbing: "Plumbing",
-      painting: "Painting",
-    }
-
-    // Map service type to category
-    const serviceCategoryMap: { [key: string]: string } = {
       tvMounting: "Mounting",
       plumbing: "Plumbing",
       painting: "Painting",
@@ -3267,39 +3274,89 @@ Would you like to book this service or compare it with other options?
     return (
       <div
         key={service.id}
-        className="flex items-start space-x-4 rounded-lg border border-gray-200/50 dark:border-gray-700/50 p-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+        className="group relative flex flex-col rounded-xl border border-indigo-100/50 dark:border-indigo-800/30 p-5 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden"
         onClick={() => router.push(`/services/${service.id}`)}
       >
-        <div className="relative h-20 w-20 rounded-lg overflow-hidden shadow-md">
-          <Image src={service.image || "/placeholder.svg"} alt={service.title} layout="fill" objectFit="cover" />
-        </div>
-        <div>
-          <h5 className="font-medium text-sm">{service.title}</h5>
-          <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mt-1">
-            <Star className="h-4 w-4 mr-1 text-amber-500" />
-            <span>{service.provider.rating}</span>
-            <span className="ml-1">({service.provider.reviews})</span>
+        {/* Decorative gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/50 via-white to-purple-50/50 dark:from-indigo-950/40 dark:via-gray-900 dark:to-purple-950/40 opacity-80 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+        {/* Subtle pattern overlay */}
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5MDkwOTAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6bTAtMTJ2NmgxOHYtNkgzNnptMCIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDI0em0wIDEydjZoMTh2LTZIMjR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY6aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] bg-[length:30px_30px] opacity-10 group-hover:opacity-20 transition-opacity duration-300"></div>
+
+        {/* Match score badge */}
+        {service.matchScore && (
+          <div className="absolute top-3 right-3 bg-indigo-600/90 text-white text-xs font-semibold px-2 py-1 rounded-full shadow-sm z-10">
+            {service.matchScore}% Match
           </div>
-          <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
-            {service.description.substring(0, 50)}
-            {service.description.length > 50 ? "..." : ""}
-          </p>
-          <div className="mt-2 flex items-center justify-between">
-            <span className="font-medium text-sm">{service.price}</span>
-            <Button
-              variant="outline"
-              size="sm"
-              className="bg-white/80 dark:bg-gray-800/80 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 border-gray-200/70 dark:border-gray-700/70 hover:border-indigo-300 dark:hover:border-indigo-700 transition-all duration-200"
-            >
-              View Details
-            </Button>
+        )}
+
+        <div className="flex items-start space-x-4 relative z-10">
+          <div className="relative h-20 w-20 rounded-lg overflow-hidden shadow-sm ring-2 ring-indigo-100 dark:ring-indigo-900 group-hover:ring-indigo-300 dark:group-hover:ring-indigo-700 transition-all duration-300">
+            <Image
+              src={service.image || "/placeholder.svg"}
+              alt={service.title}
+              layout="fill"
+              objectFit="cover"
+              className="group-hover:scale-110 transition-transform duration-500"
+            />
           </div>
-          {service.matchScore && (
-            <div className="mt-2 text-xs text-green-600 dark:text-green-400 font-medium">
-              Match Score: <span className="text-indigo-600 dark:text-indigo-400">{service.matchScore}%</span>
+
+          <div className="flex-1">
+            <h5 className="font-semibold text-base text-gray-900 dark:text-white group-hover:text-indigo-700 dark:group-hover:text-indigo-400 transition-colors duration-300">
+              {service.title}
+            </h5>
+
+            <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <Star className="h-4 w-4 mr-1 text-amber-500 fill-amber-500" />
+              <span className="font-medium">{service.provider.rating}</span>
+              <span className="ml-1 opacity-75">({service.provider.reviews})</span>
+              {service.provider.verified && (
+                <span className="ml-2 inline-flex items-center text-xs font-medium text-indigo-600 dark:text-indigo-400">
+                  <svg
+                    className="w-3 h-3 mr-1 text-indigo-600 dark:text-indigo-400"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    ></path>
+                  </svg>
+                  Verified
+                </span>
+              )}
             </div>
-          )}
+
+            <p className="text-xs text-gray-600 dark:text-gray-300 mt-1.5 line-clamp-2">{service.description}</p>
+          </div>
         </div>
+
+        <div className="mt-4 flex flex-wrap gap-1 relative z-10">
+          {service.tags.slice(0, 3).map((tag, i) => (
+            <span
+              key={i}
+              className="inline-block px-2 py-0.5 text-[10px] font-medium bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-full"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+
+        <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700/50 flex items-center justify-between relative z-10">
+          <span className="font-bold text-sm text-indigo-700 dark:text-indigo-400">{service.price}</span>
+
+          <div className="flex items-center space-x-1 text-xs text-gray-500 dark:text-gray-400">
+            <span>{service.timeEstimate}</span>
+            <span className="opacity-50">•</span>
+            <span className="text-indigo-600 dark:text-indigo-400 font-medium">
+              {service.provider.completionRate}% completion
+            </span>
+          </div>
+        </div>
+
+        <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
       </div>
     )
   }
@@ -3487,7 +3544,7 @@ Would you like to book this service or compare it with other options?
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/80 via-white/90 to-violet-50/80 dark:from-gray-900/90 dark:via-gray-900/95 dark:to-indigo-950/80 z-0" />
 
       {/* Enhanced grid pattern background */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5MDkwOTAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgzNnptMC0xMnY6aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDI0em0wIDEydjZoMTh2LTZIMjR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY6aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] bg-[size:30px_30px] z-0 opacity-30" />
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5MDkwOTAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6bTAtMTJ2NmgxOHYtNkgzNnptMCIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDI0em0wIDEydjZoMTh2LTZIMjR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY6aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] bg-[size:30px_30px] z-0 opacity-30" />
 
       <div className="w-full relative z-10 overflow-x-hidden px-0 mx-0">
         {/* AI Matchmaker Interface */}
@@ -3500,12 +3557,12 @@ Would you like to book this service or compare it with other options?
           <div className="w-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm shadow-2xl border border-gray-200/50 dark:border-gray-800/50 overflow-hidden">
             {/* Enhanced background gradient with animated pattern */}
             <div className="absolute inset-0 bg-gradient-to-r from-violet-500/20 via-indigo-600/15 to-purple-600/20 opacity-90"></div>
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzMjI2NTkiIGZpbGwtb3BhY2l0eT0iMC4wNCI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY2aDZ2LTZoLTZ6bTAgMTJ2NmgxOHYtNkgzNnptMC0xMnY6aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDI0em0wIDEydjZoMTh2LTZIMjR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY6aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] animate-[pulse_15s_ease-in-out_infinite] opacity-70"></div>
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzMjI2NTkiIGZpbGwtb3BhY2l0eT0iMC4wNCI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6bTAtMTJ2NmgxOHYtNkgzNnptMCIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDI0em0wIDEydjZoMTh2LTZIMjR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY6aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] animate-[pulse_15s_ease-in-out_infinite] opacity-70"></div>
 
             {/* Enhanced header content - simplified with icon in top left */}
             <div className="relative flex items-center justify-between p-5 border-b border-gray-200/50 dark:border-gray-800/50 backdrop-blur-sm mb-0 mt-8">
               <div className="flex items-center">
-                <LevlLogo className="h-16 w-16" />
+                <LevlLogo className="h-16 w-16 transition-all shadow-[0_4px_8px_rgba(0,0,0,0.1),0_2px_4px_rgba(0,0,0,0.1)] dark:shadow-[0_4px_8px_rgba(79,70,229,0.2),0_2px_4px_rgba(79,70,229,0.1)]" />
               </div>
               <div className="flex items-center gap-3">
                 <Link
@@ -3549,106 +3606,64 @@ Would you like to book this service or compare it with other options?
                     }
                   `}</style>
                   <div className="flex space-x-4">
-                    <EnhancedCategoryCard
-                      icon={Tv}
-                      name="Mounting"
-                      count={0}
-                      index={0}
-                      size="small"
-                      className="w-36 h-36 flex-shrink-0 my-2 mx-1 transform-gpu hover:translate-y-0"
-                      onClick={() => handleCategoryClick("tvMounting")}
-                    />
-                    <EnhancedCategoryCard
-                      icon={Briefcase}
-                      name="Moving"
-                      count={0}
-                      index={1}
-                      size="small"
-                      className="w-36 h-36 flex-shrink-0 my-2 mx-1 transform-gpu hover:translate-y-0"
-                      onClick={() => handleCategoryClick("moving")}
-                    />
-                    <EnhancedCategoryCard
-                      icon={Spray}
-                      name="Painting"
-                      count={0}
-                      index={2}
-                      size="small"
-                      className="w-36 h-36 flex-shrink-0 my-2 mx-1 transform-gpu hover:translate-y-0"
-                      onClick={() => handleCategoryClick("painting")}
-                    />
-                    <EnhancedCategoryCard
-                      icon={Home}
-                      name="Assembly"
-                      count={0}
-                      index={3}
-                      size="small"
-                      className="w-36 h-36 flex-shrink-0 my-2 mx-1 transform-gpu hover:translate-y-0"
-                      onClick={() => handleCategoryClick("furniture")}
-                    />
-                    <EnhancedCategoryCard
-                      icon={Scissors}
-                      name="Cleaning"
-                      count={0}
-                      index={4}
-                      size="small"
-                      className="w-36 h-36 flex-shrink-0 my-2 mx-1 transform-gpu hover:translate-y-0"
-                      onClick={() => handleCategoryClick("cleaning")}
-                    />
-                    <EnhancedCategoryCard
-                      icon={Zap}
-                      name="Electrical"
-                      count={0}
-                      index={5}
-                      size="small"
-                      className="w-36 h-36 flex-shrink-0 my-2 mx-1 transform-gpu hover:translate-y-0"
-                      onClick={() => handleCategoryClick("electrical")}
-                    />
-                    <EnhancedCategoryCard
-                      icon={Droplet}
-                      name="Plumbing"
-                      count={0}
-                      index={6}
-                      size="small"
-                      className="w-36 h-36 flex-shrink-0 my-2 mx-1 transform-gpu hover:translate-y-0"
-                      onClick={() => handleCategoryClick("plumbing")}
-                    />
-                    <EnhancedCategoryCard
-                      icon={Leaf}
-                      name="Landscaping"
-                      count={0}
-                      index={7}
-                      size="small"
-                      className="w-36 h-36 flex-shrink-0 my-2 mx-1 transform-gpu hover:translate-y-0"
-                      onClick={() => handleCategoryClick("landscaping")}
-                    />
-                    <EnhancedCategoryCard
-                      icon={Construction}
-                      name="Flooring"
-                      count={0}
-                      index={8}
-                      size="small"
-                      className="w-36 h-36 flex-shrink-0 my-2 mx-1 transform-gpu hover:translate-y-0"
-                      onClick={() => handleCategoryClick("flooring")}
-                    />
-                    <EnhancedCategoryCard
-                      icon={HardHat}
-                      name="Roofing"
-                      count={0}
-                      index={9}
-                      size="small"
-                      className="w-36 h-36 flex-shrink-0 my-2 mx-1 transform-gpu hover:translate-y-0"
-                      onClick={() => handleCategoryClick("roofing")}
-                    />
+                    {[
+                      { icon: Tv, name: "Mounting", serviceType: "tvMounting" },
+                      { icon: Briefcase, name: "Moving", serviceType: "moving" },
+                      { icon: Spray, name: "Painting", serviceType: "painting" },
+                      { icon: Home, name: "Assembly", serviceType: "furniture" },
+                      { icon: Scissors, name: "Cleaning", serviceType: "cleaning" },
+                      { icon: Zap, name: "Electrical", serviceType: "electrical" },
+                      { icon: Droplet, name: "Plumbing", serviceType: "plumbing" },
+                      { icon: Leaf, name: "Landscaping", serviceType: "landscaping" },
+                      { icon: Construction, name: "Flooring", serviceType: "flooring" },
+                      { icon: HardHat, name: "Roofing", serviceType: "roofing" },
+                    ].map((category, index) => (
+                      <EnhancedCategoryCard
+                        key={index}
+                        icon={category.icon}
+                        name={category.name}
+                        count={0}
+                        index={index}
+                        size="small"
+                        className="w-36 h-36 flex-shrink-0 my-2 mx-1 transform-gpu hover:translate-y-0"
+                        onClick={() => handleCategoryClick(category.serviceType)}
+                      />
+                    ))}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Chat messages */}
+            {/* Chat messages - Enhanced UI */}
             <div
               ref={chatContainerRef}
-              className="h-[500px] overflow-y-auto p-6 bg-gradient-to-b from-gray-50/80 to-white/90 dark:from-gray-900/90 dark:to-gray-950/80 backdrop-blur-sm"
+              className="relative h-[500px] overflow-y-auto p-6 bg-gradient-to-b from-gray-50/80 via-indigo-50/10 to-white/90 dark:from-gray-900/90 dark:via-indigo-950/20 dark:to-gray-950/80 backdrop-blur-sm shadow-inner border-t border-b border-indigo-100/20 dark:border-indigo-800/20"
+              style={{
+                scrollbarWidth: "thin",
+                scrollbarColor: "rgba(79, 70, 229, 0.2) transparent",
+              }}
             >
+              {/* Decorative elements */}
+              <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-indigo-100/20 to-transparent dark:from-indigo-900/10 pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-indigo-100/20 to-transparent dark:from-indigo-900/10 pointer-events-none" />
+
+              {/* Custom scrollbar styling */}
+              <style jsx>{`
+                div::-webkit-scrollbar {
+                  width: 6px;
+                  background: transparent;
+                }
+                div::-webkit-scrollbar-thumb {
+                  background: rgba(79, 70, 229, 0.2);
+                  border-radius: 10px;
+                }
+                div::-webkit-scrollbar-thumb:hover {
+                  background: rgba(79, 70, 229, 0.4);
+                }
+                div::-webkit-scrollbar-track {
+                  background: transparent;
+                }
+              `}</style>
               <div className="space-y-6 w-full">
                 {messages.map((message, index) => (
                   <motion.div
@@ -3659,9 +3674,8 @@ Would you like to book this service or compare it with other options?
                   >
                     {message.type === "user" && (
                       <div className="flex justify-end">
-                        <div className="relative bg-gradient-to-br from-indigo-50/95 via-indigo-100/90 to-violet-50/90 dark:from-indigo-900/95 dark:via-indigo-900/90 dark:to-violet-900/90 backdrop-blur-sm rounded-2xl rounded-tr-none px-5 py-3 max-w-[80%] shadow-lg border border-indigo-200/50 dark:border-indigo-700/50 hover:shadow-indigo-100/20 dark:hover:shadow-indigo-900/20 transition-all duration-300">
-                          <div className="absolute top-0 right-0 h-3 w-3 bg-gradient-to-br from-indigo-50/95 to-violet-50/90 dark:from-indigo-900/95 dark:to-violet-900/90 border-r border-t border-indigo-200/50 dark:border-indigo-700/50 transform translate-x-1/2 -translate-y-1/2 rotate-45"></div>
-                          <div className="absolute inset-0 rounded-2xl rounded-tr-none bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-violet-500/10 dark:from-indigo-500/20 dark:via-purple-500/20 dark:to-violet-500/20 opacity-70"></div>
+                        <div className="relative bg-gradient-to-br from-indigo-50/95 via-indigo-100/90 to-violet-50/90 dark:from-indigo-900/95 dark:via-indigo-900/90 dark:to-violet-900/90 backdrop-blur-sm rounded-2xl px-5 py-3 max-w-[80%] shadow-lg border border-indigo-200/50 dark:border-indigo-700/50 hover:shadow-indigo-100/20 dark:hover:shadow-indigo-900/20 transition-all duration-300">
+                          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-violet-500/10 dark:from-indigo-500/20 dark:via-purple-500/20 dark:to-violet-500/20 opacity-70"></div>
                           <p className="text-sm text-gray-800 dark:text-gray-100 relative z-10">{message.content}</p>
                           <div className="text-[10px] text-indigo-600/60 dark:text-indigo-400/60 text-right mt-1 relative z-10">
                             {new Date(message.timestamp).toLocaleTimeString([], {
@@ -3675,9 +3689,8 @@ Would you like to book this service or compare it with other options?
 
                     {message.type === "ai" && (
                       <div className="flex">
-                        <div className="relative bg-gradient-to-br from-white/95 via-white/90 to-indigo-50/90 dark:from-gray-800/95 dark:via-gray-800/90 dark:to-indigo-950/90 backdrop-blur-sm rounded-2xl rounded-tl-none px-5 py-3 max-w-[80%] shadow-lg border border-indigo-100/50 dark:border-indigo-800/50 hover:shadow-indigo-100/20 dark:hover:shadow-indigo-900/20 transition-all duration-300">
-                          <div className="absolute top-0 left-0 h-3 w-3 bg-gradient-to-br from-white/95 to-indigo-50/90 dark:from-gray-800/95 dark:to-indigo-950/90 border-l border-t border-indigo-100/50 dark:border-indigo-800/50 transform -translate-x-1/2 -translate-y-1/2 rotate-45"></div>
-                          <div className="absolute inset-0 rounded-2xl rounded-tl-none bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-violet-500/5 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-violet-500/10 opacity-70"></div>
+                        <div className="relative bg-gradient-to-br from-white/95 via-white/90 to-indigo-50/90 dark:from-gray-800/95 dark:via-gray-800/90 dark:to-indigo-950/90 backdrop-blur-sm rounded-2xl px-5 py-3 max-w-[80%] shadow-lg border border-indigo-100/50 dark:border-indigo-800/50 hover:shadow-indigo-100/20 dark:hover:shadow-indigo-900/20 transition-all duration-300">
+                          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-violet-500/5 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-violet-500/10 opacity-70"></div>
                           <p className="text-sm relative z-10">{message.content}</p>
                           {message.options && (
                             <div className="mt-4 flex flex-wrap gap-2 relative z-10">
@@ -3710,7 +3723,7 @@ Would you like to book this service or compare it with other options?
 
                     {message.type === "loading" && (
                       <div className="flex">
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl rounded-tl-none px-5 py-3 shadow-sm border border-gray-100 dark:border-gray-700">
+                        <div className="bg-white dark:bg-gray-800 rounded-2xl px-5 py-3 shadow-sm border border-gray-100 dark:border-gray-700">
                           <div className="flex items-center">
                             <div className="flex space-x-1">
                               <motion.div
@@ -3747,7 +3760,7 @@ Would you like to book this service or compare it with other options?
 
                     {message.type === "feedback" && (
                       <div className="flex">
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl rounded-tl-none px-5 py-3 max-w-[80%] shadow-md border border-gray-100 dark:border-gray-700">
+                        <div className="bg-white dark:bg-gray-800 rounded-2xl px-5 py-3 max-w-[80%] shadow-md border border-gray-100 dark:border-gray-700">
                           <p className="text-sm">{message.content}</p>
                           {message.feedbackOptions && (
                             <div className="mt-4 flex flex-wrap gap-2">
