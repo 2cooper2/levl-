@@ -405,7 +405,7 @@ interface UserPreferenceModel {
   }
   timing: {
     urgency: number // 0-10 scale
-    specificDate: Date | null
+    specificDate: null
     flexibility: number // 0-10 scale
   }
   requirements: {
@@ -1003,7 +1003,12 @@ export function AIServiceMatchmaker() {
       },
       proactiveCapabilities: {
         suggestionThreshold: 0.75,
-        anticipationFactors: ["budget_constraints", "quality_expectations", "time_sensitivity", "special_requirements"],
+        anticipationFactors: [
+          "budget_constraints",
+          "quality_expectations",
+          "time_sensitivity",
+          "specific_requirements",
+        ],
         interventionLevel: "medium",
       },
     },
@@ -1755,7 +1760,7 @@ export function AIServiceMatchmaker() {
       // Check if we can extract category from initial input
       let detectedCategory = null
       enhancedIntent.entities.forEach((entity) => {
-        if (services.some((s) => s.category === entity)) {
+        if (services.some((service) => service.category === entity)) {
           detectedCategory = entity
         }
       })
@@ -1892,13 +1897,6 @@ export function AIServiceMatchmaker() {
 
     // Map service type to category
     const categoryMap: { [key: string]: string } = {
-      tvMounting: "Mounting",
-      plumbing: "Plumbing",
-      painting: "Painting",
-      furniture: "Assembly",
-      moving: "Moving",
-      cleaning: "Cleaning",
-      electrical: "Electrical",
       tvMounting: "Mounting",
       plumbing: "Plumbing",
       painting: "Painting",
@@ -3178,7 +3176,7 @@ Would you like to book this service or compare it with other options?
             "budget_constraints",
             "quality_expectations",
             "time_sensitivity",
-            "special_requirements",
+            "specific_requirements",
           ],
           interventionLevel: "medium",
         },
@@ -3263,15 +3261,108 @@ Would you like to book this service or compare it with other options?
   // Handle horizontal scrolling for categories
   const scrollCategories = (direction: "left" | "right") => {
     if (categoriesRef.current) {
-      const scrollAmount = 200 // Adjust as needed
-      const currentScroll = categoriesRef.current.scrollLeft
+      const container = categoriesRef.current
+      const scrollAmount = container.clientWidth * 0.75 // Scroll 75% of the visible width
+      const currentScroll = container.scrollLeft
 
-      categoriesRef.current.scrollTo({
-        left: direction === "left" ? currentScroll - scrollAmount : currentScroll + scrollAmount,
+      container.scrollTo({
+        left: direction === "left" ? Math.max(0, currentScroll - scrollAmount) : currentScroll + scrollAmount,
         behavior: "smooth",
       })
     }
   }
+
+  // Add keyboard navigation for categories
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        scrollCategories("left")
+      } else if (e.key === "ArrowRight") {
+        scrollCategories("right")
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [])
+
+  // Add this after the scrollCategories function
+  useEffect(() => {
+    const container = categoriesRef.current
+    if (!container) return
+
+    let isDown = false
+    let startX: number
+    let scrollLeft: number
+
+    const handleMouseDown = (e: MouseEvent) => {
+      isDown = true
+      container.classList.add("cursor-grabbing")
+      startX = e.pageX - container.offsetLeft
+      scrollLeft = container.scrollLeft
+    }
+
+    const handleMouseLeave = () => {
+      isDown = false
+      container.classList.remove("cursor-grabbing")
+    }
+
+    const handleMouseUp = () => {
+      isDown = false
+      container.classList.remove("cursor-grabbing")
+    }
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDown) return
+      e.preventDefault()
+      const x = e.pageX - container.offsetLeft
+      const walk = (x - startX) * 2 // Scroll speed multiplier
+      container.scrollLeft = scrollLeft - walk
+    }
+
+    // Touch events for mobile with improved handling
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 1) {
+        isDown = true
+        startX = e.touches[0].pageX - container.offsetLeft
+        scrollLeft = container.scrollLeft
+      }
+    }
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!isDown || e.touches.length !== 1) return
+      const x = e.touches[0].pageX - container.offsetLeft
+      const walk = (x - startX) * 2
+      container.scrollLeft = scrollLeft - walk
+
+      // Prevent page scrolling when scrolling the categories on mobile devices
+      e.preventDefault()
+    }
+
+    container.addEventListener("mousedown", handleMouseDown)
+    container.addEventListener("mouseleave", handleMouseLeave)
+    container.addEventListener("mouseup", handleMouseUp)
+    container.addEventListener("mousemove", handleMouseMove)
+
+    container.addEventListener("touchstart", handleTouchStart, { passive: false })
+    container.addEventListener("touchend", handleMouseUp)
+    container.addEventListener("touchcancel", handleMouseLeave)
+    container.addEventListener("touchmove", handleTouchMove, { passive: false })
+
+    return () => {
+      container.removeEventListener("mousedown", handleMouseDown)
+      container.removeEventListener("mouseleave", handleMouseLeave)
+      container.removeEventListener("mouseup", handleMouseUp)
+      container.removeEventListener("mousemove", handleMouseMove)
+
+      container.removeEventListener("touchstart", handleTouchStart)
+      container.removeEventListener("touchend", handleMouseUp)
+      container.removeEventListener("touchcancel", handleMouseLeave)
+      container.removeEventListener("touchmove", handleTouchMove)
+    }
+  }, [categoriesRef.current])
 
   const renderEnhancedServiceCard = (service: Service) => {
     return (
@@ -3663,11 +3754,15 @@ Would you like to book this service or compare it with other options?
             </div>
 
             <div className="border-b border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-r from-gray-50/80 via-white/80 to-gray-50/80 dark:from-gray-900/80 dark:via-gray-900/90 dark:to-gray-900/80">
-              <div className="relative overflow-hidden w-full">
+              <div className="relative w-full overflow-hidden">
                 <div
-                  className="overflow-x-auto pb-2 pt-2 scrollbar-hide w-full"
+                  className="overflow-x-auto py-4 scrollbar-hide scroll-smooth mx-auto"
                   ref={categoriesRef}
-                  style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+                  style={{
+                    scrollbarWidth: "none",
+                    msOverflowStyle: "none",
+                    WebkitOverflowScrolling: "touch",
+                  }}
                 >
                   {/* Add this CSS rule to hide the scrollbar */}
                   <style jsx>{`
@@ -3675,7 +3770,7 @@ Would you like to book this service or compare it with other options?
                       display: none;
                     }
                   `}</style>
-                  <div className="flex space-x-4 pb-2 px-6 snap-x snap-mandatory scroll-pl-6 scroll-pr-6 scroll-smooth">
+                  <div className="flex space-x-4 snap-x snap-mandatory px-4 md:px-8 ml-4 md:ml-8 mr-4 md:mr-8">
                     {[
                       { icon: Tv, name: "Mounting", serviceType: "tvMounting" },
                       { icon: Briefcase, name: "Moving", serviceType: "moving" },
@@ -3688,16 +3783,17 @@ Would you like to book this service or compare it with other options?
                       { icon: Construction, name: "Flooring", serviceType: "flooring" },
                       { icon: HardHat, name: "Roofing", serviceType: "roofing" },
                     ].map((category, index) => (
-                      <EnhancedCategoryCard
-                        key={index}
-                        icon={category.icon}
-                        name={category.name}
-                        count={0}
-                        index={index}
-                        size="small"
-                        className="w-36 h-36 flex-shrink-0 my-2 mx-1 transform-gpu hover:translate-y-0"
-                        onClick={() => handleCategoryClick(category.serviceType)}
-                      />
+                      <div key={index} className="snap-start flex-shrink-0">
+                        <EnhancedCategoryCard
+                          icon={category.icon}
+                          name={category.name}
+                          count={0}
+                          index={index}
+                          size="small"
+                          className="w-36 h-36 my-2 mx-1 transform-gpu hover:translate-y-0"
+                          onClick={() => handleCategoryClick(category.serviceType)}
+                        />
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -3707,7 +3803,7 @@ Would you like to book this service or compare it with other options?
             {/* Chat messages - Enhanced UI */}
             <div
               ref={chatContainerRef}
-              className="relative h-[500px] overflow-y-auto p-6 bg-gradient-to-b from-gray-50/80 via-indigo-50/10 to-white/90 dark:from-gray-900/90 dark:via-indigo-950/20 dark:to-gray-950/80 backdrop-blur-sm shadow-inner border-t border-b border-indigo-100/20 dark:border-indigo-800/20"
+              className="relative h-[500px] overflow-y-auto p-6 bg-gradient-to-b from-gray-50/80 via-indigo-50/10 to-white/90 dark:from-gray-900/90 dark:via-indigo-950/20 dark:to-gray-950/80 backdrop-blur-sm shadow-inner border-t border-indigo-100/20 dark:border-indigo-800/20 rounded-b-lg"
               style={{
                 scrollbarWidth: "thin",
                 scrollbarColor: "rgba(79, 70, 229, 0.2) transparent",
@@ -3865,27 +3961,6 @@ Would you like to book this service or compare it with other options?
             </div>
 
             {/* Input area - Enhanced UI */}
-            <form
-              onSubmit={handleSubmit}
-              className="relative p-4 border-t border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-r from-gray-50/80 via-white/80 to-gray-50/80 dark:from-gray-900/80 dark:via-gray-900/90 dark:to-gray-900/80 backdrop-blur-sm -mt-64 z-10 shadow-lg"
-            >
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Type your message..."
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  className="w-full pl-5 pr-16 py-3 bg-white/90 dark:bg-gray-800/90 rounded-full border border-gray-300 dark:border-gray-700 shadow-md hover:shadow-lg focus:shadow-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-sm text-gray-700 dark:text-gray-200 backdrop-blur-sm"
-                />
-                <button
-                  type="submit"
-                  className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-full px-4 py-2 text-sm transition-colors duration-200 shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  disabled={isTyping}
-                >
-                  {isTyping ? "Sending..." : "Send"}
-                </button>
-              </div>
-            </form>
           </div>
         </motion.div>
       </div>

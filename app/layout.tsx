@@ -1,16 +1,16 @@
 import type React from "react"
-import "./globals.css"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
+import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider } from "@/context/auth-context"
-// Remove ExampleComponent import
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Levl - Skill Marketplace",
-  description: "Connect with skilled professionals and grow your business",
+  title: "Levl Platform Concept",
+  description: "AI powered marketplace for personal coaching and home services",
+  viewport: "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no",
     generator: 'v0.dev'
 }
 
@@ -20,13 +20,10 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" style={{ margin: 0, padding: 0 }}>
-      <body className={inter.className} style={{ margin: 0, padding: 0 }}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <AuthProvider>
-            {/* Remove ExampleComponent */}
-            {children}
-          </AuthProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <AuthProvider>{children}</AuthProvider>
         </ThemeProvider>
       </body>
     </html>
