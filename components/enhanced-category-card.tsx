@@ -133,15 +133,15 @@ export function EnhancedCategoryCard({
               }
             ></div>
 
-            {/* Enhanced reflective top highlight with 3D effect */}
+            {/* Enhanced reflective top highlight with 3D effect - hidden on mobile */}
             <div
-              className="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-white/60 via-white/30 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-300"
+              className="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-white/60 via-white/30 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-300 hidden md:block"
               style={{ transform: "translateZ(5px)" }}
             ></div>
 
-            {/* Enhanced hover shine effect with 3D */}
+            {/* Enhanced hover shine effect with 3D - hidden on mobile */}
             <div
-              className="absolute -inset-full h-[200%] w-[200%] bg-gradient-to-tr from-white/0 via-white/50 to-white/0 opacity-0 group-hover:opacity-100 transform -rotate-45 group-hover:translate-x-full transition-all duration-700 ease-in-out"
+              className="absolute -inset-full h-[200%] w-[200%] bg-gradient-to-tr from-white/0 via-white/50 to-white/0 opacity-0 group-hover:opacity-100 transform -rotate-45 group-hover:translate-x-full transition-all duration-700 ease-in-out hidden md:block"
               style={{ transform: "translateZ(15px) rotate(-45deg)" }}
             ></div>
 
@@ -177,11 +177,11 @@ export function EnhancedCategoryCard({
                 }}
                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
               >
-                {/* Icon top highlight */}
-                <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white via-transparent to-transparent opacity-90"></div>
+                {/* Icon top highlight - hidden on mobile */}
+                <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white via-transparent to-transparent opacity-90 hidden md:block"></div>
 
-                {/* Icon shine effect */}
-                <div className="absolute -inset-full h-20 w-20 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-100 transform -rotate-45 group-hover:translate-x-full transition-all duration-700 ease-in-out"></div>
+                {/* Icon shine effect - hidden on mobile */}
+                <div className="absolute -inset-full h-20 w-20 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-100 transform -rotate-45 group-hover:translate-x-full transition-all duration-700 ease-in-out hidden md:block"></div>
 
                 <Icon className={`${iconSize} text-primary relative z-10`} />
               </motion.div>
