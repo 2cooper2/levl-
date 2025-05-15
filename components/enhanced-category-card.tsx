@@ -85,7 +85,7 @@ export function EnhancedCategoryCard({
       >
         <div
           onClick={onClick}
-          className="block h-full transform-gpu focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 rounded-xl cursor-pointer"
+          className="block h-full transform-gpu focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 rounded-xl cursor-pointer overflow-hidden"
           aria-label={`Explore ${name} category`}
         >
           <div
@@ -99,32 +99,33 @@ export function EnhancedCategoryCard({
             style={{
               transform: "translateZ(0)",
               transformStyle: "preserve-3d",
+              borderRadius: "0.75rem", // Explicit border-radius to ensure rounded corners
             }}
           >
             {/* Card background with depth */}
             <div
-              className="absolute inset-0 backdrop-blur-[8px] bg-gradient-to-br from-purple-400/50 to-purple-500/30 dark:from-purple-500/30 dark:to-purple-600/20 opacity-80"
+              className="absolute inset-0 backdrop-blur-[8px] bg-gradient-to-br from-purple-400/50 to-purple-500/30 dark:from-purple-500/30 dark:to-purple-600/20 opacity-80 rounded-xl"
               style={{ transform: "translateZ(-10px)" }}
             ></div>
 
             {/* Background image with overlay */}
-            <div className="absolute inset-0 opacity-20 mix-blend-overlay overflow-hidden">
+            <div className="absolute inset-0 opacity-20 mix-blend-overlay overflow-hidden rounded-xl">
               <Image
                 src={imageUrl || "/placeholder.svg"}
                 alt=""
                 fill
-                className="object-cover"
+                className="object-cover rounded-xl"
                 style={{
                   transition: "transform 1.2s ease-in-out",
                 }}
                 aria-hidden="true"
               />
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/30 to-purple-700/30"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/30 to-purple-700/30 rounded-xl"></div>
             </div>
 
             {/* Interactive spotlight effect */}
             <div
-              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-[radial-gradient(circle_at_var(--x)_var(--y),rgba(255,255,255,0.15)_0%,transparent_60%)]"
+              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-[radial-gradient(circle_at_var(--x)_var(--y),rgba(255,255,255,0.15)_0%,transparent_60%)] rounded-xl"
               style={
                 {
                   "--x": spotlightX,
@@ -135,7 +136,7 @@ export function EnhancedCategoryCard({
 
             {/* Enhanced reflective top highlight with 3D effect - hidden on mobile */}
             <div
-              className="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-white/60 via-white/30 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-300 hidden md:block"
+              className="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-white/60 via-white/30 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-300 hidden md:block rounded-t-xl"
               style={{ transform: "translateZ(5px)" }}
             ></div>
 
