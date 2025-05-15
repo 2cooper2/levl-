@@ -3867,7 +3867,7 @@ Would you like to book this service or compare it with other options?
             {/* Input area - Enhanced UI */}
             <form
               onSubmit={handleSubmit}
-              className="relative p-4 border-t border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-r from-gray-50/80 via-white/80 to-gray-50/80 dark:from-gray-900/80 dark:via-gray-900/90 dark:to-gray-900/80 backdrop-blur-sm -mt-32 z-10 shadow-lg"
+              className="relative p-4 border-t border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-r from-gray-50/80 via-white/80 to-gray-50/80 dark:from-gray-900/80 dark:via-gray-900/90 dark:to-gray-900/80 backdrop-blur-sm -mt-64 z-10 shadow-lg"
             >
               <div className="relative">
                 <input
