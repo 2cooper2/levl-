@@ -2386,7 +2386,7 @@ export function AIServiceMatchmaker() {
     enhancedReasoning: EnhancedReasoning,
   ): MatchingResult & { diversityFocus: string } => {
     // Start with basic diverse alternatives
-    const basicResult = generateDiverseAlternativesFn(currentMatches, allServices, userModel)
+    const basicResult = generateDiverseAlternativesFn(allServices, userModel)
 
     // Determine what kind of diversity to focus on based on user model and context
     let diversityFocus = "balanced"
@@ -3770,7 +3770,7 @@ Would you like to book this service or compare it with other options?
                       display: none;
                     }
                   `}</style>
-                  <div className="flex space-x-4 snap-x snap-mandatory px-4 md:px-8 ml-4 md:ml-8 mr-4 md:mr-8">
+                  <div className="flex space-x-4 snap-x snap-mandatory px-4 md:px-8 -ml-2 md:-ml-4 mr-4 md:mr-8">
                     {[
                       { icon: Tv, name: "Mounting", serviceType: "tvMounting" },
                       { icon: Briefcase, name: "Moving", serviceType: "moving" },
