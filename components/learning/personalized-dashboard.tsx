@@ -99,23 +99,23 @@ export function PersonalizedDashboard() {
         {/* Advanced Particle System */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {/* Larger glowing particles */}
-          {Array.from({ length: 12 }).map((_, i) => (
+          {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={`large-${i}`}
               className="absolute rounded-full animate-pulse-custom"
               style={{
-                width: `${Math.random() * 6 + 4}px`,
-                height: `${Math.random() * 6 + 4}px`,
+                width: `${Math.random() * 5 + 3}px`,
+                height: `${Math.random() * 5 + 3}px`,
                 top: `${Math.random() * 100}%`,
                 left: `${Math.random() * 100}%`,
-                opacity: Math.random() * 0.4 + 0.1,
-                animationDuration: `${Math.random() * 8 + 4}s`,
-                animationDelay: `${Math.random() * 5}s`,
+                opacity: Math.random() * 0.3 + 0.1,
+                animationDuration: `${Math.random() * 6 + 4}s`,
+                animationDelay: `${Math.random() * 3}s`,
                 background: `radial-gradient(circle at center, ${
-                  ["rgba(var(--primary-rgb), 0.8)", "rgba(147, 51, 234, 0.8)", "rgba(59, 130, 246, 0.8)"][i % 3]
+                  ["rgba(var(--primary-rgb), 0.7)", "rgba(147, 51, 234, 0.7)", "rgba(59, 130, 246, 0.7)"][i % 3]
                 }, transparent)`,
-                boxShadow: `0 0 ${Math.random() * 10 + 5}px ${
-                  ["rgba(var(--primary-rgb), 0.4)", "rgba(147, 51, 234, 0.4)", "rgba(59, 130, 246, 0.4)"][i % 3]
+                boxShadow: `0 0 ${Math.random() * 8 + 4}px ${
+                  ["rgba(var(--primary-rgb), 0.3)", "rgba(147, 51, 234, 0.3)", "rgba(59, 130, 246, 0.3)"][i % 3]
                 }`,
                 filter: "blur(1px)",
                 transform: "translateZ(0)",
@@ -124,41 +124,19 @@ export function PersonalizedDashboard() {
           ))}
 
           {/* Tiny floating particles */}
-          {Array.from({ length: 20 }).map((_, i) => (
+          {Array.from({ length: 10 }).map((_, i) => (
             <div
               key={`tiny-${i}`}
               className={`absolute rounded-full animate-float-${(i % 4) + 1}`}
               style={{
-                width: `${Math.random() * 3 + 1}px`,
-                height: `${Math.random() * 3 + 1}px`,
+                width: `${Math.random() * 2 + 1}px`,
+                height: `${Math.random() * 2 + 1}px`,
                 top: `${Math.random() * 100}%`,
                 left: `${Math.random() * 100}%`,
-                opacity: Math.random() * 0.5 + 0.2,
-                animationDelay: `${Math.random() * 5}s`,
+                opacity: Math.random() * 0.4 + 0.2,
+                animationDelay: `${Math.random() * 3}s`,
                 background: "white",
                 filter: "blur(0.5px)",
-              }}
-            ></div>
-          ))}
-
-          {/* Particle trails */}
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div
-              key={`trail-${i}`}
-              className="absolute animate-trail"
-              style={{
-                width: "1px",
-                height: `${Math.random() * 40 + 20}px`,
-                top: `${Math.random() * 100}%`,
-                left: `${Math.random() * 100}%`,
-                opacity: Math.random() * 0.3 + 0.1,
-                animationDuration: `${Math.random() * 15 + 10}s`,
-                animationDelay: `${Math.random() * 5}s`,
-                background: `linear-gradient(to bottom, transparent, ${
-                  ["rgba(var(--primary-rgb), 0.6)", "rgba(147, 51, 234, 0.6)", "rgba(59, 130, 246, 0.6)"][i % 3]
-                }, transparent)`,
-                filter: "blur(1px)",
-                transform: "translateZ(0) rotate(${Math.random() * 360}deg)",
               }}
             ></div>
           ))}

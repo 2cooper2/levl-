@@ -505,3 +505,41 @@ body > div:first-child {
   margin-top: 0 !important;
   padding-top: 0 !important;
 }
+
+/* Mobile-specific styles for product cards */
+@media (max-width: 640px) {
+  /* Make sure product cards look the same on mobile */
+  .card,
+  .enhanced-card {
+    height: 100% !important;
+  }
+
+  /* Ensure consistent padding and spacing */
+  .card-content,
+  .enhanced-card-content {
+    padding: 1.25rem !important;
+  }
+
+  /* Ensure consistent text sizes */
+  .card h3,
+  .enhanced-card h3 {
+    font-size: 1rem !important;
+    line-height: 1.5 !important;
+  }
+
+  /* Ensure consistent badge sizes */
+  .badge {
+    font-size: 0.75rem !important;
+  }
+
+  /* Ensure consistent avatar sizes */
+  .avatar {
+    height: 1.5rem !important;
+    width: 1.5rem !important;
+  }
+
+  /* Add padding to main content to make room for fixed input bar */
+  main {
+    padding-bottom: 70px !important;
+  }
+}

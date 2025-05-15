@@ -23,10 +23,10 @@ export function AnalyticsComponent() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Simulate data loading
+    // Simulate data loading with a shorter timeout
     const timer = setTimeout(() => {
       setIsLoading(false)
-    }, 1000)
+    }, 500)
 
     return () => clearTimeout(timer)
   }, [])
@@ -169,7 +169,7 @@ export function AnalyticsComponent() {
             <CardContent>
               {isLoading ? (
                 <div className="space-y-2">
-                  {[...Array(3)].map((_, i) => (
+                  {[...Array(2)].map((_, i) => (
                     <div key={i} className="animate-pulse flex items-center gap-3">
                       <div className="rounded-full bg-muted h-8 w-8"></div>
                       <div className="flex-1">

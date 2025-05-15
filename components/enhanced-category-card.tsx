@@ -59,12 +59,15 @@ export function EnhancedCategoryCard({
 
   // Adjust the icon size based on the size prop
   const iconSize = size === "small" ? "h-6 w-6" : "h-7 w-7"
+  const responsiveIconSize = size === "small" ? "h-6 w-6 sm:h-8 sm:w-8" : "h-7 w-7"
 
   // Adjust the padding based on the size prop
   const cardPadding = size === "small" ? "p-3" : "p-6"
+  const responsiveCardPadding = "p-4 sm:p-6"
 
   // Adjust the text size based on the size prop
   const textSize = size === "small" ? "text-base" : "text-xl"
+  const responsiveTextSize = size === "small" ? "text-base sm:text-lg" : "text-xl"
 
   return (
     <motion.div
@@ -163,7 +166,7 @@ export function EnhancedCategoryCard({
 
             {/* Content wrapper with 3D effect */}
             <div
-              className={`${cardPadding} flex flex-col items-center justify-between text-center relative z-10 h-full`}
+              className={`${responsiveCardPadding} flex flex-col items-center justify-between text-center relative z-10 h-full`}
               style={{ transform: "translateZ(10px)" }}
             >
               {/* Enhanced glossy icon container with 3D effect */}
@@ -183,7 +186,7 @@ export function EnhancedCategoryCard({
                 {/* Icon shine effect */}
                 <div className="absolute -inset-full h-20 w-20 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-100 transform -rotate-45 group-hover:translate-x-full transition-all duration-700 ease-in-out"></div>
 
-                <Icon className={`${iconSize} text-primary relative z-10`} />
+                <Icon className={`${responsiveIconSize} text-primary relative z-10`} />
               </motion.div>
 
               {/* Flexible spacer */}
@@ -196,7 +199,7 @@ export function EnhancedCategoryCard({
                 transition={{ duration: 0.2 }}
               >
                 <h3
-                  className={`font-semibold ${textSize} text-white group-hover:text-white transition-colors duration-200 drop-shadow-md`}
+                  className={`font-semibold ${responsiveTextSize} text-white group-hover:text-white transition-colors duration-200 drop-shadow-md`}
                 >
                   {name}
                 </h3>

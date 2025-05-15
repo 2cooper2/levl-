@@ -25,19 +25,25 @@ export const AIMatchmakerMessages = forwardRef<HTMLDivElement, AIMatchmakerMessa
           <div key={message.id} className="flex flex-col">
             {message.type === "user" ? (
               <motion.div
-                className="self-end bg-indigo-600 text-white px-4 py-2 rounded-2xl rounded-tr-none max-w-[80%] shadow-md"
+                className="self-end bg-gradient-to-br from-indigo-500 to-indigo-600 text-white px-4 py-2 rounded-2xl rounded-tr-none max-w-[80%] shadow-[0_10px_15px_-3px_rgba(79,70,229,0.3),0_4px_6px_-4px_rgba(79,70,229,0.4)] border border-indigo-400 transform hover:translate-y-[-2px] hover:shadow-[0_14px_20px_-6px_rgba(79,70,229,0.4),0_6px_8px_-5px_rgba(79,70,229,0.5)] transition-all duration-200"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
+                style={{
+                  filter: "drop-shadow(0 4px 3px rgba(79, 70, 229, 0.15))",
+                }}
               >
                 <p className="text-sm">{message.content}</p>
               </motion.div>
             ) : message.type === "ai" ? (
               <motion.div
-                className="self-start bg-white dark:bg-gray-800 px-4 py-2 rounded-2xl rounded-tl-none max-w-[80%] shadow-md"
+                className="self-start bg-gradient-to-br from-white to-gray-50 dark:from-gray-700 dark:to-gray-800 px-4 py-2 rounded-2xl rounded-tl-none max-w-[80%] shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1),0_4px_6px_-4px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.4),0_4px_6px_-4px_rgba(0,0,0,0.3)] border border-gray-100 dark:border-gray-600 transform hover:translate-y-[-2px] hover:shadow-[0_14px_20px_-6px_rgba(0,0,0,0.15),0_6px_8px_-5px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_14px_20px_-6px_rgba(0,0,0,0.5),0_6px_8px_-5px_rgba(0,0,0,0.4)] transition-all duration-200"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
+                style={{
+                  filter: "drop-shadow(0 4px 3px rgba(0, 0, 0, 0.07))",
+                }}
               >
                 <p className="text-sm dark:text-gray-200">{message.content}</p>
 
@@ -46,7 +52,7 @@ export const AIMatchmakerMessages = forwardRef<HTMLDivElement, AIMatchmakerMessa
                     {message.services.map((service) => (
                       <div
                         key={service.id}
-                        className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-3 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                        className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-3 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer shadow-sm"
                         onClick={() => onOptionSelect(`Book ${service.title}`)}
                       >
                         <div className="flex justify-between items-start">
@@ -71,7 +77,7 @@ export const AIMatchmakerMessages = forwardRef<HTMLDivElement, AIMatchmakerMessa
                     {message.options.map((option, index) => (
                       <button
                         key={index}
-                        className="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-xs px-3 py-1.5 rounded-full transition-colors"
+                        className="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-xs px-3 py-1.5 rounded-full transition-colors shadow-sm"
                         onClick={() => onOptionSelect(option)}
                       >
                         {option}
@@ -85,10 +91,13 @@ export const AIMatchmakerMessages = forwardRef<HTMLDivElement, AIMatchmakerMessa
               </motion.div>
             ) : message.type === "feedback" ? (
               <motion.div
-                className="self-center bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800/30 px-4 py-2 rounded-xl max-w-[90%]"
+                className="self-center bg-gradient-to-br from-indigo-50 to-indigo-100/80 dark:from-indigo-900/40 dark:to-indigo-800/30 px-4 py-2 rounded-xl max-w-[90%] shadow-[0_10px_15px_-3px_rgba(79,70,229,0.1),0_4px_6px_-4px_rgba(79,70,229,0.1)] dark:shadow-[0_10px_15px_-3px_rgba(79,70,229,0.15),0_4px_6px_-4px_rgba(79,70,229,0.1)] border border-indigo-100 dark:border-indigo-700/30 transform hover:translate-y-[-2px] hover:shadow-[0_14px_20px_-6px_rgba(79,70,229,0.15),0_6px_8px_-5px_rgba(79,70,229,0.1)] transition-all duration-200"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
+                style={{
+                  filter: "drop-shadow(0 4px 3px rgba(79, 70, 229, 0.07))",
+                }}
               >
                 <p className="text-sm text-center text-indigo-700 dark:text-indigo-300">{message.content}</p>
 
@@ -97,7 +106,7 @@ export const AIMatchmakerMessages = forwardRef<HTMLDivElement, AIMatchmakerMessa
                     {message.feedbackOptions.map((option, index) => (
                       <button
                         key={index}
-                        className="bg-indigo-100 dark:bg-indigo-800/50 hover:bg-indigo-200 dark:hover:bg-indigo-700/50 text-indigo-700 dark:text-indigo-300 text-xs px-3 py-1.5 rounded-full transition-colors"
+                        className="bg-indigo-100 dark:bg-indigo-800/50 hover:bg-indigo-200 dark:hover:bg-indigo-700/50 text-indigo-700 dark:text-indigo-300 text-xs px-3 py-1.5 rounded-full transition-colors shadow-sm"
                         onClick={() => onFeedbackSelect(option)}
                       >
                         {option}
@@ -108,10 +117,13 @@ export const AIMatchmakerMessages = forwardRef<HTMLDivElement, AIMatchmakerMessa
               </motion.div>
             ) : message.type === "loading" ? (
               <motion.div
-                className="self-start bg-white dark:bg-gray-800 px-4 py-2 rounded-2xl rounded-tl-none max-w-[80%] shadow-md"
+                className="self-start bg-gradient-to-br from-white to-gray-50 dark:from-gray-700 dark:to-gray-800 px-4 py-2 rounded-2xl rounded-tl-none max-w-[80%] shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1),0_4px_6px_-4px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.4),0_4px_6px_-4px_rgba(0,0,0,0.3)] border border-gray-100 dark:border-gray-600 transform hover:translate-y-[-2px] hover:shadow-[0_14px_20px_-6px_rgba(0,0,0,0.15),0_6px_8px_-5px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_14px_20px_-6px_rgba(0,0,0,0.5),0_6px_8px_-5px_rgba(0,0,0,0.4)] transition-all duration-200"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
+                style={{
+                  filter: "drop-shadow(0 4px 3px rgba(0, 0, 0, 0.07))",
+                }}
               >
                 <div className="flex items-center space-x-2">
                   <div className="flex space-x-1">

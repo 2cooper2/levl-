@@ -70,7 +70,7 @@ export function ServiceCard({
       transition={{ duration: 0.5, delay: delay * 0.1 }}
       whileHover={{ y: -5, transition: { duration: 0.2 } }}
       onClick={handleCardClick}
-      className="cursor-pointer"
+      className="cursor-pointer h-full"
     >
       <Card className="overflow-hidden h-full flex flex-col">
         <div className="relative aspect-[4/3] overflow-hidden">

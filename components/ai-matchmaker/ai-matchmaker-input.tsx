@@ -45,9 +45,11 @@ export function AIMatchmakerInput({ inputValue, setInputValue, handleSubmit, isT
 
   return (
     <div
-      className={`p-4 border-t border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm transition-all duration-200 ${isFocused ? "shadow-md" : ""}`}
+      className={`fixed bottom-0 left-0 right-0 z-50 p-3 sm:p-4 border-t border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm transition-all duration-200 ${
+        isFocused ? "shadow-md" : ""
+      }`}
     >
-      <form onSubmit={onSubmit} className="flex items-center space-x-2">
+      <form onSubmit={onSubmit} className="flex items-center space-x-2 max-w-screen-xl mx-auto">
         <Button
           type="button"
           variant="ghost"
@@ -68,7 +70,7 @@ export function AIMatchmakerInput({ inputValue, setInputValue, handleSubmit, isT
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             disabled={isTyping}
-            className="pr-10 py-6 bg-gray-50/80 dark:bg-gray-800/80 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-600 focus:border-transparent"
+            className="pr-10 py-4 sm:py-6 bg-gray-50/80 dark:bg-gray-800/80 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-600 focus:border-transparent"
           />
         </div>
 

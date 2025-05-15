@@ -3675,7 +3675,7 @@ Would you like to book this service or compare it with other options?
                       display: none;
                     }
                   `}</style>
-                  <div className="flex space-x-4">
+                  <div className="flex space-x-4 pb-2 px-2 snap-x snap-mandatory scroll-pl-6 scroll-pr-6 scroll-smooth">
                     {[
                       { icon: Tv, name: "Mounting", serviceType: "tvMounting" },
                       { icon: Briefcase, name: "Moving", serviceType: "moving" },
@@ -3744,7 +3744,7 @@ Would you like to book this service or compare it with other options?
                   >
                     {message.type === "user" && (
                       <div className="flex justify-end">
-                        <div className="relative bg-gradient-to-br from-lavender-200/95 via-lavender-300/90 to-lavender-200/90 dark:from-lavender-950/95 dark:via-lavender-950/90 dark:to-lavender-950/90 backdrop-blur-sm rounded-2xl px-5 py-3 max-w-[80%] shadow-lg border border-lavender-400/50 dark:border-lavender-800/50 hover:shadow-lavender-300/20 dark:hover:shadow-lavender-950/20 transition-all duration-300">
+                        <div className="relative bg-gradient-to-br from-lavender-200/95 via-lavender-300/90 to-lavender-200/90 dark:from-lavender-950/95 dark:via-lavender-950/90 dark:to-lavender-950/90 backdrop-blur-sm rounded-2xl px-5 py-3 max-w-[80%] shadow-[0_10px_15px_-3px_rgba(139,92,246,0.2),0_4px_6px_-4px_rgba(139,92,246,0.2),0_-2px_6px_0px_rgba(255,255,255,0.1)] dark:shadow-[0_10px_15px_-3px_rgba(139,92,246,0.3),0_4px_6px_-4px_rgba(0,0,0,0.4),0_-2px_6px_0px_rgba(139,92,246,0.1)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-800/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 translate-y-[-2px] hover:translate-y-[-4px] transition-all duration-300 transform">
                           <p className="text-sm text-gray-800 dark:text-gray-100 relative z-10">{message.content}</p>
                           <div className="text-[10px] text-black dark:text-white text-right mt-1 relative z-10">
                             {new Date(message.timestamp).toLocaleTimeString([], {
@@ -3758,7 +3758,7 @@ Would you like to book this service or compare it with other options?
 
                     {message.type === "ai" && (
                       <div className="flex">
-                        <div className="relative bg-gradient-to-br from-white/95 via-white/90 to-indigo-50/90 dark:from-gray-800/95 dark:via-gray-800/90 dark:to-indigo-950/90 backdrop-blur-sm rounded-2xl px-5 py-3 max-w-[80%] shadow-xl border border-indigo-100/60 dark:border-indigo-800/60 hover:shadow-indigo-100/30 dark:hover:shadow-indigo-900/30 transition-all duration-300 transform hover:-translate-y-0.5">
+                        <div className="relative bg-gradient-to-br from-white/95 via-white/90 to-indigo-50/90 dark:from-gray-800/95 dark:via-gray-800/90 dark:to-indigo-950/90 backdrop-blur-sm rounded-2xl px-5 py-3 max-w-[80%] shadow-[0_10px_15px_-3px_rgba(79,70,229,0.2),0_4px_6px_-4px_rgba(79,70,229,0.2),0_-2px_6px_0px_rgba(255,255,255,0.1)] dark:shadow-[0_10px_15px_-3px_rgba(79,70,229,0.3),0_4px_6px_-4px_rgba(0,0,0,0.4),0_-2px_6px_0px_rgba(79,70,229,0.1)] border-t border-l border-r border-indigo-100/70 dark:border-t dark:border-l dark:border-r dark:border-indigo-700/40 border-b-2 border-b-indigo-200/80 dark:border-b-2 dark:border-b-indigo-800/80 translate-y-[-2px] hover:translate-y-[-4px] transition-all duration-300 transform hover:shadow-[0_14px_20px_-3px_rgba(79,70,229,0.3),0_6px_10px_-4px_rgba(79,70,229,0.2),0_-2px_8px_0px_rgba(255,255,255,0.15)]">
                           <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-500/8 via-purple-500/8 to-violet-500/8 dark:from-indigo-500/15 dark:via-purple-500/15 dark:to-violet-500/15 opacity-80"></div>
                           <div className="absolute inset-x-0 bottom-0 h-1/2 rounded-b-2xl bg-gradient-to-t from-black/5 to-transparent dark:from-white/5"></div>
 
@@ -3791,7 +3791,7 @@ Would you like to book this service or compare it with other options?
                               ))}
                             </div>
                           )}
-                          <div className="text-[10px] text-indigo-600/60 dark:text-indigo-400/60 mt-1 relative z-10">
+                          <div className="text-[10px] text-black dark:text-white mt-1 relative z-10">
                             {new Date(message.timestamp).toLocaleTimeString([], {
                               hour: "2-digit",
                               minute: "2-digit",

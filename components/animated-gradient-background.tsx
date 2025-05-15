@@ -27,15 +27,15 @@ export function AnimatedGradientBackground() {
     const circles: Circle[] = []
 
     // Add more circles with varied sizes and speeds for a richer effect
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 5; i++) {
       circles.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        radius: Math.random() * 400 + 200, // Larger radius range
-        vx: Math.random() * 0.15 - 0.075, // Slower, more subtle movement
-        vy: Math.random() * 0.15 - 0.075,
+        radius: Math.random() * 300 + 200, // Slightly smaller radius range
+        vx: Math.random() * 0.1 - 0.05, // Slower movement for better performance
+        vy: Math.random() * 0.1 - 0.05,
         hue: Math.random() * 40 + 210, // More focused blue-purple palette
-        opacity: Math.random() * 0.15 + 0.05, // Varied opacity for depth
+        opacity: Math.random() * 0.12 + 0.04, // Slightly reduced opacity
       })
     }
 
@@ -60,31 +60,12 @@ export function AnimatedGradientBackground() {
       opacity: 0.08,
     })
 
-    // Add extra circles specifically for the top-right area
-    circles.push({
-      x: width * 0.9,
-      y: height * 0.1,
-      radius: 400,
-      vx: -0.02,
-      vy: 0.01,
-      hue: 240, // Blue accent
-      opacity: 0.1,
-    })
-
-    circles.push({
-      x: width * 0.95,
-      y: height * 0.15,
-      radius: 350,
-      vx: -0.01,
-      vy: 0.02,
-      hue: 260, // Purple accent
-      opacity: 0.09,
-    })
-
     const animate = () => {
-      // Clear canvas with a slight fade effect for smoother transitions
-      ctx.fillStyle = "rgba(var(--background), 0.03)"
+      // Use a more efficient clear method
+      ctx.globalAlpha = 0.03
+      ctx.fillStyle = "rgba(var(--background), 1)"
       ctx.fillRect(0, 0, width, height)
+      ctx.globalAlpha = 1
 
       // Draw and update circles
       for (const circle of circles) {
