@@ -21,7 +21,7 @@ export default function Home() {
   }, [])
 
   return (
-    <div className="flex min-h-screen flex-col pb-16 sm:pb-0" style={{ margin: 0, padding: 0 }}>
+    <div className="flex min-h-screen flex-col" style={{ margin: 0, padding: 0 }}>
       <AnimatedGradientBackground />
 
       {/* AI Service Matchmaker */}

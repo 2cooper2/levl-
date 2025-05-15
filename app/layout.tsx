@@ -21,9 +21,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" style={{ margin: 0, padding: 0 }}>
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-      </head>
       <body className={inter.className} style={{ margin: 0, padding: 0 }}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <AuthProvider>

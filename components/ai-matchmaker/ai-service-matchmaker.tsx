@@ -3662,10 +3662,10 @@ Would you like to book this service or compare it with other options?
               </div>
             </div>
 
-            <div className="p-4 border-b border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-r from-gray-50/80 via-white/80 to-gray-50/80 dark:from-gray-900/80 dark:via-gray-900/90 dark:to-gray-900/80">
-              <div className="relative overflow-hidden">
+            <div className="border-b border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-r from-gray-50/80 via-white/80 to-gray-50/80 dark:from-gray-900/80 dark:via-gray-900/90 dark:to-gray-900/80">
+              <div className="relative overflow-hidden w-full">
                 <div
-                  className="overflow-x-auto pb-2 px-6 pt-2 scrollbar-hide"
+                  className="overflow-x-auto pb-2 pt-2 scrollbar-hide w-full"
                   ref={categoriesRef}
                   style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
                 >
@@ -3675,7 +3675,7 @@ Would you like to book this service or compare it with other options?
                       display: none;
                     }
                   `}</style>
-                  <div className="flex space-x-4 pb-2 px-2 snap-x snap-mandatory scroll-pl-6 scroll-pr-6 scroll-smooth">
+                  <div className="flex space-x-4 pb-2 px-6 snap-x snap-mandatory scroll-pl-6 scroll-pr-6 scroll-smooth">
                     {[
                       { icon: Tv, name: "Mounting", serviceType: "tvMounting" },
                       { icon: Briefcase, name: "Moving", serviceType: "moving" },
@@ -3867,7 +3867,7 @@ Would you like to book this service or compare it with other options?
             {/* Input area - Enhanced UI */}
             <form
               onSubmit={handleSubmit}
-              className="relative p-4 border-t border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-r from-gray-50/80 via-white/80 to-gray-50/80 dark:from-gray-900/80 dark:via-gray-900/90 dark:to-gray-900/80 backdrop-blur-sm"
+              className="relative p-4 border-t border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-r from-gray-50/80 via-white/80 to-gray-50/80 dark:from-gray-900/80 dark:via-gray-900/90 dark:to-gray-900/80 backdrop-blur-sm -mt-16 z-10 shadow-lg"
             >
               <div className="relative">
                 <input
@@ -3875,7 +3875,7 @@ Would you like to book this service or compare it with other options?
                   placeholder="Type your message..."
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  className="w-full pl-5 pr-16 py-2.5 bg-white/90 dark:bg-gray-800/90 rounded-full border border-gray-300 dark:border-gray-700 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow duration-200 text-sm text-gray-700 dark:text-gray-200 backdrop-blur-sm"
+                  className="w-full pl-5 pr-16 py-3 bg-white/90 dark:bg-gray-800/90 rounded-full border border-gray-300 dark:border-gray-700 shadow-md hover:shadow-lg focus:shadow-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-sm text-gray-700 dark:text-gray-200 backdrop-blur-sm"
                 />
                 <button
                   type="submit"
