@@ -27,7 +27,7 @@ export interface Database {
           skills: string | null
           email_verified: boolean | null
           stripe_customer_id: string | null
-          stripe_account_id: string | null
+          stripe_account_reference: string | null
           account_balance: number | null
           onboarding_completed: boolean | null
           is_active: boolean | null
@@ -51,7 +51,7 @@ export interface Database {
           skills?: string | null
           email_verified?: boolean | null
           stripe_customer_id?: string | null
-          stripe_account_id?: string | null
+          stripe_account_reference?: string | null
           account_balance?: number | null
           onboarding_completed?: boolean | null
           is_active?: boolean | null
@@ -75,7 +75,7 @@ export interface Database {
           skills?: string | null
           email_verified?: boolean | null
           stripe_customer_id?: string | null
-          stripe_account_id?: string | null
+          stripe_account_reference?: string | null
           account_balance?: number | null
           onboarding_completed?: boolean | null
           is_active?: boolean | null
@@ -83,7 +83,6 @@ export interface Database {
           last_login_at?: string | null
         }
       }
-      // Other tables remain the same...
     }
     Views: {
       [_ in never]: never

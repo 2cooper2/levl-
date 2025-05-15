@@ -1,164 +1,163 @@
 "use client"
-
-import type React from "react"
-
 import { motion } from "framer-motion"
-import { Star, MapPin, Clock, CheckCircle, ArrowRight, Calendar, MessageSquare, Briefcase } from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
+import { Star, CheckCircle, MessageCircle, User, Shield, Clock } from "lucide-react"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { useRouter } from "next/navigation"
-import { FeatureBadge } from "@/components/ui/feature-badge"
+import { Badge } from "@/components/ui/badge"
 
 interface Provider {
-  id: string
+  id: string | number
   name: string
-  title: string
-  avatar: string
   rating: number
   reviews: number
-  location: string
-  hourlyRate: number
-  responseTime: string
-  tags: string[]
-  description: string
-  featured: boolean
-  availability: string
-  completedProjects: number
-  languages: string[]
-  packages: {
-    name: string
-    price: number
-    description: string
-  }[]
+  avatar: string
+  specialty?: string
+  responseTime?: string
+  completionRate?: number
+  verified?: boolean
+  featured?: boolean
+  background?: string
 }
 
 interface ProviderCardProps {
   provider: Provider
-  index: number
-  isLoaded: boolean
-  onSelect: () => void
+  onSelect?: (providerId: string | number) => void
+  onContact?: (providerId: string | number) => void
+  onViewProfile?: (providerId: string | number) => void
+  featured?: boolean
+  matchScore?: number
 }
 
-export function ProviderCard({ provider, index, isLoaded, onSelect }: ProviderCardProps) {
-  const router = useRouter()
-
-  const handleViewProfile = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    router.push(`/providers/${provider.id}`)
-  }
-
-  const handleContact = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    router.push(`/messages?provider=${provider.id}`)
-  }
-
-  const handleHire = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    router.push(`/checkout?provider=${provider.id}`)
-  }
-
+export function ProviderCard({
+  provider,
+  onSelect,
+  onContact,
+  onViewProfile,
+  featured = false,
+  matchScore,
+}: ProviderCardProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
-      whileHover={{ y: -5, transition: { duration: 0.2 } }}
-      onClick={onSelect}
-      className="cursor-pointer"
-    >
-      <Card className={`overflow-hidden ${provider.featured ? "border-primary/40 bg-primary/5" : ""}`}>
-        <div className="p-6">
-          <div className="flex flex-col md:flex-row gap-6">
-            <div className="flex flex-col items-center text-center md:w-44">
-              <Avatar className="h-20 w-20 mb-4">
-                <AvatarImage src={provider.avatar || "/placeholder.svg"} alt={provider.name} />
-                <AvatarFallback>
-                  {provider.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")}
-                </AvatarFallback>
-              </Avatar>
-              <h3 className="font-semibold">{provider.name}</h3>
-              <p className="text-sm text-muted-foreground">{provider.title}</p>
-              <div className="mt-2 flex items-center">
-                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                <span className="ml-1 text-sm font-medium">{provider.rating}</span>
-                <span className="ml-1 text-xs text-muted-foreground">({provider.reviews})</span>
-              </div>
-              <div className="mt-2 flex flex-wrap gap-1">
-                <FeatureBadge type="founder" size="sm" />
-                <FeatureBadge type="fees" size="sm" />
-              </div>
-              <div className="mt-1 flex items-center text-xs text-muted-foreground">
-                <MapPin className="h-3 w-3 mr-1" />
-                {provider.location}
-              </div>
-            </div>
-
-            <div className="flex-1 space-y-4">
-              <div className="flex flex-wrap gap-2">
-                {provider.tags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="text-xs font-normal">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-
-              <p className="text-sm text-muted-foreground">{provider.description}</p>
-
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <div className="space-y-1">
-                  <p className="text-xs text-muted-foreground">Rate</p>
-                  <p className="font-semibold">${provider.hourlyRate}/hr</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-xs text-muted-foreground">Response Time</p>
-                  <div className="flex items-center">
-                    <Clock className="h-3 w-3 mr-1 text-muted-foreground" />
-                    <p className="text-sm">{provider.responseTime}</p>
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-xs text-muted-foreground">Availability</p>
-                  <div className="flex items-center">
-                    <Calendar className="h-3 w-3 mr-1 text-muted-foreground" />
-                    <p className="text-sm">{provider.availability}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-3 mt-4">
-                <Button variant="outline" size="sm" className="gap-1" onClick={handleViewProfile}>
-                  <Briefcase className="h-3 w-3" /> View Services
-                </Button>
-
-                <Button variant="ghost" size="sm" className="gap-1" onClick={handleContact}>
-                  <MessageSquare className="h-3 w-3" /> Contact
-                </Button>
-
-                <Button
-                  variant="default"
-                  size="sm"
-                  className="bg-purple-500/80 hover:bg-purple-600/90 backdrop-blur-sm border border-purple-300/30 shadow-sm hover:shadow-md transition-all duration-300"
-                  onClick={handleHire}
-                >
-                  Hire Now <ArrowRight className="ml-1 h-3 w-3" />
-                </Button>
-              </div>
-            </div>
+    <div className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-md">
+      {/* Header with background gradient */}
+      <div className="h-24 bg-gradient-to-r from-indigo-500 to-purple-600 relative">
+        {/* Avatar */}
+        <div className="absolute -bottom-10 left-4">
+          <div className="h-20 w-20 rounded-full border-4 border-white dark:border-gray-800 overflow-hidden">
+            <Image
+              src={provider.avatar || "/professional-avatar.png"}
+              alt={provider.name}
+              layout="fill"
+              objectFit="cover"
+            />
           </div>
         </div>
 
-        {provider.featured && (
-          <div className="bg-primary/10 px-6 py-2 flex items-center">
-            <CheckCircle className="h-4 w-4 text-primary mr-2" />
-            <span className="text-sm font-medium">Featured Professional</span>
+        {/* Match score */}
+        {matchScore && (
+          <div className="absolute top-3 right-3">
+            <Badge className="bg-white/90 text-indigo-800 font-medium">{matchScore}% Match</Badge>
           </div>
         )}
-      </Card>
-    </motion.div>
+      </div>
+
+      {/* Content */}
+      <div className="pt-12 px-4 pb-4">
+        {/* Name and verification */}
+        <div className="flex items-center mb-1">
+          <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{provider.name}</h3>
+          {provider.verified && (
+            <Badge
+              variant="outline"
+              className="ml-2 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800"
+            >
+              <CheckCircle className="h-3 w-3 mr-1" />
+              Verified
+            </Badge>
+          )}
+        </div>
+
+        {/* Specialty */}
+        {provider.specialty && <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">{provider.specialty}</p>}
+
+        {/* Rating */}
+        <div className="flex items-center mb-4">
+          <div className="flex">
+            {[...Array(5)].map((_, i) => (
+              <Star
+                key={i}
+                className={`h-4 w-4 ${
+                  i < Math.floor(provider.rating)
+                    ? "fill-amber-400 text-amber-400"
+                    : i < provider.rating
+                      ? "fill-amber-400/50 text-amber-400/50"
+                      : "fill-gray-300 text-gray-300 dark:fill-gray-600 dark:text-gray-600"
+                } mr-0.5`}
+              />
+            ))}
+          </div>
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">{provider.rating}</span>
+          <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">({provider.reviews} reviews)</span>
+        </div>
+
+        {/* Stats */}
+        <div className="space-y-3 mb-4">
+          {/* Response time */}
+          {provider.responseTime && (
+            <div className="flex items-center text-sm text-gray-700 dark:text-gray-300">
+              <Clock className="h-4 w-4 mr-2 text-indigo-500" />
+              <span>
+                Responds in <span className="font-medium">{provider.responseTime}</span>
+              </span>
+            </div>
+          )}
+
+          {/* Completion rate */}
+          {provider.completionRate && (
+            <div className="flex flex-col text-sm text-gray-700 dark:text-gray-300">
+              <div className="flex items-center">
+                <Shield className="h-4 w-4 mr-2 text-green-500" />
+                <span>
+                  <span className="font-medium">{provider.completionRate}%</span> Completion rate
+                </span>
+              </div>
+              <div className="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mt-1.5 overflow-hidden">
+                <motion.div
+                  className="h-full bg-green-500 rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${provider.completionRate}%` }}
+                  transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Action buttons */}
+        <div className="grid grid-cols-2 gap-2">
+          {onViewProfile && (
+            <Button variant="outline" className="w-full" onClick={() => onViewProfile(provider.id)}>
+              <User className="h-4 w-4 mr-2" />
+              Profile
+            </Button>
+          )}
+
+          {onContact && (
+            <Button variant="outline" className="w-full" onClick={() => onContact(provider.id)}>
+              <MessageCircle className="h-4 w-4 mr-2" />
+              Contact
+            </Button>
+          )}
+
+          {onSelect && (
+            <Button
+              className="w-full col-span-2 bg-indigo-600 hover:bg-indigo-700 text-white mt-2"
+              onClick={() => onSelect(provider.id)}
+            >
+              Book Now
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
   )
 }

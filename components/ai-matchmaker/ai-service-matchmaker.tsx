@@ -3,11 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
-import { motion } from "framer-motion"
-import { Star } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
-import Image from "next/image"
 import Link from "next/link"
 
 // Add import for EnhancedCategoryCard
@@ -23,8 +19,15 @@ import {
   Leaf,
   Construction,
   HardHat,
+  Star,
 } from "lucide-react"
 import { LevlLogo } from "@/components/levl-logo"
+
+// Add these imports
+import { motion } from "framer-motion"
+
+// Import the ProviderCard component
+import { ProviderCard } from "@/components/ai-matchmaker/provider-card"
 
 // Define service types
 type ServiceProvider = {
@@ -1259,7 +1262,7 @@ export function AIServiceMatchmaker() {
         contextualMemory: {
           ...prevModel.enhancedReasoning.contextualMemory,
           shortTerm: new Map([
-            ...Array.from(prevModel.enhancedReasoning.contextualMemory.shortTerm || new Map()),
+            ...Array.from(prevModel.enhancedReasoning.contextualMemory || new Map()),
             ["lastProcessedInput", input],
             ["lastIntent", enhancedIntent],
           ]),
@@ -3066,7 +3069,7 @@ Would you like to book this service or compare it with other options?
   // Reset conversation with enhanced memory
   const resetConversation = () => {
     // Store some long-term memory before resetting
-    const longTermMemory = new Map(aiModel.enhancedReasoning.contextualMemory.longTerm)
+    const longTermMemory = new Map(aiModel.enhancedReasoning.contextualMemory)
 
     // Store category preferences in long-term memory
     aiModel.userModel.categories.forEach((confidence, category) => {
@@ -3272,92 +3275,147 @@ Would you like to book this service or compare it with other options?
 
   const renderEnhancedServiceCard = (service: Service) => {
     return (
-      <div
+      <motion.div
         key={service.id}
-        className="group relative flex flex-col rounded-xl border border-indigo-100/50 dark:border-indigo-800/30 p-5 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden"
-        onClick={() => router.push(`/services/${service.id}`)}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="group relative"
       >
-        {/* Decorative gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/50 via-white to-purple-50/50 dark:from-indigo-950/40 dark:via-gray-900 dark:to-purple-950/40 opacity-80 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <div
+          className="relative overflow-hidden rounded-xl border border-lavender-200/40 dark:border-lavender-800/30 bg-white dark:bg-gray-900 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
+          onClick={() => router.push(`/services/${service.id}`)}
+        >
+          {/* Subtle gradient background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-lavender-50/50 via-white to-white dark:from-lavender-900/20 dark:via-gray-900 dark:to-gray-900 opacity-80"></div>
 
-        {/* Subtle pattern overlay */}
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5MDkwOTAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6bTAtMTJ2NmgxOHYtNkgzNnptMCIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDI0em0wIDEydjZoMTh2LTZIMjR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY6aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] bg-[length:30px_30px] opacity-10 group-hover:opacity-20 transition-opacity duration-300"></div>
+          {/* Refined grid pattern overlay */}
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9ImN1cnJlbnRDb2xvciIgZmlsbC1vcGFjaXR5PSIwLjAyIj48cGF0aCBkPSJNMCAwaDQwdjQwSDB6TTAgMGg0MHY0MEgwek0wIDBoNDB2NDBIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] bg-[length:30px_30px] dark:bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9ImN1cnJlbnRDb2xvciIgZmlsbC1vcGFjaXR5PSIwLjAzIj48cGF0aCBkPSJNMCAwaDQwdjQwSDB6TTAgMGg0MHY0MEgwek0wIDBoNDB2NDBIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-10 group-hover:opacity-30 transition-opacity duration-300"></div>
 
-        {/* Match score badge */}
-        {service.matchScore && (
-          <div className="absolute top-3 right-3 bg-indigo-600/90 text-white text-xs font-semibold px-2 py-1 rounded-full shadow-sm z-10">
-            {service.matchScore}% Match
-          </div>
-        )}
-
-        <div className="flex items-start space-x-4 relative z-10">
-          <div className="relative h-20 w-20 rounded-lg overflow-hidden shadow-sm ring-2 ring-indigo-100 dark:ring-indigo-900 group-hover:ring-indigo-300 dark:group-hover:ring-indigo-700 transition-all duration-300">
-            <Image
-              src={service.image || "/placeholder.svg"}
-              alt={service.title}
-              layout="fill"
-              objectFit="cover"
-              className="group-hover:scale-110 transition-transform duration-500"
-            />
-          </div>
-
-          <div className="flex-1">
-            <h5 className="font-semibold text-base text-gray-900 dark:text-white group-hover:text-indigo-700 dark:group-hover:text-indigo-400 transition-colors duration-300">
-              {service.title}
-            </h5>
-
-            <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mt-1">
-              <Star className="h-4 w-4 mr-1 text-amber-500 fill-amber-500" />
-              <span className="font-medium">{service.provider.rating}</span>
-              <span className="ml-1 opacity-75">({service.provider.reviews})</span>
-              {service.provider.verified && (
-                <span className="ml-2 inline-flex items-center text-xs font-medium text-indigo-600 dark:text-indigo-400">
-                  <svg
-                    className="w-3 h-3 mr-1 text-indigo-600 dark:text-indigo-400"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    ></path>
+          {/* Match score badge */}
+          {service.matchScore && (
+            <div className="absolute top-4 right-4 z-10">
+              <div className="flex items-center bg-lavender-600/90 text-white text-xs font-medium px-2.5 py-1 rounded-full shadow-sm">
+                <motion.div
+                  initial={{ rotate: 0 }}
+                  animate={{ rotate: [0, 10, -10, 0] }}
+                  transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, repeatDelay: 3 }}
+                >
+                  <svg className="w-3 h-3 mr-1" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
                   </svg>
-                  Verified
-                </span>
-              )}
+                </motion.div>
+                <span>{service.matchScore}% Match</span>
+              </div>
+            </div>
+          )}
+
+          <div className="relative p-5">
+            <div className="flex gap-4">
+              {/* Service image */}
+              <div className="relative h-20 w-20 rounded-lg overflow-hidden flex-shrink-0">
+                <div className="absolute inset-0 bg-lavender-100 dark:bg-lavender-900/30"></div>
+                <img
+                  src={service.image || "/placeholder.svg"}
+                  alt={service.title}
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              </div>
+
+              {/* Service info */}
+              <div className="flex-1">
+                <h3 className="font-semibold text-lg text-gray-900 dark:text-white group-hover:text-lavender-700 dark:group-hover:text-lavender-400 transition-colors duration-300">
+                  {service.title}
+                </h3>
+
+                <div className="flex items-center mt-1 text-sm">
+                  <span className="text-lavender-700 dark:text-lavender-400 font-medium">{service.price}</span>
+                  <span className="mx-2 text-gray-400">•</span>
+                  <span className="text-gray-600 dark:text-gray-400">{service.timeEstimate}</span>
+                </div>
+
+                <div className="flex items-center mt-1.5">
+                  <div className="flex items-center">
+                    <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
+                    <span className="ml-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {service.provider.rating}
+                    </span>
+                    <span className="ml-0.5 text-xs text-gray-500 dark:text-gray-400">
+                      ({service.provider.reviews})
+                    </span>
+                  </div>
+
+                  {service.provider.verified && (
+                    <div className="ml-3 flex items-center text-xs font-medium text-lavender-700 dark:text-lavender-400">
+                      <svg className="w-3.5 h-3.5 mr-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Verified
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
 
-            <p className="text-xs text-gray-600 dark:text-gray-300 mt-1.5 line-clamp-2">{service.description}</p>
+            {/* Service description */}
+            <p className="mt-3 text-sm text-gray-600 dark:text-gray-400 line-clamp-2 group-hover:line-clamp-none transition-all duration-300">
+              {service.description}
+            </p>
+
+            {/* Service tags */}
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {service.tags.slice(0, 3).map((tag, i) => (
+                <motion.span
+                  key={i}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.2 + i * 0.1 }}
+                  className="inline-block px-2 py-0.5 text-xs font-medium bg-lavender-100/80 dark:bg-lavender-900/30 text-lavender-800 dark:text-lavender-300 rounded-full"
+                >
+                  {tag}
+                </motion.span>
+              ))}
+            </div>
+
+            {/* Provider info */}
+            <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
+              <div className="flex items-center">
+                <div className="relative h-6 w-6 rounded-full overflow-hidden border border-lavender-200 dark:border-lavender-800">
+                  <img
+                    src={service.provider.avatar || "/placeholder.svg"}
+                    alt={service.provider.name}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <span className="ml-2 text-xs font-medium text-gray-700 dark:text-gray-300">
+                  {service.provider.name}
+                </span>
+              </div>
+
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="text-xs font-medium text-lavender-700 dark:text-lavender-400 hover:text-lavender-800 dark:hover:text-lavender-300 transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  router.push(`/messages?provider=${service.provider.id}`)
+                }}
+              >
+                Contact
+              </motion.button>
+            </div>
+
+            {/* Animated accent line */}
+            <motion.div
+              className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-lavender-500 to-purple-500"
+              initial={{ width: "0%" }}
+              whileHover={{ width: "100%" }}
+              transition={{ duration: 0.3 }}
+            />
           </div>
         </div>
-
-        <div className="mt-4 flex flex-wrap gap-1 relative z-10">
-          {service.tags.slice(0, 3).map((tag, i) => (
-            <span
-              key={i}
-              className="inline-block px-2 py-0.5 text-[10px] font-medium bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-full"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-
-        <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700/50 flex items-center justify-between relative z-10">
-          <span className="font-bold text-sm text-indigo-700 dark:text-indigo-400">{service.price}</span>
-
-          <div className="flex items-center space-x-1 text-xs text-gray-500 dark:text-gray-400">
-            <span>{service.timeEstimate}</span>
-            <span className="opacity-50">•</span>
-            <span className="text-indigo-600 dark:text-indigo-400 font-medium">
-              {service.provider.completionRate}% completion
-            </span>
-          </div>
-        </div>
-
-        <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
-      </div>
+      </motion.div>
     )
   }
 
@@ -3523,7 +3581,7 @@ Would you like to book this service or compare it with other options?
             xmlns="http://www.w3.org/2000/svg"
             width="24"
             height="24"
-            viewBox="0 0 24 24"
+            viewBox="0 0 24 0 0 24 24"
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
@@ -3537,6 +3595,18 @@ Would you like to book this service or compare it with other options?
       </div>
     )
   }
+
+  const handleServiceSelect = (serviceId: number) => {
+    // Navigate to the service details page
+    router.push(`/services/${serviceId}`)
+  }
+
+  const handleCompare = (serviceId: number) => {
+    // Implement comparison logic here
+    console.log(`Compare service with ID: ${serviceId}`)
+  }
+
+  const [filteredServices, setFilteredServices] = useState<Service[]>(services.slice(0, 3))
 
   return (
     <section className="w-full pb-8 md:pb-12 relative overflow-hidden order-first z-20 -mt-8">
@@ -3674,10 +3744,9 @@ Would you like to book this service or compare it with other options?
                   >
                     {message.type === "user" && (
                       <div className="flex justify-end">
-                        <div className="relative bg-gradient-to-br from-indigo-50/95 via-indigo-100/90 to-violet-50/90 dark:from-indigo-900/95 dark:via-indigo-900/90 dark:to-violet-900/90 backdrop-blur-sm rounded-2xl px-5 py-3 max-w-[80%] shadow-lg border border-indigo-200/50 dark:border-indigo-700/50 hover:shadow-indigo-100/20 dark:hover:shadow-indigo-900/20 transition-all duration-300">
-                          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-violet-500/10 dark:from-indigo-500/20 dark:via-purple-500/20 dark:to-violet-500/20 opacity-70"></div>
+                        <div className="relative bg-gradient-to-br from-lavender-200/95 via-lavender-300/90 to-lavender-200/90 dark:from-lavender-950/95 dark:via-lavender-950/90 dark:to-lavender-950/90 backdrop-blur-sm rounded-2xl px-5 py-3 max-w-[80%] shadow-lg border border-lavender-400/50 dark:border-lavender-800/50 hover:shadow-lavender-300/20 dark:hover:shadow-lavender-950/20 transition-all duration-300">
                           <p className="text-sm text-gray-800 dark:text-gray-100 relative z-10">{message.content}</p>
-                          <div className="text-[10px] text-indigo-600/60 dark:text-indigo-400/60 text-right mt-1 relative z-10">
+                          <div className="text-[10px] text-black dark:text-white text-right mt-1 relative z-10">
                             {new Date(message.timestamp).toLocaleTimeString([], {
                               hour: "2-digit",
                               minute: "2-digit",
@@ -3689,15 +3758,18 @@ Would you like to book this service or compare it with other options?
 
                     {message.type === "ai" && (
                       <div className="flex">
-                        <div className="relative bg-gradient-to-br from-white/95 via-white/90 to-indigo-50/90 dark:from-gray-800/95 dark:via-gray-800/90 dark:to-indigo-950/90 backdrop-blur-sm rounded-2xl px-5 py-3 max-w-[80%] shadow-lg border border-indigo-100/50 dark:border-indigo-800/50 hover:shadow-indigo-100/20 dark:hover:shadow-indigo-900/20 transition-all duration-300">
-                          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-violet-500/5 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-violet-500/10 opacity-70"></div>
+                        <div className="relative bg-gradient-to-br from-white/95 via-white/90 to-indigo-50/90 dark:from-gray-800/95 dark:via-gray-800/90 dark:to-indigo-950/90 backdrop-blur-sm rounded-2xl px-5 py-3 max-w-[80%] shadow-xl border border-indigo-100/60 dark:border-indigo-800/60 hover:shadow-indigo-100/30 dark:hover:shadow-indigo-900/30 transition-all duration-300 transform hover:-translate-y-0.5">
+                          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-500/8 via-purple-500/8 to-violet-500/8 dark:from-indigo-500/15 dark:via-purple-500/15 dark:to-violet-500/15 opacity-80"></div>
+                          <div className="absolute inset-x-0 bottom-0 h-1/2 rounded-b-2xl bg-gradient-to-t from-black/5 to-transparent dark:from-white/5"></div>
+
                           <p className="text-sm relative z-10">{message.content}</p>
+
                           {message.options && (
                             <div className="mt-4 flex flex-wrap gap-2 relative z-10">
                               {message.options.map((option) => (
                                 <button
                                   key={option}
-                                  className="px-3 py-1.5 bg-white/90 dark:bg-gray-800/90 hover:bg-indigo-100/90 dark:hover:bg-indigo-900/40 rounded-full text-xs font-medium transition-all duration-200 border border-indigo-200/70 dark:border-indigo-700/50 hover:border-indigo-300 dark:hover:border-indigo-600/70 backdrop-blur-sm hover:shadow-md"
+                                  className="px-3 py-1.5 bg-white/90 dark:bg-gray-800/90 hover:bg-indigo-100/90 dark:hover:bg-indigo-900/30 rounded-full text-xs font-medium transition-all duration-200 border border-indigo-200/70 dark:border-indigo-700/50 hover:border-indigo-300 dark:hover:border-indigo-600/70 backdrop-blur-sm hover:shadow-md"
                                   onClick={() => handleOptionSelect(option)}
                                 >
                                   {option}
@@ -3707,8 +3779,16 @@ Would you like to book this service or compare it with other options?
                           )}
                           {message.services && (
                             <div className="mt-5 space-y-4 relative z-10">
-                              {message.services.map((service) => renderEnhancedServiceCard(service))}
-                              {renderShowMoreButton()}
+                              {message.services.map((service) => (
+                                <ProviderCard
+                                  key={service.provider.id}
+                                  provider={service.provider}
+                                  onSelect={(providerId) => handleServiceSelect(service.id)}
+                                  onViewServices={(providerId) => handleServiceSelect(service.id)}
+                                  onContact={(providerId) => router.push(`/messages?provider=${providerId}`)}
+                                  matchScore={service.matchScore}
+                                />
+                              ))}
                             </div>
                           )}
                           <div className="text-[10px] text-indigo-600/60 dark:text-indigo-400/60 mt-1 relative z-10">
@@ -3775,68 +3855,37 @@ Would you like to book this service or compare it with other options?
                               ))}
                             </div>
                           )}
-                          <div className="text-[10px] text-gray-400 mt-1">
-                            {new Date(message.timestamp).toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </div>
                         </div>
                       </div>
                     )}
-
-                    {/* Date separator - show only when date changes */}
-                    {index > 0 &&
-                      new Date(message.timestamp).toDateString() !==
-                        new Date(messages[index - 1].timestamp).toDateString() && (
-                        <div className="flex justify-center my-6">
-                          <div className="bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-xs px-3 py-1 rounded-full">
-                            {new Date(message.timestamp).toLocaleDateString()}
-                          </div>
-                        </div>
-                      )}
                   </motion.div>
                 ))}
                 <div ref={messagesEndRef} />
               </div>
             </div>
 
-            {/* Input area */}
-            <div className="border-t border-gray-200/50 dark:border-gray-800/50 p-4 backdrop-blur-sm bg-white/50 dark:bg-gray-900/50">
-              <form onSubmit={handleSubmit}>
-                <div className="relative">
-                  <input
-                    type="text"
-                    className="w-full rounded-full border border-gray-300/70 dark:border-gray-700/70 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-4 py-2.5 pr-12 text-sm shadow-md focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all duration-200"
-                    placeholder="Type your message..."
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    disabled={isTyping}
-                  />
-                  <Button
-                    type="submit"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors"
-                    disabled={isTyping}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-5 w-5 text-indigo-600 dark:text-indigo-400"
-                    >
-                      <line x1="22" y1="2" x2="11" y2="13" />
-                      <polygon points="22 2 15 22 11 13 2 22 2 11 13 11 22 2" />
-                    </svg>
-                  </Button>
-                </div>
-              </form>
-            </div>
+            {/* Input area - Enhanced UI */}
+            <form
+              onSubmit={handleSubmit}
+              className="relative p-4 border-t border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-r from-gray-50/80 via-white/80 to-gray-50/80 dark:from-gray-900/80 dark:via-gray-900/90 dark:to-gray-900/80 backdrop-blur-sm"
+            >
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Type your message..."
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  className="w-full pl-5 pr-16 py-2.5 bg-white/90 dark:bg-gray-800/90 rounded-full border border-gray-300 dark:border-gray-700 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow duration-200 text-sm text-gray-700 dark:text-gray-200 backdrop-blur-sm"
+                />
+                <button
+                  type="submit"
+                  className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-full px-4 py-2 text-sm transition-colors duration-200 shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  disabled={isTyping}
+                >
+                  {isTyping ? "Sending..." : "Send"}
+                </button>
+              </div>
+            </form>
           </div>
         </motion.div>
       </div>
