@@ -3762,6 +3762,7 @@ Would you like to book this service or compare it with other options?
                     scrollbarWidth: "none",
                     msOverflowStyle: "none",
                     WebkitOverflowScrolling: "touch",
+                    scrollBehavior: "smooth",
                   }}
                 >
                   {/* Add this CSS rule to hide the scrollbar */}
@@ -3790,7 +3791,7 @@ Would you like to book this service or compare it with other options?
                           count={0}
                           index={index}
                           size="small"
-                          className="w-36 h-36 my-2 mx-1 transform-gpu hover:translate-y-0"
+                          className="w-36 h-36 my-2 mx-1 transform-gpu hover:translate-y-0 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300"
                           onClick={() => handleCategoryClick(category.serviceType)}
                         />
                       </div>
