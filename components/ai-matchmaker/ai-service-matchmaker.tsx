@@ -20,6 +20,7 @@ import {
   Construction,
   HardHat,
   Star,
+  Paperclip,
 } from "lucide-react"
 import { LevlLogo } from "@/components/levl-logo"
 
@@ -28,6 +29,8 @@ import { motion } from "framer-motion"
 
 // Import the ProviderCard component
 import { ProviderCard } from "@/components/ai-matchmaker/provider-card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 
 // Define service types
 type ServiceProvider = {
@@ -870,6 +873,11 @@ export function AIServiceMatchmaker() {
     "initial" | "understanding" | "service-specific" | "recommending" | "refining" | "finalizing"
   >("initial")
 
+  // Add these state variables
+  const [isFocused, setIsFocused] = useState(false)
+  const [isRecording, setIsRecording] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+
   // Enhanced state for sophisticated matching
   const [userContextHistory, setUserContextHistory] = useState<
     Array<{
@@ -1047,7 +1055,7 @@ export function AIServiceMatchmaker() {
     const typingMessage: Message = {
       id: `typing-${Date.now()}`,
       type: "loading",
-      content: "Thinking...",
+      content: "", // Empty content since we're using the logo
       timestamp: new Date(),
     }
     setMessages((prev) => [...prev, typingMessage])
@@ -2718,7 +2726,8 @@ export function AIServiceMatchmaker() {
         refinementIntro =
           "I understand quality is important to you. Here are some higher-quality options that should better meet your standards:"
       } else if (refinedUserModel.timing.urgency > aiModel.userModel.timing.urgency + 1) {
-        refinementIntro = "Given your time constraints, I've prioritized services with quick response times:"
+        refinementIntro =
+          "Given your time constraints, I've prioritized services with quick response times:"
       }
 
       const refinedMessage: Message = {
@@ -3049,7 +3058,7 @@ ${service.tags.map((tag) => `- ${tag}`).join("\n")}
 
 Would you like to book this service or compare it with other options?
 `
-  }
+}
 
   // Reset conversation with enhanced memory
   const resetConversation = () => {
@@ -3688,6 +3697,27 @@ Would you like to book this service or compare it with other options?
 
   const [filteredServices, setFilteredServices] = useState<Service[]>(services.slice(0, 3))
 
+  // Add this function near other form handlers
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (inputValue.trim() && !isTyping) {
+      handleSubmit(e)
+    }
+  }
+
+  // Add this function for voice recording toggle
+  const toggleRecording = () => {
+    setIsRecording(!isRecording)
+    // In a real implementation, this would start/stop voice recording
+  }
+
+  // Add this useEffect
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus()
+    }
+  }, [])
+
   return (
     <section className="w-full pb-8 md:pb-12 relative overflow-hidden order-first z-20 -mt-8">
       {/* Enhanced background elements */}
@@ -3811,8 +3841,9 @@ after:content-[''] after:absolute after:bottom-[-15px] after:left-[5%] after:rig
 
             {/* Chat messages - Enhanced UI */}
             <div
+              id="chat-container"
               ref={chatContainerRef}
-              className="relative h-[500px] overflow-y-auto p-6 bg-gradient-to-b from-gray-50/80 via-indigo-50/10 to-white/90 dark:from-gray-900/90 dark:via-indigo-950/20 dark:to-gray-950/80 backdrop-blur-sm shadow-inner border-t border-indigo-100/20 dark:border-indigo-800/20 rounded-b-lg"
+              className="relative h-[500px] overflow-y-auto p-6 pb-24 bg-gradient-to-b from-gray-50/80 via-indigo-50/10 to-white/90 dark:from-gray-900/90 dark:via-indigo-950/20 dark:to-gray-950/80 backdrop-blur-sm shadow-inner border-t border-indigo-100/20 dark:border-indigo-800/20 rounded-b-lg"
               style={{
                 scrollbarWidth: "thin",
                 scrollbarColor: "rgba(79, 70, 229, 0.2) transparent",
@@ -3908,36 +3939,38 @@ after:content-[''] after:absolute after:bottom-[-15px] after:left-[5%] after:rig
 
                     {message.type === "loading" && (
                       <div className="flex">
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl px-5 py-3 shadow-sm border border-gray-100 dark:border-gray-700">
+                        <div className="bg-white dark:bg-gray-800 rounded-xl px-3 py-2 shadow-sm border border-gray-100 dark:border-gray-700">
                           <div className="flex items-center">
-                            <div className="flex space-x-1">
-                              <motion.div
-                                className="h-2 w-2 bg-primary rounded-full"
-                                animate={{ scale: [0.5, 1, 0.5] }}
-                                transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
-                              />
-                              <motion.div
-                                className="h-2 w-2 bg-primary rounded-full"
-                                animate={{ scale: [0.5, 1, 0.5] }}
-                                transition={{
-                                  duration: 1.5,
-                                  repeat: Number.POSITIVE_INFINITY,
-                                  ease: "easeInOut",
-                                  delay: 0.2,
-                                }}
-                              />
-                              <motion.div
-                                className="h-2 w-2 bg-primary rounded-full"
-                                animate={{ scale: [0.5, 1, 0.5] }}
-                                transition={{
-                                  duration: 1.5,
-                                  repeat: Number.POSITIVE_INFINITY,
-                                  ease: "easeInOut",
-                                  delay: 0.4,
-                                }}
-                              />
+                            <div className="flex items-center">
+                              <LevlLogo className="h-12 w-12 mr-2" />
+                              <div className="flex space-x-1.5 ml-1">
+                                <motion.div
+                                  className="h-1 w-1 bg-primary rounded-full"
+                                  animate={{ scale: [0.5, 1, 0.5] }}
+                                  transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+                                />
+                                <motion.div
+                                  className="h-1 w-1 bg-primary rounded-full"
+                                  animate={{ scale: [0.5, 1, 0.5] }}
+                                  transition={{
+                                    duration: 1.5,
+                                    repeat: Number.POSITIVE_INFINITY,
+                                    ease: "easeInOut",
+                                    delay: 0.2,
+                                  }}
+                                />
+                                <motion.div
+                                  className="h-1 w-1 bg-primary rounded-full"
+                                  animate={{ scale: [0.5, 1, 0.5] }}
+                                  transition={{
+                                    duration: 1.5,
+                                    repeat: Number.POSITIVE_INFINITY,
+                                    ease: "easeInOut",
+                                    delay: 0.4,
+                                  }}
+                                />
+                              </div>
                             </div>
-                            <p className="ml-3 text-sm text-gray-500">{message.content}</p>
                           </div>
                         </div>
                       </div>
@@ -3965,14 +3998,57 @@ after:content-[''] after:absolute after:bottom-[-15px] after:left-[5%] after:rig
                     )}
                   </motion.div>
                 ))}
+                {/* Messages end ref for scrolling */}
                 <div ref={messagesEndRef} />
               </div>
             </div>
 
-            {/* Input area - Enhanced UI */}
-          </div>
-        </motion.div>
-      </div>
-    </section>
-  )
-}
+            {/* Input area - Enhanced UI with Levl styling directly integrated */}
+            <motion.div
+              className="absolute bottom-0 left-0 right-0 z-10 p-4 
+bg-gradient-to-b from-transparent via-gray-50/90 to-white/95
+dark:from-transparent dark:via-gray-900/90 dark:to-gray-950/95
+backdrop-blur-sm transition-all duration-200"
+              initial={{ y: 10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.2, duration: 0.4 }}
+            >
+              <form onSubmit={onSubmit} className="flex items-center gap-2 max-w-4xl mx-auto">
+  <div className="relative flex-1">
+    <Input
+      ref={inputRef}
+      type="text"
+      placeholder={isTyping ? "AI is thinking..." : "Type your message..."}
+      value={inputValue}
+      onChange={(e) => setInputValue(e.target.value)}
+      onFocus={() => setIsFocused(true)}
+      onBlur={() => setIsFocused(false)}
+      disabled={isTyping}
+      className={`pl-12 pr-4 py-6 bg-white/80 dark:bg-gray-800/80 border-0
+      focus:ring-0 focus:outline-none
+      rounded-full shadow-[0_4px_12px_rgba(79,70,229,0.15)] hover:shadow-[0_6px_16px_rgba(79,70,229,0.2)]
+      dark:shadow-[0_4px_12px_rgba(79,70,229,0.2)] dark:hover:shadow-[0_6px_16px_rgba(79,70,229,0.25)]
+      transform hover:-translate-y-1 transition-all duration-300 ${
+        isFocused
+          ? "shadow-[0_6px_16px_rgba(79,70,229,0.2)] dark:shadow-[0_6px_16px_rgba(79,70,229,0.25)]"
+          : ""
+      }`}
+    />
+    
+    {/* Paperclip button inside input */}
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon"
+      className="absolute left-2 top-1/2 -translate-y-1/2 text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 hover:bg-transparent dark:hover:bg-transparent rounded-full h-8 w-8"
+      aria-label="Attach file"
+    >
+      <Paperclip className="h-5 w-5" />
+    </Button>
+    
+    {inputValue && (
+      <button
+        type="button"
+        onClick={() => setInputValue("")}
+        className="absolute right-14 top-1/2 -translate-y-1/2 text-gray-400 hover:text-
+</\

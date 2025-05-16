@@ -6,6 +6,7 @@ import { forwardRef } from "react"
 import { motion } from "framer-motion"
 import { LLMFeedback } from "./llm-feedback"
 import type { Message } from "@/types/matchmaker"
+import { LevlLogo } from "@/components/levl-logo"
 
 interface AIMatchmakerMessagesProps {
   messages: Message[]
@@ -116,33 +117,37 @@ export const AIMatchmakerMessages = forwardRef<HTMLDivElement, AIMatchmakerMessa
                 )}
               </motion.div>
             ) : message.type === "loading" ? (
-              <motion.div
-                className="self-start bg-gradient-to-br from-white to-gray-50 dark:from-gray-700 dark:to-gray-800 px-4 py-2 rounded-2xl rounded-tl-none max-w-[80%] shadow-[0_15px_25px_-12px_rgba(0,0,0,0.25),0_8px_10px_-6px_rgba(0,0,0,0.1)] dark:shadow-[0_15px_25px_-12px_rgba(0,0,0,0.5),0_8px_10px_-6px_rgba(0,0,0,0.4)] border border-gray-100 dark:border-gray-600 transform hover:translate-y-[-2px] hover:shadow-[0_20px_30px_-10px_rgba(0,0,0,0.3),0_10px_15px_-8px_rgba(0,0,0,0.2)] dark:hover:shadow-[0_20px_30px_-10px_rgba(0,0,0,0.6),0_10px_15px_-8px_rgba(0,0,0,0.5)] transition-all duration-200"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                style={{
-                  filter: "drop-shadow(0 10px 8px rgba(0, 0, 0, 0.15))",
-                }}
-              >
-                <div className="flex items-center space-x-2">
-                  <div className="flex space-x-1">
+              <div className="flex items-center space-x-3">
+                <div className="bg-white dark:bg-gray-200 p-1 rounded-xl shadow-md h-14 w-14 flex items-center justify-center">
+                  <div className="h-12 w-12">
+                    <LevlLogo />
+                  </div>
+                </div>
+                <motion.div
+                  className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-700 dark:to-gray-800 px-4 py-3 rounded-2xl rounded-tl-none shadow-[0_15px_25px_-12px_rgba(0,0,0,0.25),0_8px_10px_-6px_rgba(0,0,0,0.1)] dark:shadow-[0_15px_25px_-12px_rgba(0,0,0,0.5),0_8px_10px_-6px_rgba(0,0,0,0.4)] border border-gray-100 dark:border-gray-600 transform hover:translate-y-[-2px] hover:shadow-[0_20px_30px_-10px_rgba(0,0,0,0.3),0_10px_15px_-8px_rgba(0,0,0,0.2)] dark:hover:shadow-[0_20px_30px_-10px_rgba(0,0,0,0.6),0_10px_15px_-8px_rgba(0,0,0,0.5)] transition-all duration-200"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  style={{
+                    filter: "drop-shadow(0 10px 8px rgba(0, 0, 0, 0.15))",
+                  }}
+                >
+                  <div className="flex space-x-2 items-center">
                     <div
-                      className="h-2 w-2 bg-indigo-600 dark:bg-indigo-400 rounded-full animate-bounce"
+                      className="h-2.5 w-2.5 bg-indigo-600 dark:bg-indigo-400 rounded-full animate-bounce"
                       style={{ animationDelay: "0ms" }}
                     ></div>
                     <div
-                      className="h-2 w-2 bg-indigo-600 dark:bg-indigo-400 rounded-full animate-bounce"
+                      className="h-2.5 w-2.5 bg-indigo-600 dark:bg-indigo-400 rounded-full animate-bounce"
                       style={{ animationDelay: "150ms" }}
                     ></div>
                     <div
-                      className="h-2 w-2 bg-indigo-600 dark:bg-indigo-400 rounded-full animate-bounce"
+                      className="h-2.5 w-2.5 bg-indigo-600 dark:bg-indigo-400 rounded-full animate-bounce"
                       style={{ animationDelay: "300ms" }}
                     ></div>
                   </div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{message.content}</p>
-                </div>
-              </motion.div>
+                </motion.div>
+              </div>
             ) : null}
           </div>
         ))}

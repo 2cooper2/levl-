@@ -1,4 +1,10 @@
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
 
 export interface Database {
   public: {
@@ -11,8 +17,6 @@ export interface Database {
           avatar_url: string | null
           bio: string | null
           role: string
-          available_roles: string[] | null
-          active_role: string | null
           created_at: string
           updated_at: string
           social_links: Json | null
@@ -37,8 +41,6 @@ export interface Database {
           avatar_url?: string | null
           bio?: string | null
           role?: string
-          available_roles?: string[] | null
-          active_role?: string | null
           created_at?: string
           updated_at?: string
           social_links?: Json | null
@@ -63,8 +65,6 @@ export interface Database {
           avatar_url?: string | null
           bio?: string | null
           role?: string
-          available_roles?: string[] | null
-          active_role?: string | null
           created_at?: string
           updated_at?: string
           social_links?: Json | null
