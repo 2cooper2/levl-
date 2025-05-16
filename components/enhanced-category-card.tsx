@@ -70,18 +70,19 @@ export function EnhancedCategoryCard({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5, delay: index * 0.05 }}
+      viewport={{ once: true, margin: "-10% 0px -10% 0px" }}
+      transition={{ duration: 0.6, delay: index * 0.05, ease: "easeOut" }}
       className="h-full"
     >
       <motion.div
         ref={cardRef}
         onMouseMove={handleMouseMove}
         whileHover={{
-          y: size === "small" ? -4 : -8,
-          transition: { duration: 0.2 },
+          y: size === "small" ? -6 : -10,
+          scale: 1.02,
+          transition: { duration: 0.3, ease: "easeOut" },
         }}
-        className="h-full perspective-1000"
+        className="h-full perspective-[1500px]"
       >
         <div
           onClick={onClick}
@@ -94,8 +95,8 @@ export function EnhancedCategoryCard({
             } 
             backdrop-blur-xl text-card-foreground transition-all duration-300 h-full
             bg-purple-400/40 dark:bg-purple-500/25 ${className}
-            shadow-[0_10px_20px_-5px_rgba(0,0,0,0.3)] 
-            hover:shadow-[0_20px_30px_-10px_rgba(147,51,234,0.4)]`}
+            shadow-[0_15px_30px_-8px_rgba(0,0,0,0.35)] 
+            hover:shadow-[0_25px_35px_-12px_rgba(147,51,234,0.5)]`}
             style={{
               transform: "translateZ(0)",
               transformStyle: "preserve-3d",
@@ -104,7 +105,7 @@ export function EnhancedCategoryCard({
           >
             {/* Card background with depth */}
             <div
-              className="absolute inset-0 backdrop-blur-[8px] bg-gradient-to-br from-purple-400/50 to-purple-500/30 dark:from-purple-500/30 dark:to-purple-600/20 opacity-80 rounded-xl"
+              className="absolute inset-0 backdrop-blur-[8px] bg-gradient-to-br from-purple-400/60 to-purple-600/40 dark:from-purple-500/40 dark:to-purple-700/30 opacity-90 rounded-xl"
               style={{ transform: "translateZ(-10px)" }}
             ></div>
 
@@ -165,16 +166,16 @@ export function EnhancedCategoryCard({
             {/* Content wrapper with 3D effect */}
             <div
               className={`${cardPadding} flex flex-col items-center justify-between text-center relative z-10 h-full`}
-              style={{ transform: "translateZ(10px)" }}
+              style={{ transform: "translateZ(15px) rotateX(2deg)" }}
             >
               {/* Enhanced glossy icon container with 3D effect */}
               <motion.div
                 className={`relative rounded-full bg-gradient-to-br from-white/90 to-purple-200/80 ${size === "small" ? "p-2" : "p-4"} 
                 shadow-lg overflow-hidden`}
-                style={{ transform: "translateZ(25px)" }}
+                style={{ transform: "translateZ(30px)" }}
                 whileHover={{
-                  scale: 1.1,
-                  boxShadow: "0 0 20px 0 rgba(168, 85, 247, 0.3)",
+                  scale: 1.15,
+                  boxShadow: "0 0 25px 5px rgba(168, 85, 247, 0.4)",
                 }}
                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
               >

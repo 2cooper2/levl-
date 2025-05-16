@@ -3268,6 +3268,8 @@ Would you like to book this service or compare it with other options?
       container.scrollTo({
         left: direction === "left" ? Math.max(0, currentScroll - scrollAmount) : currentScroll + scrollAmount,
         behavior: "smooth",
+        perspective: "1000px",
+        transformStyle: "preserve-3d",
       })
     }
   }
@@ -3756,13 +3758,15 @@ Would you like to book this service or compare it with other options?
             <div className="border-b border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-r from-gray-50/80 via-white/80 to-gray-50/80 dark:from-gray-900/80 dark:via-gray-900/90 dark:to-gray-900/80">
               <div className="relative w-full overflow-hidden">
                 <div
-                  className="overflow-x-auto py-4 scrollbar-hide scroll-smooth mx-auto"
+                  className="overflow-x-auto py-8 scrollbar-hide scroll-smooth mx-auto"
                   ref={categoriesRef}
                   style={{
                     scrollbarWidth: "none",
                     msOverflowStyle: "none",
                     WebkitOverflowScrolling: "touch",
                     scrollBehavior: "smooth",
+                    perspective: "1000px",
+                    transformStyle: "preserve-3d",
                   }}
                 >
                   {/* Add this CSS rule to hide the scrollbar */}
@@ -3784,14 +3788,22 @@ Would you like to book this service or compare it with other options?
                       { icon: Construction, name: "Flooring", serviceType: "flooring" },
                       { icon: HardHat, name: "Roofing", serviceType: "roofing" },
                     ].map((category, index) => (
-                      <div key={index} className="snap-start flex-shrink-0">
+                      <div
+                        key={index}
+                        className="snap-start flex-shrink-0 transform-gpu"
+                        style={{
+                          transform: "translateZ(20px) perspective(1000px)",
+                          filter:
+                            "drop-shadow(0 20px 13px rgba(147, 51, 234, 0.15)) drop-shadow(0 8px 5px rgba(147, 51, 234, 0.2))",
+                        }}
+                      >
                         <EnhancedCategoryCard
                           icon={category.icon}
                           name={category.name}
                           count={0}
                           index={index}
                           size="small"
-                          className="w-36 h-36 my-2 mx-1 transform-gpu hover:translate-y-0 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300"
+                          className="w-36 h-36 my-4 mx-1 transform-gpu hover:-translate-y-2 rounded-xl overflow-hidden shadow-[0_15px_30px_-8px_rgba(147,51,234,0.3)] hover:shadow-[0_30px_40px_-15px_rgba(147,51,234,0.5)] transition-all duration-300 bg-gradient-to-br from-purple-400/70 to-purple-600/50 dark:from-purple-500/50 dark:to-purple-700/40 border border-purple-300/30 dark:border-purple-700/30"
                           onClick={() => handleCategoryClick(category.serviceType)}
                         />
                       </div>
@@ -3841,7 +3853,7 @@ Would you like to book this service or compare it with other options?
                   >
                     {message.type === "user" && (
                       <div className="flex justify-end">
-                        <div className="relative bg-gradient-to-br from-lavender-200/95 via-lavender-300/90 to-lavender-200/90 dark:from-lavender-950/95 dark:via-lavender-950/90 dark:to-lavender-950/90 backdrop-blur-sm rounded-2xl px-5 py-3 max-w-[80%] shadow-[0_10px_15px_-3px_rgba(139,92,246,0.2),0_4px_6px_-4px_rgba(139,92,246,0.2),0_-2px_6px_0px_rgba(255,255,255,0.1)] dark:shadow-[0_10px_15px_-3px_rgba(139,92,246,0.3),0_4px_6px_-4px_rgba(0,0,0,0.4),0_-2px_6px_0px_rgba(139,92,246,0.1)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-800/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 translate-y-[-2px] hover:translate-y-[-4px] transition-all duration-300 transform">
+                        <div className="relative bg-gradient-to-br from-lavender-200/95 via-lavender-300/90 to-lavender-200/90 dark:from-lavender-950/95 dark:via-lavender-950/90 dark:to-lavender-950/90 backdrop-blur-sm rounded-2xl px-5 py-3 max-w-[80%] shadow-[0_14px_20px_-3px_rgba(79,70,229,0.3),0_6px_10px_-4px_rgba(79,70,229,0.2),0_-2px_8px_0px_rgba(255,255,255,0.15)] dark:shadow-[0_10px_15px_-3px_rgba(139,92,246,0.3),0_4px_6px_-4px_rgba(0,0,0,0.4),0_-2px_6px_0px_rgba(139,92,246,0.1)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-800/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 translate-y-[-2px] hover:translate-y-[-4px] transition-all duration-300 transform">
                           <p className="text-sm text-gray-800 dark:text-gray-100 relative z-10">{message.content}</p>
                           <div className="text-[10px] text-black dark:text-white text-right mt-1 relative z-10">
                             {new Date(message.timestamp).toLocaleTimeString([], {
@@ -3855,7 +3867,7 @@ Would you like to book this service or compare it with other options?
 
                     {message.type === "ai" && (
                       <div className="flex">
-                        <div className="relative bg-gradient-to-br from-white/95 via-white/90 to-indigo-50/90 dark:from-gray-800/95 dark:via-gray-800/90 dark:to-indigo-950/90 backdrop-blur-sm rounded-2xl px-5 py-3 max-w-[80%] shadow-[0_10px_15px_-3px_rgba(79,70,229,0.2),0_4px_6px_-4px_rgba(79,70,229,0.2),0_-2px_6px_0px_rgba(255,255,255,0.1)] dark:shadow-[0_10px_15px_-3px_rgba(79,70,229,0.3),0_4px_6px_-4px_rgba(0,0,0,0.4),0_-2px_6px_0px_rgba(79,70,229,0.1)] border-t border-l border-r border-indigo-100/70 dark:border-t dark:border-l dark:border-r dark:border-indigo-700/40 border-b-2 border-b-indigo-200/80 dark:border-b-2 dark:border-b-indigo-800/80 translate-y-[-2px] hover:translate-y-[-4px] transition-all duration-300 transform hover:shadow-[0_14px_20px_-3px_rgba(79,70,229,0.3),0_6px_10px_-4px_rgba(79,70,229,0.2),0_-2px_8px_0px_rgba(255,255,255,0.15)]">
+                        <div className="relative bg-gradient-to-br from-white/95 via-white/90 to-indigo-50/90 dark:from-gray-800/95 dark:via-gray-800/90 dark:to-indigo-950/90 backdrop-blur-sm rounded-2xl px-5 py-3 max-w-[80%] shadow-[0_14px_20px_-3px_rgba(79,70,229,0.3),0_6px_10px_-4px_rgba(79,70,229,0.2),0_-2px_8px_0px_rgba(255,255,255,0.15)] dark:shadow-[0_10px_15px_-3px_rgba(79,70,229,0.3),0_4px_6px_-4px_rgba(0,0,0,0.4),0_-2px_6px_0px_rgba(79,70,229,0.1)] border-t border-l border-r border-indigo-100/70 dark:border-t dark:border-l dark:border-r dark:border-indigo-700/40 border-b-2 border-b-indigo-200/80 dark:border-b-2 dark:border-b-indigo-800/80 translate-y-[-4px] transition-all duration-300 transform">
                           <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-500/8 via-purple-500/8 to-violet-500/8 dark:from-indigo-500/15 dark:via-purple-500/15 dark:to-violet-500/15 opacity-80"></div>
                           <div className="absolute inset-x-0 bottom-0 h-1/2 rounded-b-2xl bg-gradient-to-t from-black/5 to-transparent dark:from-white/5"></div>
 

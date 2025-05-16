@@ -37,12 +37,12 @@ export const AIMatchmakerMessages = forwardRef<HTMLDivElement, AIMatchmakerMessa
               </motion.div>
             ) : message.type === "ai" ? (
               <motion.div
-                className="self-start bg-gradient-to-br from-white to-gray-50 dark:from-gray-700 dark:to-gray-800 px-4 py-2 rounded-2xl rounded-tl-none max-w-[80%] shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1),0_4px_6px_-4px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.4),0_4px_6px_-4px_rgba(0,0,0,0.3)] border border-gray-100 dark:border-gray-600 transform hover:translate-y-[-2px] hover:shadow-[0_14px_20px_-6px_rgba(0,0,0,0.15),0_6px_8px_-5px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_14px_20px_-6px_rgba(0,0,0,0.5),0_6px_8px_-5px_rgba(0,0,0,0.4)] transition-all duration-200"
+                className="self-start bg-gradient-to-br from-white to-gray-50 dark:from-gray-700 dark:to-gray-800 px-4 py-2 rounded-2xl rounded-tl-none max-w-[80%] shadow-[0_15px_25px_-12px_rgba(0,0,0,0.25),0_8px_10px_-6px_rgba(0,0,0,0.1)] dark:shadow-[0_15px_25px_-12px_rgba(0,0,0,0.5),0_8px_10px_-6px_rgba(0,0,0,0.4)] border border-gray-100 dark:border-gray-600 transform hover:translate-y-[-2px] hover:shadow-[0_20px_30px_-10px_rgba(0,0,0,0.3),0_10px_15px_-8px_rgba(0,0,0,0.2)] dark:hover:shadow-[0_20px_30px_-10px_rgba(0,0,0,0.6),0_10px_15px_-8px_rgba(0,0,0,0.5)] transition-all duration-200"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
                 style={{
-                  filter: "drop-shadow(0 4px 3px rgba(0, 0, 0, 0.07))",
+                  filter: "drop-shadow(0 10px 8px rgba(0, 0, 0, 0.15))",
                 }}
               >
                 <p className="text-sm dark:text-gray-200">{message.content}</p>
@@ -117,12 +117,12 @@ export const AIMatchmakerMessages = forwardRef<HTMLDivElement, AIMatchmakerMessa
               </motion.div>
             ) : message.type === "loading" ? (
               <motion.div
-                className="self-start bg-gradient-to-br from-white to-gray-50 dark:from-gray-700 dark:to-gray-800 px-4 py-2 rounded-2xl rounded-tl-none max-w-[80%] shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1),0_4px_6px_-4px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.4),0_4px_6px_-4px_rgba(0,0,0,0.3)] border border-gray-100 dark:border-gray-600 transform hover:translate-y-[-2px] hover:shadow-[0_14px_20px_-6px_rgba(0,0,0,0.15),0_6px_8px_-5px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_14px_20px_-6px_rgba(0,0,0,0.5),0_6px_8px_-5px_rgba(0,0,0,0.4)] transition-all duration-200"
+                className="self-start bg-gradient-to-br from-white to-gray-50 dark:from-gray-700 dark:to-gray-800 px-4 py-2 rounded-2xl rounded-tl-none max-w-[80%] shadow-[0_15px_25px_-12px_rgba(0,0,0,0.25),0_8px_10px_-6px_rgba(0,0,0,0.1)] dark:shadow-[0_15px_25px_-12px_rgba(0,0,0,0.5),0_8px_10px_-6px_rgba(0,0,0,0.4)] border border-gray-100 dark:border-gray-600 transform hover:translate-y-[-2px] hover:shadow-[0_20px_30px_-10px_rgba(0,0,0,0.3),0_10px_15px_-8px_rgba(0,0,0,0.2)] dark:hover:shadow-[0_20px_30px_-10px_rgba(0,0,0,0.6),0_10px_15px_-8px_rgba(0,0,0,0.5)] transition-all duration-200"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
                 style={{
-                  filter: "drop-shadow(0 4px 3px rgba(0, 0, 0, 0.07))",
+                  filter: "drop-shadow(0 10px 8px rgba(0, 0, 0, 0.15))",
                 }}
               >
                 <div className="flex items-center space-x-2">
