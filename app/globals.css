@@ -250,6 +250,13 @@
   .bg-radial-gradient {
     background-image: radial-gradient(circle at center, var(--tw-gradient-from), var(--tw-gradient-to));
   }
+
+  /* Add a new class for card containers that need to display shadows */
+  .shadow-container {
+    overflow: visible !important;
+    padding-bottom: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
 }
 
 @layer base {
@@ -504,4 +511,16 @@ main,
 body > div:first-child {
   margin-top: 0 !important;
   padding-top: 0 !important;
+}
+
+/* Add this at the end of the file to ensure we have the scrollbar hiding utility */
+
+/* Add scrollbar hiding utility */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

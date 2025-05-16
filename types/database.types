@@ -1,10 +1,4 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export interface Database {
   public: {
@@ -28,6 +22,8 @@ export interface Database {
           email_verified: boolean | null
           stripe_customer_id: string | null
           stripe_account_reference: string | null
+          has_charges_enabled: boolean | null
+          has_payouts_enabled: boolean | null
           account_balance: number | null
           onboarding_completed: boolean | null
           is_active: boolean | null
@@ -52,6 +48,8 @@ export interface Database {
           email_verified?: boolean | null
           stripe_customer_id?: string | null
           stripe_account_reference?: string | null
+          has_charges_enabled?: boolean | null
+          has_payouts_enabled?: boolean | null
           account_balance?: number | null
           onboarding_completed?: boolean | null
           is_active?: boolean | null
@@ -76,6 +74,8 @@ export interface Database {
           email_verified?: boolean | null
           stripe_customer_id?: string | null
           stripe_account_reference?: string | null
+          has_charges_enabled?: boolean | null
+          has_payouts_enabled?: boolean | null
           account_balance?: number | null
           onboarding_completed?: boolean | null
           is_active?: boolean | null
@@ -83,7 +83,6 @@ export interface Database {
           last_login_at?: string | null
         }
       }
-      // Other tables remain the same...
     }
     Views: {
       [_ in never]: never
@@ -98,4 +97,3 @@ export interface Database {
 }
 
 export type User = Database["public"]["Tables"]["users"]["Row"]
-// Other types remain the same...

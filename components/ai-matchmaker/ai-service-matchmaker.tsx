@@ -406,7 +406,7 @@ interface UserPreferenceModel {
   timing: {
     urgency: number // 0-10 scale
     specificDate: null
-    flexibility: number // 0-10 scale
+    flexibility: 5 // 0-10 scale
   }
   requirements: {
     explicit: string[]
@@ -587,8 +587,8 @@ const serviceSpecificQuestions: ServiceSpecificQuestions = {
       "How old is your plumbing system?": [
         "Less than 5 years",
         "5-15 years",
-        "15-30 years",
-        "Over 30 years",
+        "15-25 years",
+        "Over 25 years",
         "Not sure",
       ],
     },
@@ -825,19 +825,6 @@ const serviceSpecificQuestions: ServiceSpecificQuestions = {
       "Have you noticed any leaks or damage?",
     ],
     options: {
-      "What type of roofing service do you need?": [
-        "New installation",
-        "Replacement",
-        "Repair",
-        "Inspection",
-        "Maintenance",
-      ],
-      "What is the approximate size of your roof?": [
-        "Small (under 1,500 sq ft)",
-        "Medium (1,500-2,500 sq ft)",
-        "Large (2,500-4,000 sq ft)",
-        "Very large (4,000+ sq ft)",
-      ],
       "What type of roofing material do you have or want?": [
         "Asphalt shingles",
         "Metal",
@@ -3351,7 +3338,7 @@ Would you like to book this service or compare it with other options?
     container.addEventListener("touchstart", handleTouchStart, { passive: false })
     container.addEventListener("touchend", handleMouseUp)
     container.addEventListener("touchcancel", handleMouseLeave)
-    container.addEventListener("touchmove", handleTouchMove, { passive: false })
+    container.addEventListener("touchmove", handleTouchMove)
 
     return () => {
       container.removeEventListener("mousedown", handleMouseDown)
@@ -3395,7 +3382,7 @@ Would you like to book this service or compare it with other options?
                   transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, repeatDelay: 3 }}
                 >
                   <svg className="w-3 h-3 mr-1" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 </motion.div>
                 <span>{service.matchScore}% Match</span>
@@ -3707,7 +3694,7 @@ Would you like to book this service or compare it with other options?
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/80 via-white/90 to-violet-50/80 dark:from-gray-900/90 dark:via-gray-900/95 dark:to-indigo-950/80 z-0" />
 
       {/* Enhanced grid pattern background */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5MDkwOTAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6bTAtMTJ2NmgxOHYtNkgzNnptMCIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDI0em0wIDEydjZoMTh2LTZIMjR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY6aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] bg-[size:30px_30px] z-0 opacity-30" />
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0ddata:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5MDkwOTAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6bTAtMTJ2NmgxOHYtNkgzNnptMCIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDI0em0wIDEydjZoMTh2LTZIMjR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY6aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] bg-[size:30px_30px] z-0 opacity-30" />
 
       <div className="w-full relative z-10 overflow-x-hidden px-0 mx-0">
         {/* AI Matchmaker Interface */}
@@ -3717,7 +3704,7 @@ Would you like to book this service or compare it with other options?
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="w-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm shadow-2xl border border-gray-200/50 dark:border-gray-800/50 overflow-hidden">
+          <div className="w-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border border-gray-200/50 dark:border-gray-800/50 overflow-hidden">
             {/* Enhanced background gradient with animated pattern */}
             <div className="absolute inset-0 bg-gradient-to-r from-violet-500/20 via-indigo-600/15 to-purple-600/20 opacity-90"></div>
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzMjI2NTkiIGZpbGwtb3BhY2l0eT0iMC4wNCI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6bTAtMTJ2NmgxOHYtNkgzNnptMCIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDI0em0wIDEydjZoMTh2LTZIMjR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY6aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] animate-[pulse_15s_ease-in-out_infinite] opacity-70"></div>
@@ -3755,6 +3742,7 @@ Would you like to book this service or compare it with other options?
               </div>
             </div>
 
+            {/* Category cards section */}
             <div className="border-b border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-r from-gray-50/80 via-white/80 to-gray-50/80 dark:from-gray-900/80 dark:via-gray-900/90 dark:to-gray-900/80">
               <div className="relative w-full overflow-hidden">
                 <div
@@ -3771,10 +3759,10 @@ Would you like to book this service or compare it with other options?
                 >
                   {/* Add this CSS rule to hide the scrollbar */}
                   <style jsx>{`
-                    div::-webkit-scrollbar {
-                      display: none;
-                    }
-                  `}</style>
+        div::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
                   <div className="flex space-x-4 snap-x snap-mandatory px-4 md:px-8 -ml-2 md:-ml-4 mr-4 md:mr-8">
                     {[
                       { icon: Tv, name: "Mounting", serviceType: "tvMounting" },
@@ -3793,8 +3781,6 @@ Would you like to book this service or compare it with other options?
                         className="snap-start flex-shrink-0 transform-gpu"
                         style={{
                           transform: "translateZ(20px) perspective(1000px)",
-                          filter:
-                            "drop-shadow(0 20px 13px rgba(147, 51, 234, 0.15)) drop-shadow(0 8px 5px rgba(147, 51, 234, 0.2))",
                         }}
                       >
                         <EnhancedCategoryCard
@@ -3803,7 +3789,17 @@ Would you like to book this service or compare it with other options?
                           count={0}
                           index={index}
                           size="small"
-                          className="w-36 h-36 my-4 mx-1 transform-gpu hover:-translate-y-2 rounded-xl overflow-hidden shadow-[0_15px_30px_-8px_rgba(147,51,234,0.3)] hover:shadow-[0_30px_40px_-15px_rgba(147,51,234,0.5)] transition-all duration-300 bg-gradient-to-br from-purple-400/70 to-purple-600/50 dark:from-purple-500/50 dark:to-purple-700/40 border border-purple-300/30 dark:border-purple-700/30"
+                          className="w-36 h-36 my-4 mx-1 transform-gpu rounded-xl overflow-hidden transition-all duration-300 
+bg-gradient-to-br from-white/95 via-white/90 to-indigo-50/90 dark:from-gray-800/95 dark:via-gray-800/90 dark:to-indigo-950/90 
+backdrop-blur-sm 
+shadow-[0_14px_20px_-3px_rgba(79,70,229,0.3),0_6px_10px_-4px_rgba(79,70,229,0.2),0_-2px_8px_0px_rgba(255,255,255,0.15)] 
+dark:shadow-[0_10px_15px_-3px_rgba(79,70,229,0.3),0_4px_6px_-4px_rgba(0,0,0,0.4),0_-2px_6px_0px_rgba(79,70,229,0.1)] 
+hover:shadow-[0_18px_25px_-5px_rgba(79,70,229,0.4),0_10px_15px_-5px_rgba(79,70,229,0.3),0_-2px_10px_0px_rgba(255,255,255,0.2)] 
+dark:hover:shadow-[0_15px_20px_-3px_rgba(79,70,229,0.4),0_8px_12px_-4px_rgba(0,0,0,0.5),0_-2px_8px_0px_rgba(79,70,229,0.2)] 
+border-t border-l border-r border-indigo-100/70 dark:border-t dark:border-l dark:border-r dark:border-indigo-700/40 
+border-b-2 border-b-indigo-200/80 dark:border-b-2 dark:border-b-indigo-800/80 
+translate-y-[-4px] hover:translate-y-[-8px] 
+after:content-[''] after:absolute after:bottom-[-15px] after:left-[5%] after:right-[5%] after:h-[15px] after:bg-indigo-500/20 dark:after:bg-indigo-500/30 after:blur-xl after:rounded-full"
                           onClick={() => handleCategoryClick(category.serviceType)}
                         />
                       </div>
@@ -3853,7 +3849,7 @@ Would you like to book this service or compare it with other options?
                   >
                     {message.type === "user" && (
                       <div className="flex justify-end">
-                        <div className="relative bg-gradient-to-br from-lavender-200/95 via-lavender-300/90 to-lavender-200/90 dark:from-lavender-950/95 dark:via-lavender-950/90 dark:to-lavender-950/90 backdrop-blur-sm rounded-2xl px-5 py-3 max-w-[80%] shadow-[0_14px_20px_-3px_rgba(79,70,229,0.3),0_6px_10px_-4px_rgba(79,70,229,0.2),0_-2px_8px_0px_rgba(255,255,255,0.15)] dark:shadow-[0_10px_15px_-3px_rgba(139,92,246,0.3),0_4px_6px_-4px_rgba(0,0,0,0.4),0_-2px_6px_0px_rgba(139,92,246,0.1)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-800/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 translate-y-[-2px] hover:translate-y-[-4px] transition-all duration-300 transform">
+                        <div className="relative bg-gradient-to-br from-lavender-200/95 via-lavender-300/90 to-lavender-200/90 dark:from-lavender-950/95 dark:via-lavender-950/90 dark:to-lavender-950/90 backdrop-blur-sm rounded-2xl px-5 py-3 max-w-[80%] shadow-[0_14px_20px_-3px_rgba(79,70,229,0.3),0_6px_10px_-4px_rgba(79,70,229,0.2),0_-2px_8px_0px_rgba(255,255,255,0.15)] dark:shadow-[0_10px_15px_-3px_rgba(79,70,229,0.3),0_4px_6px_-4px_rgba(0,0,0,0.4),0_-2px_6px_0px_rgba(79,70,229,0.1)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-800/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 translate-y-[-2px] hover:translate-y-[-4px] transition-all duration-300 transform">
                           <p className="text-sm text-gray-800 dark:text-gray-100 relative z-10">{message.content}</p>
                           <div className="text-[10px] text-black dark:text-white text-right mt-1 relative z-10">
                             {new Date(message.timestamp).toLocaleTimeString([], {

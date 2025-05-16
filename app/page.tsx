@@ -10,6 +10,8 @@ import { LevlLogo } from "@/components/levl-logo"
 import { ThemeToggle } from "@/components/theme-toggle"
 // Import the new AI Service Matchmaker component
 import { AIServiceMatchmaker } from "@/components/ai-matchmaker/ai-service-matchmaker"
+// Add this import near the other imports at the top of the file:
+import { CategoriesSection } from "@/components/categories-section"
 
 export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -34,6 +36,9 @@ export default function Home() {
 
         {/* Add any skill accelerator component here */}
         {/* For example: <SkillAcceleratorSignup /> */}
+        {/* Then find a good place to add the component in the JSX, like after the hero section 
+        or another main section. Add this line: */}
+        <CategoriesSection />
       </main>
       <footer className="w-full border-t bg-background py-6 md:py-12 relative">
         <BackgroundPattern className="opacity-30" />
