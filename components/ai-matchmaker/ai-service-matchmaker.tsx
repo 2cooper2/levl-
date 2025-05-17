@@ -431,22 +431,22 @@ interface ServiceSpecificQuestions {
   }
   plumbing: {
     questions: string[]
-    options: string[]
+    options: { [key: string]: string[] }
     required: boolean[]
   }
   painting: {
     questions: string[]
-    options: string[]
+    options: { [key: string]: string[] }
     required: boolean[]
   }
   furniture: {
     questions: string[]
-    options: string[]
+    options: { [key: string]: string[] }
     required: boolean[]
   }
   [key: string]: {
     questions: string[]
-    options: string[]
+    options: { [key: string]: string[] }
     required: boolean[]
   }
 }
@@ -826,6 +826,19 @@ const serviceSpecificQuestions: ServiceSpecificQuestions = {
       "Have you noticed any leaks or damage?",
     ],
     options: {
+      "What type of roofing service do you need?": [
+        "Repair",
+        "Full replacement",
+        "Inspection",
+        "Maintenance",
+        "New installation",
+      ],
+      "What is the approximate size of your roof?": [
+        "Small (under 1,000 sq ft)",
+        "Medium (1,000-2,000 sq ft)",
+        "Large (2,000-3,000 sq ft)",
+        "Very large (3,000+ sq ft)",
+      ],
       "What type of roofing material do you have or want?": [
         "Asphalt shingles",
         "Metal",
@@ -1021,23 +1034,23 @@ export function AIServiceMatchmaker() {
 
   // Replace the existing scrollToBottom function with this enhanced version
   const scrollToBottom = () => {
-  // Auto-scrolling functionality removed to allow only user-initiated scrolling
-  // This is intentionally empty
-}
+    // Auto-scrolling functionality removed to allow only user-initiated scrolling
+    // This is intentionally empty
+  }
 
   // Replace the useEffect for scrolling with this enhanced version
-  const isInitialMount = useRef(true);
+  const isInitialMount = useRef(true)
   useEffect(() => {
-  // We only want to scroll to top on initial component mount, not when messages update
-  // Using a ref to track if it's the initial load
-  
-  if (isInitialMount.current) {
-    window.scrollTo(0, 0);
-    isInitialMount.current = false;
-  }
-  
-  // No auto-scrolling on message updates as per user request
-}, []);
+    // We only want to scroll to top on initial component mount, not when messages update
+    // Using a ref to track if it's the initial load
+
+    if (isInitialMount.current) {
+      window.scrollTo(0, 0)
+      isInitialMount.current = false
+    }
+
+    // No auto-scrolling on message updates as per user request
+  }, [])
 
   // Simulate AI typing
   const simulateTyping = (callback: () => void, delay = 1500) => {
@@ -1054,9 +1067,9 @@ export function AIServiceMatchmaker() {
       setMessages((prev) => prev.filter((msg) => msg.id !== typingMessage.id))
       setIsTyping(false)
       callback()
-    // Removed any scrollToBottom calls here
-  }, delay)
-}
+      // Removed any scrollToBottom calls here
+    }, delay)
+  }
 
   // Handle user input submission
   const handleSubmit = (e?: React.FormEvent) => {
@@ -1110,7 +1123,7 @@ export function AIServiceMatchmaker() {
   // Add this function after the existing detectUserIntent function
   const detectAdvancedIntent = (
     input: string,
-    messages,
+    messages: Message[],
     userModel: UserPreferenceModel,
     contextualMemory: EnhancedReasoning["contextualMemory"],
   ): UserIntent & { subIntents: string[]; contextualFactors: Map<string, any> } => {
@@ -1253,7 +1266,7 @@ export function AIServiceMatchmaker() {
         contextualMemory: {
           ...prevModel.enhancedReasoning.contextualMemory,
           shortTerm: new Map([
-            ...Array.from(prevModel.enhancedReasoning.contextualMemory || new Map()),
+            ...Array.from(prevModel.enhancedReasoning.contextualMemory.shortTerm || new Map()),
             ["lastProcessedInput", input],
             ["lastIntent", enhancedIntent],
           ]),
@@ -1269,9 +1282,7 @@ export function AIServiceMatchmaker() {
         timestamp: new Date(),
         intent: enhancedIntent.type,
         entities: enhancedIntent.entities,
-        sentiment: analyzeSentiment(input).type,
-        subIntents: enhancedIntent.subIntents,
-        contextualFactors: Array.from(enhancedIntent.contextualFactors.keys()),
+        sentiment: analyzeSentiment(input).type as "positive" | "negative" | "neutral",
       },
     ])
 
@@ -2024,7 +2035,22 @@ export function AIServiceMatchmaker() {
     setMessages((prev) => [...prev, recommendationMessage])
 
     // Ask for feedback
-    // Ask for feedback
+    setTimeout(() => {
+      const feedbackMessage: Message = {
+        id: `feedback-${Date.now()}`,
+        type: "feedback",
+        content: "How do these options look?",
+        timestamp: new Date(),
+        feedbackOptions: [
+          "These look great!",
+          "Show me more options",
+          "I need something different",
+          "Tell me more details",
+        ],
+      }
+
+      setMessages((prev) => [...prev, feedbackMessage])
+    }, 1000)
   }
 
   // Enhanced handlers for the remaining conversation stages
@@ -2415,7 +2441,7 @@ export function AIServiceMatchmaker() {
 
         missingRanges.forEach((range) => {
           const minPrice = range === "low" ? 0 : range === "medium" ? 80 : 120
-          const maxPrice = range === "low" ? 0 : range === "medium" ? 120 : 1000
+          const maxPrice = range === "low" ? 80 : range === "medium" ? 120 : 1000
 
           const servicesInRange = remainingServices.filter((service) => {
             const price = Number.parseFloat(service.price.replace(/[^0-9.]/g, ""))
@@ -2541,9 +2567,10 @@ export function AIServiceMatchmaker() {
     }
 
     return {
-      ...basicResult,
       matches: enhancedMatches,
       reasoning: [...basicResult.reasoning, diversityReasoning],
+      diversityScore: 0.8,
+      coverageScore: 0.7,
       diversityFocus,
     }
   }
@@ -2717,8 +2744,7 @@ export function AIServiceMatchmaker() {
         refinementIntro =
           "I understand quality is important to you. Here are some higher-quality options that should better meet your standards:"
       } else if (refinedUserModel.timing.urgency > aiModel.userModel.timing.urgency + 1) {
-        refinementIntro =
-          "Given your time constraints, I've prioritized services with quick response times:"
+        refinementIntro = "Given your time constraints, I've prioritized services with quick response times:"
       }
 
       const refinedMessage: Message = {
@@ -3049,12 +3075,12 @@ ${service.tags.map((tag) => `- ${tag}`).join("\n")}
 
 Would you like to book this service or compare it with other options?
 `
-}
+  }
 
   // Reset conversation with enhanced memory
   const resetConversation = () => {
     // Store some long-term memory before resetting
-    const longTermMemory = new Map(aiModel.enhancedReasoning.contextualMemory)
+    const longTermMemory = new Map(aiModel.enhancedReasoning.contextualMemory.longTerm)
 
     // Store category preferences in long-term memory
     aiModel.userModel.categories.forEach((confidence, category) => {
@@ -3255,8 +3281,6 @@ Would you like to book this service or compare it with other options?
       container.scrollTo({
         left: direction === "left" ? Math.max(0, currentScroll - scrollAmount) : currentScroll + scrollAmount,
         behavior: "smooth",
-        perspective: "1000px",
-        transformStyle: "preserve-3d",
       })
     }
   }
@@ -3290,7 +3314,7 @@ Would you like to book this service or compare it with other options?
       isDown = true
       container.classList.add("cursor-grabbing")
       startX = e.pageX - container.offsetLeft
-      scrollLeft = e.scrollLeft
+      scrollLeft = container.scrollLeft
     }
 
     const handleMouseLeave = () => {
@@ -3338,7 +3362,7 @@ Would you like to book this service or compare it with other options?
     container.addEventListener("touchstart", handleTouchStart, { passive: false })
     container.addEventListener("touchend", handleMouseUp)
     container.addEventListener("touchcancel", handleMouseLeave)
-    container.addEventListener("touchmove", handleTouchMove)
+    container.addEventListener("touchmove", handleTouchMove, { passive: false })
 
     return () => {
       container.removeEventListener("mousedown", handleMouseDown)
@@ -3370,7 +3394,7 @@ Would you like to book this service or compare it with other options?
           <div className="absolute inset-0 bg-gradient-to-br from-lavender-50/50 via-white to-white dark:from-lavender-900/20 dark:via-gray-900 dark:to-gray-900 opacity-80"></div>
 
           {/* Refined grid pattern overlay */}
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9ImN1cnJlbnRDb2xvciIgZmlsbC1vcGFjaXR5PSIwLjAyIj48cGF0aCBkPSJNMCAwaDQwdjQwSDB6TTAgMGg0MHY0MEgwek0wIDBoNDB2NDBIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] bg-[length:30px_30px] dark:bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9ImN1cnJlbnRDb2xvciIgZmlsbC1vcGFjaXR5PSIwLjAzIj48cGF0aCBkPSJNMCAwaDQwdjQwSDB6TTAgMGg0MHY0MEgwek0wIDBoNDB2NDBIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-10 group-hover:opacity-30 transition-opacity duration-300"></div>
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9ImN1cnJlbnRDb2xvciIgZmlsbC1vcGFjaXR5PSIwLjAyIj48cGF0aCBkPSJNMCAwaDQwdjQwSDB6TTAgMGg0MHY0MEgwek0wIDBoNDB2NDBIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] bg-[length:30px_30px] dark:bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9ImN1cnJlbnRDb2xvciIgZmlsbC1vcGFjaXR5PSIwLjAzIj48cGF0aCBkPSJNMCAwaDQwdjQwSDB6TTAgMGg0MHY0MEgwek0wIDBoNDB2NDBIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-10 group-hover:opacity-30 transition-opacity duration-300"></div>
 
           {/* Match score badge */}
           {service.matchScore && (
@@ -3661,7 +3685,7 @@ Would you like to book this service or compare it with other options?
             xmlns="http://www.w3.org/2000/svg"
             width="24"
             height="24"
-            viewBox="0 0 24 24"
+            viewBox="0 0 24 0 0 24 24"
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
@@ -3715,7 +3739,7 @@ Would you like to book this service or compare it with other options?
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/80 via-white/90 to-violet-50/80 dark:from-gray-900/90 dark:via-gray-900/95 dark:to-indigo-950/80 z-0" />
 
       {/* Enhanced grid pattern background */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5MDkwOTAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6bTAtMTJ2NmgxOHYtNkgzNnptMCIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDI0em0wIDEydjZoMTh2LTZIMjR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY6aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] bg-[size:30px_30px] z-0 opacity-30" />
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5MDkwOTAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6bTAtMTJ2NmgxOHYtNkgzNnptMCIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDI0em0wIDEydjZoMTh2LTZIMjR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY6aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] bg-[size:30px_30px] z-0 opacity-30" />
 
       <div className="w-full relative z-10 overflow-x-hidden px-0 mx-0">
         {/* AI Matchmaker Interface */}
@@ -3768,8 +3792,6 @@ Would you like to book this service or compare it with other options?
                     msOverflowStyle: "none",
                     WebkitOverflowScrolling: "touch",
                     scrollBehavior: "smooth",
-                    perspective: "1000px",
-                    transformStyle: "preserve-3d",
                   }}
                 >
                   {/* Add this CSS rule to hide the scrollbar */}
@@ -3791,20 +3813,14 @@ Would you like to book this service or compare it with other options?
                       { icon: Construction, name: "Flooring", serviceType: "flooring" },
                       { icon: HardHat, name: "Roofing", serviceType: "roofing" },
                     ].map((category, index) => (
-                      <div
+                      <EnhancedCategoryCard
                         key={index}
-                        className="snap-start flex-shrink-0 transform-gpu"
-                        style={{
-                          transform: "translateZ(20px) perspective(1000px)",
-                        }}
-                      >
-                        <EnhancedCategoryCard
-                          icon={category.icon}
-                          name={category.name}
-                          count={0}
-                          index={index}
-                          size="small"
-                          className="w-36 h-36 my-4 mx-1 transform-gpu rounded-xl overflow-hidden transition-all duration-300 
+                        icon={category.icon}
+                        name={category.name}
+                        count={0}
+                        index={index}
+                        size="small"
+                        className="w-36 h-36 my-4 mx-1 rounded-xl overflow-hidden transition-all duration-300 
 bg-gradient-to-br from-white/95 via-white/90 to-indigo-50/90 dark:from-gray-800/95 dark:via-gray-800/90 dark:to-indigo-950/90 
 backdrop-blur-sm 
 shadow-[0_14px_20px_-3px_rgba(79,70,229,0.3),0_6px_10px_-4px_rgba(79,70,229,0.2),0_-2px_8px_0px_rgba(255,255,255,0.15)] 
@@ -3815,9 +3831,8 @@ border-t border-l border-r border-indigo-100/70 dark:border-t dark:border-l dark
 border-b-2 border-b-indigo-200/80 dark:border-b-2 dark:border-b-indigo-800/80 
 translate-y-[-4px] hover:translate-y-[-8px] 
 after:content-[''] after:absolute after:bottom-[-15px] after:left-[5%] after:right-[5%] after:h-[15px] after:bg-indigo-500/20 dark:after:bg-indigo-500/30 after:blur-xl after:rounded-full"
-                          onClick={() => handleCategoryClick(category.serviceType)}
-                        />
-                      </div>
+                        onClick={() => handleCategoryClick(category.serviceType)}
+                      />
                     ))}
                   </div>
                 </div>
@@ -3999,49 +4014,61 @@ backdrop-blur-sm transition-all duration-200"
               transition={{ delay: 0.2, duration: 0.4 }}
             >
               <form onSubmit={onSubmit} className="flex items-center gap-2 max-w-4xl mx-auto">
-        <div className="relative flex-1 border-none" style={{ borderBottom: 'none' }}>
-          <Input
-            ref={inputRef}
-            type="text"
-            placeholder={isTyping ? "AI is thinking..." : "Type your message..."}
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            disabled={isTyping}
-            className="pl-4 pr-12 py-6 bg-white/80 dark:bg-gray-800/80 border-0
-            focus:ring-0 focus:outline-none focus:border-0
-            rounded-full shadow-[0_4px_12px_rgba(79,70,229,0.15)] hover:shadow-[0_6px_16px_rgba(79,70,229,0.2)]
-            dark:shadow-[0_4px_12px_rgba(79,70,229,0.2)] dark:hover:shadow-[0_6px_16px_rgba(79,70,229,0.25)]
-            transform hover:-translate-y-1 transition-all duration-300"
-            style={{ borderBottom: 'none' }}
-          />
-          
-          {inputValue && (
-            <button
-              type="button"
-              onClick={() => setInputValue("")}
-              className="absolute right-12 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-              aria-label="Clear input"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
-          )}
+                <div className="relative flex-1 border-none" style={{ borderBottom: "none" }}>
+                  <Input
+                    ref={inputRef}
+                    type="text"
+                    placeholder={isTyping ? "AI is thinking..." : "Type your message..."}
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setIsFocused(false)}
+                    disabled={isTyping}
+                    className="pl-4 pr-12 py-6 bg-white/80 dark:bg-gray-800/80 border-0
+      focus:ring-0 focus:outline-none focus:border-0
+      rounded-full shadow-[0_4px_12px_rgba(79,70,229,0.15)] hover:shadow-[0_6px_16px_rgba(79,70,229,0.2)]
+      dark:shadow-[0_4px_12px_rgba(79,70,229,0.2)] dark:hover:shadow-[0_6px_16px_rgba(79,70,229,0.25)]
+      transform hover:-translate-y-1 transition-all duration-300"
+                    style={{ borderBottom: "none" }}
+                  />
 
-          <button
-            type="submit"
-            disabled={isTyping || !inputValue.trim()}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-white bg-indigo-\
+                  {inputValue && (
+                    <button
+                      type="button"
+                      onClick={() => setInputValue("")}
+                      className="absolute right-12 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                      aria-label="Clear input"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                      </svg>
+                    </button>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-indigo-600 hover:bg-indigo-700 transition-colors text-white font-medium rounded-full px-4 py-2 shadow-[0_4px_12px_rgba(79,70,229,0.2)] hover:shadow-[0_6px_16px_rgba(79,70,229,0.3)]"
+                    aria-label="Send message"
+                  >
+                    Send
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  )
+}

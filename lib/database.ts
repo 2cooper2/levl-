@@ -1,52 +1,74 @@
 import { createClient } from "@supabase/supabase-js"
 import type { Database } from "@/types/database.types"
 
-// Create a singleton instance for the client
+// Get environment variables
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+// Client-side database client
 let clientInstance: ReturnType<typeof createClient<Database>> | null = null
 
 export const createDatabaseClient = () => {
-  if (clientInstance) return clientInstance
+  if (typeof window === "undefined") {
+    // Server-side
+    if (!supabaseUrl || !supabaseServiceRoleKey) {
+      console.error("Missing Supabase credentials for server")
+      return null
+    }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    try {
+      return createClient<Database>(supabaseUrl, supabaseServiceRoleKey, {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      })
+    } catch (error) {
+      console.error("Error creating server database client:", error)
+      return null
+    }
+  } else {
+    // Client-side (browser)
+    if (clientInstance) return clientInstance
 
-  if (!supabaseUrl || !supabaseAnonKey) {
-    console.error("Missing Supabase credentials")
-    throw new Error("Missing Supabase credentials: NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY")
-  }
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.error("Missing Supabase credentials for client")
+      return null
+    }
 
-  try {
-    clientInstance = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        persistSession: true,
-        storageKey: "levl-supabase-auth",
-      },
-    })
-    return clientInstance
-  } catch (error) {
-    console.error("Error creating Supabase client:", error)
-    throw new Error("Failed to initialize Supabase client")
+    try {
+      clientInstance = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+        auth: {
+          persistSession: true,
+          storageKey: "levl-auth-token",
+          autoRefreshToken: true,
+        },
+      })
+      return clientInstance
+    } catch (error) {
+      console.error("Error creating client database client:", error)
+      return null
+    }
   }
 }
 
-// For server-side usage
+// Server-side database client
 export const createServerDatabaseClient = () => {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-  if (!supabaseUrl || !supabaseServiceKey) {
-    console.error("Missing Supabase server credentials")
-    throw new Error("Missing Supabase server credentials: NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY")
+  if (!supabaseUrl || !supabaseServiceRoleKey) {
+    console.error("Missing Supabase credentials for server")
+    return null
   }
 
   try {
-    return createClient<Database>(supabaseUrl, supabaseServiceKey, {
+    return createClient<Database>(supabaseUrl, supabaseServiceRoleKey, {
       auth: {
+        autoRefreshToken: false,
         persistSession: false,
       },
     })
   } catch (error) {
-    console.error("Error creating Supabase server client:", error)
-    throw new Error("Failed to initialize Supabase server client")
+    console.error("Error creating server database client:", error)
+    return null
   }
 }

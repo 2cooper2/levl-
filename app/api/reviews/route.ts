@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server"
 import { createServerDatabaseClient } from "@/lib/database"
-import { randomUUID } from "crypto"
 
 export async function GET(request: Request) {
   const url = new URL(request.url)
@@ -137,7 +136,7 @@ export async function POST(request: Request) {
     const { data: newReview, error: insertError } = await supabase
       .from("reviews")
       .insert({
-        id: randomUUID(),
+        id: crypto.randomUUID(),
         service_id: serviceId,
         provider_id: service.provider_id,
         client_id: user.id,
@@ -157,7 +156,7 @@ export async function POST(request: Request) {
 
     // Create notification for the provider
     await supabase.from("notifications").insert({
-      id: randomUUID(),
+      id: crypto.randomUUID(),
       user_id: service.provider_id,
       type: "new_review",
       title: "New Review",

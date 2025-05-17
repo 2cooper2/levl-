@@ -1,52 +1,44 @@
 "use client"
 
 import type React from "react"
-import { Inter } from "next/font/google"
-import "./globals.css"
+
+import { usePathname } from "next/navigation"
 import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/ui/toaster"
+import { useEffect } from "react"
 import { AuthProvider } from "@/context/auth-context"
-import { useEffect, useState } from "react"
 
-const inter = Inter({ subsets: ["latin"] })
-
-// Client component to handle scroll reset
-function ScrollToTop({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
-    try {
-      // Reset scroll position on page load
-      window.scrollTo(0, 0)
-    } catch (error) {
-      console.error("Error resetting scroll position:", error)
-    }
-  }, [])
-
-  return <>{children}</>
-}
-
+// Improved client-side layout with performance optimizations
 export function ClientRootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  // Add state to track if the component is mounted
-  const [isMounted, setIsMounted] = useState(false)
+  const pathname = usePathname()
 
-  // Only render on client-side to avoid hydration issues
+  // Reset scroll position when navigating to new pages
   useEffect(() => {
-    setIsMounted(true)
+    window.scrollTo(0, 0)
+  }, [pathname])
+
+  // Register service worker for offline capabilities
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/sw.js").catch((error) => {
+          console.error("Service worker registration failed:", error)
+        })
+      })
+    }
   }, [])
 
-  if (!isMounted) {
-    // Return a minimal layout during server rendering
-    return <div className={inter.className}>{children}</div>
-  }
-
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-      <AuthProvider>
-        <ScrollToTop>{children}</ScrollToTop>
-      </AuthProvider>
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+        {children}
+        <Toaster />
+      </ThemeProvider>
+    </AuthProvider>
   )
 }
 

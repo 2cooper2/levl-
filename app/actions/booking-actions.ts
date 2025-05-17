@@ -3,17 +3,11 @@
 import { createServerDatabaseClient } from "@/lib/database"
 import { revalidatePath } from "next/cache"
 import Stripe from "stripe"
-import { randomUUID } from "crypto"
 
 // Initialize Stripe
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY || ""
-let stripe: Stripe | null = null
-
-if (stripeSecretKey) {
-  stripe = new Stripe(stripeSecretKey, {
-    apiVersion: "2023-10-16",
-  })
-}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
+  apiVersion: "2023-10-16",
+})
 
 export async function createBooking(formData: FormData) {
   try {
@@ -57,10 +51,6 @@ export async function createBooking(formData: FormData) {
       return { error: "You cannot book your own service" }
     }
 
-    if (!stripe) {
-      return { error: "Payment processing is not available" }
-    }
-
     // Create a payment intent with Stripe
     const paymentIntent = await stripe.paymentIntents.create({
       amount: service.base_price,
@@ -80,7 +70,7 @@ export async function createBooking(formData: FormData) {
     const { data: booking, error: bookingError } = await supabase
       .from("bookings")
       .insert({
-        id: randomUUID(),
+        id: crypto.randomUUID(),
         service_id: serviceId,
         provider_id: service.provider_id,
         client_id: user.id,

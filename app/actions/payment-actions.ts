@@ -6,16 +6,15 @@ import { cookies } from "next/headers"
 import { randomUUID } from "crypto"
 
 // Initialize Stripe with the secret key
-let stripe: Stripe | null = null
+let stripe: Stripe
 try {
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY
   if (!stripeSecretKey) {
-    console.error("STRIPE_SECRET_KEY is not set")
-  } else {
-    stripe = new Stripe(stripeSecretKey, {
-      apiVersion: "2023-10-16",
-    })
+    throw new Error("STRIPE_SECRET_KEY is not set")
   }
+  stripe = new Stripe(stripeSecretKey, {
+    apiVersion: "2023-10-16",
+  })
 } catch (error) {
   console.error("Failed to initialize Stripe:", error)
   // We'll handle this in the functions that use stripe
@@ -63,10 +62,6 @@ async function getTransactionHistory(
 
 async function createConnectedAccount(userId: string, email: string): Promise<{ accountId?: string; error?: string }> {
   try {
-    if (!stripe) {
-      throw new Error("Stripe is not initialized")
-    }
-
     const account = await stripe.accounts.create({
       type: "express",
       email: email,
@@ -103,10 +98,6 @@ async function createConnectedAccount(userId: string, email: string): Promise<{ 
 
 async function createAccountLink(accountId: string, refreshUrl: string): Promise<{ url?: string; error?: string }> {
   try {
-    if (!stripe) {
-      throw new Error("Stripe is not initialized")
-    }
-
     const accountLink = await stripe.accountLinks.create({
       account: accountId,
       refresh_url: refreshUrl,
@@ -202,10 +193,6 @@ async function getConnectedAccountStatus(userId: string): Promise<{
 
 async function createDashboardLink(accountId: string): Promise<{ url?: string; error?: string }> {
   try {
-    if (!stripe) {
-      throw new Error("Stripe is not initialized")
-    }
-
     const dashboardLink = await stripe.accounts.createLoginLink(accountId)
     return { url: dashboardLink.url }
   } catch (error: any) {
@@ -216,10 +203,6 @@ async function createDashboardLink(accountId: string): Promise<{ url?: string; e
 
 async function updateConnectedAccountStatus(userId: string, accountId: string): Promise<void> {
   try {
-    if (!stripe) {
-      throw new Error("Stripe is not initialized")
-    }
-
     const account = await stripe.accounts.retrieve(accountId)
 
     const supabase = createServerClient({ cookies })

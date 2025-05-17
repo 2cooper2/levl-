@@ -59,6 +59,9 @@ self.addEventListener("fetch", (event) => {
         });
 
         return response;
+      }).catch(() => {
+        // Network failed, try to return a fallback
+        return caches.match('/offline.html');
       });
     })
   );
@@ -75,9 +78,60 @@ self.addEventListener("activate", (event) => {
           if (cacheWhitelist.indexOf(cacheName) === -1) {
             return caches.delete(cacheName);
           }
+          return Promise.resolve();
         })
       );
     })
   );
 });
+`
+
+// Create an offline.html file for fallback
+export const offlineHtml = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline - Levl Marketplace</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+      color: #333;
+    }
+    h1 {
+      margin-bottom: 1rem;
+    }
+    p {
+      margin-bottom: 2rem;
+      max-width: 500px;
+    }
+    button {
+      background-color: #7e22ce;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    button:hover {
+      background-color: #6b21a8;
+    }
+  </style>
+</head>
+<body>
+  <h1>You're offline</h1>
+  <p>It looks like you've lost your internet connection. Please check your connection and try again.</p>
+  <button onclick="window.location.reload()">Try Again</button>
+</body>
+</html>
 `

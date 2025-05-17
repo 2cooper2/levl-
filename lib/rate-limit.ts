@@ -1,89 +1,69 @@
-import { type NextRequest, NextResponse } from "next/server"
-
-interface RateLimitOptions {
-  limit: number
-  windowMs: number
-  keyGenerator?: (req: NextRequest) => string
+export type RateLimiterOptions = {
+  limit?: number
+  windowMs?: number
+  keyGenerator?: (req: Request) => string
+  message?: string
+  statusCode?: number
 }
 
-const defaultOptions: RateLimitOptions = {
-  limit: 100,
-  windowMs: 60 * 1000, // 1 minute
-  keyGenerator: (req: NextRequest) => {
-    return req.ip || "unknown"
-  },
-}
+// Store rate limit data in memory
+const ratelimitStore = new Map<string, { count: number; resetTime: number }>()
 
-// In-memory store for rate limiting (replace with Redis for production)
-const requestCounts: Record<string, { count: number; resetTime: number }> = {}
-
-// Cleanup expired entries every 5 minutes
-if (typeof setInterval !== "undefined") {
-  setInterval(
-    () => {
-      const now = Date.now()
-      Object.keys(requestCounts).forEach((key) => {
-        if (requestCounts[key].resetTime <= now) {
-          delete requestCounts[key]
-        }
-      })
-    },
-    5 * 60 * 1000,
-  )
-}
-
-export function rateLimit(options: Partial<RateLimitOptions> = {}) {
-  const opts = { ...defaultOptions, ...options }
-
-  return function rateLimitMiddleware(req: NextRequest) {
-    // Skip rate limiting for non-API routes
-    if (!req.nextUrl.pathname.startsWith("/api/")) {
-      return NextResponse.next()
+// Clean up expired entries periodically
+setInterval(() => {
+  const now = Date.now()
+  for (const [key, data] of ratelimitStore.entries()) {
+    if (data.resetTime < now) {
+      ratelimitStore.delete(key)
     }
+  }
+}, 60000) // Clean up every minute
 
-    const key = opts.keyGenerator(req)
-    const now = Date.now()
+export async function rateLimit(
+  req: Request,
+  options: RateLimiterOptions = {},
+): Promise<{ success: boolean; limit: number; remaining: number; reset: Date }> {
+  const {
+    limit = 10,
+    windowMs = 60000,
+    keyGenerator = (req) => req.headers.get("x-forwarded-for") || "unknown",
+    message = "Too many requests, please try again later.",
+    statusCode = 429,
+  } = options
 
-    // Initialize or get existing request count
-    if (!requestCounts[key] || requestCounts[key].resetTime <= now) {
-      requestCounts[key] = {
-        count: 1,
-        resetTime: now + opts.windowMs,
-      }
-    } else {
-      requestCounts[key].count++
-    }
+  const key = keyGenerator(req)
+  const now = Date.now()
 
-    const currentCount = requestCounts[key].count
-    const resetTime = requestCounts[key].resetTime
+  // Get or initialize rate limit data for this key
+  let data = ratelimitStore.get(key)
+  if (!data || data.resetTime <= now) {
+    data = { count: 0, resetTime: now + windowMs }
+    ratelimitStore.set(key, data)
+  }
 
-    // Set rate limit headers
-    const response = NextResponse.next()
+  // Increment count
+  data.count++
 
-    response.headers.set("X-RateLimit-Limit", String(opts.limit))
-    response.headers.set("X-RateLimit-Remaining", String(Math.max(0, opts.limit - currentCount)))
-    response.headers.set("X-RateLimit-Reset", String(resetTime))
+  // Check if rate limit has been exceeded
+  const remaining = Math.max(0, limit - data.count)
+  const success = data.count <= limit
 
-    // If rate limit is exceeded, return 429 Too Many Requests
-    if (currentCount > opts.limit) {
-      return new NextResponse(
-        JSON.stringify({
-          error: "Too many requests, please try again later.",
-          retryAfter: Math.ceil((resetTime - now) / 1000),
-        }),
-        {
-          status: 429,
-          headers: {
-            "Content-Type": "application/json",
-            "Retry-After": String(Math.ceil((resetTime - now) / 1000)),
-            "X-RateLimit-Limit": String(opts.limit),
-            "X-RateLimit-Remaining": "0",
-            "X-RateLimit-Reset": String(resetTime),
-          },
-        },
-      )
-    }
+  if (!success) {
+    throw new Response(message, {
+      status: statusCode,
+      headers: {
+        "X-RateLimit-Limit": limit.toString(),
+        "X-RateLimit-Remaining": "0",
+        "X-RateLimit-Reset": new Date(data.resetTime).toISOString(),
+        "Retry-After": Math.ceil((data.resetTime - now) / 1000).toString(),
+      },
+    })
+  }
 
-    return response
+  return {
+    success,
+    limit,
+    remaining,
+    reset: new Date(data.resetTime),
   }
 }
