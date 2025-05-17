@@ -20,14 +20,15 @@ const logSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const rateLimitMiddleware = rateLimit({
+    // Rate limiting functionality
+    const limiter = rateLimit({
       limit: 50,
       windowMs: 60 * 1000, // 1 minute
     })
 
-    const response = rateLimitMiddleware(request as any)
-    if (response.status === 429) {
-      return response
+    const rateLimited = await limiter.check(request)
+    if (rateLimited) {
+      return NextResponse.json({ error: "Too many requests", message: "Please try again later" }, { status: 429 })
     }
 
     // Parse and validate the request body

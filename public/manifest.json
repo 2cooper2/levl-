@@ -1,21 +1,16 @@
 {
-  "name": "Levl Platform",
-  "short_name": "Levl",
-  "description": "AI powered marketplace for personal coaching and home services",
+  "name": "LEVL Platform",
+  "short_name": "LEVL",
+  "description": "Find the perfect service provider for your needs",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#7e22ce",
+  "theme_color": "#9333ea",
   "icons": [
     {
-      "src": "/levl-icon.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "/levl-icon.png",
-      "sizes": "512x512",
-      "type": "image/png"
+      "src": "/favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
     }
   ]
 }

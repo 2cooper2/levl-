@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { createServerDatabaseClient } from "@/lib/database"
+import { randomUUID } from "crypto"
 
 export async function POST(request: Request) {
   try {
@@ -27,7 +28,7 @@ export async function POST(request: Request) {
 
     // Store the feedback
     const { error: insertError } = await supabase.from("recommendation_feedback").insert({
-      id: crypto.randomUUID(),
+      id: randomUUID(),
       user_id: user.id,
       service_id: serviceId,
       is_positive: isPositive,

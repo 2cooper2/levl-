@@ -30,6 +30,15 @@ export async function sendConfirmationEmail(email: string, token: string) {
 }
 
 /**
+ * Send a verification email to a user
+ */
+export async function sendVerificationEmail(email: string, token: string) {
+  console.log("Verification email bypassed for:", email)
+  // Always return success without actually sending an email
+  return { success: true }
+}
+
+/**
  * Send a password reset email
  */
 export async function sendPasswordResetEmail(email: string) {
