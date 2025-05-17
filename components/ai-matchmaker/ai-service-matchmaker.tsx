@@ -3998,26 +3998,21 @@ backdrop-blur-sm transition-all duration-200"
               transition={{ delay: 0.2, duration: 0.4 }}
             >
               <form onSubmit={onSubmit} className="flex items-center gap-2 max-w-4xl mx-auto">
-  <div className="relative flex-1 border-none">
+  <div className="relative flex-1 border-none" style={{ borderBottom: 'none' }}>
     <Input
       ref={inputRef}
       type="text"
-      className="pr-10 border-none focus:ring-0 focus:border-none"
       placeholder={isTyping ? "AI is thinking..." : "Type your message..."}
       value={inputValue}
       onChange={(e) => setInputValue(e.target.value)}
       onFocus={() => setIsFocused(true)}
       onBlur={() => setIsFocused(false)}
       disabled={isTyping}
-      className={`pl-4 pr-12 py-6 bg-white/80 dark:bg-gray-800/80 border-0
+      className="pl-4 pr-12 py-6 bg-white/80 dark:bg-gray-800/80 border-0
       focus:ring-0 focus:outline-none focus:border-0
       rounded-full shadow-[0_4px_12px_rgba(79,70,229,0.15)] hover:shadow-[0_6px_16px_rgba(79,70,229,0.2)]
       dark:shadow-[0_4px_12px_rgba(79,70,229,0.2)] dark:hover:shadow-[0_6px_16px_rgba(79,70,229,0.25)]
-      transform hover:-translate-y-1 transition-all duration-300 ${
-        isFocused
-          ? "shadow-[0_6px_16px_rgba(79,70,229,0.2)] dark:shadow-[0_6px_16px_rgba(79,70,229,0.25)]"
-          : ""
-      }`}
+      transform hover:-translate-y-1 transition-all duration-300"
       style={{ borderBottom: 'none' }}
     />
     
@@ -4039,4 +4034,12 @@ backdrop-blur-sm transition-all duration-200"
           strokeLinecap="round"
           strokeLinejoin="round"
         >
-          <line x1="18" y1="6" x2="6" y2="18\
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+    )}
+
+    <button
+      type="submit"
+      className="absolute right-4 top-1/2 -translate-y-1/2 bg-indigo-600 hover:bg-indigo-\
