@@ -431,7 +431,7 @@ interface ServiceSpecificQuestions {
   }
   plumbing: {
     questions: string[]
-    options: { [key: string]: string[] }
+    options: string[]
     required: boolean[]
   }
   painting: {
@@ -441,12 +441,12 @@ interface ServiceSpecificQuestions {
   }
   furniture: {
     questions: string[]
-    options: { [key: string]: string[] }
+    options: string[]
     required: boolean[]
   }
   [key: string]: {
     questions: string[]
-    options: { [key: string]: string[] }
+    options: string[]
     required: boolean[]
   }
 }
@@ -988,7 +988,7 @@ export function AIServiceMatchmaker() {
     enhancedReasoning: {
       contextualMemory: {
         shortTerm: new Map(),
-        longTerm: new Map(),
+        longTerm: longTermMemory, // Preserve long-term memory
         conversationFlow: [],
       },
       reasoningCapabilities: {
@@ -3739,7 +3739,7 @@ Would you like to book this service or compare it with other options?
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/80 via-white/90 to-violet-50/80 dark:from-gray-900/90 dark:via-gray-900/95 dark:to-indigo-950/80 z-0" />
 
       {/* Enhanced grid pattern background */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5MDkwOTAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6bTAtMTJ2NmgxOHYtNkgzNnptMCIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDI0em0wIDEydjZoMTh2LTZIMjR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY6aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] bg-[size:30px_30px] z-0 opacity-30" />
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5MDkwOTAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6bTAtMTJ2NmgxOHYtNkgzNnptMCIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDI0em0wIDEydjZoMTh2LTZIMzR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY6aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] bg-[size:30px_30px] z-0 opacity-30" />
 
       <div className="w-full relative z-10 overflow-x-hidden px-0 mx-0">
         {/* AI Matchmaker Interface */}
@@ -3752,7 +3752,7 @@ Would you like to book this service or compare it with other options?
           <div className="w-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border border-gray-200/50 dark:border-gray-800/50 overflow-hidden">
             {/* Enhanced background gradient with animated pattern */}
             <div className="absolute inset-0 bg-gradient-to-r from-violet-500/20 via-indigo-600/15 to-purple-600/20 opacity-90"></div>
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzMjI2NTkiIGZpbGwtb3BhY2l0eT0iMC4wNCI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6bTAtMTJ2NmgxOHYtNkgzNnptMCIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDI0em0wIDEydjZoMTh2LTZIMjR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY6aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] animate-[pulse_15s_ease-in-out_infinite] opacity-70"></div>
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzMjI2NTkiIGZpbGwtb3BhY2l0eT0iMC4wNCI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6bTAtMTJ2NmgxOHYtNkgzNnptMCIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDI0em0wIDEydjZoMTh2LTZIMzR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY6aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] animate-[pulse_15s_ease-in-out_infinite] opacity-70"></div>
 
             {/* Enhanced header content - simplified with icon in top left */}
             <div className="relative flex items-center justify-between p-5 border-b border-gray-200/50 dark:border-gray-800/50 backdrop-blur-sm mb-0 mt-8">
@@ -3843,7 +3843,7 @@ after:content-[''] after:absolute after:bottom-[-15px] after:left-[5%] after:rig
             <div
               id="chat-container"
               ref={chatContainerRef}
-              className="relative overflow-y-auto p-6 pb-24 bg-gradient-to-b from-gray-50/80 via-indigo-50/10 to-white/90 dark:from-gray-900/90 dark:via-indigo-950/20 dark:to-gray-950/80 backdrop-blur-sm shadow-inner border-t border-indigo-100/20 dark:border-indigo-800/20 rounded-b-lg"
+              className="relative overflow-y-auto p-6 pb-36 min-h-[500px] bg-gradient-to-b from-gray-50/80 via-indigo-50/10 to-white/90 dark:from-gray-900/90 dark:via-indigo-950/20 dark:to-gray-950/80 backdrop-blur-sm shadow-inner border-t border-indigo-100/20 dark:border-indigo-800/20 rounded-b-lg"
               style={{
                 scrollbarWidth: "thin",
                 scrollbarColor: "rgba(79, 70, 229, 0.2) transparent",
@@ -4055,14 +4055,6 @@ backdrop-blur-sm transition-all duration-200"
                       </svg>
                     </button>
                   )}
-
-                  <button
-                    type="submit"
-                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-indigo-600 hover:bg-indigo-700 transition-colors text-white font-medium rounded-full px-4 py-2 shadow-[0_4px_12px_rgba(79,70,229,0.2)] hover:shadow-[0_6px_16px_rgba(79,70,229,0.3)]"
-                    aria-label="Send message"
-                  >
-                    Send
-                  </button>
                 </div>
               </form>
             </motion.div>
@@ -4072,3 +4064,6 @@ backdrop-blur-sm transition-all duration-200"
     </section>
   )
 }
+
+// Initialize long-term memory outside the component
+const longTermMemory = new Map()

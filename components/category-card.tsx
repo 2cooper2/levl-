@@ -32,7 +32,7 @@ export function CategoryCard({ icon: Icon, name, count, index }: CategoryCardPro
         filter: "drop-shadow(0 20px 30px rgba(0, 0, 0, 0.15))",
       }}
     >
-      <div className="mb-4 rounded-full bg-primary/10 p-4 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+      <div className="mb-4 rounded-full bg-lavender-500/10 p-4 text-lavender-500 group-hover:bg-lavender-500 group-hover:text-white transition-colors">
         <Icon className="h-8 w-8" />
       </div>
       <h3 className="text-lg font-medium">{name}</h3>

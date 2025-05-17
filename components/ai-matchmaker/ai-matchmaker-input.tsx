@@ -5,7 +5,7 @@ import type React from "react"
 import { useState, useRef, useEffect } from "react"
 import { Send, Paperclip, Mic, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { ChatInput } from "@/components/ui/chat-input"
 
 interface AIMatchmakerInputProps {
   inputValue: string
@@ -71,10 +71,10 @@ export function AIMatchmakerInput({ inputValue, setInputValue, handleSubmit, isT
   }, [])
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 w-full bg-gradient-to-t from-background to-transparent pb-6 pt-3">
-      <form onSubmit={onSubmit} className="flex items-center gap-2 max-w-4xl mx-auto relative px-4 py-3">
+    <div className="fixed bottom-0 left-0 right-0 w-full bg-gradient-to-t from-background to-transparent pb-32 pt-16 mb-10">
+      <form onSubmit={onSubmit} className="flex items-center gap-2 max-w-4xl mx-auto relative px-4 py-6">
         <div className="relative flex-1">
-          <Input
+          <ChatInput
             ref={inputRef}
             type="text"
             placeholder={isTyping ? "AI is thinking..." : "Type your message..."}
@@ -88,6 +88,11 @@ export function AIMatchmakerInput({ inputValue, setInputValue, handleSubmit, isT
           rounded-full shadow-[0_4px_12px_rgba(79,70,229,0.15)] hover:shadow-[0_6px_16px_rgba(79,70,229,0.2)]
           dark:shadow-[0_4px_12px_rgba(79,70,229,0.2)] dark:hover:shadow-[0_6px_16px_rgba(79,70,229,0.25)]
           transition-all duration-200 pr-10"
+            onSend={() => {
+              if (inputValue.trim() && !isTyping) {
+                handleSubmit()
+              }
+            }}
           />
 
           {inputValue && (
@@ -132,8 +137,8 @@ export function AIMatchmakerInput({ inputValue, setInputValue, handleSubmit, isT
           disabled={!inputValue.trim() || isTyping}
           className={`rounded-full px-4 py-2 h-11 min-w-11 transition-all duration-300 ${
             !inputValue.trim() || isTyping
-              ? "bg-indigo-300/70 text-indigo-100/90 dark:bg-indigo-800/30 dark:text-indigo-400/50 shadow-none transform-none"
-              : "bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white shadow-[0_4px_10px_rgba(79,70,229,0.3)] hover:shadow-[0_6px_15px_rgba(79,70,229,0.4)] hover:-translate-y-[2px]"
+              ? "bg-gray-300/70 text-gray-100/90 dark:bg-gray-800/30 dark:text-gray-400/50 shadow-none transform-none"
+              : "bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white shadow-[0_4px_10px_rgba(107,114,128,0.3)] hover:shadow-[0_6px_15px_rgba(107,114,128,0.4)] hover:-translate-y-[2px]"
           }`}
           aria-label="Send message"
         >
