@@ -3843,7 +3843,7 @@ after:content-[''] after:absolute after:bottom-[-15px] after:left-[5%] after:rig
             <div
               id="chat-container"
               ref={chatContainerRef}
-              className="relative overflow-y-auto p-6 pb-36 min-h-[500px] bg-gradient-to-b from-gray-50/80 via-indigo-50/10 to-white/90 dark:from-gray-900/90 dark:via-indigo-950/20 dark:to-gray-950/80 backdrop-blur-sm shadow-inner border-t border-indigo-100/20 dark:border-indigo-800/20 rounded-b-lg"
+              className="relative overflow-y-auto p-6 pb-28 min-h-[450px] bg-gradient-to-b from-gray-50/80 via-indigo-50/10 to-white/90 dark:from-gray-900/90 dark:via-indigo-950/20 dark:to-gray-950/80 backdrop-blur-sm shadow-inner border-t border-indigo-100/20 dark:border-indigo-800/20 rounded-b-lg"
               style={{
                 scrollbarWidth: "thin",
                 scrollbarColor: "rgba(79, 70, 229, 0.2) transparent",
