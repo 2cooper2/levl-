@@ -83,29 +83,18 @@ export function AIMatchmakerInput({ inputValue, setInputValue, handleSubmit, isT
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             disabled={isTyping}
-            className="px-4 py-6 pl-12 bg-gradient-to-r from-background via-white/90 to-background dark:via-gray-800/90
+            className="px-4 py-6 bg-gradient-to-r from-background via-white/90 to-background dark:via-gray-800/90
           border-0 focus:ring-0 focus:border-0 outline-none
           rounded-full shadow-[0_4px_12px_rgba(79,70,229,0.15)] hover:shadow-[0_6px_16px_rgba(79,70,229,0.2)]
           dark:shadow-[0_4px_12px_rgba(79,70,229,0.2)] dark:hover:shadow-[0_6px_16px_rgba(79,70,229,0.25)]
           transition-all duration-200 pr-10"
           />
 
-          {/* Paperclip button inside input */}
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="absolute left-2 top-1/2 -translate-y-1/2 text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 hover:bg-transparent dark:hover:bg-transparent rounded-full h-8 w-8"
-            aria-label="Attach file"
-          >
-            <Paperclip className="h-5 w-5" />
-          </Button>
-
           {inputValue && (
             <button
               type="button"
               onClick={() => setInputValue("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100/50 dark:hover:bg-gray-800/50"
+              className="absolute right-14 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100/50 dark:hover:bg-gray-800/50"
             >
               <X className="h-4 w-4" />
             </button>
@@ -117,15 +106,25 @@ export function AIMatchmakerInput({ inputValue, setInputValue, handleSubmit, isT
           variant="outline"
           size="icon"
           className={`rounded-full border-indigo-200/60 dark:border-indigo-800/50 hover:bg-indigo-100/50 dark:hover:bg-indigo-900/40
-      ${
-        isRecording
-          ? "bg-red-500/10 text-red-500 border-red-200 dark:border-red-800 animate-pulse"
-          : "text-indigo-500 dark:text-indigo-400"
-      }`}
+    ${
+      isRecording
+        ? "bg-red-500/10 text-red-500 border-red-200 dark:border-red-800 animate-pulse"
+        : "text-indigo-500 dark:text-indigo-400"
+    }`}
           onClick={toggleRecording}
           aria-label={isRecording ? "Stop recording" : "Start voice input"}
         >
           <Mic className="h-5 w-5" />
+        </Button>
+
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          className="rounded-full border-indigo-200/60 dark:border-indigo-800/50 hover:bg-indigo-100/50 dark:hover:bg-indigo-900/40 text-indigo-500 dark:text-indigo-400"
+          aria-label="Attach file"
+        >
+          <Paperclip className="h-5 w-5" />
         </Button>
 
         <Button

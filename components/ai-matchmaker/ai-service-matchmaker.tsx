@@ -20,7 +20,6 @@ import {
   Construction,
   HardHat,
   Star,
-  Paperclip,
 } from "lucide-react"
 import { LevlLogo } from "@/components/levl-logo"
 
@@ -29,7 +28,6 @@ import { motion } from "framer-motion"
 
 // Import the ProviderCard component
 import { ProviderCard } from "@/components/ai-matchmaker/provider-card"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
 // Define service types
@@ -534,7 +532,7 @@ const initialMessages: Message[] = [
   {
     id: "welcome",
     type: "ai",
-    content: "Hi there! I'm your AI service matchmaker. Please select one of the service cards above to get started.",
+    content: "Hello Im LevL AI! Tap or scroll to find a service you need from above!",
     timestamp: new Date(),
   },
 ]
@@ -1021,33 +1019,25 @@ export function AIServiceMatchmaker() {
     "Do you have any specific requirements or preferences?",
   ]
 
-  // Scroll to bottom of messages
+  // Replace the existing scrollToBottom function with this enhanced version
   const scrollToBottom = () => {
-    try {
-      if (messagesEndRef.current) {
-        messagesEndRef.current.scrollIntoView({
-          behavior: "smooth",
-          block: "end",
-          inline: "nearest",
-        })
-        // Prevent page from scrolling
-        setTimeout(() => {
-          if (chatContainerRef.current) {
-            chatContainerRef.current.scrollIntoView({ block: "nearest" })
-          }
-        }, 100)
-      }
-    } catch (error) {
-      console.error("Error scrolling to bottom:", error)
-    }
-  }
+  // Auto-scrolling functionality removed to allow only user-initiated scrolling
+  // This is intentionally empty
+}
 
+  // Replace the useEffect for scrolling with this enhanced version
+  const isInitialMount = useRef(true);
   useEffect(() => {
-    // Only scroll if the chat is open AND we have more than the initial welcome message
-    if (showMatchmaker && messages.length > 1) {
-      scrollToBottom()
-    }
-  }, [messages, showMatchmaker])
+  // We only want to scroll to top on initial component mount, not when messages update
+  // Using a ref to track if it's the initial load
+  
+  if (isInitialMount.current) {
+    window.scrollTo(0, 0);
+    isInitialMount.current = false;
+  }
+  
+  // No auto-scrolling on message updates as per user request
+}, []);
 
   // Simulate AI typing
   const simulateTyping = (callback: () => void, delay = 1500) => {
@@ -1064,8 +1054,9 @@ export function AIServiceMatchmaker() {
       setMessages((prev) => prev.filter((msg) => msg.id !== typingMessage.id))
       setIsTyping(false)
       callback()
-    }, delay)
-  }
+    // Removed any scrollToBottom calls here
+  }, delay)
+}
 
   // Handle user input submission
   const handleSubmit = (e?: React.FormEvent) => {
@@ -2424,7 +2415,7 @@ export function AIServiceMatchmaker() {
 
         missingRanges.forEach((range) => {
           const minPrice = range === "low" ? 0 : range === "medium" ? 80 : 120
-          const maxPrice = range === "low" ? 80 : range === "medium" ? 120 : 1000
+          const maxPrice = range === "low" ? 0 : range === "medium" ? 120 : 1000
 
           const servicesInRange = remainingServices.filter((service) => {
             const price = Number.parseFloat(service.price.replace(/[^0-9.]/g, ""))
@@ -3095,8 +3086,8 @@ Would you like to book this service or compare it with other options?
       budget: null,
       timeframe: null,
       experienceImportance: null,
-      hasSpecificRequirements: false,
       specificRequirements: null,
+      hasSpecificRequirements: false,
     })
 
     // Reset AI model but preserve long-term memory
@@ -3299,7 +3290,7 @@ Would you like to book this service or compare it with other options?
       isDown = true
       container.classList.add("cursor-grabbing")
       startX = e.pageX - container.offsetLeft
-      scrollLeft = container.scrollLeft
+      scrollLeft = e.scrollLeft
     }
 
     const handleMouseLeave = () => {
@@ -3379,7 +3370,7 @@ Would you like to book this service or compare it with other options?
           <div className="absolute inset-0 bg-gradient-to-br from-lavender-50/50 via-white to-white dark:from-lavender-900/20 dark:via-gray-900 dark:to-gray-900 opacity-80"></div>
 
           {/* Refined grid pattern overlay */}
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9ImN1cnJlbnRDb2xvciIgZmlsbC1vcGFjaXR5PSIwLjAyIj48cGF0aCBkPSJNMCAwaDQwdjQwSDB6TTAgMGg0MHY0MEgwek0wIDBoNDB2NDBIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] bg-[length:30px_30px] dark:bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9ImN1cnJlbnRDb2xvciIgZmlsbC1vcGFjaXR5PSIwLjAzIj48cGF0aCBkPSJNMCAwaDQwdjQwSDB6TTAgMGg0MHY0MEgwek0wIDBoNDB2NDBIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-10 group-hover:opacity-30 transition-opacity duration-300"></div>
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0bXdata:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9ImN1cnJlbnRDb2xvciIgZmlsbC1vcGFjaXR5PSIwLjAyIj48cGF0aCBkPSJNMCAwaDQwdjQwSDB6TTAgMGg0MHY0MEgwek0wIDBoNDB2NDBIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] bg-[length:30px_30px] dark:bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9ImN1cnJlbnRDb2xvciIgZmlsbC1vcGFjaXR5PSIwLjAzIj48cGF0aCBkPSJNMCAwaDQwdjQwSDB6TTAgMGg0MHY0MEgwek0wIDBoNDB2NDBIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-10 group-hover:opacity-30 transition-opacity duration-300"></div>
 
           {/* Match score badge */}
           {service.matchScore && (
@@ -3673,8 +3664,7 @@ Would you like to book this service or compare it with other options?
             viewBox="0 0 24 0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
+            strokeWidth="2"            strokeLinecap="round"
             strokeLinejoin="round"
             className="text-white"
           >
@@ -3724,7 +3714,7 @@ Would you like to book this service or compare it with other options?
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/80 via-white/90 to-violet-50/80 dark:from-gray-900/90 dark:via-gray-900/95 dark:to-indigo-950/80 z-0" />
 
       {/* Enhanced grid pattern background */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0ddata:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5MDkwOTAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6bTAtMTJ2NmgxOHYtNkgzNnptMCIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDI0em0wIDEydjZoMTh2LTZIMjR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY6aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] bg-[size:30px_30px] z-0 opacity-30" />
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5MDkwOTAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6bTAtMTJ2NmgxOHYtNkgzNnptMCIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDI0em0wIDEydjZoMTh2LTZIMjR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY6aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] bg-[size:30px_30px] z-0 opacity-30" />
 
       <div className="w-full relative z-10 overflow-x-hidden px-0 mx-0">
         {/* AI Matchmaker Interface */}
@@ -3756,12 +3746,6 @@ Would you like to book this service or compare it with other options?
                   className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium text-foreground/80 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 >
                   Profile
-                </Link>
-                <Link
-                  href="/about"
-                  className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium text-foreground/80 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                >
-                  About
                 </Link>
                 <Link
                   href="/forum"
@@ -3843,7 +3827,7 @@ after:content-[''] after:absolute after:bottom-[-15px] after:left-[5%] after:rig
             <div
               id="chat-container"
               ref={chatContainerRef}
-              className="relative h-[500px] overflow-y-auto p-6 pb-24 bg-gradient-to-b from-gray-50/80 via-indigo-50/10 to-white/90 dark:from-gray-900/90 dark:via-indigo-950/20 dark:to-gray-950/80 backdrop-blur-sm shadow-inner border-t border-indigo-100/20 dark:border-indigo-800/20 rounded-b-lg"
+              className="relative overflow-y-auto p-6 pb-24 bg-gradient-to-b from-gray-50/80 via-indigo-50/10 to-white/90 dark:from-gray-900/90 dark:via-indigo-950/20 dark:to-gray-950/80 backdrop-blur-sm shadow-inner border-t border-indigo-100/20 dark:border-indigo-800/20 rounded-b-lg"
               style={{
                 scrollbarWidth: "thin",
                 scrollbarColor: "rgba(79, 70, 229, 0.2) transparent",
@@ -4014,18 +3998,19 @@ backdrop-blur-sm transition-all duration-200"
               transition={{ delay: 0.2, duration: 0.4 }}
             >
               <form onSubmit={onSubmit} className="flex items-center gap-2 max-w-4xl mx-auto">
-  <div className="relative flex-1">
+  <div className="relative flex-1 border-none">
     <Input
       ref={inputRef}
       type="text"
+      className="pr-10 border-none focus:ring-0 focus:border-none"
       placeholder={isTyping ? "AI is thinking..." : "Type your message..."}
       value={inputValue}
       onChange={(e) => setInputValue(e.target.value)}
       onFocus={() => setIsFocused(true)}
       onBlur={() => setIsFocused(false)}
       disabled={isTyping}
-      className={`pl-12 pr-4 py-6 bg-white/80 dark:bg-gray-800/80 border-0
-      focus:ring-0 focus:outline-none
+      className={`pl-4 pr-12 py-6 bg-white/80 dark:bg-gray-800/80 border-0
+      focus:ring-0 focus:outline-none focus:border-0
       rounded-full shadow-[0_4px_12px_rgba(79,70,229,0.15)] hover:shadow-[0_6px_16px_rgba(79,70,229,0.2)]
       dark:shadow-[0_4px_12px_rgba(79,70,229,0.2)] dark:hover:shadow-[0_6px_16px_rgba(79,70,229,0.25)]
       transform hover:-translate-y-1 transition-all duration-300 ${
@@ -4033,22 +4018,25 @@ backdrop-blur-sm transition-all duration-200"
           ? "shadow-[0_6px_16px_rgba(79,70,229,0.2)] dark:shadow-[0_6px_16px_rgba(79,70,229,0.25)]"
           : ""
       }`}
+      style={{ borderBottom: 'none' }}
     />
-    
-    {/* Paperclip button inside input */}
-    <Button
-      type="button"
-      variant="ghost"
-      size="icon"
-      className="absolute left-2 top-1/2 -translate-y-1/2 text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 hover:bg-transparent dark:hover:bg-transparent rounded-full h-8 w-8"
-      aria-label="Attach file"
-    >
-      <Paperclip className="h-5 w-5" />
-    </Button>
     
     {inputValue && (
       <button
         type="button"
         onClick={() => setInputValue("")}
-        className="absolute right-14 top-1/2 -translate-y-1/2 text-gray-400 hover:text-
-</\
+        className="absolute right-12 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+        aria-label="Clear input"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <line x1="18" y1="6" x2="6" y2="18\

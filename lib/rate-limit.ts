@@ -58,11 +58,10 @@ export function rateLimit(options: Partial<RateLimitOptions> = {}) {
     const resetTime = requestCounts[key].resetTime
 
     // Set rate limit headers
-    const remainingRequests = Math.max(0, opts.limit - currentCount)
     const response = NextResponse.next()
 
     response.headers.set("X-RateLimit-Limit", String(opts.limit))
-    response.headers.set("X-RateLimit-Remaining", String(remainingRequests))
+    response.headers.set("X-RateLimit-Remaining", String(Math.max(0, opts.limit - currentCount)))
     response.headers.set("X-RateLimit-Reset", String(resetTime))
 
     // If rate limit is exceeded, return 429 Too Many Requests

@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { forwardRef } from "react"
+import { forwardRef, useEffect, useLayoutEffect } from "react"
 import { motion } from "framer-motion"
 import { LLMFeedback } from "./llm-feedback"
 import type { Message } from "@/types/matchmaker"
@@ -20,6 +20,16 @@ interface AIMatchmakerMessagesProps {
 
 export const AIMatchmakerMessages = forwardRef<HTMLDivElement, AIMatchmakerMessagesProps>(
   ({ messages, isTyping, matchedServices, onOptionSelect, onFeedbackSelect, onLLMFeedback, messagesEndRef }, ref) => {
+    // Removed auto-scrolling functionality
+    useEffect(() => {
+      // Auto-scrolling removed to allow only user-initiated scrolling
+    }, [messages, messagesEndRef])
+
+    // Removed layout auto-scrolling functionality
+    useLayoutEffect(() => {
+      // Auto-scrolling removed to allow only user-initiated scrolling
+    }, [messages, messagesEndRef])
+
     return (
       <div ref={ref} className="space-y-6">
         {messages.map((message) => (
@@ -152,7 +162,7 @@ export const AIMatchmakerMessages = forwardRef<HTMLDivElement, AIMatchmakerMessa
           </div>
         ))}
 
-        {messagesEndRef && <div ref={messagesEndRef} />}
+        {messagesEndRef && <div ref={messagesEndRef} className="h-px w-full" />}
       </div>
     )
   },

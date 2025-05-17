@@ -46,12 +46,11 @@ export function EnhancedMainNav() {
     setIsMenuOpen(!isMenuOpen)
   }
 
-  // Modify the navItems array to remove the AI Matchmaker button and adjust the order
+  // Removed the About button from navItems
   const navItems = [
     { href: "/", label: "Home" },
     { href: "/services", label: "Services" },
     { href: "/providers", label: "Providers" },
-    { href: "/about", label: "About" },
   ]
 
   return (

@@ -22,12 +22,27 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/auth/login", request.url))
     }
 
-    // Get user role
-    const { data: userProfile } = await supabase.from("users").select("role").eq("id", session.user.id).single()
+    try {
+      // Get user role
+      const { data: userProfile, error } = await supabase
+        .from("users")
+        .select("role")
+        .eq("id", session.user.id)
+        .single()
 
-    // Redirect clients away from provider-only routes
-    if (!userProfile || userProfile.role !== "provider") {
-      return NextResponse.redirect(new URL("/dashboard", request.url))
+      // Handle potential error
+      if (error) {
+        console.error("Error fetching user profile:", error)
+        return NextResponse.redirect(new URL("/auth/login", request.url))
+      }
+
+      // Redirect clients away from provider-only routes
+      if (!userProfile || userProfile.role !== "provider") {
+        return NextResponse.redirect(new URL("/dashboard", request.url))
+      }
+    } catch (error) {
+      console.error("Error in middleware:", error)
+      return NextResponse.redirect(new URL("/auth/login", request.url))
     }
   }
 

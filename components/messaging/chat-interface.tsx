@@ -56,9 +56,19 @@ export function ChatInterface({
     // Return cleanup function
   }, [conversationId])
 
-  // Scroll to bottom when messages change
+  // Scroll to bottom when messages change, but only if user is near the bottom already
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    if (messagesEndRef.current) {
+      const chatContainer = messagesEndRef.current.parentElement
+      if (chatContainer) {
+        // Only auto-scroll if user is already near the bottom (within 100px of bottom)
+        const isNearBottom = chatContainer.scrollHeight - chatContainer.scrollTop - chatContainer.clientHeight < 100
+
+        if (isNearBottom) {
+          messagesEndRef.current.scrollIntoView({ behavior: "smooth" })
+        }
+      }
+    }
   }, [messages])
 
   const handleSendMessage = async (e: React.FormEvent) => {

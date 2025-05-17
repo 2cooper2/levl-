@@ -1,5 +1,6 @@
+// This is a client-side only file
 export default function registerServiceWorker() {
-  if ("serviceWorker" in navigator) {
+  if (typeof window !== "undefined" && "serviceWorker" in navigator) {
     window.addEventListener("load", () => {
       navigator.serviceWorker
         .register("/sw.js")
@@ -13,67 +14,70 @@ export default function registerServiceWorker() {
   }
 }
 
-// This is a basic service worker that caches core assets
-const CACHE_NAME = "levl-cache-v1"
-const urlsToCache = ["/", "/favicon.ico", "/manifest.json"]
+// The actual service worker code should be in a public/sw.js file
+// This is just a TypeScript definition of what that file would contain
+export const serviceWorkerScript = `
+const CACHE_NAME = "levl-cache-v1";
+const urlsToCache = ["/", "/favicon.ico", "/manifest.json"];
 
 self.addEventListener("install", (event) => {
   // Skip waiting to activate the new service worker immediately
-  self.skipWaiting()
+  self.skipWaiting();
 
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(urlsToCache)
-    }),
-  )
-})
+      return cache.addAll(urlsToCache);
+    })
+  );
+});
 
 self.addEventListener("fetch", (event) => {
   // Only cache GET requests
-  if (event.request.method !== "GET") return
+  if (event.request.method !== "GET") return;
 
   event.respondWith(
     caches.match(event.request).then((response) => {
       // Cache hit - return response
       if (response) {
-        return response
+        return response;
       }
 
       // Clone the request because it's a one-time use stream
-      const fetchRequest = event.request.clone()
+      const fetchRequest = event.request.clone();
 
       return fetch(fetchRequest).then((response) => {
         // Check if we received a valid response
         if (!response || response.status !== 200 || response.type !== "basic") {
-          return response
+          return response;
         }
 
         // Clone the response because it's a one-time use stream
-        const responseToCache = response.clone()
+        const responseToCache = response.clone();
 
         caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache)
-        })
+          cache.put(event.request, responseToCache);
+        });
 
-        return response
-      })
-    }),
-  )
-})
+        return response;
+      });
+    })
+  );
+});
 
 // Clean up old caches when a new service worker activates
 self.addEventListener("activate", (event) => {
-  const cacheWhitelist = [CACHE_NAME]
+  const cacheWhitelist = [CACHE_NAME];
 
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName)
+            return caches.delete(cacheName);
           }
-        }),
-      )
-    }),
-  )
-})
+        })
+      );
+    })
+  );
+});
+`

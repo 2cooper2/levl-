@@ -14,21 +14,34 @@ export const createClientSupabase = () => {
 
   if (!supabaseUrl || !supabaseAnonKey) {
     console.error("Missing Supabase credentials for client")
-    throw new Error("Missing Supabase credentials")
+    throw new Error("Missing Supabase credentials: NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY")
   }
 
-  clientInstance = createClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      persistSession: true,
-      storageKey: "levl-supabase-auth",
-      autoRefreshToken: true,
-    },
-  })
-
-  return clientInstance
+  try {
+    clientInstance = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        storageKey: "levl-supabase-auth",
+        autoRefreshToken: true,
+      },
+    })
+    return clientInstance
+  } catch (error) {
+    console.error("Error creating Supabase client:", error)
+    throw new Error("Failed to initialize Supabase client")
+  }
 }
 
 // Export a singleton instance
-export const supabase = createClientSupabase()
+let supabase: ReturnType<typeof createClient> | null = null
+try {
+  supabase = createClientSupabase()
+} catch (error) {
+  console.error("Failed to initialize Supabase singleton:", error)
+  // Don't throw here to prevent breaking the app on load
+  // The error will be handled when methods are called
+}
+
+export { supabase }
 
 export const createClientDatabaseClient = createClientSupabase

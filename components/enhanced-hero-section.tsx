@@ -28,7 +28,6 @@ import {
 import { AnimatedTextDivider } from "@/components/animated-text-divider"
 import { useAuth } from "@/context/auth-context"
 import { useMobile } from "@/hooks/use-mobile"
-// Remove the existing import for ForumComponent
 import { FeatureBadge } from "@/components/ui/feature-badge"
 
 // Add keyframes for the shimmer animation
@@ -40,11 +39,11 @@ const shimmerAnimation = {
 // Add styles for hiding scrollbars
 const scrollbarHideStyles = `
 .scrollbar-hide::-webkit-scrollbar {
- display: none;
+display: none;
 }
 .scrollbar-hide {
- -ms-overflow-style: none;
- scrollbar-width: none;
+-ms-overflow-style: none;
+scrollbar-width: none;
 }
 `
 
@@ -55,7 +54,7 @@ const detailedVisualStyles = `
    overflow: hidden;
    isolation: isolate;
  }
- 
+
  .grid-pattern {
    opacity: 0.7;
  }
@@ -64,7 +63,7 @@ const detailedVisualStyles = `
    opacity: 0.7;
    
  }
- 
+
  .circuit-lines {
    position: absolute;
    top: 0;
@@ -75,14 +74,14 @@ const detailedVisualStyles = `
    pointer-events: none;
    z-index: 1;
  }
- 
+
  .circuit-line {
    position: absolute;
    background: linear-gradient(90deg, rgba(var(--primary-rgb), 0.1), rgba(var(--primary-rgb), 0.3), rgba(var(--primary-rgb), 0.1));
    height: 1px;
    opacity: 0.3;
  }
- 
+
  .circuit-dot {
    position: absolute;
    width: 4px;
@@ -92,7 +91,7 @@ const detailedVisualStyles = `
    background-color: rgba(var(--primary-rgb), 0.5);
    box-shadow: 0 0 5px rgba(var(--primary-rgb), 0.5);
  }
- 
+
  .glow-dot {
    position: absolute;
    width: 2px;
@@ -103,24 +102,24 @@ const detailedVisualStyles = `
    box-shadow: 0 0 5px 2px rgba(255, 255, 255, 0.3);
    animation: pulse-glow 3s infinite;
  }
- 
+
  @keyframes pulse-glow {
    0%, 100% { opacity: 0.2; transform: scale(1); }
    50% { opacity: 0.8; transform: scale(1.5); }
  }
- 
+
  .geometric-shape {
    position: absolute;
    opacity: 0.15;
    pointer-events: none;
    z-index: 1;
  }
- 
+
  .skill-card {
    position: relative;
    overflow: hidden;
  }
- 
+
  .skill-card::before {
    content: '';
    position: absolute;
@@ -132,13 +131,13 @@ const detailedVisualStyles = `
    pointer-events: none;
    z-index: 1;
  }
- 
+
  .progress-track {
    position: relative;
    overflow: hidden;
    border-radius: 9999px;
  }
- 
+
  .progress-track::after {
    content: '';
    position: absolute;
@@ -155,16 +154,16 @@ const detailedVisualStyles = `
    animation: shimmer 2s infinite;
    pointer-events: none;
  }
- 
+
  @keyframes shimmer {
    0% { background-position: -200% 0; }
    100% { background-position: 200% 0; }
  }
- 
+
  .detailed-tab {
    position: relative;
  }
- 
+
  .detailed-tab::after {
    content: '';
    position: absolute;
@@ -179,11 +178,11 @@ const detailedVisualStyles = `
    opacity: 0;
    transition: opacity 0.3s ease;
  }
- 
+
  .detailed-tab.active::after {
    opacity: 1;
  }
- 
+
  .tech-pattern {
    position: absolute;
    top: 0;
@@ -739,7 +738,7 @@ export function EnhancedHeroSection() {
 
         // Draw area under projected earnings line
         ctx.beginPath()
-        data.forEach((point) => {
+        data.forEach((point, i) => {
           ctx.lineTo(point.x, point.projectedY)
         })
         ctx.lineTo(width, height)
@@ -853,7 +852,8 @@ export function EnhancedHeroSection() {
         <AnimatedTextDivider firstText="Learn. Earn." secondText="Grow Your Business" className="mb-12 text-gray-800" />
         {/* Animated background elements */}
         <div
-          className="absolute -left-64 -top-64 h-[500px] w-[500px] rounded-full bg-primary/10 blur-3xl opacity-50 animate-pulse"
+          className="absolute -left-64 -top-64 h-[500px] w-[500px] rounded-full bg-primary/10 blur-3xl opacity-50
+animate-pulse"
           style={{ animationDuration: "15s" }}
         ></div>
         <div
@@ -991,13 +991,6 @@ export function EnhancedHeroSection() {
                       </motion.div>
                     )}
                   </AnimatePresence>
-                  {/* Tech pattern overlay */}
-
-                  {/* Even background overlay */}
-
-                  {/* Circuit lines */}
-
-                  {/* Success message toast */}
 
                   <div className="space-y-3 md:space-y-4 relative z-10 lg:grid lg:grid-cols-12 lg:gap-4 lg:space-y-0">
                     <div className="flex items-center justify-between lg:col-span-12">
@@ -1306,7 +1299,7 @@ export function EnhancedHeroSection() {
                               ].map((stat, i) => (
                                 <motion.div
                                   key={i}
-                                  className="bg-white rounded-lg p-3 relative overflow-hidden hover:bg-lavender-50 transition-colors duration-200 shadow-sm border border-lavender-100 group/stat"
+                                  className={`bg-white rounded-lg p-3 relative overflow-hidden hover:bg-lavender-50 transition-colors duration-200 shadow-sm border border-lavender-100 group/stat`}
                                   whileHover={{ y: -2 }}
                                   transition={{ type: "spring", stiffness: 500, damping: 30 }}
                                 >
