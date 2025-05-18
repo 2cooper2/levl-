@@ -607,7 +607,7 @@ export function ForumTab() {
                 viewMode === "card" ? "p-5" : "p-4"
               } rounded-xl bg-gradient-to-br from-white/95 via-lavender-50/80 to-white/90 backdrop-blur-sm border hover:border-primary/40 transition-all duration-300 relative overflow-hidden cursor-pointer shadow-sm hover:shadow-md ${
                 activeTopic === topic.id ? "border-primary/40 bg-primary/5 shadow-primary/10" : "border-lavender-200/50"
-              }`}
+              } ${viewMode === "card" ? "min-h-[180px]" : "min-h-[80px]"}`}
               onClick={() => setActiveTopic(activeTopic === topic.id ? null : topic.id)}
               whileHover={{ scale: 1.01, y: -2, boxShadow: "0 8px 24px rgba(147, 51, 234, 0.08)" }}
               layout
@@ -737,7 +737,10 @@ export function ForumTab() {
                       <div className="space-y-3">
                         {topic.responses && topic.responses.length > 0 ? (
                           topic.responses.map((response, index) => (
-                            <div key={index} className="bg-white/50 rounded-lg p-3 border border-lavender-200/30">
+                            <div
+                              key={index}
+                              className="bg-white/50 rounded-lg p-3 border border-lavender-200/30 min-h-[90px]"
+                            >
                               <div className="flex items-start gap-3">
                                 <div className="h-7 w-7 rounded-full bg-gradient-to-r from-primary/10 to-purple-500/10 flex items-center justify-center text-xs font-bold text-primary border border-lavender-200/30">
                                   {response.author.charAt(0)}
@@ -788,7 +791,7 @@ export function ForumTab() {
                         <div className="flex-1 relative">
                           <textarea
                             placeholder="Write a reply..."
-                            className="w-full h-20 px-3 py-2 text-sm bg-white rounded-lg border border-lavender-200/50 focus:border-primary/50 focus:ring-1 focus:ring-primary/30 outline-none transition-colors resize-none"
+                            className="w-full h-24 px-3 py-2 text-sm bg-white rounded-lg border border-lavender-200/50 focus:border-primary/50 focus:ring-1 focus:ring-primary/30 outline-none transition-colors resize-none"
                             value={replyContent}
                             onChange={(e) => setReplyContent(e.target.value)}
                             onClick={(e) => e.stopPropagation()}
