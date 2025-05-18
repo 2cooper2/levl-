@@ -33,28 +33,28 @@ import { useRouter } from "next/navigation"
 const forumTopics = [
   {
     id: 1,
-    title: "Best mold-resistant paint brands for bathrooms?",
-    author: "PaintPro",
-    replies: 12,
-    likes: 25,
-    lastActive: "1 day ago",
-    tags: ["painting", "bathroom", "supplies"],
+    title: "Best power drill for home DIY projects under $150?",
+    author: "ToolEnthusiast",
+    replies: 14,
+    likes: 32,
+    lastActive: "2 hours ago",
+    tags: ["tools", "power-tools", "recommendations"],
     preview:
-      "Looking for recommendations on high-quality mold-resistant paint for bathroom walls. Which brands have worked best for you in high-humidity environments?",
+      "I'm looking to invest in a quality power drill for various home projects. Need something versatile with good battery life that won't break the bank. Any recommendations under $150?",
     responses: [
       {
-        author: "InteriorDesigner",
-        time: "1 day ago",
+        author: "HandyPro",
+        time: "1 hour ago",
         content:
-          "Benjamin Moore's Aura Bath & Spa is my go-to. It has excellent mold resistance and the matte finish hides wall imperfections while still being washable.",
-        likes: 5,
+          "The DeWalt 20V MAX has been my go-to for years. Great battery life, comes with multiple bits, and you can often find it on sale for around $130. Perfect balance of quality and price for home DIY.",
+        likes: 8,
       },
       {
-        author: "DIYPainter",
-        time: "1 day ago",
+        author: "DIYQueen",
+        time: "30 minutes ago",
         content:
-          "Sherwin-Williams Emerald with added antimicrobial agents has been fantastic in my experience. Worth the higher price for its durability in humid conditions.",
-        likes: 3,
+          "If you want something lighter, the Bosch 12V is excellent for home use. Very comfortable grip and enough power for most household tasks. The battery lasts forever and it's usually around $120.",
+        likes: 5,
       },
     ],
   },
@@ -1084,15 +1084,13 @@ export function ForumTab() {
       <div className="space-y-4 mb-8">
         {filteredTopics.length > 0 ? (
           filteredTopics.map((topic) => (
-            <motion.div
+            <div
               key={topic.id}
               className={`${
                 viewMode === "card" ? "p-6" : "p-5"
-              } flex flex-col rounded-xl border bg-card text-card-foreground transition-all cursor-pointer group relative overflow-visible bg-gradient-to-br from-lavender-50/95 via-white/90 to-lavender-100/90 backdrop-blur-sm shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25),0_10px_20px_-5px_rgba(0,0,0,0.2),0_0_0_1px_rgba(0,0,0,0.05)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 transform translate-y-0 translateZ-0 filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.15)] ${activeTopic === topic.id ? "border-lavender-400/60 bg-lavender-50/40" : "hover:border-lavender-300/60"}
+              } flex flex-col rounded-xl border bg-card text-card-foreground cursor-pointer group relative overflow-visible bg-gradient-to-br from-lavender-50/95 via-white/90 to-lavender-100/90 backdrop-blur-sm shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25),0_10px_20px_-5px_rgba(0,0,0,0.2),0_0_0_1px_rgba(0,0,0,0.05)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 transform translate-y-0 translateZ-0 filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.15)] ${activeTopic === topic.id ? "border-lavender-400/60 bg-lavender-50/40" : "hover:border-lavender-300/60"}
 ${viewMode === "card" ? "min-h-[240px]" : "min-h-[120px]"}`}
               onClick={() => setActiveTopic(activeTopic === topic.id ? null : topic.id)}
-              whileTap={{ scale: 0.99 }}
-              layout
             >
               {/* Decorative elements */}
               <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-lavender-400/10 to-transparent rounded-bl-full transform transition-transform duration-700 group-hover:scale-110"></div>
@@ -1230,14 +1228,8 @@ ${viewMode === "card" ? "min-h-[240px]" : "min-h-[120px]"}`}
 
                   {/* Expanded topic with responses - enhanced styling */}
                   {activeTopic === topic.id && (
-                    <motion.div
-                      className="mt-5 pt-5 border-t border-lavender-200/30"
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <div className="space-y-4">
+                    <div className="mt-5 pt-5 border-t border-lavender-200/30">
+                      <div className="space-y-4 mt-2 overflow-visible">
                         {topic.responses && topic.responses.length > 0 ? (
                           topic.responses.map((response, index) => (
                             <div
@@ -1317,7 +1309,7 @@ ${viewMode === "card" ? "min-h-[240px]" : "min-h-[120px]"}`}
                           </Button>
                         </div>
                       </div>
-                    </motion.div>
+                    </div>
                   )}
                 </>
               ) : (
@@ -1343,7 +1335,7 @@ ${viewMode === "card" ? "min-h-[240px]" : "min-h-[120px]"}`}
                   </div>
                 </div>
               )}
-            </motion.div>
+            </div>
           ))
         ) : (
           <div className="text-gray-500">No topics found.</div>
