@@ -1173,8 +1173,8 @@ ${viewMode === "card" ? "min-h-[240px]" : "min-h-[120px]"}`}
                   </div>
 
                   {/* Preview text with enhanced styling */}
-                  <div className="mt-4 text-sm text-gray-600 line-clamp-2 leading-relaxed bg-white/50 p-3 rounded-lg border border-lavender-100/50 hover:bg-white/80 transition-all duration-200">
-                    {topic.preview}
+                  <div className="mt-4 text-sm text-gray-600 leading-relaxed bg-white/50 p-3 rounded-lg border border-lavender-100/50 hover:bg-white/80 transition-all duration-200">
+                    <p className="md:line-clamp-2 line-clamp-none">{topic.preview}</p>
                   </div>
 
                   {/* Author info with enhanced styling */}
