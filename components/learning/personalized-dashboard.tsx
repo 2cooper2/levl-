@@ -69,7 +69,7 @@ export function PersonalizedDashboard() {
             style={{ width: "70%", height: "70%", transform: "translate(20%, 20%)" }}
           ></div>
           <div
-            className="absolute top-1/2 left-1/2 w-full h-full bg-gradient-radial from-blue-400/20 via-transparent to-transparent animate-pulse-slowest"
+            className="absolute top-1/2 left-1/2 w-full h-full bg-gradient-radial from-primary/20 via-transparent to-transparent animate-pulse-slowest"
             style={{ width: "80%", height: "80%", transform: "translate(-50%, -50%)" }}
           ></div>
         </div>
@@ -266,15 +266,15 @@ export function PersonalizedDashboard() {
           <div className="glass-card rounded-xl p-5 border border-slate-200/50 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
             <div className="flex items-center justify-between mb-3">
               <div className="text-sm font-medium text-gray-600">Hours Invested</div>
-              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center shadow-sm">
-                <Clock className="h-5 w-5 text-blue-600" />
+              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-lavender-100 to-lavender-50 flex items-center justify-center shadow-sm">
+                <Clock className="h-5 w-5 text-lavender-600" />
               </div>
             </div>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-bold gradient-text">24.5</span>
               <span className="text-sm text-gray-500">hours</span>
             </div>
-            <div className="text-xs text-blue-600 flex items-center mt-2 font-medium">
+            <div className="text-xs text-lavender-600 flex items-center mt-2 font-medium">
               <TrendingUp className="h-3 w-3 mr-1" />
               <span>+5.5 from last month</span>
             </div>

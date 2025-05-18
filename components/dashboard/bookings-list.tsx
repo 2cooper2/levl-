@@ -95,7 +95,7 @@ export function BookingsList({ status = "all", limit }: BookingsListProps) {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "upcoming":
-        return <Badge className="bg-blue-500">Upcoming</Badge>
+        return <Badge className="bg-lavender-500">Upcoming</Badge>
       case "pending":
         return (
           <Badge variant="outline" className="text-yellow-600 border-yellow-200 bg-yellow-50">

@@ -67,7 +67,7 @@ export function RecentActivity() {
     switch (type) {
       case "booking":
         return (
-          <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">
+          <Badge variant="outline" className="bg-lavender-50 text-lavender-600 border-lavender-200">
             Booking
           </Badge>
         )

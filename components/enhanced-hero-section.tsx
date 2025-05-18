@@ -871,18 +871,25 @@ animate-pulse"
 
             {/* Enhanced Skill Accelerator UI - Now below the hero content and more horizontal */}
             <motion.div
-              className="flex items-center justify-center w-full"
+              className="flex items-center justify-center w-full -mt-4"
               variants={fadeIn}
               initial="hidden"
               animate="visible"
               transition={{ delay: 0.3 }}
             >
-              <div className="relative w-full max-w-full">
+              <div className="relative w-full max-w-4xl mx-auto">
                 <motion.div
-                  className={`relative rounded-xl overflow-hidden bg-gradient-to-br from-white via-lavender-50/50 to-white backdrop-blur-md p-3 sm:p-4 md:p-6 shadow-xl border border-lavender-200/50 detailed-card hover:shadow-lavender-300/30 transition-all duration-300 ${isMobile ? "simple-card" : ""}`}
+                  className={`relative rounded-xl overflow-hidden bg-gradient-to-br from-lavender-50/95 via-white/90 to-lavender-100/90 backdrop-blur-md p-3 sm:p-4 md:p-6 transition-all duration-300 ${isMobile ? "simple-card" : ""}`}
                   style={{
                     border: "1px solid rgba(168, 85, 247, 0.15)",
-                    boxShadow: "0 10px 30px -5px rgba(168, 85, 247, 0.08), 0 0 10px -10px rgba(168, 85, 247, 0.15)",
+                    boxShadow:
+                      "0 25px 60px -15px rgba(0,0,0,0.3), 0 15px 30px -5px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.05)",
+                    borderTop: "1px solid rgba(168, 85, 247, 0.2)",
+                    borderLeft: "1px solid rgba(168, 85, 247, 0.2)",
+                    borderRight: "1px solid rgba(168, 85, 247, 0.2)",
+                    borderBottom: "2px solid rgba(168, 85, 247, 0.3)",
+                    transform: "translateY(0) translateZ(0) perspective(1000px)",
+                    filter: "drop-shadow(0 30px 40px rgba(0,0,0,0.2))",
                   }}
                   initial={{ opacity: 0, scale: 0.9, y: 20 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -892,6 +899,36 @@ animate-pulse"
                     delay: 0.4,
                   }}
                 >
+                  {/* Decorative elements with enhanced depth */}
+                  <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-lavender-400/15 to-transparent rounded-bl-full transform transition-transform duration-700 group-hover:scale-110"></div>
+                  <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-gradient-to-tr from-lavender-500/20 to-transparent rounded-tr-full transform transition-transform duration-700 group-hover:scale-110"></div>
+                  <div
+                    className="absolute inset-0 opacity-40 transition-opacity duration-500"
+                    style={{
+                      background: "radial-gradient(circle at 30% 20%, rgba(233,213,255,0.3) 1px, transparent 1px)",
+                      backgroundSize: "24px 24px",
+                      transform: "translateZ(10px)",
+                      perspective: "1000px",
+                    }}
+                  ></div>
+
+                  {/* Additional depth elements */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-lavender-100/30 mix-blend-overlay pointer-events-none"></div>
+                  <div
+                    className="absolute inset-0 bg-gradient-to-tr from-transparent via-lavender-50/20 to-transparent pointer-events-none"
+                    style={{ transform: "translateZ(5px)" }}
+                  ></div>
+                  <div className="absolute -inset-0.5 bg-gradient-to-br from-lavender-200/20 via-transparent to-lavender-100/20 opacity-50 blur-sm pointer-events-none"></div>
+
+                  {/* Enhanced animated accent line */}
+                  <div
+                    className="absolute h-[3px] w-2/5 bg-gradient-to-r from-transparent via-lavender-400/70 to-transparent top-0 left-0 animate-shimmer"
+                    style={{ filter: "drop-shadow(0 1px 2px rgba(168, 85, 247, 0.3))" }}
+                  ></div>
+
+                  {/* Additional decorative elements */}
+                  <div className="absolute bottom-0 right-0 w-24 h-24 bg-gradient-to-tl from-lavender-300/5 to-transparent rounded-tl-full"></div>
+                  <div className="absolute top-1/2 left-0 w-12 h-24 bg-gradient-to-r from-lavender-400/5 to-transparent"></div>
                   {/* Improved tech pattern overlay with subtle animation */}
                   <motion.div
                     className="tech-pattern absolute inset-0 bg-[radial-gradient(circle_at_10px_10px,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none z-1"

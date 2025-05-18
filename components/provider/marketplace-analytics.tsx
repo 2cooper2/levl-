@@ -95,15 +95,15 @@ export function MarketplaceAnalytics() {
         <div className="bg-white rounded-lg p-4 border border-lavender-100">
           <div className="flex items-center justify-between mb-2">
             <div className="text-sm text-gray-500">Completed Jobs</div>
-            <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-              <CheckCircle className="h-4 w-4 text-blue-600" />
+            <div className="h-8 w-8 rounded-full bg-lavender-100 flex items-center justify-center">
+              <CheckCircle className="h-4 w-4 text-lavender-600" />
             </div>
           </div>
           <div className="flex items-baseline gap-1">
             <span className="text-2xl font-bold">18</span>
             <span className="text-sm text-gray-500">jobs</span>
           </div>
-          <div className="text-xs text-blue-600 flex items-center mt-1">
+          <div className="text-xs text-lavender-600 flex items-center mt-1">
             <TrendingUp className="h-3 w-3 mr-1" />
             <span>+4 from last month</span>
           </div>

@@ -15,7 +15,6 @@ import {
   PlusCircle,
   Sparkles,
   Target,
-  Shield,
   WrenchIcon as ScrewDriver,
   Hammer,
   Layers,
@@ -23,6 +22,10 @@ import {
   Eye,
   ArrowRight,
   CheckCircle,
+  Truck,
+  Droplet,
+  Scissors,
+  PaintBucket,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 
@@ -30,74 +33,262 @@ import { useRouter } from "next/navigation"
 const forumTopics = [
   {
     id: 1,
-    title: "Best drill for mounting?",
-    author: "ToolLover",
+    title: "Best mold-resistant paint brands for bathrooms?",
+    author: "PaintPro",
     replies: 12,
     likes: 25,
     lastActive: "1 day ago",
-    tags: ["mounting", "tools", "drilling"],
-    preview: "I'm looking for a reliable drill for mounting shelves and TVs. Any recommendations?",
+    tags: ["painting", "bathroom", "supplies"],
+    preview:
+      "Looking for recommendations on high-quality mold-resistant paint for bathroom walls. Which brands have worked best for you in high-humidity environments?",
     responses: [
       {
-        author: "HandyMan",
+        author: "InteriorDesigner",
         time: "1 day ago",
-        content: "I recommend the Dewalt DCD791D2. It's powerful and versatile.",
+        content:
+          "Benjamin Moore's Aura Bath & Spa is my go-to. It has excellent mold resistance and the matte finish hides wall imperfections while still being washable.",
         likes: 5,
       },
       {
-        author: "DrillMaster",
+        author: "DIYPainter",
         time: "1 day ago",
-        content: "I prefer the Milwaukee M18. It's a bit more expensive, but it's worth it.",
+        content:
+          "Sherwin-Williams Emerald with added antimicrobial agents has been fantastic in my experience. Worth the higher price for its durability in humid conditions.",
         likes: 3,
       },
     ],
   },
   {
     id: 2,
-    title: "How to find studs in a wall?",
-    author: "DIYNewbie",
+    title: "Tips for assembling IKEA furniture efficiently?",
+    author: "FurnitureNewbie",
     replies: 8,
     likes: 15,
     lastActive: "3 days ago",
-    tags: ["studs", "walls", "mounting"],
-    preview: "What's the best way to locate studs behind drywall?",
+    tags: ["assembly", "furniture", "tools"],
+    preview:
+      "Just bought several IKEA pieces for my new apartment. Any tips for assembling them quickly and correctly? Tools I should have on hand?",
     responses: [
       {
-        author: "WallExpert",
+        author: "AssemblyExpert",
         time: "3 days ago",
         content:
-          "A stud finder is the easiest way. You can also try tapping on the wall and listening for a solid sound.",
+          "Get a quality electric screwdriver with multiple bits - it's a game changer. Sort all hardware by type before starting, and always build drawers last.",
         likes: 7,
       },
       {
-        author: "DIYPro",
+        author: "DIYEnthusiast",
         time: "3 days ago",
-        content: "Don't forget to check for electrical wires before drilling!",
+        content:
+          "Follow the instructions in order! And use a rubber mallet instead of a hammer to avoid damaging the pieces. Also, those little IKEA wrenches are terrible - use your own tools.",
         likes: 2,
       },
     ],
   },
   {
     id: 3,
-    title: "Best way to hide cables?",
-    author: "CableGuy",
+    title: "Best packing materials for fragile items?",
+    author: "CarefulPacker",
     replies: 5,
     likes: 10,
     lastActive: "1 week ago",
-    tags: ["cables", "tv", "mounting"],
-    preview: "What are some creative ways to hide TV cables after mounting?",
+    tags: ["moving", "packing", "fragile"],
+    preview:
+      "I have several valuable glass and ceramic items to pack for an upcoming move. What packing materials provide the best protection beyond basic bubble wrap?",
     responses: [
       {
-        author: "HomeTheaterPro",
+        author: "MoveCoordinator",
         time: "1 week ago",
-        content: "You can use cable sleeves or in-wall cable management kits.",
+        content:
+          "Dish packing kits with cell dividers are excellent for glassware. For odd-shaped items, expandable foam bags that conform to the shape are worth the investment.",
         likes: 4,
       },
       {
-        author: "TechGuru",
+        author: "AntiquesCollector",
         time: "1 week ago",
-        content: "Consider using a power bridge to safely run cables behind the wall.",
+        content:
+          "I double-box my valuable items with foam inserts between boxes. Also, microfiber cloths work better than newspaper as they don't leave print residue.",
         likes: 1,
+      },
+    ],
+  },
+  {
+    id: 4,
+    title: "Best anchors for hanging heavy mirrors on drywall?",
+    author: "DecorLover",
+    replies: 4,
+    likes: 6,
+    lastActive: "5 days ago",
+    tags: ["mounting", "hardware", "drywall"],
+    preview:
+      "I have a 40-pound decorative mirror to hang on drywall. What anchors would you recommend that won't fail over time? Studs aren't in the right position.",
+    responses: [
+      {
+        author: "HardwareSpecialist",
+        time: "5 days ago",
+        content:
+          "Toggle bolts are your best option for heavy items on drywall. The TOGGLER SnapSkru has a 65lb rating per anchor - I'd use at least two for your mirror.",
+        likes: 3,
+      },
+    ],
+  },
+  {
+    id: 5,
+    title: "Most effective cleaning solution for shower glass?",
+    author: "CleanFreak",
+    replies: 7,
+    likes: 12,
+    lastActive: "2 days ago",
+    tags: ["cleaning", "bathroom", "glass"],
+    preview:
+      "My shower glass gets cloudy with hard water stains no matter what I try. What cleaning products or DIY solutions actually work for stubborn mineral buildup?",
+    responses: [
+      {
+        author: "CleaningPro",
+        time: "2 days ago",
+        content:
+          "Equal parts white vinegar and Dawn dish soap, heated slightly and sprayed on. Let sit for 30 minutes, then scrub with a non-scratch sponge. Follow with a squeegee after each shower.",
+        likes: 5,
+      },
+    ],
+  },
+  {
+    id: 6,
+    title: "Tools needed for basic plumbing repairs?",
+    author: "DIYPlumber",
+    replies: 9,
+    likes: 18,
+    lastActive: "1 day ago",
+    tags: ["plumbing", "tools", "repairs"],
+    preview:
+      "Want to handle simple plumbing issues myself. What's a good starter tool kit for tasks like fixing leaky faucets, unclogging drains, and replacing p-traps?",
+    responses: [
+      {
+        author: "PlumbingExpert",
+        time: "1 day ago",
+        content:
+          "Must-haves: adjustable wrench, pipe wrench, basin wrench, plunger, drain snake, plumber's tape, and a good set of screwdrivers. Add channel locks and a hacksaw for plastic pipes.",
+        likes: 7,
+      },
+    ],
+  },
+  {
+    id: 7,
+    title: "Best technique for painting clean edges without tape?",
+    author: "PaintingNewbie",
+    replies: 15,
+    likes: 22,
+    lastActive: "3 days ago",
+    tags: ["painting", "techniques", "edges"],
+    preview:
+      "I'm tired of paint bleeding under tape. Are there techniques for cutting in edges freehand with professional results? What brush works best for this?",
+    responses: [
+      {
+        author: "PaintContractor",
+        time: "3 days ago",
+        content:
+          'Use a 2-2.5" angled sash brush with quality bristles. Hold it like a pencil, load only the first 1/3 of bristles, and pull the brush along the edge with steady pressure. Practice makes perfect!',
+        likes: 12,
+      },
+    ],
+  },
+  {
+    id: 8,
+    title: "Best drill bits for concrete walls?",
+    author: "DIYMounter",
+    replies: 6,
+    likes: 9,
+    lastActive: "4 days ago",
+    tags: ["drilling", "concrete", "tools"],
+    preview:
+      "Need to mount several items on concrete walls. Regular bits aren't working. What type of drill bits should I use, and do I need a hammer drill or will my regular drill work?",
+    responses: [
+      {
+        author: "ContractorPro",
+        time: "4 days ago",
+        content:
+          "You need carbide-tipped masonry bits and ideally a hammer drill. For occasional use, Bosch Multipurpose bits work well. For many holes, invest in a rotary hammer drill - your arms will thank you.",
+        likes: 4,
+      },
+    ],
+  },
+  {
+    id: 9,
+    title: "How to properly measure for furniture before buying?",
+    author: "SpacePlanner",
+    replies: 11,
+    likes: 17,
+    lastActive: "2 days ago",
+    tags: ["furniture", "measuring", "planning"],
+    preview:
+      "I've made mistakes buying furniture that didn't fit my space well. What's the best approach to measuring rooms and planning furniture layout before purchasing?",
+    responses: [
+      {
+        author: "InteriorDesigner",
+        time: "2 days ago",
+        content:
+          "Create a floor plan with all measurements, including windows, doors, and their swing paths. Account for walking paths (min 30\"). Use painter's tape on the floor to visualize size. Don't forget to measure doorways for delivery!",
+        likes: 8,
+      },
+    ],
+  },
+  {
+    id: 10,
+    title: "In-wall cable management solutions for mounted TVs?",
+    author: "CableHater",
+    replies: 8,
+    likes: 14,
+    lastActive: "6 days ago",
+    tags: ["mounting", "cables", "organization"],
+    preview:
+      "What are the best products for running TV cables through walls? Looking for something that's code-compliant and relatively easy to install for a DIYer.",
+    responses: [
+      {
+        author: "AVInstaller",
+        time: "6 days ago",
+        content:
+          "Legrand's in-wall power and cable management kits are excellent and code-compliant. They include everything you need and are fairly straightforward to install if you're comfortable cutting drywall.",
+        likes: 6,
+      },
+    ],
+  },
+  {
+    id: 11,
+    title: "Best grass seed for shady areas?",
+    author: "GreenThumb",
+    replies: 7,
+    likes: 11,
+    lastActive: "5 days ago",
+    tags: ["landscaping", "lawn", "shade"],
+    preview:
+      "Part of my yard gets only 2-3 hours of direct sunlight. Regular grass seed isn't thriving there. What varieties work best in shady conditions in the Northeast?",
+    responses: [
+      {
+        author: "LandscaperPro",
+        time: "5 days ago",
+        content:
+          "Fine fescues are your best bet for shade. Look for a mix with Creeping Red Fescue, Chewings Fescue, and Hard Fescue. Jonathan Green's Shady Nooks blend has worked well for my clients.",
+        likes: 6,
+      },
+    ],
+  },
+  {
+    id: 12,
+    title: "Space-saving home office organization ideas?",
+    author: "WFHWarrior",
+    replies: 10,
+    likes: 19,
+    lastActive: "3 days ago",
+    tags: ["organization", "home-office", "small-space"],
+    preview:
+      "My home office is tiny (8x8 ft). Looking for creative storage and organization solutions that maximize the limited space while keeping everything accessible.",
+    responses: [
+      {
+        author: "OrganizationConsultant",
+        time: "3 days ago",
+        content:
+          "Wall-mounted monitor arms free up desk space. Use vertical storage with floating shelves. A pegboard system for frequently used items keeps them accessible without cluttering your desk.",
+        likes: 7,
       },
     ],
   },
@@ -173,34 +364,40 @@ export function ForumTab() {
       // Simulate loading more topics
       const newTopics = [
         {
-          id: 4,
-          title: "How to choose the right drill bit for mounting?",
-          author: "DrillMaster",
-          replies: 4,
-          likes: 6,
-          lastActive: "5 days ago",
-          tags: ["mounting", "tools", "drilling"],
-          preview: "What type of drill bit should I use for different wall materials?",
+          id: topics.length + 1,
+          title: "Recommended power tools for a beginner DIYer?",
+          author: "ToolNewbie",
+          replies: 8,
+          likes: 14,
+          lastActive: "6 days ago",
+          tags: ["tools", "beginner", "recommendations"],
+          preview:
+            "Setting up my first home workshop. What are the essential power tools I should invest in first? Looking for quality but budget-friendly options.",
           responses: [],
         },
         {
-          id: 5,
-          title: "Best anchors for heavy items?",
-          author: "WallMountPro",
+          id: topics.length + 2,
+          title: "Best way to remove old wallpaper without damaging walls?",
+          author: "RenovationRookie",
+          replies: 11,
+          likes: 19,
+          lastActive: "3 days ago",
+          tags: ["wallpaper", "removal", "walls"],
+          preview:
+            "Bought a house with outdated wallpaper in several rooms. What's the most effective method to remove it without damaging the drywall underneath?",
+          responses: [],
+        },
+        {
+          id: topics.length + 3,
+          title: "Recommendations for cordless vacuum for pet hair?",
+          author: "DogOwner",
           replies: 7,
-          likes: 12,
-          lastActive: "2 days ago",
-          tags: ["mounting", "anchors", "heavy-duty"],
-          preview: "I need to hang a 50lb mirror. What anchors should I use for drywall?",
-          responses: [
-            {
-              author: "HardwareExpert",
-              time: "2 days ago",
-              content:
-                "Toggle bolts are your best bet for heavy items on drywall. They can hold up to 100lbs when installed correctly.",
-              likes: 5,
-            },
-          ],
+          likes: 16,
+          lastActive: "4 days ago",
+          tags: ["cleaning", "vacuum", "pets"],
+          preview:
+            "Have two shedding dogs and hardwood floors with area rugs. Need a powerful cordless vacuum specifically good for pet hair. Budget around $300.",
+          responses: [],
         },
       ]
       setTopics([...topics, ...newTopics])
@@ -349,9 +546,12 @@ export function ForumTab() {
   const categories = [
     { id: "all", name: "All Topics", icon: <Layers className="h-3.5 w-3.5" /> },
     { id: "mounting", name: "Mounting", icon: <Hammer className="h-3.5 w-3.5" /> },
+    { id: "painting", name: "Painting", icon: <PaintBucket className="h-3.5 w-3.5" /> },
     { id: "tools", name: "Tools", icon: <ScrewDriver className="h-3.5 w-3.5" /> },
-    { id: "drilling", name: "Drilling", icon: <Target className="h-3.5 w-3.5" /> },
-    { id: "anchors", name: "Anchors", icon: <Shield className="h-3.5 w-3.5" /> },
+    { id: "furniture", name: "Furniture", icon: <Truck className="h-3.5 w-3.5" /> },
+    { id: "cleaning", name: "Cleaning", icon: <Sparkles className="h-3.5 w-3.5" /> },
+    { id: "plumbing", name: "Plumbing", icon: <Droplet className="h-3.5 w-3.5" /> },
+    { id: "landscaping", name: "Landscaping", icon: <Scissors className="h-3.5 w-3.5" /> },
   ]
 
   const allTags = Array.from(new Set(topics.flatMap((topic) => topic.tags)))
@@ -551,10 +751,11 @@ export function ForumTab() {
         <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-lavender-400/10 to-transparent rounded-bl-full transform transition-transform duration-700 group-hover:scale-110"></div>
         <div className="absolute -bottom-8 -left-8 w-40 h-40 bg-gradient-to-tr from-lavender-500/15 to-transparent rounded-tr-full transform transition-transform duration-700 group-hover:scale-110"></div>
         <div
-          className="absolute inset-0 opacity-30 transition-opacity duration-500"
+          className="absolute inset-0 opacity-40 transition-opacity duration-500 group-hover:opacity-60"
           style={{
-            background: "radial-gradient(circle at 30% 20%, rgba(233,213,255,0.2) 1px, transparent 1px)",
-            backgroundSize: "20px 20px",
+            background:
+              "radial-gradient(circle at 30% 20%, rgba(233,213,255,0.3) 1px, transparent 1px), radial-gradient(circle at 70% 60%, rgba(233,213,255,0.25) 1px, transparent 1px)",
+            backgroundSize: "20px 20px, 25px 25px",
           }}
         ></div>
 
@@ -577,9 +778,32 @@ export function ForumTab() {
               value={searchQuery}
               onChange={handleSearch}
             />
-            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none opacity-0 transition-opacity duration-200">
-              <span className="text-xs text-gray-400">Press / to search</span>
-            </div>
+            <motion.div
+              className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: searchQuery ? 1 : 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <button
+                className="h-5 w-5 bg-lavender-100 rounded-full flex items-center justify-center text-lavender-500 hover:bg-lavender-200 transition-colors"
+                onClick={() => setSearchQuery("")}
+              >
+                <span className="sr-only">Clear search</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M18 6L6 18M6 6l12 12"></path>
+                </svg>
+              </button>
+            </motion.div>
           </div>
           <button
             className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-lavender-300 to-lavender-500 text-white rounded-lg font-medium text-sm transition-all duration-200 shadow-lavender-400/20"
@@ -592,18 +816,20 @@ export function ForumTab() {
 
         {/* Forum categories */}
         <div className="flex flex-wrap gap-2 mb-2 relative z-10">
-          {["All Topics", "Announcements", "Discussions", "Questions", "Resources", "Events"].map((category) => (
-            <button
-              key={category}
-              className={`px-3 py-1.5 text-xs rounded-full transition-all duration-200 ${
-                category === "All Topics"
-                  ? "bg-lavender-100/80 text-lavender-700 font-medium border-2 border-lavender-300/40"
-                  : "bg-lavender-50 text-gray-600 border border-lavender-200/50"
-              }`}
-            >
-              {category}
-            </button>
-          ))}
+          {["All Topics", "Recommendations", "How-To", "Tips & Tricks", "Product Reviews", "DIY Projects"].map(
+            (category) => (
+              <button
+                key={category}
+                className={`px-3 py-1.5 text-xs rounded-full transition-all duration-200 ${
+                  category === "All Topics"
+                    ? "bg-lavender-100/80 text-lavender-700 font-medium border-2 border-lavender-300/40"
+                    : "bg-lavender-50 text-gray-600 border border-lavender-200/50"
+                }`}
+              >
+                {category}
+              </button>
+            ),
+          )}
         </div>
 
         {/* Sort options */}
@@ -703,16 +929,16 @@ export function ForumTab() {
       </AnimatePresence>
 
       {/* Category tabs - Enhanced with Levl UI/UX */}
-      <div className="flex overflow-x-auto pb-1 -mx-1 px-1 hide-scrollbar space-x-1 mb-1 relative">
-        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-lavender-400/20 to-transparent"></div>
+      <div className="flex overflow-x-auto pb-2 -mx-1 px-1 hide-scrollbar space-x-2 mb-2 relative">
+        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-lavender-400/30 to-transparent"></div>
 
         {categories.map((category) => (
           <motion.button
             key={category.id}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 flex items-center relative ${
+            className={`px-3.5 py-2 rounded-full text-xs font-medium transition-all duration-300 flex items-center relative ${
               activeCategory === category.id
                 ? "bg-gradient-to-r from-lavender-400 to-lavender-600 text-white shadow-lg shadow-lavender-400/20"
-                : "bg-white/80 text-gray-700 hover:bg-lavender-50 border border-lavender-200/70"
+                : "bg-white/90 text-gray-700 hover:bg-lavender-50 border border-lavender-200/70"
             }`}
             onClick={() => setActiveCategory(category.id)}
             whileHover={{ scale: 1.05, y: -1 }}
@@ -783,10 +1009,22 @@ export function ForumTab() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
           {[
-            { title: "Best power drill for mounting TVs", views: 342, hot: true, time: "3h ago", replies: 18 },
-            { title: "How to find studs without a stud finder", views: 289, hot: false, time: "5h ago", replies: 12 },
-            { title: "Wall anchors vs. toggle bolts comparison", views: 215, hot: false, time: "1d ago", replies: 9 },
-            { title: "Mounting a TV on drywall safely", views: 198, hot: true, time: "2d ago", replies: 14 },
+            {
+              title: "Best drill bits for different wall materials",
+              views: 342,
+              hot: true,
+              time: "3h ago",
+              replies: 18,
+            },
+            {
+              title: "Top-rated paint brands for bathroom humidity",
+              views: 289,
+              hot: false,
+              time: "5h ago",
+              replies: 12,
+            },
+            { title: "Cable management solutions for mounted TVs", views: 215, hot: false, time: "1d ago", replies: 9 },
+            { title: "Most durable anchors for heavy mirrors", views: 198, hot: true, time: "2d ago", replies: 14 },
           ].map((topic, i) => (
             <motion.div
               key={i}
@@ -843,7 +1081,7 @@ export function ForumTab() {
       </div>
 
       {/* Topics list */}
-      <div className="space-y-3 mb-6">
+      <div className="space-y-4 mb-8">
         {filteredTopics.length > 0 ? (
           filteredTopics.map((topic) => (
             <motion.div
@@ -898,7 +1136,7 @@ ${viewMode === "card" ? "min-h-[240px]" : "min-h-[120px]"}`}
               {viewMode === "card" ? (
                 <>
                   <div className="flex justify-between items-start pr-8">
-                    <div>
+                    <div className="flex-1">
                       <div className="flex items-center">
                         <div className="text-base font-medium text-gray-800 group-hover:text-lavender-700 transition-colors duration-200">
                           {topic.title}
@@ -913,7 +1151,7 @@ ${viewMode === "card" ? "min-h-[240px]" : "min-h-[120px]"}`}
                         {topic.tags.map((tag) => (
                           <div
                             key={tag}
-                            className="px-2.5 py-0.5 rounded-full bg-white/80 text-xs flex items-center text-lavender-700 font-medium border border-lavender-200/70 shadow-sm"
+                            className="px-2.5 py-0.5 rounded-full bg-white/80 text-xs flex items-center text-lavender-700 font-medium border border-lavender-200/70 shadow-sm hover:bg-lavender-50 hover:border-lavender-300/70 transition-all duration-200"
                           >
                             <span className="h-1.5 w-1.5 rounded-full bg-lavender-400 mr-1.5"></span>
                             {tag}
@@ -937,7 +1175,7 @@ ${viewMode === "card" ? "min-h-[240px]" : "min-h-[120px]"}`}
                   </div>
 
                   {/* Preview text with enhanced styling */}
-                  <div className="mt-4 text-sm text-gray-600 line-clamp-2 leading-relaxed bg-white/50 p-3 rounded-lg border border-lavender-100/50">
+                  <div className="mt-4 text-sm text-gray-600 line-clamp-2 leading-relaxed bg-white/50 p-3 rounded-lg border border-lavender-100/50 hover:bg-white/80 transition-all duration-200">
                     {topic.preview}
                   </div>
 
@@ -1004,78 +1242,78 @@ ${viewMode === "card" ? "min-h-[240px]" : "min-h-[120px]"}`}
                           topic.responses.map((response, index) => (
                             <div
                               key={index}
-                              className="bg-white/70 rounded-lg p-4 border border-lavender-200/50 min-h-[120px] shadow-sm hover:shadow-md transition-all duration-200 hover:bg-white"
+                              className="bg-white/80 rounded-lg p-4 shadow-sm border border-lavender-100/50"
                             >
-                              <div className="flex items-start gap-3">
-                                <div className="h-8 w-8 rounded-full bg-gradient-to-r from-lavender-200 to-lavender-300 flex items-center justify-center text-xs font-bold text-white border border-lavender-200/30 shadow-sm">
-                                  {response.author.charAt(0)}
-                                </div>
-                                <div className="flex-1">
-                                  <div className="flex items-center justify-between">
-                                    <div className="flex items-center">
-                                      <span className="text-sm font-medium text-gray-700">{response.author}</span>
-                                      <span className="mx-2 text-xs text-gray-400">•</span>
-                                      <span className="text-xs text-gray-500">{response.time}</span>
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <div className="flex items-center">
+                                    <div className="h-7 w-7 rounded-full bg-gradient-to-r from-lavender-300 to-lavender-400 flex items-center justify-center text-sm font-bold text-white border border-lavender-200/50 shadow-md mr-2">
+                                      {response.author.charAt(0)}
                                     </div>
-                                    <div className="flex items-center gap-1">
-                                      <button
-                                        className="p-1.5 rounded-full hover:bg-lavender-100/50 transition-colors"
-                                        onClick={(e) => {
-                                          e.stopPropagation()
-                                          handleVote(topic.id, index, "up")
-                                        }}
-                                      >
-                                        <ThumbsUp
-                                          className={`h-3.5 w-3.5 ${
-                                            userVotes[`${topic.id}-${index}`]?.up
-                                              ? "text-lavender-500 fill-lavender-500"
-                                              : "text-gray-400"
-                                          }`}
-                                        />
-                                      </button>
-                                      <span className="text-xs font-medium text-gray-600">{response.likes}</span>
-                                    </div>
+                                    <span className="text-sm font-medium text-gray-700">{response.author}</span>
                                   </div>
-                                  <p className="text-sm text-gray-600 mt-2 bg-lavender-50/50 p-3 rounded-lg border border-lavender-100/30">
-                                    {response.content}
-                                  </p>
+                                  <div className="text-xs text-gray-500 mt-1">{response.time}</div>
+                                  <div className="mt-2 text-gray-600">{response.content}</div>
+                                </div>
+                                <div className="flex items-center">
+                                  <motion.button
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    className={`flex items-center px-2 py-1 rounded-full transition-colors duration-200 ${
+                                      userVotes[`${topic.id}-${index}`]?.up
+                                        ? "bg-lavender-100 text-lavender-700"
+                                        : "bg-white/70 text-gray-600 hover:bg-lavender-50"
+                                    }`}
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      handleVote(topic.id, index, "up")
+                                    }}
+                                  >
+                                    <ThumbsUp className="h-3 w-3 mr-1" />
+                                    <span>{response.likes}</span>
+                                  </motion.button>
+                                  <motion.button
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    className={`ml-2 flex items-center px-2 py-1 rounded-full transition-colors duration-200 ${
+                                      userVotes[`${topic.id}-${index}`]?.down
+                                        ? "bg-red-100 text-red-700"
+                                        : "bg-white/70 text-gray-600 hover:bg-red-50"
+                                    }`}
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      handleVote(topic.id, index, "down")
+                                    }}
+                                  >
+                                    <ThumbsUp className="h-3 w-3 mr-1 transform rotate-180" />
+                                  </motion.button>
                                 </div>
                               </div>
                             </div>
                           ))
                         ) : (
-                          <div className="text-center py-6 text-sm text-gray-500 bg-white/50 rounded-lg border border-lavender-200/30">
-                            <MessageSquare className="h-5 w-5 mx-auto mb-2 text-lavender-300" />
-                            <p>No responses yet. Be the first to reply!</p>
-                          </div>
+                          <div className="text-gray-500">No responses yet. Be the first to reply!</div>
                         )}
                       </div>
 
-                      {/* Reply form with enhanced styling */}
-                      <div className="mt-5 flex gap-3">
-                        <div className="h-9 w-9 rounded-full bg-gradient-to-r from-lavender-300 to-lavender-400 flex items-center justify-center text-sm font-bold text-white border border-lavender-200/50 shadow-md">
-                          Y
-                        </div>
-                        <div className="flex-1 relative">
-                          <textarea
-                            placeholder="Write a reply..."
-                            className="w-full h-36 px-4 py-3 text-sm bg-white rounded-lg border border-lavender-200/70 focus:border-lavender-400/60 focus:ring-2 focus:ring-lavender-300/30 outline-none transition-colors resize-none shadow-sm"
-                            value={replyContent}
-                            onChange={(e) => setReplyContent(e.target.value)}
-                            onClick={(e) => e.stopPropagation()}
-                          />
+                      {/* Reply input */}
+                      <div className="mt-5">
+                        <textarea
+                          placeholder="Write your reply..."
+                          className="w-full h-20 px-3 py-2 text-sm bg-white/5 dark:bg-black/20 rounded-md border border-white/10 focus:border-lavender-500/50 focus:ring-1 focus:ring-lavender-400/30 outline-none transition-colors resize-none text-gray-800"
+                          value={replyContent}
+                          onChange={(e) => setReplyContent(e.target.value)}
+                        />
+                        <div className="flex justify-end mt-2">
                           <Button
                             variant="default"
                             size="sm"
-                            className="absolute bottom-3 right-3 gap-1 text-xs bg-gradient-to-r from-lavender-400 to-lavender-500 hover:from-lavender-500 hover:to-lavender-600 text-white shadow-md hover:shadow-lg transition-all duration-200"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleReply(topic.id)
-                            }}
+                            className="gap-1 text-xs bg-gradient-to-r from-lavender-300 to-lavender-500 hover:from-lavender-400 hover:to-lavender-600 text-white"
+                            onClick={() => handleReply(topic.id)}
                             disabled={!replyContent.trim()}
                           >
                             <MessageSquare className="h-3.5 w-3.5" />
-                            Reply
+                            Post Reply
                           </Button>
                         </div>
                       </div>
@@ -1083,29 +1321,24 @@ ${viewMode === "card" ? "min-h-[240px]" : "min-h-[120px]"}`}
                   )}
                 </>
               ) : (
-                // Compact view with enhanced styling
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="h-9 w-9 rounded-full bg-gradient-to-r from-lavender-300 to-lavender-400 flex items-center justify-center text-sm font-bold text-white border border-lavender-200/50 shadow-md">
-                      {topic.author.charAt(0)}
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="text-base font-medium text-gray-800 group-hover:text-lavender-700 transition-colors duration-200">
+                      {topic.title}
                     </div>
-                    <div className="min-w-0">
-                      <div className="text-sm font-medium text-gray-800 truncate">{topic.title}</div>
-                      <div className="flex items-center text-xs text-gray-500">
-                        <span className="font-medium">{topic.author}</span>
-                        <span className="mx-1.5">•</span>
-                        <span>{topic.lastActive}</span>
-                      </div>
-                    </div>
+                    <div className="text-sm text-gray-600 line-clamp-1">{topic.preview}</div>
                   </div>
-                  <div className="flex items-center gap-3 ml-2">
-                    <div className="flex items-center px-2 py-1 rounded-full bg-white/70 border border-lavender-200/50 shadow-sm">
-                      <MessageSquare className="h-3 w-3 mr-1 text-lavender-500" />
-                      <span className="text-xs text-gray-700 font-medium">{topic.replies}</span>
-                    </div>
-                    <div className="flex items-center px-2 py-1 rounded-full bg-white/70 border border-lavender-200/50 shadow-sm">
-                      <ThumbsUp className="h-3 w-3 mr-1 text-lavender-500" />
-                      <span className="text-xs text-gray-700 font-medium">{topic.likes}</span>
+                  <div className="text-right text-xs">
+                    <div className="text-gray-500 font-medium">{topic.lastActive}</div>
+                    <div className="flex items-center justify-end mt-1.5 space-x-3">
+                      <div className="flex items-center px-2 py-1 rounded-full bg-white/70 border border-lavender-200/50 shadow-sm">
+                        <MessageSquare className="h-3 w-3 mr-1 text-lavender-500" />
+                        <span className="text-gray-700 font-medium">{topic.replies}</span>
+                      </div>
+                      <div className="flex items-center px-2 py-1 rounded-full bg-white/70 border border-lavender-200/50 shadow-sm">
+                        <ThumbsUp className="h-3 w-3 mr-1 text-lavender-500" />
+                        <span className="text-gray-700 font-medium">{topic.likes}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1113,74 +1346,17 @@ ${viewMode === "card" ? "min-h-[240px]" : "min-h-[120px]"}`}
             </motion.div>
           ))
         ) : (
-          <div className="flex flex-col p-6 rounded-xl border bg-card text-card-foreground transition-all group relative overflow-visible bg-gradient-to-br from-lavender-50/95 via-white/90 to-lavender-100/90 backdrop-blur-sm shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25),0_10px_20px_-5px_rgba(0,0,0,0.2),0_0_0_1px_rgba(0,0,0,0.05)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 transform translate-y-0 translateZ-0 filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.15)] text-center">
-            <MessageSquare className="h-8 w-8 mx-auto mb-2 text-lavender-500/50" />
-            <h3 className="text-sm font-medium text-gray-800 mb-1">No topics found</h3>
-            <p className="text-xs text-gray-500 mb-3">
-              {searchQuery ? "Try adjusting your search or filters" : "Be the first to start a discussion"}
-            </p>
-            <Button
-              variant="default"
-              size="sm"
-              className="mx-auto gap-1 text-xs bg-gradient-to-r from-lavender-300 to-lavender-500 hover:from-lavender-400 hover:to-lavender-600 text-white"
-              onClick={() => setShowNewTopicForm(true)}
-            >
-              <MessageSquare className="h-3.5 w-3.5" />
-              Create New Topic
+          <div className="text-gray-500">No topics found.</div>
+        )}
+        {isLoading && <div className="text-center">Loading more topics...</div>}
+        {!isLoading && filteredTopics.length > 0 && (
+          <div className="text-center">
+            <Button variant="outline" onClick={loadMoreTopics}>
+              Load More Topics
             </Button>
           </div>
         )}
-
-        {/* Load more button */}
-        {filteredTopics.length > 0 && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="mt-4">
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full relative overflow-hidden group border-white/10 text-gray-600 hover:text-gray-800 py-3"
-              onClick={loadMoreTopics}
-              disabled={isLoading}
-            >
-              {/* Animated gradient background on hover */}
-              <div className="absolute inset-0 w-full bg-gradient-to-r from-lavender-400/0 via-lavender-400/20 to-lavender-400/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-
-              {isLoading ? (
-                <span className="flex items-center">
-                  <svg
-                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-lavender-500"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Loading more topics...
-                </span>
-              ) : (
-                <span className="flex items-center">
-                  <ArrowRight className="mr-2 h-4 w-4 text-lavender-500" />
-                  Load More Topics
-                </span>
-              )}
-            </Button>
-          </motion.div>
-        )}
       </div>
-
-      {/* Footer spacer */}
-      <div className="h-12"></div>
     </div>
   )
 }

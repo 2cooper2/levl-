@@ -97,7 +97,7 @@ export function SkillChallenges() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="bg-white rounded-lg p-4 border border-lavender-100 hover:border-primary/40 transition-all">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="px-2 py-0.5 bg-blue-100 rounded-full text-xs font-medium text-blue-600">
+                  <div className="px-2 py-0.5 bg-lavender-100 rounded-full text-xs font-medium text-lavender-600">
                     Intermediate
                   </div>
                   <div className="px-2 py-0.5 bg-green-100 rounded-full text-xs font-medium text-green-600 flex items-center">
@@ -206,7 +206,7 @@ export function SkillChallenges() {
                           challenge.difficulty === "Advanced"
                             ? "bg-red-100 text-red-600"
                             : challenge.difficulty === "Intermediate"
-                              ? "bg-blue-100 text-blue-600"
+                              ? "bg-lavender-100 text-lavender-600"
                               : "bg-purple-100 text-purple-600"
                         }`}
                       >
@@ -290,7 +290,7 @@ export function SkillChallenges() {
                           challenge.difficulty === "Advanced"
                             ? "bg-red-100 text-red-600"
                             : challenge.difficulty === "Intermediate"
-                              ? "bg-blue-100 text-blue-600"
+                              ? "bg-lavender-100 text-lavender-600"
                               : "bg-purple-100 text-purple-600"
                         }`}
                       >
@@ -369,7 +369,7 @@ export function SkillChallenges() {
                           challenge.difficulty === "Advanced"
                             ? "bg-red-100 text-red-600"
                             : challenge.difficulty === "Intermediate"
-                              ? "bg-blue-100 text-blue-600"
+                              ? "bg-lavender-100 text-lavender-600"
                               : "bg-purple-100 text-purple-600"
                         }`}
                       >
