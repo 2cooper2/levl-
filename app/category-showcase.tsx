@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Code, Palette, Briefcase, Lightbulb, Camera, Wrench, Home, Laptop, BookOpen, Music } from "lucide-react"
+import { Code2, Palette, LineChart, Megaphone, Camera, Wrench, Sofa, Globe, GraduationCap, Music } from "lucide-react"
 import { EnhancedCategoryCard } from "@/components/enhanced-category-card"
 import { CategoryScrollContainer } from "@/components/category-scroll-container"
 
@@ -9,14 +9,14 @@ export default function CategoryShowcase() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
 
   const categories = [
-    { name: "Programming", icon: Code, count: 120, featured: true },
+    { name: "Programming", icon: Code2, count: 120, featured: true },
     { name: "Design", icon: Palette, count: 85, featured: false },
-    { name: "Business", icon: Briefcase, count: 74, featured: true },
-    { name: "Marketing", icon: Lightbulb, count: 63, featured: false },
+    { name: "Business", icon: LineChart, count: 74, featured: true },
+    { name: "Marketing", icon: Megaphone, count: 63, featured: false },
     { name: "Photography", icon: Camera, count: 42, featured: false },
-    { name: "Home Services", icon: Home, count: 38, featured: true },
-    { name: "Technology", icon: Laptop, count: 56, featured: false },
-    { name: "Education", icon: BookOpen, count: 47, featured: false },
+    { name: "Home Services", icon: Sofa, count: 38, featured: true },
+    { name: "Technology", icon: Globe, count: 56, featured: false },
+    { name: "Education", icon: GraduationCap, count: 47, featured: false },
     { name: "Music", icon: Music, count: 31, featured: false },
     { name: "Repairs", icon: Wrench, count: 29, featured: false },
   ]

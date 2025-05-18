@@ -188,13 +188,13 @@ translate-y-[-4px] hover:translate-y-[-10px] mb-4`} // Added mb-4 for bottom mar
 
           {/* Content wrapper with 3D effect */}
           <div
-            className={`${cardPadding} flex flex-col items-center justify-between text-center relative z-10 h-full`}
+            className={`${cardPadding} flex flex-col items-center justify-between text-center relative z-10 h-full min-h-[160px]`}
             style={{ transform: "translateZ(15px) rotateX(2deg)" }}
           >
             {/* Enhanced glossy icon container with 3D effect */}
             <motion.div
-              className={`relative rounded-full bg-gradient-to-br from-white/90 to-purple-200/80 ${size === "small" ? "p-2" : "p-4"} 
-                shadow-lg overflow-hidden`}
+              className={`relative rounded-full bg-gradient-to-br from-white/90 to-lavender-200/80 ${size === "small" ? "p-3" : "p-5"} 
+  shadow-lg overflow-hidden border border-purple-400/30`}
               style={{
                 transform: "translateZ(30px)",
                 boxShadow:
@@ -212,7 +212,7 @@ translate-y-[-4px] hover:translate-y-[-10px] mb-4`} // Added mb-4 for bottom mar
               {/* Icon shine effect - hidden on mobile */}
               <div className="absolute -inset-full h-20 w-20 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-100 transform -rotate-45 group-hover:translate-x-full transition-all duration-700 ease-in-out hidden md:block"></div>
 
-              <Icon className={`${iconSize} text-primary relative z-10`} />
+              <Icon className={`${iconSize} text-purple-500 relative z-10`} />
             </motion.div>
 
             {/* Flexible spacer */}
@@ -220,12 +220,17 @@ translate-y-[-4px] hover:translate-y-[-10px] mb-4`} // Added mb-4 for bottom mar
 
             {/* Category name with enhanced styling */}
             <motion.div
-              className={size === "small" ? "my-2" : "my-4"}
+              className={size === "small" ? "my-2" : "my-3"}
               whileHover={{ scale: 1.03 }}
               transition={{ duration: 0.2 }}
+              style={{ transform: "translateZ(25px)" }}
             >
               <h3
-                className={`font-semibold ${textSize} text-white group-hover:text-white transition-colors duration-200 drop-shadow-md`}
+                className={`font-semibold ${textSize} text-white group-hover:text-white transition-colors duration-200`}
+                style={{
+                  textShadow: "0 2px 4px rgba(0,0,0,0.5), 0 0 10px rgba(168, 85, 247, 0.5)",
+                  letterSpacing: "0.02em",
+                }}
               >
                 {name}
               </h3>
