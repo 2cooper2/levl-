@@ -234,26 +234,26 @@ const DashboardPage = () => {
   }, [])
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-b from-white via-slate-50/30 to-white">
+    <div className="relative min-h-screen bg-gradient-to-b from-lavender-50/50 via-white to-lavender-100/30">
       {/* Background elements */}
       <div className="absolute inset-0 bg-grid-pattern opacity-[0.03] pointer-events-none"></div>
-      <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-gradient-to-b from-primary/10 to-transparent rounded-full blur-3xl transform translate-x-1/3 -translate-y-1/3 pointer-events-none"></div>
-      <div className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-gradient-to-t from-purple-500/10 to-transparent rounded-full blur-3xl transform -translate-x-1/3 translate-y-1/3 pointer-events-none"></div>
+      <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-gradient-to-b from-lavender-400/10 to-transparent rounded-full blur-3xl transform translate-x-1/3 -translate-y-1/3 pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-gradient-to-t from-lavender-500/10 to-transparent rounded-full blur-3xl transform -translate-x-1/3 translate-y-1/3 pointer-events-none"></div>
 
       {/* Main content */}
       <div className="container mx-auto py-12 px-4 sm:px-6 relative z-10 space-y-12">
         {/* Enhanced Header section with advanced animations */}
         <div className="relative mb-16">
           {/* Animated background elements */}
-          <div className="absolute -top-10 -left-10 w-64 h-64 bg-primary/5 rounded-full blur-3xl animate-pulse-slow"></div>
-          <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl animate-pulse-slow animation-delay-2000"></div>
+          <div className="absolute -top-10 -left-10 w-64 h-64 bg-lavender-300/5 rounded-full blur-3xl animate-pulse-slow"></div>
+          <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-lavender-500/5 rounded-full blur-3xl animate-pulse-slow animation-delay-2000"></div>
 
           {/* Floating particles */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             {[...Array(6)].map((_, i) => (
               <div
                 key={i}
-                className={`absolute w-2 h-2 rounded-full bg-gradient-to-r from-primary to-purple-500 opacity-70 animate-float-${i + 1}`}
+                className={`absolute w-2 h-2 rounded-full bg-gradient-to-r from-lavender-400 to-lavender-500 opacity-70 animate-float-${i + 1}`}
                 style={{
                   top: `${Math.random() * 100}%`,
                   left: `${Math.random() * 100}%`,
@@ -273,17 +273,17 @@ const DashboardPage = () => {
             {/* 3D Card Effect Header */}
             <div className="group perspective">
               <div className="relative transform transition-all duration-500 ease-out group-hover:rotate-x-2 group-hover:rotate-y-2 group-hover:scale-[1.01]">
-                <div className="bg-white/80 backdrop-blur-xl p-8 rounded-2xl border border-slate-200/50 shadow-xl relative overflow-hidden">
+                <div className="bg-white/80 backdrop-blur-xl p-8 rounded-2xl border border-lavender-200/50 shadow-xl relative overflow-hidden">
                   {/* Enhanced Gradient overlay with animated particles */}
                   <div className="absolute inset-0 overflow-hidden">
                     {/* Base gradient */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div className="absolute inset-0 bg-gradient-to-br from-lavender-400/10 via-transparent to-lavender-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
                     {/* Animated gradient mesh */}
                     <div className="absolute inset-0 opacity-0 group-hover:opacity-30 transition-all duration-700">
-                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(120,119,198,0.1),transparent_70%)] animate-pulse-slow"></div>
-                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(120,0,255,0.1),transparent_50%)] animate-float-1"></div>
-                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(74,222,128,0.1),transparent_50%)] animate-float-2"></div>
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(168,85,247,0.1),transparent_70%)] animate-pulse-slow"></div>
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(168,85,247,0.1),transparent_50%)] animate-float-1"></div>
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(168,85,247,0.1),transparent_50%)] animate-float-2"></div>
                     </div>
 
                     {/* Particle system */}
@@ -297,10 +297,10 @@ const DashboardPage = () => {
                             height: `${Math.random() * 6 + 2}px`,
                             backgroundColor:
                               i % 3 === 0
-                                ? "rgba(120,119,198,0.7)"
+                                ? "rgba(167,139,250,0.7)"
                                 : i % 3 === 1
-                                  ? "rgba(120,0,255,0.7)"
-                                  : "rgba(74,222,128,0.7)",
+                                  ? "rgba(168,85,247,0.7)"
+                                  : "rgba(192,132,252,0.7)",
                             left: `${Math.random() * 100}%`,
                             top: `${Math.random() * 100}%`,
                             opacity: Math.random() * 0.5 + 0.3,
@@ -316,7 +316,7 @@ const DashboardPage = () => {
                       <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
                         <defs>
                           <linearGradient id="networkGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stopColor="var(--color-primary)" stopOpacity="0.5" />
+                            <stop offset="0%" stopColor="rgb(167, 139, 250)" stopOpacity="0.5" />
                             <stop offset="100%" stopColor="rgb(168, 85, 247)" stopOpacity="0.5" />
                           </linearGradient>
                         </defs>
@@ -328,7 +328,7 @@ const DashboardPage = () => {
                           <line x1="40%" y1="30%" x2="70%" y2="60%" className="animate-network-line-5" />
                           <line x1="70%" y1="40%" x2="80%" y2="70%" className="animate-network-line-6" />
                         </g>
-                        <g fill="var(--color-primary)" className="animate-pulse-slow">
+                        <g fill="rgb(167, 139, 250)" className="animate-pulse-slow">
                           <circle cx="10%" cy="20%" r="3" />
                           <circle cx="30%" cy="60%" r="2" />
                           <circle cx="40%" cy="30%" r="4" />
@@ -344,7 +344,13 @@ const DashboardPage = () => {
                     </div>
 
                     {/* Subtle noise texture */}
-                    <div className="absolute inset-0 bg-noise-pattern opacity-0 group-hover:opacity-5 transition-opacity duration-700 mix-blend-overlay"></div>
+                    <div
+                      className="absolute inset-0 bg-noise-pattern opacity-0 group-hover:opacity-5 transition-opacity duration-700 mix-blend-overlay"
+                      style={{
+                        background: "radial-gradient(circle at 30% 20%, rgba(233,213,255,0.2) 1px, transparent 1px)",
+                        backgroundSize: "20px 20px",
+                      }}
+                    ></div>
                   </div>
 
                   {/* Enhanced shine effect with multiple layers */}
@@ -369,11 +375,11 @@ const DashboardPage = () => {
                     <div className="flex items-start gap-5">
                       {/* Animated icon */}
                       <motion.div
-                        className="relative h-16 w-16 rounded-2xl bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center shadow-lg group-hover:shadow-primary/20 transition-all duration-500"
+                        className="relative h-16 w-16 rounded-2xl bg-gradient-to-r from-lavender-400 to-lavender-500 flex items-center justify-center shadow-lg group-hover:shadow-lavender-400/20 transition-all duration-500"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                       >
-                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary to-purple-500 opacity-70 blur-md group-hover:opacity-100 transition-opacity"></div>
+                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-lavender-400 to-lavender-500 opacity-70 blur-md group-hover:opacity-100 transition-opacity"></div>
                         <LayoutDashboard className="h-8 w-8 text-white relative z-10" />
 
                         {/* Pulsing ring */}
@@ -382,27 +388,29 @@ const DashboardPage = () => {
 
                       <div>
                         <div className="flex items-center space-x-2 mb-2">
-                          <div className="flex items-center text-sm text-gray-500 font-medium">
-                            <span className="hover:text-primary transition-colors">Home</span>
+                          <div className="flex items-center text-sm text-lavender-500/70 font-medium">
+                            <span className="hover:text-lavender-400 transition-colors">Home</span>
                             <ChevronRight className="h-3 w-3 mx-1" />
-                            <span className="text-gray-800">Dashboard</span>
+                            <span className="text-lavender-800">Dashboard</span>
                           </div>
 
                           <div className="flex items-center">
-                            <span className="inline-block h-2 w-2 rounded-full bg-green-500 animate-pulse mr-2"></span>
-                            <span className="text-xs text-green-600 font-medium">Live</span>
+                            <span className="inline-block h-2 w-2 rounded-full bg-lavender-500 animate-pulse mr-2"></span>
+                            <span className="text-xs text-lavender-600 font-medium">Live</span>
                           </div>
                         </div>
 
-                        <h1 className="text-5xl font-bold text-gray-800 tracking-tight mb-2">
+                        <h1 className="text-5xl font-bold text-lavender-800 tracking-tight mb-2">
                           Your{" "}
                           <span className="relative">
-                            <span className="relative z-10 gradient-text">Dashboard</span>
-                            <span className="absolute bottom-1 left-0 w-full h-3 bg-primary/10 rounded-full -z-10 transform skew-x-3"></span>
+                            <span className="relative z-10 bg-gradient-to-r from-lavender-600 to-lavender-400 bg-clip-text text-transparent">
+                              Dashboard
+                            </span>
+                            <span className="absolute bottom-1 left-0 w-full h-3 bg-lavender-300/10 rounded-full -z-10 transform skew-x-3"></span>
                           </span>
                         </h1>
 
-                        <p className="text-gray-600 max-w-2xl mt-3 leading-relaxed">
+                        <p className="text-lavender-600/80 max-w-2xl mt-3 leading-relaxed">
                           Track your progress, explore new skills, and connect with the community. Your personalized
                           learning journey starts here with real-time insights and recommendations.
                         </p>
@@ -410,16 +418,16 @@ const DashboardPage = () => {
                     </div>
 
                     <div className="flex flex-col sm:flex-row items-center gap-3">
-                      <div className="flex items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-2.5 rounded-full shadow-sm border border-slate-200/50 hover:border-primary/20 hover:shadow-md transition-all duration-300 group cursor-pointer">
+                      <div className="flex items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-2.5 rounded-full shadow-sm border border-lavender-200/50 hover:border-lavender-400/20 hover:shadow-md transition-all duration-300 group cursor-pointer">
                         <div className="relative">
-                          <Sparkles className="h-4 w-4 text-primary" />
-                          <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-primary animate-ping"></span>
+                          <Sparkles className="h-4 w-4 text-lavender-500" />
+                          <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-lavender-500 animate-ping"></span>
                         </div>
                         <span className="text-sm font-medium whitespace-nowrap">Updated just now</span>
                       </div>
 
                       <motion.button
-                        className="flex items-center gap-2 bg-gradient-to-r from-primary to-purple-500 text-white px-4 py-2.5 rounded-full shadow-md hover:shadow-lg hover:shadow-primary/20 transition-all duration-300"
+                        className="flex items-center gap-2 bg-gradient-to-r from-lavender-400 to-lavender-500 text-white px-4 py-2.5 rounded-full shadow-md hover:shadow-lg hover:shadow-lavender-400/20 transition-all duration-300"
                         whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.97 }}
                       >
@@ -439,15 +447,15 @@ const DashboardPage = () => {
 
                   {/* Interactive progress indicator */}
                   <div className="mt-8 relative">
-                    <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-1.5 w-full bg-lavender-100 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-gradient-to-r from-primary via-purple-500 to-primary bg-size-200 animate-gradient-x rounded-full"
+                        className="h-full bg-gradient-to-r from-lavender-400 via-lavender-500 to-lavender-400 bg-size-200 animate-gradient-x rounded-full"
                         style={{ width: "68%" }}
                       ></div>
                     </div>
-                    <div className="flex justify-between mt-2 text-xs text-gray-500">
+                    <div className="flex justify-between mt-2 text-xs text-lavender-500/70">
                       <span>Weekly Progress</span>
-                      <span className="font-medium text-primary">68%</span>
+                      <span className="font-medium text-lavender-600">68%</span>
                     </div>
                   </div>
                 </div>
@@ -462,6 +470,7 @@ const DashboardPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
+            className="flex flex-col p-6 rounded-xl border bg-card text-card-foreground transition-all relative overflow-visible bg-gradient-to-br from-lavender-50/95 via-white/90 to-lavender-100/90 backdrop-blur-sm shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25),0_10px_20px_-5px_rgba(0,0,0,0.2),0_0_0_1px_rgba(0,0,0,0.05)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 transform translate-y-0 translateZ-0 filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.15)]"
           >
             <PersonalizedDashboard />
           </motion.div>
@@ -470,6 +479,7 @@ const DashboardPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
+            className="flex flex-col p-6 rounded-xl border bg-card text-card-foreground transition-all relative overflow-visible bg-gradient-to-br from-lavender-50/95 via-white/90 to-lavender-100/90 backdrop-blur-sm shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25),0_10px_20px_-5px_rgba(0,0,0,0.2),0_0_0_1px_rgba(0,0,0,0.05)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 transform translate-y-0 translateZ-0 filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.15)]"
           >
             <SkillAssessmentTool />
           </motion.div>
@@ -478,6 +488,7 @@ const DashboardPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
+            className="flex flex-col p-6 rounded-xl border bg-card text-card-foreground transition-all relative overflow-visible bg-gradient-to-br from-lavender-50/95 via-white/90 to-lavender-100/90 backdrop-blur-sm shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25),0_10px_20px_-5px_rgba(0,0,0,0.2),0_0_0_1px_rgba(0,0,0,0.05)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 transform translate-y-0 translateZ-0 filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.15)]"
           >
             <CollaborationHub />
           </motion.div>
@@ -486,6 +497,7 @@ const DashboardPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
+            className="flex flex-col p-6 rounded-xl border bg-card text-card-foreground transition-all relative overflow-visible bg-gradient-to-br from-lavender-50/95 via-white/90 to-lavender-100/90 backdrop-blur-sm shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25),0_10px_20px_-5px_rgba(0,0,0,0.2),0_0_0_1px_rgba(0,0,0,0.05)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 transform translate-y-0 translateZ-0 filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.15)]"
           >
             <MarketplaceAnalytics />
           </motion.div>
@@ -494,6 +506,7 @@ const DashboardPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.5 }}
+            className="flex flex-col p-6 rounded-xl border bg-card text-card-foreground transition-all relative overflow-visible bg-gradient-to-br from-lavender-50/95 via-white/90 to-lavender-100/90 backdrop-blur-sm shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25),0_10px_20px_-5px_rgba(0,0,0,0.2),0_0_0_1px_rgba(0,0,0,0.05)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 transform translate-y-0 translateZ-0 filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.15)]"
           >
             <SkillChallenges />
           </motion.div>
