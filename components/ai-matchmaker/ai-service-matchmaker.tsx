@@ -971,16 +971,6 @@ export function AIServiceMatchmaker() {
       history: {
         viewedServices: [],
         interactionCount: 0,
-        flexibility: 5,
-      },
-      requirements: {
-        explicit: [],
-        implicit: new Map(),
-        dealBreakers: [],
-      },
-      history: {
-        viewedServices: [],
-        interactionCount: 0,
         satisfactionTrend: [],
         refinementIterations: 0,
       },
@@ -1276,7 +1266,7 @@ export function AIServiceMatchmaker() {
         contextualMemory: {
           ...prevModel.enhancedReasoning.contextualMemory,
           shortTerm: new Map([
-            ...Array.from(prevModel.enhancedReasoning.contextualMemory.shortTerm || new Map()),
+            ...Array.from(prevModel.enhancedReasoning.contextualMemory || new Map()),
             ["lastProcessedInput", input],
             ["lastIntent", enhancedIntent],
           ]),
@@ -2048,7 +2038,7 @@ export function AIServiceMatchmaker() {
     setTimeout(() => {
       const feedbackMessage: Message = {
         id: `feedback-${Date.now()}`,
-        type: "feedback",
+        type: "ai",
         content: "How do these options look?",
         timestamp: new Date(),
         feedbackOptions: [
@@ -2170,7 +2160,7 @@ export function AIServiceMatchmaker() {
       setTimeout(() => {
         const feedbackMessage: Message = {
           id: `feedback-${Date.now()}`,
-          type: "feedback",
+          type: "ai",
           content: "How do these additional options look?",
           timestamp: new Date(),
           feedbackOptions: [
@@ -2785,7 +2775,7 @@ export function AIServiceMatchmaker() {
 
         const feedbackMessage: Message = {
           id: `feedback-${Date.now()}`,
-          type: "feedback",
+          type: "ai",
           content: "How do these refined options look?",
           timestamp: new Date(),
           feedbackOptions: feedbackOptions,
@@ -3035,7 +3025,7 @@ export function AIServiceMatchmaker() {
     })
 
     // Customer satisfaction comparison
-    comparison += "\n| Customer Satisfaction | "
+    comparison += "\n| Customer satisfaction | "
     services.forEach((service) => {
       comparison += `${service.satisfaction}% | `
     })
@@ -3078,7 +3068,7 @@ ${service.description}
 - Response Time: ${service.provider.responseTime}
 - Completion Rate: ${service.provider.completionRate}%
 - Completed Projects: ${service.completedProjects}+
-- Customer Satisfaction: ${service.satisfaction}%
+- Customer satisfaction: ${service.satisfaction}%
 
 ## What's Included
 ${service.tags.map((tag) => `- ${tag}`).join("\n")}
@@ -3372,7 +3362,7 @@ Would you like to book this service or compare it with other options?
     container.addEventListener("touchstart", handleTouchStart, { passive: false })
     container.addEventListener("touchend", handleMouseUp)
     container.addEventListener("touchcancel", handleMouseLeave)
-    container.addEventListener("touchmove", handleTouchMove, { passive: false })
+    container.addEventListener("touchmove", { passive: false })
 
     return () => {
       container.removeEventListener("mousedown", handleMouseDown)
@@ -3904,8 +3894,8 @@ after:content-[''] after:absolute after:bottom-[-15px] after:left-[5%] after:rig
 
                     {message.type === "ai" && (
                       <div className="flex">
-                        <div className="relative bg-gradient-to-br from-white/95 via-white/90 to-indigo-50/90 dark:from-gray-800/95 dark:via-gray-800/90 dark:to-indigo-950/90 backdrop-blur-sm rounded-2xl px-5 py-3 max-w-[80%] shadow-[0_14px_20px_-3px_rgba(79,70,229,0.3),0_6px_10px_-4px_rgba(79,70,229,0.2),0_-2px_8px_0px_rgba(255,255,255,0.15)] dark:shadow-[0_10px_15px_-3px_rgba(79,70,229,0.3),0_4px_6px_-4px_rgba(0,0,0,0.4),0_-2px_6px_0px_rgba(79,70,229,0.1)] border-t border-l border-r border-indigo-100/70 dark:border-t dark:border-l dark:border-r dark:border-indigo-700/40 border-b-2 border-b-indigo-200/80 dark:border-b-2 dark:border-b-indigo-800/80 translate-y-[-4px] transition-all duration-300 transform">
-                          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-500/8 via-purple-500/8 to-violet-500/8 dark:from-indigo-500/15 dark:via-purple-500/15 dark:to-violet-500/15 opacity-80"></div>
+                        <div className="relative bg-gradient-to-br from-white/95 via-white/90 to-lavender-50/90 dark:from-gray-800/95 dark:via-gray-800/90 dark:to-lavender-950/90 backdrop-blur-sm rounded-2xl px-5 py-3 max-w-[80%] shadow-[0_14px_20px_-3px_rgba(79,70,229,0.3),0_6px_10px_-4px_rgba(79,70,229,0.2),0_-2px_8px_0px_rgba(255,255,255,0.15)] dark:shadow-[0_10px_15px_-3px_rgba(79,70,229,0.3),0_4px_6px_-4px_rgba(0,0,0,0.4),0_-2px_6px_0px_rgba(79,70,229,0.1)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 translate-y-[-4px] transition-all duration-300 transform">
+                          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-lavender-500/8 via-purple-500/8 to-violet-500/8 dark:from-lavender-500/15 dark:via-purple-500/15 dark:to-violet-500/15 opacity-80"></div>
                           <div className="absolute inset-x-0 bottom-0 h-1/2 rounded-b-2xl bg-gradient-to-t from-black/5 to-transparent dark:from-white/5"></div>
 
                           <p className="text-sm relative z-10">{message.content}</p>
@@ -3915,7 +3905,7 @@ after:content-[''] after:absolute after:bottom-[-15px] after:left-[5%] after:rig
                               {message.options.map((option) => (
                                 <button
                                   key={option}
-                                  className="px-3 py-1.5 bg-white/90 dark:bg-gray-800/90 hover:bg-indigo-100/90 dark:hover:bg-indigo-900/30 rounded-full text-xs font-medium transition-all duration-200 border border-indigo-200/70 dark:border-indigo-700/50 hover:border-indigo-300 dark:hover:border-indigo-600/70 backdrop-blur-sm hover:shadow-md"
+                                  className="px-3 py-1.5 bg-white/90 dark:bg-gray-800/90 hover:bg-lavender-100/90 dark:hover:bg-lavender-900/30 rounded-full text-xs font-medium transition-all duration-200 border border-lavender-200/70 dark:border-lavender-700/50 hover:border-lavender-300 dark:hover:border-lavender-600/70 backdrop-blur-sm hover:shadow-md"
                                   onClick={() => handleOptionSelect(option)}
                                 >
                                   {option}
