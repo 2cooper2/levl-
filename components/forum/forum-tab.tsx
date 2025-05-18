@@ -497,7 +497,7 @@ export function ForumTab() {
       </AnimatePresence>
 
       {/* Category tabs - Enhanced with Levl UI/UX */}
-      <div className="flex overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide space-x-1 mb-3 relative">
+      <div className="flex overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide space-x-1 mb-1 relative">
         <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
 
         {categories.map((category) => (
@@ -542,7 +542,7 @@ export function ForumTab() {
       </div>
 
       {/* Trending Topics - Enhanced with Levl UI/UX */}
-      <div className="bg-gradient-to-br from-white/80 via-lavender-50/80 to-white/80 backdrop-blur-sm rounded-xl p-3 mb-3 border border-lavender-200/50 relative overflow-hidden">
+      <div className="bg-gradient-to-br from-white/80 via-lavender-50/80 to-white/80 backdrop-blur-sm rounded-xl p-3 mb-2 border border-lavender-200/50 relative overflow-hidden">
         {/* Decorative elements */}
         <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-purple-500/10 to-transparent rounded-bl-full"></div>
         <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-gradient-to-tr from-primary/10 to-transparent rounded-tr-full"></div>
@@ -598,7 +598,7 @@ export function ForumTab() {
       </div>
 
       {/* Topics list */}
-      <div className="space-y-3">
+      <div className="space-y-2">
         {filteredTopics.length > 0 ? (
           filteredTopics.map((topic) => (
             <motion.div

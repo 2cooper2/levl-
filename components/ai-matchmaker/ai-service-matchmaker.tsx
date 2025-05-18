@@ -971,6 +971,16 @@ export function AIServiceMatchmaker() {
       history: {
         viewedServices: [],
         interactionCount: 0,
+        flexibility: 5,
+      },
+      requirements: {
+        explicit: [],
+        implicit: new Map(),
+        dealBreakers: [],
+      },
+      history: {
+        viewedServices: [],
+        interactionCount: 0,
         satisfactionTrend: [],
         refinementIterations: 0,
       },
@@ -2441,7 +2451,7 @@ export function AIServiceMatchmaker() {
 
         missingRanges.forEach((range) => {
           const minPrice = range === "low" ? 0 : range === "medium" ? 80 : 120
-          const maxPrice = range === "low" ? 80 : range === "medium" ? 120 : 1000
+          const maxPrice = range === "low" ? 0 : range === "medium" ? 120 : 1000
 
           const servicesInRange = remainingServices.filter((service) => {
             const price = Number.parseFloat(service.price.replace(/[^0-9.]/g, ""))
@@ -3782,10 +3792,10 @@ Would you like to book this service or compare it with other options?
             </div>
 
             {/* Category cards section */}
-            <div className="border-b border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-r from-gray-50/80 via-white/80 to-gray-50/80 dark:from-gray-900/80 dark:via-gray-900/90 dark:to-gray-900/80">
+            <div className="border-b border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-r from-gray-50/80 via-white/80 to-gray-50/80 dark:from-gray-900/80 dark:via-gray-900/90 dark:to-gray-900/80 mb-0 pb-0">
               <div className="relative w-full overflow-hidden">
                 <div
-                  className="overflow-x-auto py-8 scrollbar-hide scroll-smooth mx-auto"
+                  className="overflow-x-auto py-4 pb-2 scrollbar-hide scroll-smooth mx-auto"
                   ref={categoriesRef}
                   style={{
                     scrollbarWidth: "none",
@@ -3820,7 +3830,7 @@ Would you like to book this service or compare it with other options?
                         count={0}
                         index={index}
                         size="small"
-                        className="w-36 h-36 my-4 mx-1 rounded-xl overflow-hidden transition-all duration-300 
+                        className="w-36 h-32 my-2 mx-1 rounded-xl overflow-hidden transition-all duration-300 
 bg-gradient-to-br from-white/95 via-white/90 to-indigo-50/90 dark:from-gray-800/95 dark:via-gray-800/90 dark:to-indigo-950/90 
 backdrop-blur-sm 
 shadow-[0_14px_20px_-3px_rgba(79,70,229,0.3),0_6px_10px_-4px_rgba(79,70,229,0.2),0_-2px_8px_0px_rgba(255,255,255,0.15)] 
@@ -3843,7 +3853,7 @@ after:content-[''] after:absolute after:bottom-[-15px] after:left-[5%] after:rig
             <div
               id="chat-container"
               ref={chatContainerRef}
-              className="relative overflow-y-auto p-6 pb-16 min-h-[380px] bg-gradient-to-b from-gray-50/80 via-indigo-50/10 to-white/90 dark:from-gray-900/90 dark:via-indigo-950/20 dark:to-gray-950/80 backdrop-blur-sm shadow-inner border-t border-indigo-100/20 dark:border-indigo-800/20 rounded-b-lg"
+              className="relative overflow-y-auto p-6 pb-16 min-h-[380px] bg-gradient-to-b from-gray-50/80 via-indigo-50/10 to-white/90 dark:from-gray-900/90 dark:via-indigo-950/20 dark:to-gray-950/80 backdrop-blur-sm shadow-inner border-t border-indigo-100/20 dark:border-indigo-800/20 rounded-b-lg mt-0 pt-4"
               style={{
                 scrollbarWidth: "thin",
                 scrollbarColor: "rgba(79, 70, 229, 0.2) transparent",
