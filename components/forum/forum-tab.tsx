@@ -557,7 +557,13 @@ transform translate-y-0 translateZ-0 filter drop-shadow-[0_20px_30px_rgba(0,0,0,
         {/* Decorative elements exactly like category cards */}
         <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-lavender-400/10 to-transparent rounded-bl-full transform transition-transform duration-700 group-hover:scale-110"></div>
         <div className="absolute -bottom-8 -left-8 w-40 h-40 bg-gradient-to-tr from-lavender-500/15 to-transparent rounded-tr-full transform transition-transform duration-700 group-hover:scale-110"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(233,213,255,0.2)_1px,transparent_1px)] bg-[length:20px_20px] opacity-30 group-hover:opacity-50 transition-opacity duration-500"></div>
+        <div
+          className="absolute inset-0 opacity-30 transition-opacity duration-500"
+          style={{
+            background: "radial-gradient(circle at 30% 20%, rgba(233,213,255,0.2) 1px, transparent 1px)",
+            backgroundSize: "20px 20px",
+          }}
+        ></div>
 
         {/* Animated accent line exactly like category cards */}
         <div className="absolute h-[2px] w-1/3 bg-gradient-to-r from-transparent via-lavender-400/60 to-transparent top-0 left-0 animate-shimmer"></div>
@@ -710,7 +716,7 @@ mb-4"
       </AnimatePresence>
 
       {/* Category tabs - Enhanced with Levl UI/UX */}
-      <div className="flex overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide space-x-1 mb-1 relative">
+      <div className="flex overflow-x-auto pb-1 -mx-1 px-1 hide-scrollbar space-x-1 mb-1 relative">
         <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-lavender-400/20 to-transparent"></div>
 
         {categories.map((category) => (
@@ -767,7 +773,13 @@ mb-3"
         {/* Decorative elements */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-lavender-400/10 to-transparent rounded-bl-full transform transition-transform duration-700 group-hover:scale-110"></div>
         <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-gradient-to-tr from-lavender-500/15 to-transparent rounded-tr-full transform transition-transform duration-700 group-hover:scale-110"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(233,213,255,0.2)_1px,transparent_1px)] bg-[length:20px_20px] opacity-30 group-hover:opacity-50 transition-opacity duration-500"></div>
+        <div
+          className="absolute inset-0 opacity-30 transition-opacity duration-500"
+          style={{
+            background: "radial-gradient(circle at 30% 20%, rgba(233,213,255,0.2) 1px, transparent 1px)",
+            backgroundSize: "20px 20px",
+          }}
+        ></div>
 
         {/* Animated accent line */}
         <div className="absolute h-[2px] w-1/3 bg-gradient-to-r from-transparent via-lavender-400/60 to-transparent top-0 left-0 animate-shimmer"></div>
