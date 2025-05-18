@@ -338,7 +338,7 @@ export function ForumTab() {
     .slice(0, expandedTags ? undefined : 5)
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-8">
       {/* Notification toast */}
       <AnimatePresence>
         {showNotification && (
@@ -598,16 +598,16 @@ export function ForumTab() {
       </div>
 
       {/* Topics list */}
-      <div className="space-y-2">
+      <div className="space-y-3 mb-6">
         {filteredTopics.length > 0 ? (
           filteredTopics.map((topic) => (
             <motion.div
               key={topic.id}
               className={`${
-                viewMode === "card" ? "p-5" : "p-4"
+                viewMode === "card" ? "p-6" : "p-5"
               } rounded-xl bg-gradient-to-br from-white/95 via-lavender-50/80 to-white/90 backdrop-blur-sm border hover:border-primary/40 transition-all duration-300 relative overflow-hidden cursor-pointer shadow-sm hover:shadow-md ${
                 activeTopic === topic.id ? "border-primary/40 bg-primary/5 shadow-primary/10" : "border-lavender-200/50"
-              } ${viewMode === "card" ? "min-h-[220px]" : "min-h-[100px]"}`}
+              } ${viewMode === "card" ? "min-h-[240px]" : "min-h-[120px]"}`}
               onClick={() => setActiveTopic(activeTopic === topic.id ? null : topic.id)}
               whileHover={{ scale: 1.01, y: -2, boxShadow: "0 8px 24px rgba(147, 51, 234, 0.08)" }}
               layout
@@ -680,11 +680,11 @@ export function ForumTab() {
                   </div>
 
                   {/* Preview text */}
-                  <div className="mt-3 text-sm text-gray-600 line-clamp-2 leading-relaxed">{topic.preview}</div>
+                  <div className="mt-4 text-sm text-gray-600 line-clamp-2 leading-relaxed">{topic.preview}</div>
 
                   {/* Author info */}
                   <div
-                    className="flex items-center mt-4 pt-3 border-t border-lavender-200/30"
+                    className="flex items-center mt-5 pt-4 border-t border-lavender-200/30"
                     onMouseEnter={() => setShowUserTooltip(topic.id)}
                     onMouseLeave={() => setShowUserTooltip(null)}
                   >
@@ -728,18 +728,18 @@ export function ForumTab() {
                   {/* Expanded topic with responses */}
                   {activeTopic === topic.id && (
                     <motion.div
-                      className="mt-4 pt-4 border-t border-lavender-200/30"
+                      className="mt-5 pt-5 border-t border-lavender-200/30"
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <div className="space-y-3">
+                      <div className="space-y-4">
                         {topic.responses && topic.responses.length > 0 ? (
                           topic.responses.map((response, index) => (
                             <div
                               key={index}
-                              className="bg-white/50 rounded-lg p-3 border border-lavender-200/30 min-h-[110px]"
+                              className="bg-white/50 rounded-lg p-4 border border-lavender-200/30 min-h-[120px]"
                             >
                               <div className="flex items-start gap-3">
                                 <div className="h-7 w-7 rounded-full bg-gradient-to-r from-primary/10 to-purple-500/10 flex items-center justify-center text-xs font-bold text-primary border border-lavender-200/30">
@@ -771,27 +771,27 @@ export function ForumTab() {
                                       <span className="text-xs font-medium text-gray-600">{response.likes}</span>
                                     </div>
                                   </div>
-                                  <p className="text-sm text-gray-600 mt-1">{response.content}</p>
+                                  <p className="text-sm text-gray-600 mt-2">{response.content}</p>
                                 </div>
                               </div>
                             </div>
                           ))
                         ) : (
-                          <div className="text-center py-3 text-sm text-gray-500">
+                          <div className="text-center py-4 text-sm text-gray-500">
                             No responses yet. Be the first to reply!
                           </div>
                         )}
                       </div>
 
                       {/* Reply form */}
-                      <div className="mt-3 flex gap-3">
+                      <div className="mt-4 flex gap-3">
                         <div className="h-8 w-8 rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 flex items-center justify-center text-sm font-bold text-primary border border-lavender-200/50">
                           Y
                         </div>
                         <div className="flex-1 relative">
                           <textarea
                             placeholder="Write a reply..."
-                            className="w-full h-32 px-3 py-2 text-sm bg-white rounded-lg border border-lavender-200/50 focus:border-primary/50 focus:ring-1 focus:ring-primary/30 outline-none transition-colors resize-none"
+                            className="w-full h-36 px-4 py-3 text-sm bg-white rounded-lg border border-lavender-200/50 focus:border-primary/50 focus:ring-1 focus:ring-primary/30 outline-none transition-colors resize-none"
                             value={replyContent}
                             onChange={(e) => setReplyContent(e.target.value)}
                             onClick={(e) => e.stopPropagation()}
@@ -799,7 +799,7 @@ export function ForumTab() {
                           <Button
                             variant="default"
                             size="sm"
-                            className="absolute bottom-2 right-2 gap-1 text-xs bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white"
+                            className="absolute bottom-3 right-3 gap-1 text-xs bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white"
                             onClick={(e) => {
                               e.stopPropagation()
                               handleReply(topic.id)
@@ -865,11 +865,11 @@ export function ForumTab() {
 
         {/* Load more button */}
         {filteredTopics.length > 0 && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="mt-4">
             <Button
               variant="outline"
               size="sm"
-              className="w-full relative overflow-hidden group border-white/10 text-gray-600 hover:text-gray-800"
+              className="w-full relative overflow-hidden group border-white/10 text-gray-600 hover:text-gray-800 py-3"
               onClick={loadMoreTopics}
               disabled={isLoading}
             >
@@ -910,6 +910,9 @@ export function ForumTab() {
           </motion.div>
         )}
       </div>
+
+      {/* Footer spacer */}
+      <div className="h-12"></div>
     </div>
   )
 }
