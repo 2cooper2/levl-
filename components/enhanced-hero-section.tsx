@@ -880,16 +880,16 @@ animate-pulse"
               <div className="relative w-full max-w-full">
                 <motion.div
                   className={`relative rounded-xl overflow-hidden bg-gradient-to-br from-white via-lavender-50/50 to-white backdrop-blur-md p-3 sm:p-4 md:p-6 shadow-xl border border-lavender-200/50 detailed-card hover:shadow-lavender-300/30 transition-all duration-300 ${isMobile ? "simple-card" : ""}`}
+                  style={{
+                    border: "1px solid rgba(168, 85, 247, 0.15)",
+                    boxShadow: "0 10px 30px -5px rgba(168, 85, 247, 0.08), 0 0 10px -10px rgba(168, 85, 247, 0.15)",
+                  }}
                   initial={{ opacity: 0, scale: 0.9, y: 20 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   transition={{
                     duration: 0.8,
                     ease: [0.16, 1, 0.3, 1],
                     delay: 0.4,
-                  }}
-                  style={{
-                    border: "1px solid rgba(147, 51, 234, 0.2)",
-                    boxShadow: "0 10px 30px -5px rgba(147, 51, 234, 0.1), 0 0 20px -10px rgba(147, 51, 234, 0.2)",
                   }}
                 >
                   {/* Improved tech pattern overlay with subtle animation */}
@@ -936,7 +936,7 @@ animate-pulse"
                           left: `${line.left}%`,
                           width: `${line.width}px`,
                           background:
-                            "linear-gradient(90deg, rgba(147, 51, 234, 0.05), rgba(147, 51, 234, 0.15), rgba(147, 51, 234, 0.05))",
+                            "linear-gradient(90deg, rgba(168, 85, 247, 0.05), rgba(168, 85, 247, 0.1), rgba(168, 85, 247, 0.05))",
                         }}
                         animate={{
                           opacity: [0.3, 0.7, 0.3],
@@ -958,8 +958,8 @@ animate-pulse"
                         style={{
                           top: `${dot.top}%`,
                           left: `${dot.left}%`,
-                          backgroundColor: "rgba(147, 51, 234, 0.2)",
-                          boxShadow: "0 0 5px rgba(147, 51, 234, 0.2)",
+                          backgroundColor: "rgba(168, 85, 247, 0.1)",
+                          boxShadow: "0 0 5px rgba(168, 85, 247, 0.1)",
                         }}
                         animate={{
                           scale: [1, 1.5, 1],
@@ -995,7 +995,7 @@ animate-pulse"
                   <div className="space-y-3 md:space-y-4 relative z-10 lg:grid lg:grid-cols-12 lg:gap-4 lg:space-y-0">
                     <div className="flex items-center justify-between lg:col-span-12">
                       <div className="flex items-center">
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center mr-3 relative group">
+                        <div className="h-10 w-10 rounded-full bg-gradient-to-r from-lavender-300 to-lavender-500 flex items-center justify-center mr-3 relative group">
                           <motion.div
                             animate={
                               !isMobile
@@ -1068,7 +1068,7 @@ animate-pulse"
                     <p className="text-sm text-gray-700 lg:col-span-12">
                       The world's first AI-powered gig ecosystem that helps you earn while you learn and grow your
                       freelance career exponentially.
-                      <span className="inline-flex items-center ml-2 text-primary">
+                      <span className="inline-flex items-center ml-2 text-lavender-500">
                         <Lightbulb className="h-3 w-3 mr-1" /> Smart matching technology
                       </span>
                     </p>
@@ -1079,7 +1079,7 @@ animate-pulse"
                           key={index}
                           className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 flex items-center ${
                             activeSkill === index
-                              ? "bg-gradient-to-r from-primary to-purple-500 text-white shadow-lg shadow-primary/20"
+                              ? "bg-gradient-to-r from-lavender-300 to-lavender-500 text-white shadow-lavender-300/30"
                               : "bg-white/10 dark:bg-black/20 text-gray-800 hover:bg-white/20 dark:hover:bg-black/30"
                           }`}
                           onClick={() => setActiveSkill(index)}
@@ -1124,7 +1124,9 @@ animate-pulse"
                         <motion.button
                           key={tab}
                           className={`px-2 sm:px-3 py-2 text-xs font-medium capitalize whitespace-nowrap transition-all duration-300 detailed-tab ${
-                            activeTab === tab ? "active text-primary relative" : "text-gray-500 hover:text-gray-800"
+                            activeTab === tab
+                              ? "active text-lavender-500 relative"
+                              : "text-gray-500 hover:text-gray-800"
                           }`}
                           onClick={() => setActiveTab(tab)}
                           whileHover={{ y: -1 }}
@@ -1138,7 +1140,7 @@ animate-pulse"
                           {tab}
                           {activeTab === tab && (
                             <motion.span
-                              className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/50 via-primary to-primary/50"
+                              className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-lavender-300/50 via-lavender-400 to-lavender-300/50"
                               layoutId="activeTabLine"
                               transition={{
                                 type: "spring",
@@ -1159,18 +1161,18 @@ animate-pulse"
                         <div className="space-y-4">
                           {/* Active Skill Card - Enhanced with better UI/UX */}
                           <div
-                            className="bg-gradient-to-br from-white via-lavender-50/50 to-white backdrop-blur-sm rounded-lg p-5 border border-lavender-300/50 skill-card shadow-lg relative overflow-hidden group transition-all duration-300 hover:shadow-lavender-500/20 hover:border-lavender-400/50"
+                            className="bg-gradient-to-br from-white via-lavender-50/50 to-white backdrop-blur-sm rounded-lg p-5 border border-lavender-200/50 skill-card shadow-lg relative overflow-hidden group transition-all duration-300 hover:shadow-lavender-300/20 hover:border-lavender-300/50"
                             style={{ borderLeft: `4px solid ${skills[activeSkill].color}` }}
                           >
                             {/* Animated background elements */}
                             <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
-                            <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-gradient-to-br from-primary/20 to-purple-500/10 blur-3xl group-hover:opacity-70 transition-opacity duration-500 opacity-50"></div>
-                            <div className="absolute -left-10 -bottom-10 w-40 h-40 rounded-full bg-gradient-to-tr from-primary/10 to-purple-500/20 blur-3xl group-hover:opacity-70 transition-opacity duration-500 opacity-40"></div>
+                            <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-purple-400/20 blur-3xl group-hover:opacity-70 transition-opacity duration-500 opacity-50"></div>
+                            <div className="absolute -left-10 -bottom-10 w-40 h-40 rounded-full bg-purple-400/20 blur-3xl group-hover:opacity-70 transition-opacity duration-500 opacity-40"></div>
 
                             <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4 relative z-10">
                               <div className="flex-1">
                                 <div className="flex items-center">
-                                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center mr-3 relative group shadow-md shadow-primary/20">
+                                  <div className="h-10 w-10 rounded-xl bg-gradient-to-r from-lavender-300 to-lavender-500 flex items-center justify-center mr-3 relative group shadow-md shadow-lavender-300/20">
                                     <motion.div
                                       animate={{
                                         scale: [1, 1.1, 1],
@@ -1183,7 +1185,7 @@ animate-pulse"
                                     >
                                       {skills[activeSkill].icon}
                                     </motion.div>
-                                    <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/50 to-purple-500/50 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                                    <div className="absolute inset-0 rounded-xl bg-purple-400/50 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                                   </div>
                                   <div>
                                     <h4 className="text-lg font-bold text-gray-800 flex items-center">
@@ -1195,7 +1197,7 @@ animate-pulse"
                                         {skills[activeSkill].level}
                                       </div>
                                       <ArrowRight className="h-3 w-3 text-white/50" />
-                                      <div className="px-2 py-0.5 rounded-full bg-gradient-to-r from-primary/50 to-purple-500/50 text-xs text-white font-medium">
+                                      <div className="px-2 py-0.5 rounded-full bg-gradient-to-r from-lavender-300 to-lavender-500 text-xs text-white font-medium">
                                         {skills[activeSkill].nextLevel}
                                       </div>
                                     </div>
@@ -1204,7 +1206,7 @@ animate-pulse"
 
                                 <p className="text-sm text-gray-700 mt-3 leading-relaxed">
                                   {skills[activeSkill].description}
-                                  <span className="inline-flex items-center ml-2 text-xs text-primary font-medium">
+                                  <span className="inline-flex items-center ml-2 text-xs text-lavender-500 font-medium">
                                     <Cpu className="h-3 w-3 mr-1" /> AI-optimized learning path
                                   </span>
                                 </p>
@@ -1228,11 +1230,11 @@ animate-pulse"
                                 <span className="text-gray-500 font-medium">
                                   Progress to {skills[activeSkill].nextLevel}
                                 </span>
-                                <span className="font-semibold text-primary">{progress}%</span>
+                                <span className="font-semibold text-lavender-500">{progress}%</span>
                               </div>
                               <div className="h-3 w-full bg-black/10 dark:bg-white/5 rounded-full overflow-hidden progress-track shadow-inner relative">
                                 <motion.div
-                                  className="h-full rounded-full bg-gradient-to-r from-primary via-purple-500/80 to-primary relative"
+                                  className="h-full rounded-full bg-gradient-to-r from-lavender-300 via-lavender-400 to-lavender-500 relative"
                                   style={{ width: `${progress}%` }}
                                   initial={{ width: 0 }}
                                   animate={{ width: `${progress}%` }}
@@ -1268,7 +1270,7 @@ animate-pulse"
                                     <div
                                       className={`absolute -top-7 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded text-[10px] ${
                                         progress >= marker
-                                          ? "bg-primary text-white"
+                                          ? "bg-lavender-400 text-white"
                                           : "bg-white/10 dark:bg-black/30 text-gray-500"
                                       } opacity-0 group-hover:opacity-100 transition-opacity duration-200`}
                                     >
@@ -1282,7 +1284,12 @@ animate-pulse"
                             {/* Stats - Enhanced with better layout and hover effects */}
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                               {[
-                                { label: "Mentors", value: skills[activeSkill].mentors, icon: Users, color: "primary" },
+                                {
+                                  label: "Mentors",
+                                  value: skills[activeSkill].mentors,
+                                  icon: Users,
+                                  color: "purple-500",
+                                },
                                 {
                                   label: "Projects",
                                   value: skills[activeSkill].projects,
@@ -1299,7 +1306,7 @@ animate-pulse"
                               ].map((stat, i) => (
                                 <motion.div
                                   key={i}
-                                  className={`bg-white rounded-lg p-3 relative overflow-hidden hover:bg-lavender-50 transition-colors duration-200 shadow-sm border border-lavender-100 group/stat`}
+                                  className={`bg-white rounded-lg p-3 relative overflow-hidden hover:bg-lavender-50 transition-colors duration-200 shadow-sm border border-lavender-200/50 group/stat`}
                                   whileHover={{ y: -2 }}
                                   transition={{ type: "spring", stiffness: 500, damping: 30 }}
                                 >
@@ -1328,22 +1335,22 @@ animate-pulse"
 
                           {/* Testimonial - Enhanced */}
                           <motion.div
-                            className="bg-white rounded-lg p-4 border border-lavender-200/50 relative overflow-hidden group hover:border-primary/30 transition-all duration-300 shadow-sm"
+                            className="bg-white rounded-lg p-4 border border-lavender-200/50 relative overflow-hidden group hover:border-lavender-300/50 transition-all duration-300 shadow-sm"
                             whileHover={{ y: -2, boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1)" }}
                           >
                             {/* Quote marks */}
-                            <div className="absolute top-2 left-2 text-4xl text-primary/10 font-serif">"</div>
-                            <div className="absolute bottom-2 right-2 text-4xl text-primary/10 font-serif">"</div>
+                            <div className="absolute top-2 left-2 text-4xl text-purple-500/10 font-serif">"</div>
+                            <div className="absolute bottom-2 right-2 text-4xl text-purple-500/10 font-serif">"</div>
 
                             {/* Background pattern */}
                             <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_10px_10px,rgba(var(--primary-rgb),0.4)_1px,transparent_1px)] bg-[length:20px_20px] pointer-events-none"></div>
 
                             <div className="flex items-start gap-4">
-                              <div className="h-12 w-12 rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 flex items-center justify-center text-sm font-bold text-primary shadow-inner relative">
+                              <div className="h-12 w-12 rounded-full bg-lavender-100 flex items-center justify-center text-sm font-bold text-lavender-500 shadow-inner relative">
                                 {skills[activeSkill].testimonial.author.split(" ")[0][0]}
                                 {skills[activeSkill].testimonial.author.split(" ")[1][0]}
                                 <motion.div
-                                  className="absolute inset-0 rounded-full border border-primary/30"
+                                  className="absolute inset-0 rounded-full border border-purple-400/30"
                                   animate={{ scale: [1, 1.1, 1] }}
                                   transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
                                 />
@@ -1367,7 +1374,7 @@ animate-pulse"
                                       </motion.div>
                                     ))}
                                   </div>
-                                  <div className="ml-2 px-1.5 py-0.5 text-xs bg-primary/10 text-primary rounded-full">
+                                  <div className="ml-2 px-1.5 py-0.5 text-xs bg-lavender-100 text-lavender-500 rounded-full">
                                     Verified Client
                                   </div>
                                 </div>
@@ -1384,36 +1391,36 @@ animate-pulse"
                           {/* Quick Actions - New section */}
                           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             <motion.button
-                              className="bg-white hover:bg-lavender-50 rounded-lg p-3 flex flex-col items-center text-center transition-colors duration-200 border border-lavender-100 shadow-sm"
+                              className="bg-white hover:bg-lavender-50 rounded-lg p-3 flex flex-col items-center text-center transition-colors duration-200 border border-lavender-200/50 shadow-sm"
                               whileHover={{ y: -2 }}
                               whileTap={{ y: 0 }}
                             >
-                              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center mb-2">
-                                <BookOpen className="h-4 w-4 text-primary" />
+                              <div className="h-8 w-8 rounded-full bg-lavender-100 flex items-center justify-center mb-2">
+                                <BookOpen className="h-4 w-4 text-lavender-500" />
                               </div>
                               <div className="text-xs font-medium text-gray-800">Continue Learning</div>
                               <div className="text-[10px] text-gray-500 mt-1">4 lessons left</div>
                             </motion.button>
 
                             <motion.button
-                              className="bg-white hover:bg-lavender-50 rounded-lg p-3 flex flex-col items-center text-center transition-colors duration-200 border border-lavender-100 shadow-sm"
+                              className="bg-white hover:bg-lavender-50 rounded-lg p-3 flex flex-col items-center text-center transition-colors duration-200 border border-lavender-200/50 shadow-sm"
                               whileHover={{ y: -2 }}
                               whileTap={{ y: 0 }}
                             >
-                              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center mb-2">
-                                <Layers className="h-4 w-4 text-primary" />
+                              <div className="h-8 w-8 rounded-full bg-lavender-100 flex items-center justify-center mb-2">
+                                <Layers className="h-4 w-4 text-lavender-500" />
                               </div>
                               <div className="text-xs font-medium text-gray-800">Find Projects</div>
                               <div className="text-[10px] text-gray-500 mt-1">12 available</div>
                             </motion.button>
 
                             <motion.button
-                              className="bg-white hover:bg-lavender-50 rounded-lg p-3 flex flex-col items-center text-center transition-colors duration-200 border border-lavender-100 shadow-sm"
+                              className="bg-white hover:bg-lavender-50 rounded-lg p-3 flex flex-col items-center text-center transition-colors duration-200 border border-lavender-200/50 shadow-sm"
                               whileHover={{ y: -2 }}
                               whileTap={{ y: 0 }}
                             >
-                              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center mb-2">
-                                <MessageSquare className="h-4 w-4 text-primary" />
+                              <div className="h-8 w-8 rounded-full bg-lavender-100 flex items-center justify-center mb-2">
+                                <MessageSquare className="h-4 w-4 text-lavender-500" />
                               </div>
                               <div className="text-xs font-medium text-gray-800">Community</div>
                               <div className="text-[10px] text-gray-500 mt-1">3 new topics</div>
@@ -1426,8 +1433,8 @@ animate-pulse"
                     <div className="lg:col-span-4 space-y-4">
                       <div className="grid grid-cols-2 gap-2 sm:gap-3">
                         <div className="flex items-start">
-                          <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2 mt-0.5">
-                            <MessageSquare className="h-3 w-3 text-primary" />
+                          <div className="h-6 w-6 rounded-full bg-lavender-100 flex items-center justify-center mr-2 mt-0.5">
+                            <MessageSquare className="h-3 w-3 text-lavender-500" />
                           </div>
                           <div>
                             <h4 className="text-xs font-semibold text-gray-800">Forum</h4>
@@ -1436,8 +1443,8 @@ animate-pulse"
                         </div>
 
                         <div className="flex items-start">
-                          <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2 mt-0.5">
-                            <Users className="h-3 w-3 text-primary" />
+                          <div className="h-6 w-6 rounded-full bg-lavender-100 flex items-center justify-center mr-2 mt-0.5">
+                            <Users className="h-3 w-3 text-lavender-500" />
                           </div>
                           <div>
                             <h4 className="text-xs font-semibold text-gray-800">Mentor Network</h4>
@@ -1446,8 +1453,8 @@ animate-pulse"
                         </div>
 
                         <div className="flex items-start">
-                          <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2 mt-0.5">
-                            <Target className="h-3 w-3 text-primary" />
+                          <div className="h-6 w-6 rounded-full bg-lavender-100 flex items-center justify-center mr-2 mt-0.5">
+                            <Target className="h-3 w-3 text-lavender-500" />
                           </div>
                           <div>
                             <h4 className="text-xs font-semibold text-gray-800">Skill Projects</h4>
@@ -1456,8 +1463,8 @@ animate-pulse"
                         </div>
 
                         <div className="flex items-start">
-                          <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mr-2 mt-0.5">
-                            <Trophy className="h-3 w-3 text-primary" />
+                          <div className="h-6 w-6 rounded-full bg-lavender-100 flex items-center justify-center mr-2 mt-0.5">
+                            <Trophy className="h-3 w-3 text-lavender-500" />
                           </div>
                           <div>
                             <h4 className="text-xs font-semibold text-gray-800">Skill Certification</h4>
@@ -1466,7 +1473,12 @@ animate-pulse"
                         </div>
                       </div>
 
-                      <EnhancedButton variant="gradient" size="sm" className="w-full" onClick={handleHireNow}>
+                      <EnhancedButton
+                        variant="gradient"
+                        size="sm"
+                        className="w-full bg-gradient-to-r from-lavender-300 to-lavender-500 hover:from-lavender-400 hover:to-lavender-600"
+                        onClick={handleHireNow}
+                      >
                         <Zap className="mr-2 h-4 w-4" />
                         Accelerate Your Skills
                       </EnhancedButton>

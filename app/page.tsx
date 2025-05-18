@@ -10,20 +10,6 @@ import { LevlLogo } from "@/components/levl-logo"
 import { ThemeToggle } from "@/components/theme-toggle"
 // Import the new AI Service Matchmaker component
 import { AIServiceMatchmaker } from "@/components/ai-matchmaker/ai-service-matchmaker"
-// Import more specialized Lucide icons for categories
-import {
-  Hammer,
-  Wrench,
-  LightbulbIcon,
-  Paintbrush,
-  Camera,
-  Globe,
-  Armchair,
-  GraduationCap,
-  Sparkles,
-  Scissors,
-} from "lucide-react"
-import { EnhancedCategoryCard } from "@/components/enhanced-category-card"
 
 export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -47,58 +33,6 @@ export default function Home() {
         <EnhancedHeroSection />
 
         {/* Categories Section */}
-        <section className="w-full py-12">
-          <div className="container px-4 md:px-6">
-            <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              <div className="space-y-2">
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">Browse Categories</h2>
-                <p className="max-w-[700px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed dark:text-gray-400">
-                  Find skilled professionals in various categories to help with your projects.
-                </p>
-              </div>
-            </div>
-            <div className="mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8">
-              <div onClick={() => router.push("/category/home-repair")}>
-                <EnhancedCategoryCard name="Home Repair" icon={Hammer} index={0} count={0} />
-              </div>
-              <div onClick={() => router.push("/category/plumbing")}>
-                <EnhancedCategoryCard name="Plumbing" icon={Wrench} index={1} count={0} />
-              </div>
-              <div onClick={() => router.push("/category/electrical")}>
-                <EnhancedCategoryCard name="Electrical" icon={LightbulbIcon} index={2} count={0} />
-              </div>
-              <div onClick={() => router.push("/category/painting")}>
-                <EnhancedCategoryCard name="Painting" icon={Paintbrush} index={3} count={0} />
-              </div>
-              <div onClick={() => router.push("/category/cleaning")}>
-                <EnhancedCategoryCard name="Cleaning" icon={Sparkles} index={4} count={0} />
-              </div>
-              <div onClick={() => router.push("/category/photography")}>
-                <EnhancedCategoryCard name="Photography" icon={Camera} index={5} count={0} />
-              </div>
-              <div onClick={() => router.push("/category/web-development")}>
-                <EnhancedCategoryCard name="Web Development" icon={Globe} index={6} count={0} />
-              </div>
-              <div onClick={() => router.push("/category/interior-design")}>
-                <EnhancedCategoryCard name="Interior Design" icon={Armchair} index={7} count={0} />
-              </div>
-              <div onClick={() => router.push("/category/education")}>
-                <EnhancedCategoryCard name="Education" icon={GraduationCap} index={8} count={0} />
-              </div>
-              <div onClick={() => router.push("/category/hair-styling")}>
-                <EnhancedCategoryCard name="Hair Styling" icon={Scissors} index={9} count={0} />
-              </div>
-            </div>
-            <div className="flex justify-center mt-8">
-              <Link
-                href="/categories"
-                className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-              >
-                View All Categories
-              </Link>
-            </div>
-          </div>
-        </section>
       </main>
       <footer className="w-full border-t bg-background py-6 md:py-12 relative">
         <BackgroundPattern className="opacity-30" />

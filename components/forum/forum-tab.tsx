@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -24,6 +24,7 @@ import {
   ArrowRight,
   CheckCircle,
 } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 // Define forumTopics
 const forumTopics = [
@@ -123,6 +124,26 @@ export function ForumTab() {
 
   const [viewMode, setViewMode] = useState<"card" | "compact">("card")
   const [showUserTooltip, setShowUserTooltip] = useState<number | null>(null)
+
+  const categoriesRef = useRef<HTMLDivElement>(null)
+  const chatContainerRef = useRef<HTMLDivElement>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const router = useRouter()
+
+  const [messages, setMessages] = useState([
+    {
+      id: 1,
+      type: "ai",
+      content:
+        "Hey there! I'm Levl, your AI assistant. I'm here to help you find the right service provider for your needs. What are you looking for today?",
+      timestamp: new Date(),
+      options: ["Mounting a TV", "Moving", "Painting", "Furniture Assembly"],
+    },
+  ])
+  const [inputValue, setInputValue] = useState("")
+  const [isTyping, setIsTyping] = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value)
@@ -337,13 +358,182 @@ export function ForumTab() {
     .filter((tag) => !categories.some((cat) => cat.id === tag))
     .slice(0, expandedTags ? undefined : 5)
 
+  const handleCategoryClick = (category: string) => {
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      {
+        id: Date.now(),
+        type: "user",
+        content: `I'm looking for ${category} services.`,
+        timestamp: new Date(),
+      },
+      {
+        id: Date.now() + 1,
+        type: "loading",
+        content: "Levl is searching for the best matches...",
+        timestamp: new Date(),
+      },
+    ])
+
+    setTimeout(() => {
+      setMessages((prevMessages) => {
+        const loadingMessageIndex = prevMessages.findIndex((msg) => msg.type === "loading")
+        const newMessages = [...prevMessages]
+        if (loadingMessageIndex !== -1) {
+          newMessages.splice(loadingMessageIndex, 1, {
+            id: Date.now() + 2,
+            type: "ai",
+            content: `Okay, I found some great ${category} service providers for you!`,
+            timestamp: new Date(),
+            services: [
+              {
+                id: 1,
+                provider: {
+                  id: "provider1",
+                  name: "John's Handyman Services",
+                  rating: 4.5,
+                  reviews: 120,
+                  image: "/placeholder-service.jpg",
+                  category: "Mounting",
+                },
+                matchScore: 0.85,
+              },
+              {
+                id: 2,
+                provider: {
+                  id: "provider2",
+                  name: "Jane's Moving Co.",
+                  rating: 4.2,
+                  reviews: 85,
+                  image: "/placeholder-service.jpg",
+                  category: "Moving",
+                },
+                matchScore: 0.78,
+              },
+            ],
+          })
+        }
+        return newMessages
+      })
+      scrollToBottom()
+    }, 2000)
+  }
+
+  const handleOptionSelect = (option: string) => {
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      { id: Date.now(), type: "user", content: option, timestamp: new Date() },
+      { id: Date.now() + 1, type: "loading", content: "Levl is searching...", timestamp: new Date() },
+    ])
+
+    setTimeout(() => {
+      setMessages((prevMessages) => {
+        const loadingMessageIndex = prevMessages.findIndex((msg) => msg.type === "loading")
+        const newMessages = [...prevMessages]
+        if (loadingMessageIndex !== -1) {
+          newMessages.splice(loadingMessageIndex, 1, {
+            id: Date.now() + 2,
+            type: "ai",
+            content: `Great choice! Here are some top-rated providers for ${option.toLowerCase()}.`,
+            timestamp: new Date(),
+            services: [
+              {
+                id: 1,
+                provider: {
+                  id: "provider1",
+                  name: "John's Handyman Services",
+                  rating: 4.5,
+                  reviews: 120,
+                  image: "/placeholder-service.jpg",
+                  category: "Mounting",
+                },
+                matchScore: 0.85,
+              },
+              {
+                id: 2,
+                provider: {
+                  id: "provider2",
+                  name: "Jane's Moving Co.",
+                  rating: 4.2,
+                  reviews: 85,
+                  image: "/placeholder-service.jpg",
+                  category: "Moving",
+                },
+                matchScore: 0.78,
+              },
+            ],
+          })
+        }
+        return newMessages
+      })
+      scrollToBottom()
+    }, 2000)
+  }
+
+  const handleServiceSelect = (serviceId: string) => {
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      {
+        id: Date.now(),
+        type: "ai",
+        content: `You selected service with ID: ${serviceId}. Do you want to proceed with this provider?`,
+        timestamp: new Date(),
+        feedbackOptions: ["Yes", "No"],
+      },
+    ])
+    scrollToBottom()
+  }
+
+  const handleFeedbackSelect = (feedback: string) => {
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      { id: Date.now(), type: "feedback", content: `You selected: ${feedback}`, timestamp: new Date() },
+    ])
+    scrollToBottom()
+  }
+
+  const sendMessage = async (message: string) => {
+    setIsTyping(true)
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      { id: Date.now(), type: "user", content: message, timestamp: new Date() },
+    ])
+    setInputValue("")
+
+    // Simulate AI response after a short delay
+    setTimeout(() => {
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          id: Date.now() + 1,
+          type: "ai",
+          content: `Thanks for your message! I'm processing your request: "${message}"`,
+          timestamp: new Date(),
+        },
+      ])
+      setIsTyping(false)
+      scrollToBottom()
+    }, 1500)
+  }
+
+  const onSubmit = async (event: React.FormEvent) => {
+    event.preventDefault()
+    if (inputValue.trim()) {
+      await sendMessage(inputValue)
+    }
+  }
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
+
   return (
-    <div className="space-y-4 pb-8">
+    <div className="space-y-4 pb-8 bg-gradient-to-b from-lavender-50/50 via-white to-lavender-100/30 min-h-screen">
       {/* Notification toast */}
       <AnimatePresence>
         {showNotification && (
           <motion.div
-            className="fixed top-4 right-4 z-50 bg-gradient-to-r from-primary to-purple-600 text-white px-4 py-2 rounded-lg shadow-lg flex items-center"
+            className="fixed top-4 right-4 z-50 bg-gradient-to-r from-lavender-400 to-lavender-600 text-white px-4 py-2 rounded-lg shadow-lg flex items-center"
             initial={{ opacity: 0, y: -20, scale: 0.8 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.8 }}
@@ -356,41 +546,60 @@ export function ForumTab() {
       </AnimatePresence>
 
       {/* Header with search and new topic button - Enhanced with Levl UI/UX */}
-      <div className="bg-gradient-to-br from-purple-50/90 via-lavender-100/80 to-white/90 backdrop-blur-sm rounded-xl p-5 shadow-lg border border-lavender-300/50 transition-all duration-300 hover:shadow-lavender-200/30">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-          <div className="relative flex-1 group">
+      <div
+        className="flex flex-col p-6 rounded-xl border bg-card text-card-foreground transition-all relative overflow-visible
+bg-gradient-to-br from-lavender-50/95 via-white/90 to-lavender-100/90 backdrop-blur-sm
+shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25),0_10px_20px_-5px_rgba(0,0,0,0.2),0_0_0_1px_rgba(0,0,0,0.05)]
+border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/40 
+border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 
+transform translate-y-0 translateZ-0 filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.15)]"
+      >
+        {/* Decorative elements exactly like category cards */}
+        <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-lavender-400/10 to-transparent rounded-bl-full transform transition-transform duration-700 group-hover:scale-110"></div>
+        <div className="absolute -bottom-8 -left-8 w-40 h-40 bg-gradient-to-tr from-lavender-500/15 to-transparent rounded-tr-full transform transition-transform duration-700 group-hover:scale-110"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(233,213,255,0.2)_1px,transparent_1px)] bg-[length:20px_20px] opacity-30 group-hover:opacity-50 transition-opacity duration-500"></div>
+
+        {/* Animated accent line exactly like category cards */}
+        <div className="absolute h-[2px] w-1/3 bg-gradient-to-r from-transparent via-lavender-400/60 to-transparent top-0 left-0 animate-shimmer"></div>
+
+        {/* Additional decorative elements from category cards */}
+        <div className="absolute bottom-0 right-0 w-24 h-24 bg-gradient-to-tl from-lavender-300/5 to-transparent rounded-tl-full"></div>
+        <div className="absolute top-1/2 left-0 w-12 h-24 bg-gradient-to-r from-lavender-400/5 to-transparent"></div>
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 relative z-10">
+          <div className="relative flex-1">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-primary/70 group-hover:text-primary transition-colors duration-200" />
+              <Search className="h-4 w-4 text-lavender-500/70 transition-colors duration-200" />
             </div>
             <Input
               type="text"
               placeholder="Search forum topics..."
-              className="pl-10 pr-4 py-2.5 w-full rounded-lg border border-lavender-200 focus:border-primary/60 focus:ring-2 focus:ring-primary/20 bg-white/80 hover:bg-white transition-all duration-200 text-sm placeholder:text-gray-400"
+              className="pl-10 pr-4 py-2.5 w-full rounded-lg border border-lavender-200 focus:border-lavender-400/60 focus:ring-2 focus:ring-lavender-300/30 bg-white/80 transition-all duration-200 text-sm placeholder:text-gray-400"
               value={searchQuery}
               onChange={handleSearch}
             />
-            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none opacity-0 transition-opacity duration-200">
               <span className="text-xs text-gray-400">Press / to search</span>
             </div>
           </div>
           <button
-            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary/90 to-purple-500 hover:from-primary hover:to-purple-400 text-white rounded-lg font-medium text-sm transition-all duration-200 hover:shadow-md hover:shadow-primary/20 active:scale-[0.98] group"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-lavender-300 to-lavender-500 text-white rounded-lg font-medium text-sm transition-all duration-200 shadow-lavender-400/20"
             onClick={() => setShowNewTopicForm(true)}
           >
-            <PlusCircle className="h-4 w-4 group-hover:rotate-90 transition-transform duration-300" />
+            <PlusCircle className="h-4 w-4 transition-transform duration-300" />
             <span>New Topic</span>
           </button>
         </div>
 
         {/* Forum categories */}
-        <div className="flex flex-wrap gap-2 mb-2">
+        <div className="flex flex-wrap gap-2 mb-2 relative z-10">
           {["All Topics", "Announcements", "Discussions", "Questions", "Resources", "Events"].map((category) => (
             <button
               key={category}
               className={`px-3 py-1.5 text-xs rounded-full transition-all duration-200 ${
                 category === "All Topics"
-                  ? "bg-primary/10 text-primary font-medium border-2 border-primary/20"
-                  : "bg-lavender-50 text-gray-600 hover:bg-lavender-100 border border-lavender-200/50"
+                  ? "bg-lavender-100/80 text-lavender-700 font-medium border-2 border-lavender-300/40"
+                  : "bg-lavender-50 text-gray-600 border border-lavender-200/50"
               }`}
             >
               {category}
@@ -399,16 +608,14 @@ export function ForumTab() {
         </div>
 
         {/* Sort options */}
-        <div className="flex items-center justify-between text-xs text-gray-500">
+        <div className="flex items-center justify-between text-xs text-gray-500 relative z-10">
           <div className="flex items-center gap-3">
             <span className="font-medium">Sort by:</span>
             <div className="flex items-center gap-3">
               {["Latest", "Popular", "Unanswered"].map((option, index) => (
                 <button
                   key={option}
-                  className={`transition-colors duration-200 ${
-                    index === 0 ? "text-primary font-medium" : "hover:text-gray-700"
-                  }`}
+                  className={`transition-colors duration-200 ${index === 0 ? "text-lavender-600 font-medium" : ""}`}
                   onClick={() => setSortBy(index === 0 ? "recent" : index === 1 ? "popular" : "replies")}
                 >
                   {option}
@@ -417,7 +624,7 @@ export function ForumTab() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Filter className="h-3 w-3" />
+            <Filter className="h-3 w-3 text-lavender-500" />
             <span>Filters</span>
           </div>
         </div>
@@ -431,13 +638,19 @@ export function ForumTab() {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm rounded-xl p-4 border border-primary/20 mb-4 relative overflow-hidden"
+            className="flex flex-col p-6 rounded-xl border bg-card text-card-foreground transition-all relative overflow-visible
+bg-gradient-to-br from-lavender-50/95 via-white/90 to-lavender-100/90 backdrop-blur-sm
+shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25),0_10px_20px_-5px_rgba(0,0,0,0.2),0_0_0_1px_rgba(0,0,0,0.05)]
+border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/40 
+border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 
+transform translate-y-0 translateZ-0 filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.15)]
+mb-4"
           >
             {/* Background pattern */}
             <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_10px_10px,rgba(var(--primary-rgb),0.4)_1px,transparent_1px)] bg-[length:20px_20px] pointer-events-none"></div>
 
             <h3 className="text-sm font-semibold text-gray-800 mb-3 flex items-center">
-              <Sparkles className="h-4 w-4 mr-2 text-primary" />
+              <Sparkles className="h-4 w-4 mr-2 text-lavender-600" />
               Create New Discussion
             </h3>
 
@@ -457,7 +670,7 @@ export function ForumTab() {
               <div className="relative">
                 <textarea
                   placeholder="What would you like to discuss?"
-                  className="w-full h-24 px-3 py-2 text-sm bg-white/5 dark:bg-black/20 rounded-md border border-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/30 outline-none transition-colors resize-none text-gray-800"
+                  className="w-full h-24 px-3 py-2 text-sm bg-white/5 dark:bg-black/20 rounded-md border border-white/10 focus:border-lavender-500/50 focus:ring-1 focus:ring-lavender-400/30 outline-none transition-colors resize-none text-gray-800"
                   value={newTopicContent}
                   onChange={(e) => setNewTopicContent(e.target.value)}
                 />
@@ -467,7 +680,7 @@ export function ForumTab() {
               <div className="flex items-center">
                 <div className="relative flex-1">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Target className="h-3.5 w-3.5 text-primary/60" />
+                    <Target className="h-3.5 w-3.5 text-lavender-500/60" />
                   </div>
                   <Input
                     placeholder="Tags (comma separated)"
@@ -483,7 +696,7 @@ export function ForumTab() {
                 <Button
                   variant="default"
                   size="sm"
-                  className="gap-1 text-xs bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white"
+                  className="gap-1 text-xs bg-gradient-to-r from-lavender-300 to-lavender-500 hover:from-lavender-400 hover:to-lavender-600 text-white"
                   onClick={handleCreateTopic}
                   disabled={!newTopicTitle.trim() || !newTopicContent.trim()}
                 >
@@ -498,14 +711,14 @@ export function ForumTab() {
 
       {/* Category tabs - Enhanced with Levl UI/UX */}
       <div className="flex overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide space-x-1 mb-1 relative">
-        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
+        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-lavender-400/20 to-transparent"></div>
 
         {categories.map((category) => (
           <motion.button
             key={category.id}
             className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 flex items-center relative ${
               activeCategory === category.id
-                ? "bg-gradient-to-r from-primary to-purple-500 text-white shadow-lg shadow-primary/20"
+                ? "bg-gradient-to-r from-lavender-400 to-lavender-600 text-white shadow-lg shadow-lavender-400/20"
                 : "bg-white/80 text-gray-700 hover:bg-lavender-50 border border-lavender-200/70"
             }`}
             onClick={() => setActiveCategory(category.id)}
@@ -527,9 +740,9 @@ export function ForumTab() {
                   className="absolute inset-0 rounded-full opacity-0"
                   animate={{
                     boxShadow: [
-                      "0 0 0px 0px rgba(147, 51, 234, 0)",
-                      "0 0 8px 2px rgba(147, 51, 234, 0.3)",
-                      "0 0 0px 0px rgba(147, 51, 234, 0)",
+                      "0 0 0px 0px rgba(147, 112, 219, 0)",
+                      "0 0 8px 2px rgba(147, 112, 219, 0.3)",
+                      "0 0 0px 0px rgba(147,  112, 219, 0)",
                     ],
                     opacity: [0, 0.7, 0],
                   }}
@@ -542,59 +755,100 @@ export function ForumTab() {
       </div>
 
       {/* Trending Topics - Enhanced with Levl UI/UX */}
-      <div className="bg-gradient-to-br from-white/80 via-lavender-50/80 to-white/80 backdrop-blur-sm rounded-xl p-3 mb-2 border border-lavender-200/50 relative overflow-hidden">
+      <div
+        className="flex flex-col p-6 rounded-xl border bg-card text-card-foreground transition-all group relative overflow-visible
+bg-gradient-to-br from-lavender-50/95 via-white/90 to-lavender-100/90 backdrop-blur-sm
+shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25),0_10px_20px_-5px_rgba(0,0,0,0.2),0_0_0_1px_rgba(0,0,0,0.05)]
+border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/40 
+border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 
+transform translate-y-0 translateZ-0 filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.15)]
+mb-3"
+      >
         {/* Decorative elements */}
-        <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-purple-500/10 to-transparent rounded-bl-full"></div>
-        <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-gradient-to-tr from-primary/10 to-transparent rounded-tr-full"></div>
+        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-lavender-400/10 to-transparent rounded-bl-full transform transition-transform duration-700 group-hover:scale-110"></div>
+        <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-gradient-to-tr from-lavender-500/15 to-transparent rounded-tr-full transform transition-transform duration-700 group-hover:scale-110"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(233,213,255,0.2)_1px,transparent_1px)] bg-[length:20px_20px] opacity-30 group-hover:opacity-50 transition-opacity duration-500"></div>
+
+        {/* Animated accent line */}
+        <div className="absolute h-[2px] w-1/3 bg-gradient-to-r from-transparent via-lavender-400/60 to-transparent top-0 left-0 animate-shimmer"></div>
 
         <div className="flex items-center justify-between mb-3 relative z-10">
-          <h4 className="text-xs font-medium text-gray-800 flex items-center">
-            <div className="h-5 w-5 rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 flex items-center justify-center mr-1.5">
-              <TrendingUp className="h-3 w-3 text-primary" />
+          <h4 className="text-sm font-semibold text-gray-800 flex items-center">
+            <div className="h-6 w-6 rounded-full bg-gradient-to-r from-lavender-300 to-lavender-400 flex items-center justify-center mr-2 shadow-sm shadow-lavender-300/30">
+              <TrendingUp className="h-3 w-3 text-white" />
             </div>
-            Trending Topics
+            <span className="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+              Trending Discussions
+            </span>
           </h4>
           <motion.button
-            whileHover={{ scale: 1.05, x: 1 }}
+            whileHover={{ scale: 1.05, x: 2 }}
             whileTap={{ scale: 0.95 }}
-            className="text-xs text-primary flex items-center"
+            className="text-xs text-lavender-600 flex items-center font-medium px-2 py-1 rounded-full bg-lavender-50/80 border border-lavender-200/50 hover:bg-lavender-100/80 transition-colors duration-200"
           >
             View All <ArrowRight className="h-3 w-3 ml-1" />
           </motion.button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
           {[
-            { title: "Best power drill for beginners", views: 342, hot: true },
-            { title: "How to find studs without a stud finder", views: 289 },
-            { title: "Wall anchors vs. toggle bolts", views: 215 },
-            { title: "Mounting a TV on drywall safely", views: 198 },
+            { title: "Best power drill for mounting TVs", views: 342, hot: true, time: "3h ago", replies: 18 },
+            { title: "How to find studs without a stud finder", views: 289, hot: false, time: "5h ago", replies: 12 },
+            { title: "Wall anchors vs. toggle bolts comparison", views: 215, hot: false, time: "1d ago", replies: 9 },
+            { title: "Mounting a TV on drywall safely", views: 198, hot: true, time: "2d ago", replies: 14 },
           ].map((topic, i) => (
             <motion.div
               key={i}
-              className="group cursor-pointer bg-white/50 hover:bg-white rounded-lg p-2 border border-transparent hover:border-lavender-200/70 transition-all duration-200"
-              whileHover={{ y: -2, boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}
+              className="group/card cursor-pointer bg-white/70 hover:bg-white rounded-lg p-3 border border-lavender-200/30 hover:border-lavender-300/50 transition-all duration-200 relative overflow-hidden"
+              whileHover={{ y: -2, boxShadow: "0 8px 20px rgba(147, 51, 234, 0.08)" }}
             >
-              <div className="flex justify-between items-start">
-                <div className="text-xs text-gray-700 group-hover:text-primary transition-colors line-clamp-1 font-medium">
+              {/* Card accent */}
+              <div className="absolute top-0 left-0 h-full w-1 bg-gradient-to-b from-lavender-300/40 via-lavender-400/20 to-lavender-300/40 rounded-l-lg"></div>
+
+              <div className="flex justify-between items-start pl-2">
+                <div className="text-sm text-gray-800 group-hover/card:text-lavender-700 transition-colors line-clamp-1 font-medium">
                   {topic.title}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between mt-2 pl-2">
+                <div className="flex items-center space-x-3">
+                  <div className="flex items-center text-xs text-gray-500">
+                    <Eye className="h-3 w-3 mr-1 text-lavender-400" />
+                    <span>{topic.views}</span>
+                  </div>
+                  <div className="flex items-center text-xs text-gray-500">
+                    <MessageSquare className="h-3 w-3 mr-1 text-lavender-400" />
+                    <span>{topic.replies}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center">
                   {topic.hot && (
-                    <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] bg-primary/10 text-primary">
+                    <span className="mr-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] bg-lavender-100 text-lavender-700 font-medium">
                       <TrendingUp className="h-2 w-2 mr-0.5" /> Hot
                     </span>
                   )}
+                  <div className="text-xs text-gray-400">{topic.time}</div>
                 </div>
               </div>
-              <div className="flex items-center justify-between mt-1">
-                <div className="flex items-center text-xs text-gray-500">
-                  <Eye className="h-3 w-3 mr-1 text-gray-400" />
-                  {topic.views} views
-                </div>
-                <div className="text-xs text-gray-400">3h ago</div>
-              </div>
+
+              {/* Hover indicator */}
+              <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-lavender-300 to-lavender-400 transform scale-x-0 group-hover/card:scale-x-100 transition-transform duration-300 origin-left"></div>
             </motion.div>
           ))}
         </div>
+
+        {/* Add this to your globals.css or inline style */}
+        <style jsx>{`
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(400%); }
+        }
+        .animate-shimmer {
+          animation: shimmer 6s infinite;
+        }
+      `}</style>
       </div>
 
       {/* Topics list */}
@@ -605,21 +859,31 @@ export function ForumTab() {
               key={topic.id}
               className={`${
                 viewMode === "card" ? "p-6" : "p-5"
-              } rounded-xl bg-gradient-to-br from-white/95 via-lavender-50/80 to-white/90 backdrop-blur-sm border hover:border-primary/40 transition-all duration-300 relative overflow-hidden cursor-pointer shadow-sm hover:shadow-md ${
-                activeTopic === topic.id ? "border-primary/40 bg-primary/5 shadow-primary/10" : "border-lavender-200/50"
-              } ${viewMode === "card" ? "min-h-[240px]" : "min-h-[120px]"}`}
+              } flex flex-col rounded-xl border bg-card text-card-foreground transition-all cursor-pointer group relative overflow-visible
+bg-gradient-to-br from-lavender-50/95 via-white/90 to-lavender-100/90 backdrop-blur-sm
+shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25),0_10px_20px_-5px_rgba(0,0,0,0.2),0_0_0_1px_rgba(0,0,0,0.05)]
+border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/40 
+border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 
+transform translate-y-0 translateZ-0 filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.15)]
+${activeTopic === topic.id ? "border-lavender-400/60 bg-lavender-50/40" : "hover:border-lavender-300/60"}
+${viewMode === "card" ? "min-h-[240px]" : "min-h-[120px]"}`}
               onClick={() => setActiveTopic(activeTopic === topic.id ? null : topic.id)}
-              whileHover={{ scale: 1.01, y: -2, boxShadow: "0 8px 24px rgba(147, 51, 234, 0.08)" }}
+              whileTap={{ scale: 0.99 }}
               layout
             >
               {/* Decorative elements */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-purple-500/5 to-transparent rounded-bl-full"></div>
-              <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-gradient-to-tr from-primary/5 to-transparent rounded-tr-full"></div>
+              <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-lavender-400/10 to-transparent rounded-bl-full transform transition-transform duration-700 group-hover:scale-110"></div>
+              <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-gradient-to-tr from-lavender-500/10 to-transparent rounded-tr-full transform transition-transform duration-700 group-hover:scale-110"></div>
+
+              {/* Animated accent line */}
+              <div
+                className={`absolute h-[3px] w-1/2 bg-gradient-to-r from-transparent via-lavender-500/70 to-transparent top-0 left-0 ${activeTopic === topic.id ? "opacity-100" : "opacity-0"} transition-opacity duration-500`}
+              ></div>
 
               {/* Background pattern */}
               <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_10px_10px,rgba(var(--primary-rgb),0.4)_1px,transparent_1px)] bg-[length:20px_20px] pointer-events-none"></div>
 
-              {/* Bookmark button */}
+              {/* Bookmark button with enhanced styling */}
               <div
                 className="absolute top-3 right-3 z-10"
                 onClick={(e) => {
@@ -628,12 +892,20 @@ export function ForumTab() {
                 }}
               >
                 <motion.button
-                  whileHover={{ scale: 1.2 }}
+                  whileHover={{ scale: 1.2, rotate: userBookmarks.includes(topic.id) ? 0 : 20 }}
                   whileTap={{ scale: 0.9 }}
-                  className="h-7 w-7 flex items-center justify-center rounded-full bg-white shadow-sm hover:shadow-md transition-all duration-200"
+                  className={`h-8 w-8 flex items-center justify-center rounded-full transition-all duration-200 ${
+                    userBookmarks.includes(topic.id)
+                      ? "bg-gradient-to-br from-yellow-100 to-yellow-200 shadow-md shadow-yellow-200/30"
+                      : "bg-white/80 hover:bg-white shadow-sm hover:shadow-md"
+                  }`}
                 >
                   <Star
-                    className={`h-4 w-4 ${userBookmarks.includes(topic.id) ? "text-yellow-500 fill-yellow-500" : "text-gray-400"}`}
+                    className={`h-4 w-4 ${
+                      userBookmarks.includes(topic.id)
+                        ? "text-yellow-500 fill-yellow-500"
+                        : "text-lavender-400 hover:text-lavender-500"
+                    }`}
                   />
                 </motion.button>
               </div>
@@ -643,11 +915,11 @@ export function ForumTab() {
                   <div className="flex justify-between items-start pr-8">
                     <div>
                       <div className="flex items-center">
-                        <div className="text-base font-medium text-gray-800 group-hover:text-primary transition-colors duration-200">
+                        <div className="text-base font-medium text-gray-800 group-hover:text-lavender-700 transition-colors duration-200">
                           {topic.title}
                         </div>
                         {topic.replies > 10 && (
-                          <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-primary/10 text-primary rounded-full flex items-center">
+                          <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-lavender-100 text-lavender-700 rounded-full flex items-center">
                             <TrendingUp className="h-3 w-3 mr-1" /> Hot
                           </span>
                         )}
@@ -656,9 +928,9 @@ export function ForumTab() {
                         {topic.tags.map((tag) => (
                           <div
                             key={tag}
-                            className="px-2.5 py-0.5 rounded-full bg-lavender-100/80 text-xs flex items-center text-primary/80 font-medium border border-lavender-200/50"
+                            className="px-2.5 py-0.5 rounded-full bg-white/80 text-xs flex items-center text-lavender-700 font-medium border border-lavender-200/70 shadow-sm"
                           >
-                            <span className="h-1.5 w-1.5 rounded-full bg-primary/70 mr-1.5"></span>
+                            <span className="h-1.5 w-1.5 rounded-full bg-lavender-400 mr-1.5"></span>
                             {tag}
                           </div>
                         ))}
@@ -667,55 +939,63 @@ export function ForumTab() {
                     <div className="text-right text-xs">
                       <div className="text-gray-500 font-medium">{topic.lastActive}</div>
                       <div className="flex items-center justify-end mt-1.5 space-x-3">
-                        <div className="flex items-center px-2 py-1 rounded-full bg-lavender-50/80 border border-lavender-200/30">
-                          <MessageSquare className="h-3 w-3 mr-1 text-primary" />
+                        <div className="flex items-center px-2 py-1 rounded-full bg-white/70 border border-lavender-200/50 shadow-sm">
+                          <MessageSquare className="h-3 w-3 mr-1 text-lavender-500" />
                           <span className="text-gray-700 font-medium">{topic.replies}</span>
                         </div>
-                        <div className="flex items-center px-2 py-1 rounded-full bg-lavender-50/80 border border-lavender-200/30">
-                          <ThumbsUp className="h-3 w-3 mr-1 text-primary/70" />
+                        <div className="flex items-center px-2 py-1 rounded-full bg-white/70 border border-lavender-200/50 shadow-sm">
+                          <ThumbsUp className="h-3 w-3 mr-1 text-lavender-500" />
                           <span className="text-gray-700 font-medium">{topic.likes}</span>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Preview text */}
-                  <div className="mt-4 text-sm text-gray-600 line-clamp-2 leading-relaxed">{topic.preview}</div>
+                  {/* Preview text with enhanced styling */}
+                  <div className="mt-4 text-sm text-gray-600 line-clamp-2 leading-relaxed bg-white/50 p-3 rounded-lg border border-lavender-100/50">
+                    {topic.preview}
+                  </div>
 
-                  {/* Author info */}
+                  {/* Author info with enhanced styling */}
                   <div
                     className="flex items-center mt-5 pt-4 border-t border-lavender-200/30"
                     onMouseEnter={() => setShowUserTooltip(topic.id)}
                     onMouseLeave={() => setShowUserTooltip(null)}
                   >
                     <div className="relative">
-                      <div className="h-8 w-8 rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 flex items-center justify-center text-sm font-bold text-primary border border-lavender-200/50 shadow-sm">
+                      <div className="h-9 w-9 rounded-full bg-gradient-to-r from-lavender-300 to-lavender-400 flex items-center justify-center text-sm font-bold text-white border border-lavender-200/50 shadow-md">
                         {topic.author.charAt(0)}
                       </div>
 
-                      {/* User tooltip */}
+                      {/* User tooltip with enhanced styling */}
                       {showUserTooltip === topic.id && (
                         <motion.div
-                          className="absolute bottom-full left-0 mb-2 w-56 bg-white rounded-lg shadow-lg p-3 z-50 border border-lavender-200"
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.2 }}
+                          className="absolute bottom-full left-0 mb-2 w-60 bg-white rounded-lg shadow-xl p-4 z-50 border border-lavender-200"
+                          initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          transition={{ duration: 0.2, type: "spring", stiffness: 500 }}
                         >
                           <div className="flex items-start gap-3">
-                            <div className="h-10 w-10 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center text-sm font-bold text-white">
+                            <div className="h-12 w-12 rounded-full bg-gradient-to-r from-lavender-400 to-lavender-500 flex items-center justify-center text-base font-bold text-white shadow-md">
                               {topic.author.charAt(0)}
                             </div>
                             <div>
                               <div className="font-medium text-gray-800">{topic.author}</div>
                               <div className="text-xs text-gray-500">Member since 2023</div>
-                              <div className="flex items-center mt-1 text-xs text-gray-600">
-                                <Star className="h-3 w-3 text-yellow-500 fill-yellow-500 mr-0.5" />
-                                <span>4.8</span>
-                                <span className="mx-1">•</span>
-                                <span>42 topics</span>
+                              <div className="flex items-center mt-2 text-xs text-gray-600">
+                                <div className="flex items-center bg-lavender-50 px-2 py-1 rounded-full">
+                                  <Star className="h-3 w-3 text-yellow-500 fill-yellow-500 mr-1" />
+                                  <span>4.8</span>
+                                </div>
+                                <span className="mx-1.5">•</span>
+                                <div className="flex items-center bg-lavender-50 px-2 py-1 rounded-full">
+                                  <MessageSquare className="h-3 w-3 text-lavender-500 mr-1" />
+                                  <span>42 topics</span>
+                                </div>
                               </div>
                             </div>
                           </div>
+                          <div className="absolute -bottom-2 left-4 w-4 h-4 bg-white border-b border-r border-lavender-200 transform rotate-45"></div>
                         </motion.div>
                       )}
                     </div>
@@ -725,7 +1005,7 @@ export function ForumTab() {
                     </div>
                   </div>
 
-                  {/* Expanded topic with responses */}
+                  {/* Expanded topic with responses - enhanced styling */}
                   {activeTopic === topic.id && (
                     <motion.div
                       className="mt-5 pt-5 border-t border-lavender-200/30"
@@ -739,10 +1019,10 @@ export function ForumTab() {
                           topic.responses.map((response, index) => (
                             <div
                               key={index}
-                              className="bg-white/50 rounded-lg p-4 border border-lavender-200/30 min-h-[120px]"
+                              className="bg-white/70 rounded-lg p-4 border border-lavender-200/50 min-h-[120px] shadow-sm hover:shadow-md transition-all duration-200 hover:bg-white"
                             >
                               <div className="flex items-start gap-3">
-                                <div className="h-7 w-7 rounded-full bg-gradient-to-r from-primary/10 to-purple-500/10 flex items-center justify-center text-xs font-bold text-primary border border-lavender-200/30">
+                                <div className="h-8 w-8 rounded-full bg-gradient-to-r from-lavender-200 to-lavender-300 flex items-center justify-center text-xs font-bold text-white border border-lavender-200/30 shadow-sm">
                                   {response.author.charAt(0)}
                                 </div>
                                 <div className="flex-1">
@@ -754,7 +1034,7 @@ export function ForumTab() {
                                     </div>
                                     <div className="flex items-center gap-1">
                                       <button
-                                        className="p-1 rounded-full hover:bg-lavender-100/50 transition-colors"
+                                        className="p-1.5 rounded-full hover:bg-lavender-100/50 transition-colors"
                                         onClick={(e) => {
                                           e.stopPropagation()
                                           handleVote(topic.id, index, "up")
@@ -763,7 +1043,7 @@ export function ForumTab() {
                                         <ThumbsUp
                                           className={`h-3.5 w-3.5 ${
                                             userVotes[`${topic.id}-${index}`]?.up
-                                              ? "text-primary fill-primary"
+                                              ? "text-lavender-500 fill-lavender-500"
                                               : "text-gray-400"
                                           }`}
                                         />
@@ -771,27 +1051,30 @@ export function ForumTab() {
                                       <span className="text-xs font-medium text-gray-600">{response.likes}</span>
                                     </div>
                                   </div>
-                                  <p className="text-sm text-gray-600 mt-2">{response.content}</p>
+                                  <p className="text-sm text-gray-600 mt-2 bg-lavender-50/50 p-3 rounded-lg border border-lavender-100/30">
+                                    {response.content}
+                                  </p>
                                 </div>
                               </div>
                             </div>
                           ))
                         ) : (
-                          <div className="text-center py-4 text-sm text-gray-500">
-                            No responses yet. Be the first to reply!
+                          <div className="text-center py-6 text-sm text-gray-500 bg-white/50 rounded-lg border border-lavender-200/30">
+                            <MessageSquare className="h-5 w-5 mx-auto mb-2 text-lavender-300" />
+                            <p>No responses yet. Be the first to reply!</p>
                           </div>
                         )}
                       </div>
 
-                      {/* Reply form */}
-                      <div className="mt-4 flex gap-3">
-                        <div className="h-8 w-8 rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 flex items-center justify-center text-sm font-bold text-primary border border-lavender-200/50">
+                      {/* Reply form with enhanced styling */}
+                      <div className="mt-5 flex gap-3">
+                        <div className="h-9 w-9 rounded-full bg-gradient-to-r from-lavender-300 to-lavender-400 flex items-center justify-center text-sm font-bold text-white border border-lavender-200/50 shadow-md">
                           Y
                         </div>
                         <div className="flex-1 relative">
                           <textarea
                             placeholder="Write a reply..."
-                            className="w-full h-36 px-4 py-3 text-sm bg-white rounded-lg border border-lavender-200/50 focus:border-primary/50 focus:ring-1 focus:ring-primary/30 outline-none transition-colors resize-none"
+                            className="w-full h-36 px-4 py-3 text-sm bg-white rounded-lg border border-lavender-200/70 focus:border-lavender-400/60 focus:ring-2 focus:ring-lavender-300/30 outline-none transition-colors resize-none shadow-sm"
                             value={replyContent}
                             onChange={(e) => setReplyContent(e.target.value)}
                             onClick={(e) => e.stopPropagation()}
@@ -799,7 +1082,7 @@ export function ForumTab() {
                           <Button
                             variant="default"
                             size="sm"
-                            className="absolute bottom-3 right-3 gap-1 text-xs bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white"
+                            className="absolute bottom-3 right-3 gap-1 text-xs bg-gradient-to-r from-lavender-400 to-lavender-500 hover:from-lavender-500 hover:to-lavender-600 text-white shadow-md hover:shadow-lg transition-all duration-200"
                             onClick={(e) => {
                               e.stopPropagation()
                               handleReply(topic.id)
@@ -815,10 +1098,10 @@ export function ForumTab() {
                   )}
                 </>
               ) : (
-                // Compact view
+                // Compact view with enhanced styling
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="h-9 w-9 rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 flex items-center justify-center text-sm font-bold text-primary border border-lavender-200/50 shadow-sm">
+                    <div className="h-9 w-9 rounded-full bg-gradient-to-r from-lavender-300 to-lavender-400 flex items-center justify-center text-sm font-bold text-white border border-lavender-200/50 shadow-md">
                       {topic.author.charAt(0)}
                     </div>
                     <div className="min-w-0">
@@ -831,12 +1114,12 @@ export function ForumTab() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3 ml-2">
-                    <div className="flex items-center px-2 py-1 rounded-full bg-lavender-50/80 border border-lavender-200/30">
-                      <MessageSquare className="h-3 w-3 mr-1 text-primary" />
+                    <div className="flex items-center px-2 py-1 rounded-full bg-white/70 border border-lavender-200/50 shadow-sm">
+                      <MessageSquare className="h-3 w-3 mr-1 text-lavender-500" />
                       <span className="text-xs text-gray-700 font-medium">{topic.replies}</span>
                     </div>
-                    <div className="flex items-center px-2 py-1 rounded-full bg-lavender-50/80 border border-lavender-200/30">
-                      <ThumbsUp className="h-3 w-3 mr-1 text-primary/70" />
+                    <div className="flex items-center px-2 py-1 rounded-full bg-white/70 border border-lavender-200/50 shadow-sm">
+                      <ThumbsUp className="h-3 w-3 mr-1 text-lavender-500" />
                       <span className="text-xs text-gray-700 font-medium">{topic.likes}</span>
                     </div>
                   </div>
@@ -845,8 +1128,16 @@ export function ForumTab() {
             </motion.div>
           ))
         ) : (
-          <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50 text-center">
-            <MessageSquare className="h-8 w-8 mx-auto mb-2 text-primary/50" />
+          <div
+            className="flex flex-col p-6 rounded-xl border bg-card text-card-foreground transition-all group relative overflow-visible
+bg-gradient-to-br from-lavender-50/95 via-white/90 to-lavender-100/90 backdrop-blur-sm
+shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25),0_10px_20px_-5px_rgba(0,0,0,0.2),0_0_0_1px_rgba(0,0,0,0.05)]
+border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/40 
+border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 
+transform translate-y-0 translateZ-0 filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.15)]
+text-center"
+          >
+            <MessageSquare className="h-8 w-8 mx-auto mb-2 text-lavender-500/50" />
             <h3 className="text-sm font-medium text-gray-800 mb-1">No topics found</h3>
             <p className="text-xs text-gray-500 mb-3">
               {searchQuery ? "Try adjusting your search or filters" : "Be the first to start a discussion"}
@@ -854,7 +1145,7 @@ export function ForumTab() {
             <Button
               variant="default"
               size="sm"
-              className="mx-auto gap-1 text-xs bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white"
+              className="mx-auto gap-1 text-xs bg-gradient-to-r from-lavender-300 to-lavender-500 hover:from-lavender-400 hover:to-lavender-600 text-white"
               onClick={() => setShowNewTopicForm(true)}
             >
               <MessageSquare className="h-3.5 w-3.5" />
@@ -874,12 +1165,12 @@ export function ForumTab() {
               disabled={isLoading}
             >
               {/* Animated gradient background on hover */}
-              <div className="absolute inset-0 w-full bg-gradient-to-r from-primary/0 via-primary/20 to-primary/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+              <div className="absolute inset-0 w-full bg-gradient-to-r from-lavender-400/0 via-lavender-400/20 to-lavender-400/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
 
               {isLoading ? (
                 <span className="flex items-center">
                   <svg
-                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-primary"
+                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-lavender-500"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -902,7 +1193,7 @@ export function ForumTab() {
                 </span>
               ) : (
                 <span className="flex items-center">
-                  <ArrowRight className="mr-2 h-4 w-4 text-primary" />
+                  <ArrowRight className="mr-2 h-4 w-4 text-lavender-500" />
                   Load More Topics
                 </span>
               )}
