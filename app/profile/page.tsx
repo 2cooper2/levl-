@@ -28,7 +28,7 @@ import {
   MessageSquare,
 } from "lucide-react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -36,20 +36,29 @@ import { Textarea } from "@/components/ui/textarea"
 export default function ProfilePage() {
   const { user } = useAuth()
 
-  // Add these CSS style rules
-  const style = document.createElement("style")
-  style.innerHTML = `
-    .perspective-900 { perspective: 900px; }
-    .rotate-x-1 { transform: rotateX(1deg); }
-    .rotate-y-1 { transform: rotateY(1deg); }
-    .rotate-y-5 { transform: rotateY(5deg); }
-    .rotate-y-10 { transform: rotateY(10deg); }
-    .translate-z-5 { transform: translateZ(5px); }
-    .translate-z-10 { transform: translateZ(10px); }
-  `
-  if (typeof document !== "undefined") {
+  // Add custom CSS styles using useEffect to ensure it only runs on the client side
+  useEffect(() => {
+    // Create style element
+    const style = document.createElement("style")
+    style.innerHTML = `
+      .perspective-900 { perspective: 900px; }
+      .rotate-x-1 { transform: rotateX(1deg); }
+      .rotate-y-1 { transform: rotateY(1deg); }
+      .rotate-y-5 { transform: rotateY(5deg); }
+      .rotate-y-10 { transform: rotateY(10deg); }
+      .translate-z-5 { transform: translateZ(5px); }
+      .translate-z-10 { transform: translateZ(10px); }
+    `
+    // Append to document head
     document.head.appendChild(style)
-  }
+
+    // Cleanup function to remove the style when component unmounts
+    return () => {
+      if (style.parentNode) {
+        style.parentNode.removeChild(style)
+      }
+    }
+  }, []) // Empty dependency array means this runs once on mount
 
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false)
   const [profileData, setProfileData] = useState({
