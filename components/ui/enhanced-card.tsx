@@ -1,81 +1,84 @@
-import * as React from "react"
+import type React from "react"
+import {
+  Card as BaseCard,
+  CardContent as BaseCardContent,
+  CardDescription,
+  CardFooter as BaseCardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import { forwardRef } from "react"
 
-const EnhancedCard = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & {
-    interactive?: boolean
-    elevation?: "low" | "medium" | "high"
-  }
->(({ className, interactive = false, elevation = "medium", ...props }, ref) => {
-  const elevationClasses = {
-    low: "shadow-sm",
-    medium: "shadow",
-    high: "shadow-md",
-  }
+export interface EnhancedCardProps extends React.HTMLAttributes<HTMLDivElement> {
+  variant?: "default" | "primary" | "secondary" | "destructive" | "outline"
+  elevation?: "low" | "medium" | "high"
+  hoverable?: boolean
+}
 
-  return (
-    <div
-      ref={ref}
-      className={cn(
-        "rounded-lg border bg-card text-card-foreground",
-        elevationClasses[elevation],
-        interactive && "transition-all duration-200 hover:shadow-md hover:-translate-y-1",
-        className,
-      )}
-      {...props}
-    />
-  )
-})
+const EnhancedCard = forwardRef<HTMLDivElement, EnhancedCardProps>(
+  ({ className, variant = "default", elevation = "low", hoverable = true, children, ...props }, ref) => {
+    let baseShadow =
+      "shadow-[0_1px_3px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_3px_rgba(255,255,255,0.08),0_1px_2px_rgba(255,255,255,0.04)]"
+    let hoverShadow =
+      "hover:shadow-[0_4px_8px_rgba(0,0,0,0.15),0_2px_4px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_4px_8px_rgba(255,255,255,0.1),0_2px_4px_rgba(255,255,255,0.08)]"
+
+    if (elevation === "medium") {
+      baseShadow =
+        "shadow-[0_8px_16px_-4px_rgba(0,0,0,0.1),0_4px_8px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_16px_-4px_rgba(255,255,255,0.08),0_4px_8px_-4px_rgba(255,255,255,0.06)]"
+      hoverShadow =
+        "hover:shadow-[0_12px_24px_-6px_rgba(0,0,0,0.2),0_6px_12px_-6px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_12px_24px_-6px_rgba(255,255,255,0.12),0_6px_12px_-6px_rgba(255,255,255,0.08)]"
+    } else if (elevation === "high") {
+      baseShadow =
+        "shadow-[0_20px_40px_-8px_rgba(0,0,0,0.15),0_10px_20px_-8px_rgba(0,0,0,0.12)] dark:shadow-[0_20px_40px_-8px_rgba(255,255,255,0.1),0_10px_20px_-8px_rgba(255,255,255,0.08)]"
+      hoverShadow =
+        "hover:shadow-[0_30px_60px_-12px_rgba(0,0,0,0.25),0_15px_30px_-12px_rgba(0,0,0,0.15)] dark:hover:shadow-[0_30px_60px_-12px_rgba(255,255,255,0.15),0_15px_30px_-12px_rgba(255,255,255,0.1)]"
+    }
+
+    return (
+      <BaseCard
+        ref={ref}
+        {...props}
+        className={cn(
+          className,
+          baseShadow,
+          hoverable ? hoverShadow : "",
+          variant === "primary" && "bg-primary text-primary-foreground",
+          variant === "secondary" && "bg-secondary text-secondary-foreground",
+          variant === "destructive" && "bg-destructive text-destructive-foreground",
+          variant === "outline" && "border",
+        )}
+      >
+        {children}
+      </BaseCard>
+    )
+  },
+)
+
 EnhancedCard.displayName = "EnhancedCard"
 
-const EnhancedCardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn("flex flex-col space-y-1.5 p-6", className)} {...props} />
-  ),
-)
-EnhancedCardHeader.displayName = "EnhancedCardHeader"
-
-const EnhancedCardTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLHeadingElement>>(
-  ({ className, ...props }, ref) => (
-    <h3 ref={ref} className={cn("text-xl font-semibold leading-tight tracking-tight", className)} {...props} />
-  ),
-)
-EnhancedCardTitle.displayName = "EnhancedCardTitle"
-
-const EnhancedCardDescription = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
-  ({ className, ...props }, ref) => (
-    <p ref={ref} className={cn("text-sm text-muted-foreground", className)} {...props} />
-  ),
-)
-EnhancedCardDescription.displayName = "EnhancedCardDescription"
-
-const EnhancedCardContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />,
+// Enhanced versions of CardContent and CardFooter
+const EnhancedCardContent = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => <BaseCardContent ref={ref} className={cn("p-6", className)} {...props} />,
 )
 EnhancedCardContent.displayName = "EnhancedCardContent"
 
-const EnhancedCardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+const EnhancedCardFooter = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn("flex items-center p-6 pt-0", className)} {...props} />
+    <BaseCardFooter ref={ref} className={cn("flex items-center p-6 pt-0", className)} {...props} />
   ),
 )
 EnhancedCardFooter.displayName = "EnhancedCardFooter"
 
+// Export the original components
 export {
   EnhancedCard,
-  EnhancedCardHeader,
-  EnhancedCardFooter,
-  EnhancedCardTitle,
-  EnhancedCardDescription,
-  EnhancedCardContent,
+  CardHeader,
+  BaseCardFooter as CardFooter,
+  CardTitle,
+  CardDescription,
+  BaseCardContent as CardContent,
 }
 
-export {
-  EnhancedCard as Card,
-  EnhancedCardHeader as CardHeader,
-  EnhancedCardFooter as CardFooter,
-  EnhancedCardTitle as CardTitle,
-  EnhancedCardDescription as CardDescription,
-  EnhancedCardContent as CardContent,
-}
+// Export the enhanced components and Card alias
+export { EnhancedCard as Card, EnhancedCardContent, EnhancedCardFooter }

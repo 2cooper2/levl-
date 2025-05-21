@@ -27,15 +27,16 @@ export function AnimatedGradientBackground() {
     const circles: Circle[] = []
 
     // Add more circles with varied sizes and speeds for a richer effect
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 3; i++) {
+      // Reduce number of circles to improve performance
       circles.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        radius: Math.random() * 300 + 200, // Slightly smaller radius range
-        vx: Math.random() * 0.1 - 0.05, // Slower movement for better performance
-        vy: Math.random() * 0.1 - 0.05,
+        radius: Math.random() * 250 + 150, // Slightly smaller radius range
+        vx: Math.random() * 0.08 - 0.04, // Slower movement for better performance
+        vy: Math.random() * 0.08 - 0.04,
         hue: Math.random() * 40 + 210, // More focused blue-purple palette
-        opacity: Math.random() * 0.12 + 0.04, // Slightly reduced opacity
+        opacity: Math.random() * 0.1, // Slightly reduced opacity
       })
     }
 
