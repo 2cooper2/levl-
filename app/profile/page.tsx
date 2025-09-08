@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import { useEffect, useState } from "react"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -28,28 +29,17 @@ import {
   MessageSquare,
 } from "lucide-react"
 
-import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 
 export default function ProfilePage() {
   const { user } = useAuth()
+  const [isMounted, setIsMounted] = useState(false)
 
-  // Add these CSS style rules
-  const style = document.createElement("style")
-  style.innerHTML = `
-    .perspective-900 { perspective: 900px; }
-    .rotate-x-1 { transform: rotateX(1deg); }
-    .rotate-y-1 { transform: rotateY(1deg); }
-    .rotate-y-5 { transform: rotateY(5deg); }
-    .rotate-y-10 { transform: rotateY(10deg); }
-    .translate-z-5 { transform: translateZ(5px); }
-    .translate-z-10 { transform: translateZ(10px); }
-  `
-  if (typeof document !== "undefined") {
-    document.head.appendChild(style)
-  }
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false)
   const [profileData, setProfileData] = useState({
@@ -99,6 +89,11 @@ export default function ProfilePage() {
 
     // Visual feedback (in a real app, you might use a toast notification)
     alert("Profile updated successfully!")
+  }
+
+  // Don't render until mounted to avoid hydration issues
+  if (!isMounted) {
+    return null
   }
 
   return (
@@ -466,7 +461,7 @@ export default function ProfilePage() {
 
                 <Button
                   variant="outline"
-                  className="w-full mt-4 border-lavender-200/50 hover:bg-lavender-50 hover:border-lavender-300/70 text-lavender-700"
+                  className="w-full mt-4 border-lavender-200/50 hover:bg-lavender-50 hover:border-lavender-300/70 text-lavender-700 bg-transparent"
                 >
                   View All Services
                 </Button>
@@ -531,7 +526,7 @@ export default function ProfilePage() {
 
                 <Button
                   variant="outline"
-                  className="w-full mt-4 border-lavender-200/50 hover:bg-lavender-50 hover:border-lavender-300/70 text-lavender-700"
+                  className="w-full mt-4 border-lavender-200/50 hover:bg-lavender-50 hover:border-lavender-300/70 text-lavender-700 bg-transparent"
                 >
                   View All Reviews
                 </Button>
@@ -602,7 +597,7 @@ export default function ProfilePage() {
 
               <Button
                 variant="outline"
-                className="w-full mt-6 border-lavender-200/50 hover:bg-lavender-50 hover:border-lavender-300/70 text-lavender-700"
+                className="w-full mt-6 border-lavender-200/50 hover:bg-lavender-50 hover:border-lavender-300/70 text-lavender-700 bg-transparent"
               >
                 View Full Activity Log
               </Button>
@@ -626,7 +621,7 @@ export default function ProfilePage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-lavender-200/50 hover:bg-lavender-50 hover:border-lavender-300/70 text-lavender-700"
+                  className="border-lavender-200/50 hover:bg-lavender-50 hover:border-lavender-300/70 text-lavender-700 bg-transparent"
                 >
                   Change Password
                 </Button>
@@ -643,7 +638,7 @@ export default function ProfilePage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-lavender-200/50 hover:bg-lavender-50 hover:border-lavender-300/70 text-lavender-700"
+                  className="border-lavender-200/50 hover:bg-lavender-50 hover:border-lavender-300/70 text-lavender-700 bg-transparent"
                 >
                   Manage 2FA
                 </Button>
@@ -722,7 +717,7 @@ export default function ProfilePage() {
 
               <Button
                 variant="outline"
-                className="w-full mt-2 border-lavender-200/50 hover:bg-lavender-50 hover:border-lavender-300/70 text-lavender-700"
+                className="w-full mt-2 border-lavender-200/50 hover:bg-lavender-50 hover:border-lavender-300/70 text-lavender-700 bg-transparent"
               >
                 Update Preferences
               </Button>

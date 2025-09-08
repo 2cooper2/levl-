@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   Home,
@@ -232,6 +232,16 @@ function Sidebar({
     { id: "settings", label: "Settings", icon: Settings, description: "Portal preferences" },
   ]
 
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  if (!isMounted) {
+    return null
+  }
+
   return (
     <>
       {/* Mobile overlay */}
@@ -248,11 +258,11 @@ function Sidebar({
       {/* Sidebar */}
       <motion.div
         className={`
-  fixed lg:static inset-y-0 left-0 z-50 w-72 bg-gradient-to-b from-white/98 via-lavender-50/95 to-lavender-100/90 backdrop-blur-xl border-r border-lavender-200/60 shadow-[4px_0_24px_-2px_rgba(147,51,234,0.12)] transform transition-all duration-300 ease-in-out
-  ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-`}
+          fixed lg:static inset-y-0 left-0 z-50 w-72 bg-gradient-to-b from-white/98 via-lavender-50/95 to-lavender-100/90 backdrop-blur-xl border-r border-lavender-200/60 shadow-[4px_0_24px_-2px_rgba(147,51,234,0.12)] transform transition-all duration-300 ease-in-out
+          ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+        `}
         initial={false}
-        animate={{ x: isOpen || window.innerWidth >= 1024 ? 0 : "-100%" }}
+        animate={{ x: isOpen || (typeof window !== "undefined" && window.innerWidth >= 1024) ? 0 : "-100%" }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
         {/* Decorative elements */}
@@ -416,12 +426,12 @@ function OverviewSection() {
                 >
                   <div className="relative mb-4">
                     <div
-                      className={`w-16 h-16 mx-auto rounded-2xl bg-gradient-to-r from-${stat.color}-100 to-${stat.color}-200 flex items-center justify-center group-hover:shadow-lg transition-all duration-300`}
+                      className={`w-16 h-16 mx-auto rounded-2xl bg-gradient-to-r from-lavender-100 to-lavender-200 flex items-center justify-center group-hover:shadow-lg transition-all duration-300`}
                     >
-                      <stat.icon className={`h-8 w-8 text-${stat.color}-600`} />
+                      <stat.icon className={`h-8 w-8 text-lavender-600`} />
                     </div>
                     <motion.div
-                      className={`absolute inset-0 rounded-2xl bg-${stat.color}-400/20 scale-0 group-hover:scale-110`}
+                      className={`absolute inset-0 rounded-2xl bg-lavender-400/20 scale-0 group-hover:scale-110`}
                       whileHover={{ scale: 1.1, opacity: [0, 0.5, 0] }}
                       transition={{ duration: 1 }}
                     />
@@ -459,7 +469,7 @@ function OverviewSection() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div
-                      className={`w-14 h-14 rounded-2xl bg-gradient-to-r ${platform.color} flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-${platform.bgColor}/30 group-hover:scale-110 transition-transform duration-300`}
+                      className={`w-14 h-14 rounded-2xl bg-gradient-to-r ${platform.color} flex items-center justify-center text-white font-bold text-lg shadow-lg group-hover:scale-110 transition-transform duration-300`}
                     >
                       {platform.logo}
                     </div>
@@ -1369,6 +1379,7 @@ export function LevlPortal() {
         />
 
         <main className="flex-1 overflow-y-auto h-screen">
+          <Header onMenuClick={() => setSidebarOpen(true)} />
           <div className="p-6 lg:p-8">
             <div className="max-w-7xl mx-auto">
               <AnimatePresence mode="wait">
