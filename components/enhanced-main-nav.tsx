@@ -46,7 +46,6 @@ export function EnhancedMainNav() {
     setIsMenuOpen(!isMenuOpen)
   }
 
-  // Removed the About button from navItems
   const navItems = [
     { href: "/", label: "Home" },
     { href: "/services", label: "Services" },
@@ -90,7 +89,7 @@ export function EnhancedMainNav() {
 
         <div className="flex items-center gap-4">
           {isLoggedIn ? (
-            <Button variant="outline" size="sm" className="hidden md:flex" asChild>
+            <Button variant="outline" size="sm" className="hidden md:flex bg-transparent" asChild>
               <Link href="/dashboard">
                 <User className="mr-2 h-4 w-4" />
                 Dashboard
@@ -136,8 +135,9 @@ export function EnhancedMainNav() {
                 {item.label}
               </Link>
             ))}
+
             {isLoggedIn ? (
-              <Button variant="outline" size="sm" className="w-full" asChild>
+              <Button variant="outline" size="sm" className="w-full bg-transparent" asChild>
                 <Link href="/dashboard">
                   <User className="mr-2 h-4 w-4" />
                   Dashboard
@@ -145,7 +145,7 @@ export function EnhancedMainNav() {
               </Button>
             ) : (
               <div className="flex flex-col gap-2 pt-2 border-t">
-                <Button variant="outline" size="sm" className="w-full" asChild>
+                <Button variant="outline" size="sm" className="w-full bg-transparent" asChild>
                   <Link href="/auth/login">
                     <LogIn className="mr-2 h-4 w-4" />
                     Log in

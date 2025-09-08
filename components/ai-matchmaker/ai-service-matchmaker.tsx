@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 
@@ -12,7 +12,7 @@ import {
   Briefcase,
   Tv,
   Droplet,
-  SprayCanIcon as Spray,
+  SprayCan as Spray,
   Home,
   Zap,
   Scissors,
@@ -29,6 +29,17 @@ import { motion } from "framer-motion"
 // Import the ProviderCard component
 import { ProviderCard } from "@/components/ai-matchmaker/provider-card"
 import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Layout } from "lucide-react"
+import { LevlPortal } from "@/components/levl-portal"
+
+// Long-term memory
+const longTermMemoryData = new Map<string, any>([
+  ["userLocation", "San Francisco, CA"],
+  ["preferredLanguage", "English"],
+  ["pastServices", ["TV Mounting", "Furniture Assembly"]],
+])
 
 // Define service types
 type ServiceProvider = {
@@ -55,6 +66,45 @@ type Service = {
   matchScore: number
   completedProjects: number
   satisfaction: number
+}
+
+interface Message {
+  id: string
+  type: "user" | "ai" | "system"
+  content: string
+  timestamp: Date
+  suggestions?: string[]
+  context?: {
+    intent?: string
+    confidence?: number
+    entities?: Array<{ type: string; value: string }>
+    sentiment?: "positive" | "neutral" | "negative"
+    urgency?: "low" | "medium" | "high"
+  }
+  metadata?: {
+    processingTime?: number
+    modelUsed?: string
+    reasoning?: string[]
+  }
+}
+
+interface ServiceRecommendation {
+  id: string
+  title: string
+  provider: string
+  rating: number
+  price: string
+  description: string
+  matchScore: number
+  availability: string
+  location: string
+  specialties: string[]
+  responseTime: string
+  completionRate: number
+  badges: string[]
+  reasoning: string[]
+  pros: string[]
+  cons: string[]
 }
 
 // Sample services data
@@ -317,7 +367,12 @@ const extractUserConcerns = (input: string) => {
     concerns.push("price")
   }
 
-  if (lowerInput.includes("quality") || lowerInput.includes("good") || lowerInput.includes("reliable")) {
+  if (
+    lowerInput.includes("quality") ||
+    lowerInput.includes("good") ||
+    lowerInput.includes("best") ||
+    lowerInput.includes("reliable")
+  ) {
     concerns.push("quality")
   }
 
@@ -406,7 +461,7 @@ interface UserPreferenceModel {
   }
   timing: {
     urgency: number // 0-10 scale
-    specificDate: null
+    specificDate: Date | null
     flexibility: 5 // 0-10 scale
   }
   requirements: {
@@ -485,7 +540,7 @@ interface AIModelState {
   conversationContext: {
     stage: "initial" | "understanding" | "service-specific" | "recommending" | "refining" | "finalizing"
     depth: number
-    lastRecommendations: number[]
+    lastRecommendations: (number | string)[]
     explanationProvided: boolean
     comparisonMode: boolean
     currentServiceType: string | null
@@ -859,21 +914,85 @@ const serviceSpecificQuestions: ServiceSpecificQuestions = {
   },
 }
 
-// Map service type to category
-const serviceCategoryMap: { [key: string]: string } = {
-  tvMounting: "Mounting",
-  plumbing: "Plumbing",
-  painting: "Painting",
-  furniture: "Assembly",
-  moving: "Moving",
-  cleaning: "Cleaning",
-  electrical: "Electrical",
-  landscaping: "Landscaping",
-  flooring: "Flooring",
-  roofing: "Roofing",
+// Initial AI model state - no changes here
+const initialAIModel: AIModelState = {
+  reasoningTrace: [],
+  confidenceThreshold: 0.7,
+  explorationFactor: 0.2,
+  lastUserIntent: null,
+  userModel: {
+    categories: new Map(),
+    budget: {
+      sensitivity: 5,
+      range: null,
+      flexibility: 5,
+    },
+    quality: {
+      importance: 7,
+      minimumRating: null,
+      certificationRequired: false,
+    },
+    timing: {
+      urgency: 5,
+      specificDate: null,
+      flexibility: 5,
+    },
+    requirements: {
+      explicit: [],
+      implicit: new Map(),
+      dealBreakers: [],
+    },
+    history: {
+      viewedServices: [],
+      interactionCount: 0,
+      satisfactionTrend: [],
+      refinementIterations: 0,
+    },
+  },
+  conversationContext: {
+    stage: "initial",
+    depth: 0,
+    lastRecommendations: [],
+    explanationProvided: false,
+    comparisonMode: false,
+    currentServiceType: null,
+    serviceSpecificAnswers: new Map(),
+    currentServiceQuestion: 0,
+  },
+  enhancedReasoning: {
+    contextualMemory: {
+      shortTerm: new Map(),
+      longTerm: longTermMemoryData, // Preserve long-term memory
+      conversationFlow: [],
+    },
+    reasoningCapabilities: {
+      chainOfThought: true,
+      selfCritique: true,
+      uncertaintyHandling: 0.8,
+      explorationFactor: 0.3,
+    },
+    adaptivePersonalization: {
+      learningRate: 0.2,
+      preferenceWeights: new Map(),
+      confidenceThresholds: new Map([
+        ["category", 0.7],
+        ["budget", 0.6],
+        ["quality", 0.65],
+        ["timing", 0.6],
+      ]),
+    },
+    proactiveCapabilities: {
+      suggestionThreshold: 0.75,
+      anticipationFactors: ["budget_constraints", "quality_expectations", "time_sensitivity", "specific_requirements"],
+      interventionLevel: "medium",
+    },
+  },
 }
 
 export function AIServiceMatchmaker() {
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([])
+  const [userInput, setUserInput] = useState("")
   const [messages, setMessages] = useState<Message[]>(initialMessages)
   const [inputValue, setInputValue] = useState("")
   const [isTyping, setIsTyping] = useState(false)
@@ -887,6 +1006,7 @@ export function AIServiceMatchmaker() {
   // Add these state variables
   const [isFocused, setIsFocused] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
+  const [showPortal, setShowPortal] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   // Enhanced state for sophisticated matching
@@ -941,84 +1061,7 @@ export function AIServiceMatchmaker() {
   >([])
 
   // Replace the existing state declarations with this enhanced AI model
-  const [aiModel, setAIModel] = useState<AIModelState>({
-    reasoningTrace: [],
-    confidenceThreshold: 0.7,
-    explorationFactor: 0.2,
-    lastUserIntent: null,
-    userModel: {
-      categories: new Map(),
-      budget: {
-        sensitivity: 5,
-        range: null,
-        flexibility: 5,
-      },
-      quality: {
-        importance: 7,
-        minimumRating: null,
-        certificationRequired: false,
-      },
-      timing: {
-        urgency: 5,
-        specificDate: null,
-        flexibility: 5,
-      },
-      requirements: {
-        explicit: [],
-        implicit: new Map(),
-        dealBreakers: [],
-      },
-      history: {
-        viewedServices: [],
-        interactionCount: 0,
-        satisfactionTrend: [],
-        refinementIterations: 0,
-      },
-    },
-    conversationContext: {
-      stage: "initial",
-      depth: 0,
-      lastRecommendations: [],
-      explanationProvided: false,
-      comparisonMode: false,
-      currentServiceType: null,
-      serviceSpecificAnswers: new Map(),
-      currentServiceQuestion: 0,
-    },
-    enhancedReasoning: {
-      contextualMemory: {
-        shortTerm: new Map(),
-        longTerm: longTermMemory, // Preserve long-term memory
-        conversationFlow: [],
-      },
-      reasoningCapabilities: {
-        chainOfThought: true,
-        selfCritique: true,
-        uncertaintyHandling: 0.8,
-        explorationFactor: 0.3,
-      },
-      adaptivePersonalization: {
-        learningRate: 0.2,
-        preferenceWeights: new Map(),
-        confidenceThresholds: new Map([
-          ["category", 0.7],
-          ["budget", 0.6],
-          ["quality", 0.65],
-          ["timing", 0.6],
-        ]),
-      },
-      proactiveCapabilities: {
-        suggestionThreshold: 0.75,
-        anticipationFactors: [
-          "budget_constraints",
-          "quality_expectations",
-          "time_sensitivity",
-          "specific_requirements",
-        ],
-        interventionLevel: "medium",
-      },
-    },
-  })
+  const [aiModel, setAIModel] = useState<AIModelState>(initialAIModel)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
@@ -1053,7 +1096,7 @@ export function AIServiceMatchmaker() {
   }, [])
 
   // Simulate AI typing
-  const simulateTyping = (callback: () => void, delay = 1500) => {
+  const simulateTyping = useCallback((callback: () => void, delay = 1500) => {
     setIsTyping(true)
     const typingMessage: Message = {
       id: `typing-${Date.now()}`,
@@ -1069,7 +1112,7 @@ export function AIServiceMatchmaker() {
       callback()
       // Removed any scrollToBottom calls here
     }, delay)
-  }
+  }, [])
 
   // Handle user input submission
   const handleSubmit = (e?: React.FormEvent) => {
@@ -1086,7 +1129,7 @@ export function AIServiceMatchmaker() {
     setMessages((prev) => [...prev, userMessage])
     setInputValue("")
 
-    // Process user input and generate AI response
+    // Process user input
     processUserInput(userMessage.content)
   }
 
@@ -1120,2098 +1163,32 @@ export function AIServiceMatchmaker() {
     specificRequirements: null,
   })
 
-  // Add this function after the existing detectUserIntent function
-  const detectAdvancedIntent = (
-    input: string,
-    messages: Message[],
-    userModel: UserPreferenceModel,
-    contextualMemory: EnhancedReasoning["contextualMemory"],
-  ): UserIntent & { subIntents: string[]; contextualFactors: Map<string, any> } => {
-    // Get basic intent first
-    const basicIntent = detectUserIntent(input)
-
-    // Initialize enhanced result
-    const enhancedIntent = {
-      ...basicIntent,
-      subIntents: [] as string[],
-      contextualFactors: new Map<string, any>(),
-    }
-
-    const inputLower = input.toLowerCase()
-
-    // Detect multiple intents in a single message
-    if (inputLower.includes("but") || inputLower.includes("also") || inputLower.includes("and")) {
-      // Message might contain multiple intents
-      const segments = input.split(/\s+(?:but|also|and)\s+/i)
-
-      if (segments.length > 1) {
-        segments.slice(1).forEach((segment) => {
-          const segmentIntent = detectUserIntent(segment)
-          if (segmentIntent.type !== "general" && segmentIntent.confidence > 0.6) {
-            enhancedIntent.subIntents.push(segmentIntent.type)
-            // Merge entities
-            segmentIntent.entities.forEach((entity) => {
-              if (!enhancedIntent.entities.includes(entity)) {
-                enhancedIntent.entities.push(entity)
-              }
-            })
-          }
-        })
-      }
-    }
-
-    // Consider conversation context
-    const conversationHistory = messages
-    if (conversationHistory.length > 1) {
-      const recentMessages = conversationHistory.slice(-3)
-      const recentUserMessages = recentMessages.filter((msg) => msg.type === "user")
-
-      // Check for follow-up questions
-      if (
-        recentUserMessages.length > 0 &&
-        (inputLower.includes("what about") ||
-          inputLower.includes("how about") ||
-          inputLower.startsWith("and") ||
-          inputLower.length < 15)
-      ) {
-        enhancedIntent.contextualFactors.set("isFollowUp", true)
-
-        // Inherit entities from previous messages if this is a short follow-up
-        if (inputLower.length < 15 && !enhancedIntent.entities.length) {
-          recentUserMessages.forEach((msg) => {
-            const prevIntent = detectUserIntent(msg.content)
-            prevIntent.entities.forEach((entity) => {
-              if (!enhancedIntent.entities.includes(entity)) {
-                enhancedIntent.entities.push(entity)
-              }
-            })
-          })
-        }
-      }
-    }
-
-    // Consider user model for contextual understanding
-    if (userModel.budget.sensitivity > 7) {
-      enhancedIntent.contextualFactors.set("budgetSensitive", true)
-    }
-
-    if (userModel.quality.importance > 7) {
-      enhancedIntent.contextualFactors.set("qualitySensitive", true)
-    }
-
-    if (userModel.timing.urgency > 7) {
-      enhancedIntent.contextualFactors.set("timeSensitive", true)
-    }
-
-    // Detect implicit intents
-    if (
-      !enhancedIntent.contextualFactors.has("budgetSensitive") &&
-      (inputLower.includes("expensive") || inputLower.includes("cost") || inputLower.includes("price"))
-    ) {
-      enhancedIntent.contextualFactors.set("implicitBudgetConcern", true)
-    }
-
-    if (
-      !enhancedIntent.contextualFactors.has("qualitySensitive") &&
-      (inputLower.includes("quality") || inputLower.includes("best") || inputLower.includes("good"))
-    ) {
-      enhancedIntent.contextualFactors.set("implicitQualityConcern", true)
-    }
-
-    // Store in contextual memory
-    contextualMemory.shortTerm.set("lastIntent", enhancedIntent)
-
-    return enhancedIntent
-  }
-
-  // Replace the existing processUserInput function with this enhanced version
+  // Process user input
   const processUserInput = (input: string) => {
-    // Update conversation flow in contextual memory
-    aiModel.enhancedReasoning.contextualMemory.conversationFlow.push(input)
-
-    // Analyze user input with advanced NLP
-    const enhancedIntent = detectAdvancedIntent(
-      input,
-      messages,
-      aiModel.userModel,
-      aiModel.enhancedReasoning.contextualMemory,
-    )
-
-    // Update user model based on input with adaptive learning
-    const updatedUserModel = updateUserModelWithAdaptiveLearning(
-      aiModel.userModel,
-      input,
-      enhancedIntent,
-      aiModel.conversationContext,
-      aiModel.enhancedReasoning.adaptivePersonalization,
-    )
-
-    // Perform multi-step reasoning
-    const reasoningSteps = performMultiStepReasoning(
-      input,
-      enhancedIntent,
-      updatedUserModel,
-      aiModel.conversationContext,
-      aiModel.enhancedReasoning,
-    )
-
-    // Update AI model state with enhanced reasoning
-    setAIModel((prevModel) => ({
-      ...prevModel,
-      lastUserIntent: enhancedIntent,
-      userModel: updatedUserModel,
-      reasoningTrace: [...prevModel.reasoningTrace, ...reasoningSteps],
-      enhancedReasoning: {
-        ...prevModel.enhancedReasoning,
-        contextualMemory: {
-          ...prevModel.enhancedReasoning.contextualMemory,
-          shortTerm: new Map([
-            ...Array.from(prevModel.enhancedReasoning.contextualMemory || new Map()),
-            ["lastProcessedInput", input],
-            ["lastIntent", enhancedIntent],
-          ]),
-        },
-      },
-    }))
-
-    // Store user input with enhanced analysis
-    setUserContextHistory((prev) => [
-      ...prev,
-      {
-        query: input,
-        timestamp: new Date(),
-        intent: enhancedIntent.type,
-        entities: enhancedIntent.entities,
-        sentiment: analyzeSentiment(input).type as "positive" | "negative" | "neutral",
-      },
-    ])
-
-    // Determine processing complexity for more realistic AI behavior
-    const complexity = determineQueryComplexity(input, aiModel.conversationContext.stage)
-
-    // Check if AI should be proactive based on context
-    const shouldBeProactive = shouldTakeProactiveAction(
-      enhancedIntent,
-      aiModel.userModel,
-      aiModel.conversationContext,
-      aiModel.enhancedReasoning.proactiveCapabilities,
-    )
-
-    // Simulate AI thinking
+    // Simple AI response simulation
     simulateTyping(() => {
-      // Process based on conversation stage with enhanced decision making
-      processConversationStage(input, enhancedIntent, shouldBeProactive)
-    }, complexity)
-  }
-
-  // Add these new functions before the return statement
-
-  // Enhanced user model update with adaptive learning
-  const updateUserModelWithAdaptiveLearning = (
-    currentModel: UserPreferenceModel,
-    input: string,
-    intent: UserIntent & { subIntents: string[]; contextualFactors: Map<string, any> },
-    context: AIModelState["conversationContext"],
-    adaptivePersonalization: EnhancedReasoning["adaptivePersonalization"],
-  ): UserPreferenceModel => {
-    // Start with basic update
-    const updatedModel = updateUserModel(currentModel, input, intent, context)
-
-    // Apply adaptive learning
-    const learningRate = adaptivePersonalization.learningRate
-
-    // Dynamically adjust weights based on user interaction patterns
-    intent.entities.forEach((entity) => {
-      if (services.some((s) => s.category === entity)) {
-        // It's a valid category - apply stronger learning for repeated mentions
-        const currentWeight = adaptivePersonalization.preferenceWeights.get(`category:${entity}`) || 1.0
-        const newWeight = Math.min(3.0, currentWeight + learningRate)
-        adaptivePersonalization.preferenceWeights.set(`category:${entity}`, newWeight)
-
-        // Apply weighted learning to the category confidence
-        const currentConfidence = updatedModel.categories.get(entity) || 0
-        const weightedIncrement = 0.2 * newWeight
-        const newConfidence = Math.min(0.98, currentConfidence + weightedIncrement)
-        updatedModel.categories.set(entity, newConfidence)
-      }
-    })
-
-    // Adapt to implicit signals
-    if (intent.contextualFactors.has("implicitBudgetConcern")) {
-      updatedModel.budget.sensitivity = Math.min(10, updatedModel.budget.sensitivity + learningRate * 2)
-    }
-
-    if (intent.contextualFactors.has("implicitQualityConcern")) {
-      updatedModel.quality.importance = Math.min(10, updatedModel.quality.importance + learningRate * 2)
-    }
-
-    // Learn from feedback more aggressively
-    if (intent.type === "feedback") {
-      const sentiment = analyzeSentiment(input)
-
-      if (sentiment.type === "positive" && sentiment.confidence > 0.7) {
-        // Reinforce current preferences that led to positive feedback
-        updatedModel.history.satisfactionTrend.push(0.9)
-
-        // Strengthen weights for categories in last recommendations
-        context.lastRecommendations.forEach((serviceId) => {
-          const service = services.find((s) => s.id === serviceId)
-          if (service) {
-            const currentConfidence = updatedModel.categories.get(service.category) || 0
-            updatedModel.categories.set(service.category, Math.min(0.95, currentConfidence + learningRate))
-          }
-        })
-      } else if (sentiment.type === "negative" && sentiment.confidence > 0.6) {
-        // Learn more aggressively from negative feedback
-        updatedModel.history.satisfactionTrend.push(-0.8)
-        updatedModel.history.refinementIterations += 1
-
-        // Extract specific concerns for targeted learning
-        const concerns = extractUserConcerns(input)
-        concerns.forEach((concern) => {
-          if (concern === "price") {
-            updatedModel.budget.sensitivity = Math.min(10, updatedModel.budget.sensitivity + learningRate * 3)
-          } else if (concern === "quality") {
-            updatedModel.quality.importance = Math.min(10, updatedModel.quality.importance + learningRate * 3)
-          } else if (concern === "timing") {
-            updatedModel.timing.urgency = Math.min(10, updatedModel.timing.urgency + learningRate * 3)
-          }
-        })
-      }
-    }
-
-    return updatedModel
-  }
-
-  // Multi-step reasoning process
-  const performMultiStepReasoning = (
-    input: string,
-    intent: UserIntent & { subIntents: string[]; contextualFactors: Map<string, any> },
-    userModel: UserPreferenceModel,
-    context: AIModelState["conversationContext"],
-    enhancedReasoning: EnhancedReasoning,
-  ): ReasoningStep[] => {
-    const reasoningSteps: ReasoningStep[] = []
-    const reasoningId = `reasoning-${Date.now()}`
-
-    // Step 1: Intent analysis with confidence
-    reasoningSteps.push({
-      id: `${reasoningId}-intent`,
-      step: "Intent Analysis",
-      reasoning: `Analyzed user input: "${input.substring(0, 50)}${input.length > 50 ? "..." : ""}"`,
-      conclusion: `Primary intent: ${intent.type} (${Math.round(intent.confidence * 100)}% confidence)${
-        intent.subIntents.length ? `, Sub-intents: ${intent.subIntents.join(", ")}` : ""
-      }`,
-      confidence: intent.confidence,
-      timestamp: new Date(),
-    })
-
-    // Step 2: Context integration
-    const contextualFactors = Array.from(intent.contextualFactors.entries())
-    if (contextualFactors.length > 0 || context.depth > 0) {
-      reasoningSteps.push({
-        id: `${reasoningId}-context`,
-        step: "Context Integration",
-        reasoning: `Considering conversation context (stage: ${context.stage}, depth: ${context.depth})${
-          contextualFactors.length ? ` and contextual factors: ${contextualFactors.map(([k, v]) => k).join(", ")}` : ""
-        }`,
-        conclusion: contextualFactors.length
-          ? `User input should be interpreted in context of previous conversation and detected factors`
-          : `Continuing conversation flow in ${context.stage} stage`,
-        confidence: 0.85,
-        timestamp: new Date(),
-      })
-    }
-
-    // Step 3: User model evaluation
-    const userModelInsights = []
-
-    if (userModel.categories.size > 0) {
-      const topCategory = Array.from(userModel.categories.entries()).sort((a, b) => b[1] - a[1])[0]
-      if (topCategory && topCategory[1] > 0.6) {
-        userModelInsights.push(
-          `Strong preference for ${topCategory[0]} (${Math.round(topCategory[1] * 100)}% confidence)`,
-        )
-      }
-    }
-
-    if (userModel.budget.sensitivity > 7) {
-      userModelInsights.push(`High budget sensitivity (${userModel.budget.sensitivity}/10)`)
-    }
-
-    if (userModel.quality.importance > 7) {
-      userModelInsights.push(`High quality importance (${userModel.quality.importance}/10)`)
-    }
-
-    if (userModel.timing.urgency > 7) {
-      userModelInsights.push(`High time urgency (${userModel.timing.urgency}/10)`)
-    }
-
-    if (userModelInsights.length > 0) {
-      reasoningSteps.push({
-        id: `${reasoningId}-user-model`,
-        step: "User Model Evaluation",
-        reasoning: `Analyzing current user preference model after ${userModel.history.interactionCount} interactions`,
-        conclusion: `Key user preferences: ${userModelInsights.join("; ")}`,
-        confidence: 0.9,
-        timestamp: new Date(),
-      })
-    }
-
-    // Step 4: Decision planning
-    if (enhancedReasoning.reasoningCapabilities.chainOfThought) {
-      let decisionPlan = ""
-      let decisionConfidence = 0.7
-
-      switch (context.stage) {
-        case "initial":
-          decisionPlan = "Begin understanding user needs through structured questions"
-          decisionConfidence = 0.95
-          break
-        case "understanding":
-          decisionPlan = "Continue gathering user preferences to build comprehensive model"
-          decisionConfidence = 0.9
-          break
-        case "recommending":
-          if (intent.type === "feedback") {
-            const sentiment = analyzeSentiment(input)
-            if (sentiment.type === "positive") {
-              decisionPlan = "User is satisfied with recommendations; move to finalizing stage"
-              decisionConfidence = 0.85
-            } else {
-              decisionPlan = "User needs refined recommendations; identify specific concerns"
-              decisionConfidence = 0.8
-            }
-          } else {
-            decisionPlan = "Provide personalized recommendations based on current user model"
-            decisionConfidence = 0.85
-          }
-          break
-        case "refining":
-          decisionPlan = "Generate refined recommendations addressing user concerns"
-          decisionConfidence = 0.8
-          break
-        case "finalizing":
-          if (intent.type === "booking" || intent.subIntents.includes("booking")) {
-            decisionPlan = "User wants to book; facilitate service selection and booking process"
-            decisionConfidence = 0.9
-          } else if (intent.type === "comparison" || intent.subIntents.includes("comparison")) {
-            decisionPlan = "User wants to compare options; provide detailed comparison"
-            decisionConfidence = 0.85
-          } else {
-            decisionPlan = "Guide user to final decision or provide additional information"
-            decisionConfidence = 0.75
-          }
-          break
-      }
-
-      reasoningSteps.push({
-        id: `${reasoningId}-decision`,
-        step: "Decision Planning",
-        reasoning: `Planning next action based on conversation stage (${context.stage}) and user intent (${intent.type})`,
-        conclusion: decisionPlan,
-        confidence: decisionConfidence,
-        timestamp: new Date(),
-      })
-    }
-
-    // Step 5: Self-critique (if enabled)
-    if (enhancedReasoning.reasoningCapabilities.selfCritique && context.stage !== "initial") {
-      // Evaluate quality of current understanding and recommendations
-      const critiqueFocus =
-        context.stage === "recommending" || context.stage === "refining" ? "recommendations" : "user understanding"
-
-      const critiqueConcerns = []
-
-      // Check for potential gaps in understanding
-      if (userModel.categories.size === 0 && context.stage !== "understanding") {
-        critiqueConcerns.push("No clear category preference detected")
-      }
-
-      if (userModel.requirements.explicit.length === 0 && context.stage !== "understanding") {
-        critiqueConcerns.push("No explicit requirements captured")
-      }
-
-      if (userModel.history.satisfactionTrend.length > 0) {
-        const recentSatisfaction = userModel.history.satisfactionTrend.slice(-3)
-        const avgSatisfaction = recentSatisfaction.reduce((sum, val) => sum + val, 0) / recentSatisfaction.length
-
-        if (avgSatisfaction < 0) {
-          critiqueConcerns.push("Recent user satisfaction is negative")
-        }
-      }
-
-      if (critiqueConcerns.length > 0) {
-        reasoningSteps.push({
-          id: `${reasoningId}-critique`,
-          step: "Self-Critique",
-          reasoning: `Evaluating quality of current ${critiqueFocus}`,
-          conclusion: `Potential concerns: ${critiqueConcerns.join("; ")}. Will adjust approach accordingly.`,
-          confidence: 0.75,
-          timestamp: new Date(),
-        })
-      }
-    }
-
-    return reasoningSteps
-  }
-
-  // Determine if AI should take proactive action
-  const shouldTakeProactiveAction = (
-    intent: UserIntent & { subIntents: string[]; contextualFactors: Map<string, any> },
-    userModel: UserPreferenceModel,
-    context: AIModelState["conversationContext"],
-    proactiveCapabilities: EnhancedReasoning["proactiveCapabilities"],
-  ): boolean => {
-    // Base threshold from configuration
-    let threshold = proactiveCapabilities.suggestionThreshold
-
-    // Adjust threshold based on intervention level
-    if (proactiveCapabilities.interventionLevel === "high") {
-      threshold -= 0.15
-    } else if (proactiveCapabilities.interventionLevel === "low") {
-      threshold += 0.15
-    }
-
-    // Factors that might trigger proactive behavior
-    let proactiveScore = 0
-
-    // 1. Low confidence in user intent suggests AI should be more proactive
-    if (intent.confidence < 0.6) {
-      proactiveScore += 0.2
-    }
-
-    // 2. If we're in refining stage with multiple refinement iterations
-    if (context.stage === "refining" && userModel.history.refinementIterations > 1) {
-      proactiveScore += 0.25 // User is struggling to find what they want
-    }
-
-    // 3. If user has expressed frustration
-    const recentSatisfaction = userModel.history.satisfactionTrend.slice(-2)
-    if (recentSatisfaction.length > 0 && recentSatisfaction.some((score) => score < -0.5)) {
-      proactiveScore += 0.3 // User is frustrated, AI should be more helpful
-    }
-
-    // 4. If we have strong understanding of user needs but they're not making progress
-    if (userModel.categories.size > 0 && context.stage === "finalizing" && intent.type === "general") {
-      proactiveScore += 0.2 // We know what they want but they're not moving forward
-    }
-
-    // 5. If user has been in the same stage for too long
-    if (context.depth > 3 && context.stage !== "finalizing") {
-      proactiveScore += 0.15 // User might be stuck
-    }
-
-    return proactiveScore > threshold
-  }
-
-  // Process conversation based on stage with enhanced decision making
-  const processConversationStage = (
-    input: string,
-    enhancedIntent: UserIntent & { subIntents: string[]; contextualFactors: Map<string, any> },
-    shouldBeProactive: boolean,
-  ) => {
-    const currentStage = aiModel.conversationContext.stage
-
-    // Handle proactive interventions if needed
-    if (shouldBeProactive) {
-      // AI takes initiative based on context
-      if (currentStage === "understanding" && aiModel.conversationContext.depth > 2) {
-        // We've asked enough questions, move to recommendations proactively
-        handleProactiveRecommendation()
-        return
-      }
-
-      if (currentStage === "recommending" && enhancedIntent.contextualFactors.has("implicitBudgetConcern")) {
-        // User mentioned budget concerns without explicitly asking for cheaper options
-        handleProactiveBudgetRefinement(input)
-        return
-      }
-
-      if (currentStage === "finalizing" && aiModel.conversationContext.depth > 2) {
-        // User seems indecisive, offer proactive guidance
-        handleProactiveGuidance()
-        return
-      }
-    }
-
-    // Normal conversation flow with enhanced processing
-    if (currentStage === "initial") {
-      // Enhanced initial stage handling
-      handleInitialStage(input, enhancedIntent)
-    } else if (currentStage === "service-specific") {
-      // Handle service-specific questions
-      handleServiceSpecificQuestions(input)
-    } else if (currentStage === "understanding") {
-      // Enhanced understanding stage
-      handleUnderstandingStage(input, enhancedIntent)
-    } else if (currentStage === "recommending") {
-      // Enhanced recommendation stage
-      handleRecommendingStage(input, enhancedIntent)
-    } else if (currentStage === "refining") {
-      // Enhanced refining stage
-      handleRefiningStage(input, enhancedIntent)
-    } else if (currentStage === "finalizing") {
-      // Enhanced finalizing stage
-      handleFinalizingStage(input, enhancedIntent)
-    }
-  }
-
-  // Add these handler functions for each conversation stage
-  const handleInitialStage = (
-    input: string,
-    enhancedIntent: UserIntent & { subIntents: string[]; contextualFactors: Map<string, any> },
-  ) => {
-    // Detect service type from input
-    let serviceType = null
-
-    if (input.toLowerCase().includes("tv") || input.toLowerCase().includes("mount")) {
-      serviceType = "tvMounting"
-    } else if (
-      input.toLowerCase().includes("plumb") ||
-      input.toLowerCase().includes("leak") ||
-      input.toLowerCase().includes("pipe")
-    ) {
-      serviceType = "plumbing"
-    } else if (
-      input.toLowerCase().includes("paint") ||
-      input.toLowerCase().includes("wall") ||
-      input.toLowerCase().includes("color")
-    ) {
-      serviceType = "painting"
-    } else if (
-      input.toLowerCase().includes("furniture") ||
-      input.toLowerCase().includes("assemble") ||
-      input.toLowerCase().includes("assembly")
-    ) {
-      serviceType = "furniture"
-    }
-
-    // If we detected a specific service type, go to service-specific questions
-    if (serviceType) {
-      setAIModel((prevModel) => ({
-        ...prevModel,
-        conversationContext: {
-          ...prevModel.conversationContext,
-          stage: "service-specific",
-          depth: 1,
-          currentServiceType: serviceType,
-          currentServiceQuestion: 0,
-        },
-        reasoningTrace: [
-          ...prevModel.reasoningTrace,
-          {
-            id: `stage-${Date.now()}`,
-            step: "Stage Transition",
-            reasoning: `Detected ${serviceType} request, moving to service-specific questions`,
-            conclusion: "Transitioning to service-specific questions stage",
-            confidence: 0.95,
-            timestamp: new Date(),
-          },
-        ],
-      }))
-
-      // Ask the first service-specific question
-      const firstQuestion = serviceSpecificQuestions[serviceType].questions[0]
-      const options = serviceSpecificQuestions[serviceType].options[firstQuestion]
-
       const aiMessage: Message = {
         id: `ai-${Date.now()}`,
         type: "ai",
-        content: `I'll help you find the perfect ${
-          serviceType === "tvMounting"
-            ? "TV mounting"
-            : serviceType === "plumbing"
-              ? "plumbing"
-              : serviceType === "painting"
-                ? "painting"
-                : "furniture assembly"
-        } service. ${firstQuestion}`,
+        content: "I understand you're looking for help. Let me find some great service providers for you!",
         timestamp: new Date(),
-        options: options,
       }
 
       setMessages((prev) => [...prev, aiMessage])
-    } else {
-      // Continue with general questions as before
-      setAIModel((prevModel) => ({
-        ...prevModel,
-        conversationContext: {
-          ...prevModel.conversationContext,
-          stage: "understanding",
-          depth: 1,
-        },
-        reasoningTrace: [
-          ...prevModel.reasoningTrace,
-          {
-            id: `stage-${Date.now()}`,
-            step: "Stage Transition",
-            reasoning: "Initial greeting completed, moving to understanding user needs",
-            conclusion: "Transitioning to understanding stage",
-            confidence: 0.95,
-            timestamp: new Date(),
-          },
-        ],
-      }))
 
-      // Check if we can extract category from initial input
-      let detectedCategory = null
-      enhancedIntent.entities.forEach((entity) => {
-        if (services.some((service) => service.category === entity)) {
-          detectedCategory = entity
-        }
-      })
-
-      // Personalize first question based on detected intent
-      let firstQuestion = questions[0] // Default first question about budget
-      let options = ["Budget-friendly", "Mid-range", "Premium", "No preference"]
-
-      if (detectedCategory) {
-        // If category is detected, acknowledge it and still ask about budget
-        firstQuestion = `Great, I see you're interested in ${detectedCategory.toLowerCase()} services. What's your budget range for this?`
-      } else if (enhancedIntent.contextualFactors.has("implicitBudgetConcern")) {
-        // If budget is mentioned, skip to timing question
-        firstQuestion = questions[1]
-        options = ["As soon as possible", "Within a week", "Within a month", "Flexible"]
-        setCurrentQuestion(1) // Skip the budget question
-      } else if (enhancedIntent.contextualFactors.has("implicitQualityConcern")) {
-        // If quality is mentioned, acknowledge it in budget question
-        firstQuestion = "I understand quality is important to you. What's your budget range for this service?"
-      }
-
-      const aiMessage: Message = {
-        id: `ai-${Date.now()}`,
-        type: "ai",
-        content: firstQuestion,
-        timestamp: new Date(),
-        options: options,
-      }
-
-      setMessages((prev) => [...prev, aiMessage])
-      setCurrentQuestion((prev) => prev + 1)
-    }
-  }
-
-  // Add this new function to handle service-specific questions
-  const handleServiceSpecificQuestions = (input: string) => {
-    const serviceType = aiModel.conversationContext.currentServiceType
-
-    if (!serviceType || !serviceSpecificQuestions[serviceType]) {
-      // Fallback to understanding stage if something went wrong
-      handleUnderstandingStage(input, {
-        type: "general",
-        confidence: 0.5,
-        entities: [],
-        subIntents: [],
-        contextualFactors: new Map(),
-      })
-      return
-    }
-
-    // Store the answer to the current question
-    const currentQuestion =
-      serviceSpecificQuestions[serviceType].questions[aiModel.conversationContext.currentServiceQuestion]
-
-    setAIModel((prevModel) => ({
-      ...prevModel,
-      conversationContext: {
-        ...prevModel.conversationContext,
-        serviceSpecificAnswers: new Map([
-          ...Array.from(prevModel.conversationContext.serviceSpecificAnswers.entries()),
-          [currentQuestion, input],
-        ]),
-        currentServiceQuestion: prevModel.conversationContext.currentServiceQuestion + 1,
-      },
-    }))
-
-    // Check if we have more service-specific questions
-    const nextQuestionIndex = aiModel.conversationContext.currentServiceQuestion + 1
-
-    if (nextQuestionIndex < serviceSpecificQuestions[serviceType].questions.length) {
-      // Ask the next service-specific question
-      const nextQuestion = serviceSpecificQuestions[serviceType].questions[nextQuestionIndex]
-      const options = serviceSpecificQuestions[serviceType].options[nextQuestion]
-
-      const aiMessage: Message = {
-        id: `ai-${Date.now()}`,
-        type: "ai",
-        content: nextQuestion,
-        timestamp: new Date(),
-        options: options,
-      }
-
-      setMessages((prev) => [...prev, aiMessage])
-    } else {
-      // We've asked all service-specific questions, move to recommendations
-      simulateThinkingWithReasoning(() => {
-        // Update user model with service-specific information
-        setAIModel((prevModel) => {
-          const updatedModel = { ...prevModel }
-
-          // Set the category based on service type
-          const categoryMap: { [key: string]: string } = {
-            tvMounting: "Mounting",
-            plumbing: "Plumbing",
-            painting: "Painting",
-            furniture: "Assembly",
-          }
-
-          const category = categoryMap[serviceType]
-          if (category) {
-            updatedModel.userModel.categories.set(category, 0.95) // High confidence in category
-          }
-
-          // Add service-specific requirements to user model
-          prevModel.conversationContext.serviceSpecificAnswers.forEach((answer, question) => {
-            updatedModel.userModel.requirements.explicit.push(`${question}: ${answer}`)
-          })
-
-          return {
-            ...updatedModel,
-            conversationContext: {
-              ...updatedModel.conversationContext,
-              stage: "recommending",
-              depth: updatedModel.conversationContext.depth + 1,
-            },
-          }
-        })
-
-        // Generate recommendations filtered by the specific service typemendations filtered by the specific service type
-        generateServiceSpecificRecommendations()
-      }, "complex")
-    }
-  }
-
-  // Add this new function to generate service-specific recommendations
-  const generateServiceSpecificRecommendations = () => {
-    const serviceType = aiModel.conversationContext.currentServiceType
-
-    if (!serviceType) {
-      // Fallback to regular recommendations if something went wrong
-      generateEnhancedRecommendations()
-      return
-    }
-
-    // Map service type to category
-    const categoryMap: { [key: string]: string } = {
-      tvMounting: "Mounting",
-      plumbing: "Plumbing",
-      painting: "Painting",
-      furniture: "Assembly",
-      moving: "Moving",
-      cleaning: "Cleaning",
-      electrical: "Electrical",
-      landscaping: "Landscaping",
-      flooring: "Flooring",
-      roofing: "Roofing",
-    }
-
-    const category = serviceCategoryMap[serviceType]
-
-    // Create Caydon Cooper as the first service provider
-    const caydonCooper = {
-      id: 999,
-      title: `Premium ${category} Service`,
-      category: category,
-      provider: {
-        id: 999,
-        name: "Caydon Cooper",
-        avatar: "/professional-avatar.png",
-        rating: 5.0,
-        reviews: 187,
-        verified: true,
-        responseTime: "< 30 minutes",
-        completionRate: 99,
-      },
-      price: "$95",
-      timeEstimate: "1-3 hours",
-      description: `Expert ${category.toLowerCase()} service with premium quality and attention to detail. Satisfaction guaranteed.`,
-      image: "/professional-avatar.png",
-      tags: [`Professional ${category}`, "Premium Service", "Highly Rated"],
-      matchScore: 98,
-      completedProjects: 250,
-      satisfaction: 99,
-    }
-
-    // Filter services by the specific category
-    const filteredServices = services.filter((service) => service.category === category)
-
-    // If we don't have enough services for this category, add some generic ones
-    if (filteredServices.length < 4) {
-      for (let i = filteredServices.length; i < 4; i++) {
-        filteredServices.push({
-          id: 1000 + i,
-          title: `${category} Service ${i + 1}`,
-          category: category,
-          provider: {
-            id: 1000 + i,
-            name: `${category} Expert ${i + 1}`,
-            avatar: "/professional-expert-avatar.png",
-            rating: 4.7 + Math.random() * 0.3,
-            reviews: 50 + Math.floor(Math.random() * 100),
-            verified: Math.random() > 0.3,
-            responseTime: "< 2 hours",
-            completionRate: 94 + Math.floor(Math.random() * 6),
-          },
-          price: `$${70 + Math.floor(Math.random() * 50)}`,
-          timeEstimate: "2-4 hours",
-          description: `Professional ${category.toLowerCase()} service with great quality and customer service.`,
-          image: "/professional-expert-avatar.png",
-          tags: [`${category} Service`, "Professional", "Experienced"],
-          matchScore: 85 + Math.floor(Math.random() * 10),
-          completedProjects: 100 + Math.floor(Math.random() * 100),
-          satisfaction: 90 + Math.floor(Math.random() * 10),
-        })
-      }
-    }
-
-    // Calculate match scores based on service-specific answers
-    const matchedServices = filteredServices
-      .map((service) => {
-        let matchScore = 85 // Start with a high base score since we're already category-matched
-
-        // Adjust score based on service-specific answers
-        aiModel.conversationContext.serviceSpecificAnswers.forEach((answer, question) => {
-          // Example scoring logic - this would be more sophisticated in a real implementation
-          if (serviceType === "tvMounting") {
-            if (
-              question.includes("wall") &&
-              answer.includes("Brick") &&
-              service.description.toLowerCase().includes("brick")
-            ) {
-              matchScore += 5
-            }
-            if (
-              question.includes("mount") &&
-              answer.includes("need") &&
-              service.description.toLowerCase().includes("mount included")
-            ) {
-              matchScore += 5
-            }
-            if (
-              question.includes("cable") &&
-              answer.includes("Yes") &&
-              service.description.toLowerCase().includes("cable management")
-            ) {
-              matchScore += 5
-            }
-          }
-          // Similar logic for other service types
-        })
-
-        // Cap at 100
-        matchScore = Math.min(100, matchScore)
-
-        return {
-          ...service,
-          matchScore,
-        }
-      })
-      .sort((a, b) => b.matchScore - a.matchScore)
-
-    // Add Caydon Cooper as the first option
-    const finalServices = [caydonCooper, ...matchedServices.slice(0, 4)]
-
-    setMatchedServices(finalServices)
-
-    // Generate a personalized intro based on the service type
-    const serviceTypeDisplay =
-      serviceType === "tvMounting"
-        ? "TV mounting"
-        : serviceType === "furniture"
-          ? "furniture assembly"
-          : serviceType.charAt(0).toUpperCase() + serviceType.slice(1)
-
-    const introMessage = `Based on your ${serviceTypeDisplay} requirements, here are the best professional service providers for you:`
-
-    const recommendationMessage: Message = {
-      id: `ai-${Date.now()}`,
-      type: "ai",
-      content: introMessage,
-      timestamp: new Date(),
-      services: finalServices,
-    }
-
-    setMessages((prev) => [...prev, recommendationMessage])
-
-    // Ask for feedback
-    setTimeout(() => {
-      const feedbackMessage: Message = {
-        id: `feedback-${Date.now()}`,
-        type: "ai",
-        content: "How do these options look?",
-        timestamp: new Date(),
-        feedbackOptions: [
-          "These look great!",
-          "Show me more options",
-          "I need something different",
-          "Tell me more details",
-        ],
-      }
-
-      setMessages((prev) => [...prev, feedbackMessage])
-    }, 1000)
-  }
-
-  // Enhanced handlers for the remaining conversation stages
-  const handleRecommendingStage = (
-    input: string,
-    enhancedIntent: UserIntent & { subIntents: string[]; contextualFactors: Map<string, any> },
-  ) => {
-    // Handle feedback on recommendations with enhanced understanding
-    const sentiment = analyzeSentiment(input)
-
-    if (enhancedIntent.type === "feedback" && sentiment.type === "positive") {
-      // Positive feedback - move to finalizing with personalized next steps
-      setAIModel((prevModel) => ({
-        ...prevModel,
-        conversationContext: {
-          ...prevModel.conversationContext,
-          stage: "finalizing",
-          depth: prevModel.conversationContext.depth + 1,
-        },
-        userModel: {
-          ...prevModel.userModel,
-          history: {
-            ...prevModel.userModel.history,
-            satisfactionTrend: [...prevModel.userModel.history.satisfactionTrend, 0.8],
-          },
-        },
-      }))
-
-      // Determine most relevant next steps based on user model
-      const nextStepOptions = ["Book a service"]
-
-      // If user has shown interest in multiple categories, suggest comparison
-      if (aiModel.userModel.categories.size > 1) {
-        nextStepOptions.push("Compare top options")
-      }
-
-      // If user has high quality importance, suggest learning more
-      if (aiModel.userModel.quality.importance > 6) {
-        nextStepOptions.push("Learn more details")
-      }
-
-      // Add save option as fallback
-      nextStepOptions.push("Save for later")
-
-      const aiMessage: Message = {
-        id: `ai-${Date.now()}`,
-        type: "ai",
-        content: "Great! I'm glad these recommendations work for you. What would you like to do next?",
-        timestamp: new Date(),
-        options: nextStepOptions,
-      }
-
-      setMessages((prev) => [...prev, aiMessage])
-    } else if (
-      input.toLowerCase().includes("more options") ||
-      input.toLowerCase().includes("show me more") ||
-      enhancedIntent.subIntents.includes("more")
-    ) {
-      // Generate diverse alternatives with enhanced diversity
-      const diverseResult = generateEnhancedDiverseAlternatives(
-        matchedServices.map((service) => ({
-          service,
-          matchScore: service.matchScore,
-          matchReasons: [{ factor: "Base Match", score: service.matchScore, explanation: "Base match score" }],
-          confidenceScore: 0.7,
-        })),
-        services,
-        aiModel.userModel,
-        aiModel.enhancedReasoning,
-      )
-
-      // Update AI model with reasoning trace
-      setAIModel((prevModel) => ({
-        ...prevModel,
-        reasoningTrace: [...prevModel.reasoningTrace, ...diverseResult.reasoning],
-        conversationContext: {
-          ...prevModel.conversationContext,
-          lastRecommendations: diverseResult.matches.slice(0, 3).map((match) => match.service.id),
-        },
-      }))
-
-      // Personalize the message based on what kind of diversity we're showing
-      let diversityMessage = "Here are some additional options with different characteristics that might interest you:"
-
-      if (diverseResult.diversityFocus === "category") {
-        diversityMessage = "Here are some alternative service types that might also meet your needs:"
-      } else if (diverseResult.diversityFocus === "price") {
-        diversityMessage = "Here are some options at different price points that might interest you:"
-      } else if (diverseResult.diversityFocus === "quality") {
-        diversityMessage = "Here are some options with different quality/price tradeoffs:"
-      }
-
-      const moreOptionsMessage: Message = {
-        id: `ai-${Date.now()}`,
-        type: "ai",
-        content: diversityMessage,
-        timestamp: new Date(),
-        services: diverseResult.matches.map((match) => ({
-          ...match.service,
-          matchScore: match.matchScore,
-        })),
-      }
-
-      setMessages((prev) => [...prev, moreOptionsMessage])
-
-      // Ask for feedback with context-aware options
+      // Show some sample services
       setTimeout(() => {
-        const feedbackMessage: Message = {
-          id: `feedback-${Date.now()}`,
+        const servicesMessage: Message = {
+          id: `services-${Date.now()}`,
           type: "ai",
-          content: "How do these additional options look?",
+          content: "Here are some top-rated service providers:",
           timestamp: new Date(),
-          feedbackOptions: [
-            "These are better!",
-            "I need something different",
-            "Let's go back to the first options",
-            "Can you compare these with the previous ones?",
-          ],
+          services: services.slice(0, 3),
         }
 
-        setMessages((prev) => [...prev, feedbackMessage])
+        setMessages((prev) => [...prev, servicesMessage])
       }, 1000)
-    } else if (
-      input.toLowerCase().includes("explain") ||
-      input.toLowerCase().includes("why") ||
-      enhancedIntent.type === "information"
-    ) {
-      // Generate enhanced explanation with more personalization
-      const explanation = generateEnhancedPersonalizedExplanation(
-        matchedServices.map((service) => ({
-          service,
-          matchScore: service.matchScore,
-          matchReasons: [
-            {
-              factor: "Category Match",
-              score: 20,
-              explanation: `Matches your interest in ${service.category} services`,
-            },
-            {
-              factor: "Provider Quality",
-              score: Math.floor((service.provider.rating - 4) * 10),
-              explanation: `${service.provider.rating}★ rating from ${service.provider.reviews} reviews`,
-            },
-            { factor: "Price Compatibility", score: 10, explanation: `Priced at ${service.price}` },
-          ],
-          confidenceScore: 0.8,
-        })),
-        aiModel.userModel,
-        aiModel.reasoningTrace,
-        aiModel.enhancedReasoning,
-      )
-
-      // Update AI model
-      setAIModel((prevModel) => ({
-        ...prevModel,
-        conversationContext: {
-          ...prevModel.conversationContext,
-          explanationProvided: true,
-        },
-      }))
-
-      const explanationMessage: Message = {
-        id: `ai-${Date.now()}`,
-        type: "ai",
-        content: explanation,
-        timestamp: new Date(),
-      }
-
-      setMessages((prev) => [...prev, explanationMessage])
-
-      // Ask what they'd like to do next with personalized options
-      setTimeout(() => {
-        const nextStepMessage: Message = {
-          id: `ai-${Date.now()}`,
-          type: "ai",
-          content: "Would you like to proceed with one of these options or see alternatives?",
-          timestamp: new Date(),
-          options: ["Book a service", "Show me more options", "I need something different"],
-        }
-
-        setMessages((prev) => [...prev, nextStepMessage])
-      }, 1500)
-    } else {
-      // Refine recommendations based on feedback with enhanced understanding
-      setAIModel((prevModel) => ({
-        ...prevModel,
-        conversationContext: {
-          ...prevModel.conversationContext,
-          stage: "refining",
-          depth: prevModel.conversationContext.depth + 1,
-        },
-        userModel: {
-          ...prevModel.userModel,
-          history: {
-            ...prevModel.userModel.history,
-            refinementIterations: prevModel.userModel.history.refinementIterations + 1,
-          },
-        },
-      }))
-
-      // Extract concerns from feedback with enhanced NLP
-      const concerns = extractEnhancedUserConcerns(input, enhancedIntent)
-
-      // Generate a highly personalized refinement question
-      const refinementQuestion = generateEnhancedPersonalizedRefinementQuestion(
-        concerns,
-        aiModel.userModel.history.refinementIterations,
-        enhancedIntent,
-        aiModel.enhancedReasoning,
-      )
-
-      const aiMessage: Message = {
-        id: `ai-${Date.now()}`,
-        type: "ai",
-        content: refinementQuestion,
-        timestamp: new Date(),
-      }
-
-      setMessages((prev) => [...prev, aiMessage])
-    }
-  }
-
-  // Enhanced function to extract user concerns
-  const extractEnhancedUserConcerns = (
-    input: string,
-    enhancedIntent: UserIntent & { subIntents: string[]; contextualFactors: Map<string, any> },
-  ): string[] => {
-    const concerns = extractUserConcerns(input) // Start with basic concerns
-    const inputLower = input.toLowerCase()
-
-    // Add concerns from contextual factors
-    if (enhancedIntent.contextualFactors.has("implicitBudgetConcern")) {
-      if (!concerns.includes("price")) concerns.push("price")
-    }
-
-    if (enhancedIntent.contextualFactors.has("implicitQualityConcern")) {
-      if (!concerns.includes("quality")) concerns.push("quality")
-    }
-
-    if (enhancedIntent.contextualFactors.has("timeSensitive")) {
-      if (!concerns.includes("timing")) concerns.push("timing")
-    }
-
-    // Look for more specific concerns
-    if (inputLower.includes("experience") || inputLower.includes("expertise") || inputLower.includes("qualified")) {
-      if (!concerns.includes("expertise")) concerns.push("expertise")
-    }
-
-    if (inputLower.includes("guarantee") || inputLower.includes("warranty") || inputLower.includes("reliable")) {
-      if (!concerns.includes("reliability")) concerns.push("reliability")
-    }
-
-    if (inputLower.includes("location") || inputLower.includes("distance") || inputLower.includes("nearby")) {
-      if (!concerns.includes("location")) concerns.push("location")
-    }
-
-    if (inputLower.includes("specific") || inputLower.includes("exactly") || inputLower.includes("precisely")) {
-      if (!concerns.includes("specificity")) concerns.push("specificity")
-    }
-
-    return concerns.length > 0 ? concerns : ["general"]
-  }
-
-  // Enhanced personalized refinement question
-  const generateEnhancedPersonalizedRefinementQuestion = (
-    concerns: string[],
-    refinementIterations: number,
-    enhancedIntent: UserIntent & { subIntents: string[]; contextualFactors: Map<string, any> },
-    enhancedReasoning: EnhancedReasoning,
-  ): string => {
-    // If this is a repeat refinement, acknowledge that with more empathy
-    if (refinementIterations > 1) {
-      // For multiple refinements, be more specific and empathetic
-      if (concerns.includes("price")) {
-        return "I understand price is really important to you. Could you tell me your specific budget range so I can find the most affordable options that still meet your needs? For example, is there a maximum amount you're comfortable spending?"
-      }
-
-      if (concerns.includes("quality")) {
-        return "I see you're looking for higher quality services. Could you tell me which specific aspects of quality matter most to you - is it provider experience, ratings, customer reviews, or something else?"
-      }
-
-      if (concerns.includes("timing")) {
-        return "Let me find options that better fit your schedule. When exactly do you need this service completed, and is there a specific day or time that works best for you?"
-      }
-
-      if (concerns.includes("expertise")) {
-        return "I understand you want someone with specific expertise. Could you tell me what qualifications or experience level you're looking for in a service provider?"
-      }
-
-      if (concerns.includes("reliability")) {
-        return "Reliability seems important to you. Are you looking for services with guarantees, warranties, or providers with particularly high completion rates?"
-      }
-
-      if (concerns.includes("relevance")) {
-        return "I apologize for misunderstanding your needs. Could you describe exactly what type of service you're looking for, perhaps with some examples of what you have in mind?"
-      }
-
-      return "I apologize that my recommendations still aren't meeting your needs. Could you tell me more specifically what you're looking for in an ideal service provider?"
-    }
-
-    // First refinement attempt - more conversational and natural
-    if (concerns.includes("price")) {
-      return "I understand price is important to you. Could you tell me more about your budget constraints so I can find better matches? What price range would you consider reasonable for this service?"
-    }
-
-    if (concerns.includes("quality")) {
-      return "I see you're looking for higher quality. Could you tell me more about what specific qualifications or experience level you're looking for? What aspects of quality matter most to you?"
-    }
-
-    if (concerns.includes("timing")) {
-      return "Let me find options that better fit your schedule. When exactly do you need this service completed? Is this something urgent or do you have some flexibility?"
-    }
-
-    if (concerns.includes("expertise")) {
-      return "Expertise seems important for this service. What specific skills or experience should the provider have to meet your needs?"
-    }
-
-    if (concerns.includes("reliability")) {
-      return "I understand reliability is important. Are you looking for providers with guarantees, high ratings, or specific credentials to ensure quality work?"
-    }
-
-    if (concerns.includes("relevance")) {
-      return "I understand these options aren't quite what you're looking for. Could you provide more details about the specific service you need? What would make a service perfect for your situation?"
-    }
-
-    // Check if we can infer anything from the enhanced intent
-    if (enhancedIntent.entities.length > 0) {
-      const categoryEntities = enhancedIntent.entities.filter((entity) =>
-        services.some((service) => service.category === entity),
-      )
-
-      if (categoryEntities.length > 0) {
-        return `I see you might be interested in ${categoryEntities[0]} services. Could you tell me more about what specific ${categoryEntities[0].toLowerCase()} service you're looking for and what matters most to you about it?`
-      }
-    }
-
-    return "I understand these aren't quite what you're looking for. Could you tell me more about what you need so I can find better matches? What aspects are most important to you?"
-  }
-
-  // Enhanced function to generate diverse alternatives
-  const generateEnhancedDiverseAlternatives = (
-    currentMatches: ServiceMatch[],
-    allServices: Service[],
-    userModel: UserPreferenceModel,
-    enhancedReasoning: EnhancedReasoning,
-  ): MatchingResult & { diversityFocus: string } => {
-    // Start with basic diverse alternatives
-    const basicResult = generateDiverseAlternativesFn(allServices, userModel)
-
-    // Determine what kind of diversity to focus on based on user model and context
-    let diversityFocus = "balanced"
-
-    // Check user model for clues about what kind of diversity to prioritize
-    if (userModel.budget.sensitivity > 7) {
-      // User is budget sensitive, focus on price diversity
-      diversityFocus = "price"
-    } else if (userModel.quality.importance > 7) {
-      // User values quality, focus on quality diversity
-      diversityFocus = "quality"
-    } else if (userModel.categories.size > 0) {
-      // User has category preferences, focus on category diversity
-      diversityFocus = "category"
-    }
-
-    // Apply diversity focus to enhance results
-    let enhancedMatches = [...basicResult.matches]
-
-    if (diversityFocus === "price") {
-      // Ensure we have a good spread of price points
-      const priceRanges = new Map<string, number>() // low, medium, high -> count
-
-      enhancedMatches.forEach((match) => {
-        const price = Number.parseFloat(match.service.price.replace(/[^0-9.]/g, ""))
-        const priceRange = price < 80 ? "low" : price < 120 ? "medium" : "high"
-        priceRanges.set(priceRange, (priceRanges.get(priceRange) || 0) + 1)
-      })
-
-      // Find underrepresented price ranges
-      const missingRanges = ["low", "medium", "high"].filter(
-        (range) => !priceRanges.has(range) || (priceRanges.get(range) || 0) < 1,
-      )
-
-      if (missingRanges.length > 0) {
-        // Find services in missing price ranges
-        const remainingServices = allServices.filter(
-          (service) => !enhancedMatches.some((match) => match.service.id === service.id),
-        )
-
-        missingRanges.forEach((range) => {
-          const minPrice = range === "low" ? 0 : range === "medium" ? 80 : 120
-          const maxPrice = range === "low" ? 0 : range === "medium" ? 120 : 1000
-
-          const servicesInRange = remainingServices.filter((service) => {
-            const price = Number.parseFloat(service.price.replace(/[^0-9.]/g, ""))
-            return price >= minPrice && price < maxPrice
-          })
-
-          if (servicesInRange.length > 0) {
-            // Find best match in this price range
-            const bestMatch = servicesInRange
-              .map((service) => {
-                let score = 50
-
-                // Quality score
-                score += (service.provider.rating - 4) * 10
-
-                // Category score
-                if (userModel.categories.has(service.category)) {
-                  score += 15
-                }
-
-                return { service, score }
-              })
-              .sort((a, b) => b.score - a.score)[0]
-
-            // Add to enhanced matches if not already included
-            if (!enhancedMatches.some((match) => match.service.id === bestMatch.service.id)) {
-              enhancedMatches.push({
-                service: bestMatch.service,
-                matchScore: Math.min(85, bestMatch.score),
-                matchReasons: [
-                  {
-                    factor: "Price Diversity",
-                    score: 20,
-                    explanation: `${range.charAt(0).toUpperCase() + range.slice(1)}-priced option at ${
-                      bestMatch.service.price
-                    }`,
-                  },
-                  {
-                    factor: "Provider Quality",
-                    score: Math.floor((bestMatch.service.provider.rating - 4) * 10),
-                    explanation: `${bestMatch.service.provider.rating}★ rating from ${bestMatch.service.provider.reviews} reviews`,
-                  },
-                ],
-                confidenceScore: 0.7,
-              })
-            }
-          }
-        })
-      }
-    } else if (diversityFocus === "category") {
-      // Ensure we have diversity in categories
-      const categories = new Set(enhancedMatches.map((match) => match.service.category))
-
-      // Find categories not represented
-      const allCategories = new Set(allServices.map((service) => service.category))
-      const missingCategories = Array.from(allCategories).filter((category) => !categories.has(category))
-
-      if (missingCategories.length > 0) {
-        // Find services in missing categories
-        const remainingServices = allServices.filter(
-          (service) =>
-            !enhancedMatches.some((match) => match.service.id === service.id) &&
-            missingCategories.includes(service.category),
-        )
-
-        if (remainingServices.length > 0) {
-          // Find best match in a missing category
-          const bestMatch = remainingServices
-            .map((service) => {
-              let score = 50
-
-              // Quality score
-              score += (service.provider.rating - 4) * 10
-
-              // Price score (inverse of budget sensitivity)
-              const price = Number.parseFloat(service.price.replace(/[^0-9.]/g, ""))
-              score += (10 - userModel.budget.sensitivity) * (price / 100)
-
-              return { service, score }
-            })
-            .sort((a, b) => b.score - a.score)[0]
-
-          // Add to enhanced matches
-          enhancedMatches.push({
-            service: bestMatch.service,
-            matchScore: Math.min(80, bestMatch.score),
-            matchReasons: [
-              {
-                factor: "Category Diversity",
-                score: 20,
-                explanation: `Alternative service type (${bestMatch.service.category})`,
-              },
-              {
-                factor: "Provider Quality",
-                score: Math.floor((bestMatch.service.provider.rating - 4) * 10),
-                explanation: `${bestMatch.service.provider.rating}★ rating from ${bestMatch.service.provider.reviews} reviews`,
-              },
-            ],
-            confidenceScore: 0.7,
-          })
-        }
-      }
-    }
-
-    // Ensure we don't have more than 3 matches
-    if (enhancedMatches.length > 3) {
-      enhancedMatches = enhancedMatches.slice(0, 3)
-    }
-
-    // Ensure diversityFocus is defined
-    if (!diversityFocus) {
-      diversityFocus = "balanced"
-    }
-
-    // Add reasoning step about diversity focus
-    const diversityReasoning: ReasoningStep = {
-      id: `diversity-${Date.now()}`,
-      step: "Diversity Enhancement",
-      reasoning: `Applied ${diversityFocus} diversity focus based on user preferences and context`,
-      conclusion: `Generated diverse alternatives with emphasis on ${diversityFocus} diversity`,
-      confidence: 0.85,
-      timestamp: new Date(),
-    }
-
-    return {
-      matches: enhancedMatches,
-      reasoning: [...basicResult.reasoning, diversityReasoning],
-      diversityScore: 0.8,
-      coverageScore: 0.7,
-      diversityFocus,
-    }
-  }
-
-  // Enhanced personalized explanation
-  const generateEnhancedPersonalizedExplanation = (
-    matches: ServiceMatch[],
-    userModel: UserPreferenceModel,
-    reasoning: ReasoningStep[],
-    enhancedReasoning: EnhancedReasoning,
-  ): string => {
-    // Start with basic explanation
-    let explanation = generatePersonalizedExplanation(matches, userModel, reasoning)
-
-    // Enhance the explanation with more personalized insights
-    if (matches.length > 0) {
-      const topMatch = matches[0]
-
-      // Add more detailed reasoning based on enhanced reasoning capabilities
-      if (enhancedReasoning.reasoningCapabilities.chainOfThought) {
-        explanation += "\n\n**Why This Matches Your Needs:**\n"
-
-        // Add specific insights based on user model
-        if (userModel.budget.sensitivity > 7 && topMatch.service.price.replace(/[^0-9.]/g, "") < 100) {
-          explanation += `\n• This option is budget-friendly at ${topMatch.service.price}, which aligns with your focus on affordability.`
-        }
-
-        if (userModel.quality.importance > 7 && topMatch.service.provider.rating > 4.7) {
-          explanation += `\n• With a ${topMatch.service.provider.rating}★ rating from ${topMatch.service.provider.reviews} reviews, this provider meets your high quality standards.`
-        }
-
-        if (userModel.timing.urgency > 7 && topMatch.service.provider.responseTime.includes("1 hour")) {
-          explanation += `\n• The provider's quick response time (${topMatch.service.provider.responseTime}) matches your need for timely service.`
-        }
-
-        // Add completion rate if it's high
-        if (topMatch.service.provider.completionRate > 95) {
-          explanation += `\n• This provider has an excellent track record with a ${topMatch.service.provider.completionRate}% completion rate.`
-        }
-
-        // Add project experience if available
-        if (topMatch.service.completedProjects > 100) {
-          explanation += `\n• With ${topMatch.service.completedProjects}+ completed projects, this provider brings substantial experience.`
-        }
-      }
-
-      // Add comparison with alternatives if we have multiple matches
-      if (matches.length > 1 && enhancedReasoning.reasoningCapabilities.selfCritique) {
-        explanation += "\n\n**How These Options Compare:**\n"
-
-        // Compare price points
-        const prices = matches.map((match) => Number.parseFloat(match.service.price.replace(/[^0-9.]/g, "")))
-        const minPrice = Math.min(...prices)
-        const maxPrice = Math.max(...prices)
-
-        if (maxPrice - minPrice > 20) {
-          explanation += `\n• Price range: The options range from ${
-            matches.find((m) => Number.parseFloat(m.service.price.replace(/[^0-9.]/g, "")) === minPrice)?.service.price
-          } to ${matches.find((m) => Number.parseFloat(m.service.price.replace(/[^0-9.]/g, "")) === maxPrice)?.service.price}.`
-        }
-
-        // Compare ratings
-        const ratings = matches.map((match) => match.service.provider.rating)
-        const minRating = Math.min(...ratings)
-        const maxRating = Math.max(...ratings)
-
-        if (maxRating - minRating > 0.2) {
-          explanation += `\n• Provider ratings: The providers range from ${minRating}★ to ${maxRating}★.`
-        }
-
-        // Compare response times if they differ
-        const quickestResponse = matches.find((match) => match.service.provider.responseTime.includes("1 hour"))
-        if (quickestResponse) {
-          explanation += `\n• ${quickestResponse.service.provider.name} offers the quickest response time at ${quickestResponse.service.provider.responseTime}.`
-        }
-      }
-
-      // Add confidence statement with more nuance
-      const confidenceLevel =
-        topMatch.confidenceScore > 0.9
-          ? "highly confident"
-          : topMatch.confidenceScore > 0.8
-            ? "very confident"
-            : topMatch.confidenceScore > 0.7
-              ? "confident"
-              : topMatch.confidenceScore > 0.6
-                ? "reasonably confident"
-                : "moderately confident"
-
-      explanation += `\n\nBased on your specific preferences and my analysis, I'm ${confidenceLevel} that these recommendations align with your needs.`
-
-      // Add next steps guidance
-      explanation +=
-        "\n\nWould you like to book one of these services, see more options, or learn more specific details about any of them?"
-    }
-
-    return explanation
-  }
-
-  // Handle refining stage with enhanced capabilities
-  const handleRefiningStage = (
-    input: string,
-    enhancedIntent: UserIntent & { subIntents: string[]; contextualFactors: Map<string, any> },
-  ) => {
-    // Generate refined recommendations with enhanced understanding
-    simulateThinkingWithReasoning(() => {
-      // Update user model with refinement input using adaptive learning
-      const refinedUserModel = updateUserModelWithAdaptiveLearning(
-        aiModel.userModel,
-        input,
-        enhancedIntent,
-        aiModel.conversationContext,
-        aiModel.enhancedReasoning.adaptivePersonalization,
-      )
-
-      // Generate new recommendations with updated model and enhanced reasoning
-      const refinedResult = matchServicesWithReasoning(services, refinedUserModel)
-
-      // Apply personalization boost based on adaptive learning
-      const personalizedMatches = refinedResult.matches.map((match) => {
-        let personalizedScore = match.matchScore
-
-        // Apply preference weights from adaptive learning
-        if (
-          aiModel.enhancedReasoning.adaptivePersonalization.preferenceWeights.has(`category:${match.service.category}`)
-        ) {
-          const weight =
-            aiModel.enhancedReasoning.adaptivePersonalization.preferenceWeights.get(
-              `category:${match.service.category}`,
-            ) || 1.0
-          personalizedScore = Math.min(100, personalizedScore * (1 + (weight - 1) * 0.2))
-        }
-
-        return {
-          ...match,
-          matchScore: Math.round(personalizedScore),
-        }
-      })
-
-      // Sort by personalized score
-      personalizedMatches.sort((a, b) => b.matchScore - a.matchScore)
-
-      // Update AI model
-      setAIModel((prevModel) => ({
-        ...prevModel,
-        userModel: refinedUserModel,
-        reasoningTrace: [...prevModel.reasoningTrace, ...refinedResult.reasoning],
-        conversationContext: {
-          ...prevModel.conversationContext,
-          stage: "finalizing",
-          depth: prevModel.conversationContext.depth + 1,
-          lastRecommendations: personalizedMatches.slice(0, 3).map((match) => match.service.id),
-        },
-      }))
-
-      setMatchedServices(
-        personalizedMatches.map((match) => ({
-          ...match.service,
-          matchScore: match.matchScore,
-        })),
-      )
-
-      // Generate personalized refinement intro based on user model and refinement history
-      let refinementIntro = generateRefinementResponseIntro(refinedUserModel.history.refinementIterations)
-
-      // Add personalized touches based on what changed in the user model
-      if (refinedUserModel.budget.sensitivity > aiModel.userModel.budget.sensitivity + 1) {
-        refinementIntro =
-          "Based on your feedback about budget, I've found these more affordable options that should better match your needs:"
-      } else if (refinedUserModel.quality.importance > aiModel.userModel.quality.importance + 1) {
-        refinementIntro =
-          "I understand quality is important to you. Here are some higher-quality options that should better meet your standards:"
-      } else if (refinedUserModel.timing.urgency > aiModel.userModel.timing.urgency + 1) {
-        refinementIntro = "Given your time constraints, I've prioritized services with quick response times:"
-      }
-
-      const refinedMessage: Message = {
-        id: `ai-${Date.now()}`,
-        type: "ai",
-        content: refinementIntro,
-        timestamp: new Date(),
-        services: personalizedMatches.slice(0, 3).map((match) => ({
-          ...match.service,
-          matchScore: match.matchScore,
-        })),
-      }
-
-      setMessages((prev) => [...prev, refinedMessage])
-
-      // Ask for feedback with personalized options based on refinement history
-      setTimeout(() => {
-        const feedbackOptions = ["Much better!", "Still not right"]
-
-        // Add contextual options based on refinement history
-        if (refinedUserModel.history.refinementIterations > 1) {
-          feedbackOptions.push("Can you explain these recommendations?")
-          feedbackOptions.push("I'll contact support for help")
-        } else {
-          feedbackOptions.push("Can you show me more variety?")
-          feedbackOptions.push("I'd like to compare these options")
-        }
-
-        const feedbackMessage: Message = {
-          id: `feedback-${Date.now()}`,
-          type: "ai",
-          content: "How do these refined options look?",
-          timestamp: new Date(),
-          feedbackOptions: feedbackOptions,
-        }
-
-        setMessages((prev) => [...prev, feedbackMessage])
-      }, 1000)
-    }, "complex")
-  }
-
-  // Handle finalizing stage with enhanced capabilities
-  const handleFinalizingStage = (
-    input: string,
-    enhancedIntent: UserIntent & { subIntents: string[]; contextualFactors: Map<string, any> },
-  ) => {
-    // Handle final decision with enhanced understanding
-    const primaryIntent = enhancedIntent.type
-    const subIntents = enhancedIntent.subIntents
-
-    // Check for booking intent in primary or sub-intents
-    if (primaryIntent === "booking" || subIntents.includes("booking") || input.toLowerCase().includes("book")) {
-      // Determine which service they want to book
-      let serviceToBook: Service | undefined
-
-      // Check if they mentioned a specific service
-      for (const service of matchedServices) {
-        if (input.toLowerCase().includes(service.title.toLowerCase())) {
-          serviceToBook = service
-          break
-        }
-      }
-
-      // If no specific service mentioned, use the top match
-      if (!serviceToBook && matchedServices.length > 0) {
-        serviceToBook = matchedServices[0]
-      }
-
-      const bookingMessage: Message = {
-        id: `ai-${Date.now()}`,
-        type: "ai",
-        content: serviceToBook
-          ? `Great! I'll take you to the booking page for "${serviceToBook.title}" provided by ${serviceToBook.provider.name}.`
-          : "Great! I'll take you to the booking page for your selected service.",
-        timestamp: new Date(),
-      }
-
-      setMessages((prev) => [...prev, bookingMessage])
-
-      // In a real app, this would redirect to the booking page
-      setTimeout(() => {
-        router.push(serviceToBook ? `/services/${serviceToBook.id}` : "/services/1")
-      }, 2000)
-    } else if (
-      primaryIntent === "comparison" ||
-      subIntents.includes("comparison") ||
-      input.toLowerCase().includes("compare")
-    ) {
-      // Set comparison mode with enhanced comparison
-      setAIModel((prevModel) => ({
-        ...prevModel,
-        conversationContext: {
-          ...prevModel.conversationContext,
-          comparisonMode: true,
-        },
-      }))
-
-      // Generate enhanced comparison with more details
-      const comparisonContent = generateEnhancedServiceComparison(
-        matchedServices.slice(0, Math.min(3, matchedServices.length)),
-      )
-
-      const aiMessage: Message = {
-        id: `ai-${Date.now()}`,
-        type: "ai",
-        content: `Here's a detailed comparison of the top options:\n\n${comparisonContent}`,
-        timestamp: new Date(),
-      }
-
-      setMessages((prev) => [...prev, aiMessage])
-
-      // Follow up with personalized recommendation
-      setTimeout(() => {
-        // Determine which service best matches their preferences
-        const topMatch = matchedServices.sort((a, b) => b.matchScore - a.matchScore)[0]
-
-        const followUpMessage: Message = {
-          id: `ai-${Date.now()}`,
-          type: "ai",
-          content: `Based on your preferences, "${topMatch.title}" seems to be the best match for you. Would you like to book this service or learn more about any of the options?`,
-          timestamp: new Date(),
-          options: [
-            `Book ${topMatch.title}`,
-            ...matchedServices
-              .slice(0, Math.min(3, matchedServices.length))
-              .filter((service) => service.id !== topMatch.id)
-              .map((service) => `Book ${service.title}`),
-            "I need more information",
-          ],
-        }
-
-        setMessages((prev) => [...prev, followUpMessage])
-      }, 1500)
-    } else if (
-      primaryIntent === "information" ||
-      subIntents.includes("information") ||
-      input.toLowerCase().includes("learn more") ||
-      input.toLowerCase().includes("details")
-    ) {
-      // Determine which service they want to learn about
-      let serviceToDetail: Service | undefined
-
-      // Check if they mentioned a specific service
-      for (const service of matchedServices) {
-        if (input.toLowerCase().includes(service.title.toLowerCase())) {
-          serviceToDetail = service
-          break
-        }
-      }
-
-      if (serviceToDetail) {
-        // Generate detailed information about the specific service
-        const detailedInfo = generateEnhancedServiceDetails(serviceToDetail)
-
-        const detailMessage: Message = {
-          id: `ai-${Date.now()}`,
-          type: "ai",
-          content: detailedInfo,
-          timestamp: new Date(),
-          options: ["Book this service", "Compare with other options", "Go back to all recommendations"],
-        }
-
-        setMessages((prev) => [...prev, detailMessage])
-      } else {
-        // Ask which service they want to learn about
-        const aiMessage: Message = {
-          id: `ai-${Date.now()}`,
-          type: "ai",
-          content:
-            "I'd be happy to provide more details about these services. Which one would you like to learn more about?",
-          timestamp: new Date(),
-          options: matchedServices.slice(0, 3).map((service) => `Learn about "${service.title}"`),
-        }
-
-        setMessages((prev) => [...prev, aiMessage])
-      }
-    } else if (primaryIntent === "save" || subIntents.includes("save") || input.toLowerCase().includes("save")) {
-      // Enhanced save functionality with next steps
-      const aiMessage: Message = {
-        id: `ai-${Date.now()}`,
-        type: "ai",
-        content:
-          "I've saved these recommendations for you. You can access them anytime from your saved items. Would you like me to send you an email with these recommendations for future reference?",
-        timestamp: new Date(),
-        options: ["Yes, email me the recommendations", "No thanks", "Find another service", "Talk to a human agent"],
-      }
-
-      setMessages((prev) => [...prev, aiMessage])
-    } else {
-      // Enhanced general follow-up with personalized suggestions
-      const topMatch = matchedServices.length > 0 ? matchedServices[0] : null
-
-      const nextStepOptions = ["Find another service", "No, that's all for now"]
-
-      // Add personalized options based on user model
-      if (topMatch) {
-        nextStepOptions.unshift(`Book ${topMatch.title}`)
-
-        if (matchedServices.length > 1) {
-          nextStepOptions.unshift("Compare top options")
-        }
-      }
-
-      // Add support option if we've been through multiple iterations
-      if (aiModel.userModel.history.refinementIterations > 1) {
-        nextStepOptions.push("Talk to a human agent")
-      }
-
-      const aiMessage: Message = {
-        id: `ai-${Date.now()}`,
-        type: "ai",
-        content: "Is there anything else I can help you with today?",
-        timestamp: new Date(),
-        options: nextStepOptions,
-      }
-
-      setMessages((prev) => [...prev, aiMessage])
-    }
-  }
-
-  // Generate enhanced service comparison
-  const generateEnhancedServiceComparison = (services: Service[]): string => {
-    if (services.length < 2) {
-      return "I need at least two services to compare."
-    }
-
-    let comparison = "| Feature | "
-    services.forEach((service) => {
-      comparison += `${service.title} | `
-    })
-    comparison += "\n|---|"
-    services.forEach(() => {
-      comparison += "---|"
-    })
-
-    // Price comparison
-    comparison += "\n| Price | "
-    services.forEach((service) => {
-      comparison += `${service.price} | `
-    })
-
-    // Provider rating comparison
-    comparison += "\n| Provider Rating | "
-    services.forEach((service) => {
-      comparison += `${service.provider.rating}★ (${service.provider.reviews} reviews) | `
-    })
-
-    // Response time comparison
-    comparison += "\n| Response Time | "
-    services.forEach((service) => {
-      comparison += `${service.provider.responseTime} | `
-    })
-
-    // Completion rate comparison
-    comparison += "\n| Completion Rate | "
-    services.forEach((service) => {
-      comparison += `${service.provider.completionRate}% | `
-    })
-
-    // Category comparison
-    comparison += "\n| Category | "
-    services.forEach((service) => {
-      comparison += `${service.category} | `
-    })
-
-    // Match score comparison
-    comparison += "\n| Match Score | "
-    services.forEach((service) => {
-      comparison += `${service.matchScore}% | `
-    })
-
-    // Add more detailed comparisons
-
-    // Completed projects comparison
-    comparison += "\n| Completed Projects | "
-    services.forEach((service) => {
-      comparison += `${service.completedProjects}+ | `
-    })
-
-    // Customer satisfaction comparison
-    comparison += "\n| Customer satisfaction | "
-    services.forEach((service) => {
-      comparison += `${service.satisfaction}% | `
-    })
-
-    // Service description summary
-    comparison += "\n| Service Description | "
-    services.forEach((service) => {
-      // Truncate description to keep table readable
-      const shortDesc =
-        service.description.length > 50 ? service.description.substring(0, 50) + "..." : service.description
-      comparison += `${shortDesc} | `
-    })
-
-    // Time estimate comparison
-    comparison += "\n| Time Estimate | "
-    services.forEach((service) => {
-      comparison += `${service.timeEstimate} | `
-    })
-
-    return comparison
-  }
-
-  // Generate enhanced service details
-  const generateEnhancedServiceDetails = (service: Service): string => {
-    return `
-# ${service.title}
-
-**Provider:** ${service.provider.name} (${service.provider.rating}★ from ${service.provider.reviews} reviews)
-${service.provider.verified ? "✓ Verified Provider" : ""}
-
-**Price:** ${service.price}
-**Estimated Time:** ${service.timeEstimate}
-**Category:** ${service.category}
-**Match Score:** ${service.matchScore}%
-
-## Service Description
-${service.description}
-
-## Provider Details
-- Response Time: ${service.provider.responseTime}
-- Completion Rate: ${service.provider.completionRate}%
-- Completed Projects: ${service.completedProjects}+
-- Customer satisfaction: ${service.satisfaction}%
-
-## What's Included
-${service.tags.map((tag) => `- ${tag}`).join("\n")}
-
-Would you like to book this service or compare it with other options?
-`
-  }
-
-  // Reset conversation with enhanced memory
-  const resetConversation = () => {
-    // Store some long-term memory before resetting
-    const longTermMemory = new Map(aiModel.enhancedReasoning.contextualMemory.longTerm)
-
-    // Store category preferences in long-term memory
-    aiModel.userModel.categories.forEach((confidence, category) => {
-      if (confidence > 0.6) {
-        longTermMemory.set(`category_preference:${category}`, confidence)
-      }
-    })
-
-    // Store budget sensitivity in long-term memory if it's significant
-    if (aiModel.userModel.budget.sensitivity !== 5) {
-      longTermMemory.set("budget_sensitivity", aiModel.userModel.budget.sensitivity)
-    }
-
-    // Store quality importance in long-term memory if it's significant
-    if (aiModel.userModel.quality.importance !== 7) {
-      longTermMemory.set("quality_importance", aiModel.userModel.quality.importance)
-    }
-
-    // Reset conversation state
-    setMessages(initialMessages)
-    setInputValue("")
-    setIsTyping(false)
-    setMatchedServices([])
-    setCurrentQuestion(0)
-    setConversationStage("initial")
-    setUserContextHistory([])
-    setDetectedPreferences({
-      category: null,
-      budget: null,
-      timeframe: null,
-      experienceImportance: null,
-      specificRequirements: null,
-      hasSpecificRequirements: false,
-    })
-
-    // Reset AI model but preserve long-term memory
-    setAIModel({
-      reasoningTrace: [],
-      confidenceThreshold: 0.7,
-      explorationFactor: 0.2,
-      lastUserIntent: null,
-      userModel: {
-        categories: new Map(),
-        budget: {
-          sensitivity: 5,
-          range: null,
-          flexibility: 5,
-        },
-        quality: {
-          importance: 7,
-          minimumRating: null,
-          certificationRequired: false,
-        },
-        timing: {
-          urgency: 5,
-          specificDate: null,
-          flexibility: 5,
-        },
-        requirements: {
-          explicit: [],
-          implicit: new Map(),
-          dealBreakers: [],
-        },
-        history: {
-          viewedServices: [],
-          interactionCount: 0,
-          satisfactionTrend: [],
-          refinementIterations: 0,
-        },
-      },
-      conversationContext: {
-        stage: "initial",
-        depth: 0,
-        lastRecommendations: [],
-        explanationProvided: false,
-        comparisonMode: false,
-        currentServiceType: null,
-        serviceSpecificAnswers: new Map(),
-        currentServiceQuestion: 0,
-      },
-      enhancedReasoning: {
-        contextualMemory: {
-          shortTerm: new Map(),
-          longTerm: longTermMemory, // Preserve long-term memory
-          conversationFlow: [],
-        },
-        reasoningCapabilities: {
-          chainOfThought: true,
-          selfCritique: true,
-          uncertaintyHandling: 0.8,
-          explorationFactor: 0.3,
-        },
-        adaptivePersonalization: {
-          learningRate: 0.2,
-          preferenceWeights: new Map(),
-          confidenceThresholds: new Map([
-            ["category", 0.7],
-            ["budget", 0.6],
-            ["quality", 0.65],
-            ["timing", 0.6],
-          ]),
-        },
-        proactiveCapabilities: {
-          suggestionThreshold: 0.75,
-          anticipationFactors: [
-            "budget_constraints",
-            "quality_expectations",
-            "time_sensitivity",
-            "specific_requirements",
-          ],
-          interventionLevel: "medium",
-        },
-      },
-    })
-  }
-
-  const handleFeedbackSelect = (option: string) => {
-    const userMessage: Message = {
-      id: `user-${Date.now()}`,
-      type: "user",
-      content: option,
-      timestamp: new Date(),
-    }
-
-    setMessages((prev) => [...prev, userMessage])
-    processUserInput(option)
-  }
-
-  const simulateThinkingWithReasoning = (callback: () => void, complexity: string) => {
-    const delay = determineQueryComplexity("", complexity)
-    simulateTyping(callback, delay)
+    }, 1500)
   }
 
   const categoriesRef = useRef<HTMLDivElement>(null)
@@ -3224,51 +1201,20 @@ Would you like to book this service or compare it with other options?
     setIsTyping(false)
     setMatchedServices([])
 
-    // Set AI model to service-specific questions stage
-    setAIModel((prevModel) => ({
-      ...prevModel,
-      conversationContext: {
-        ...prevModel.conversationContext,
-        stage: "service-specific",
-        depth: 1,
-        currentServiceType: serviceType,
-        currentServiceQuestion: 0,
-        serviceSpecificAnswers: new Map(),
-      },
-      reasoningTrace: [
-        {
-          id: `stage-${Date.now()}`,
-          step: "Stage Transition",
-          reasoning: `User selected ${serviceType} category, moving to service-specific questions`,
-          conclusion: "Transitioning to service-specific questions stage",
-          confidence: 0.95,
-          timestamp: new Date(),
-        },
-      ],
-    }))
-
-    // Ask the first service-specific question
-    if (serviceSpecificQuestions[serviceType]) {
-      const firstQuestion = serviceSpecificQuestions[serviceType].questions[0]
-      const options = serviceSpecificQuestions[serviceType].options[firstQuestion]
-
-      const serviceTypeDisplay =
-        serviceType === "tvMounting"
-          ? "TV mounting"
-          : serviceType === "furniture"
-            ? "furniture assembly"
-            : serviceType.charAt(0).toUpperCase() + serviceType.slice(1)
-
+    // Simple response for category selection
+    simulateTyping(() => {
       const aiMessage: Message = {
         id: `ai-${Date.now()}`,
         type: "ai",
-        content: `I'll help you find the perfect ${serviceTypeDisplay} service. ${firstQuestion}`,
+        content: `Great choice! I'll help you find the best ${serviceType} services. Here are some top providers:`,
         timestamp: new Date(),
-        options: options,
+        services: services
+          .filter((service) => service.category.toLowerCase().includes(serviceType.toLowerCase()))
+          .slice(0, 3),
       }
 
       setMessages((prev) => [...prev, aiMessage])
-    }
+    }, 1000)
   }
 
   // Handle horizontal scrolling for categories
@@ -3362,7 +1308,7 @@ Would you like to book this service or compare it with other options?
     container.addEventListener("touchstart", handleTouchStart, { passive: false })
     container.addEventListener("touchend", handleMouseUp)
     container.addEventListener("touchcancel", handleMouseLeave)
-    container.addEventListener("touchmove", { passive: false })
+    container.addEventListener("touchmove", handleTouchMove)
 
     return () => {
       container.removeEventListener("mousedown", handleMouseDown)
@@ -3523,203 +1469,6 @@ Would you like to book this service or compare it with other options?
     )
   }
 
-  const processQuestionAnswer = (questionIndex: number, answer: string) => {
-    // Update user model based on the answer
-    setAIModel((prevModel) => {
-      const updatedModel = { ...prevModel }
-
-      switch (questionIndex) {
-        case 0:
-          // Budget question
-          if (answer.toLowerCase().includes("budget-friendly")) {
-            updatedModel.userModel.budget.sensitivity = 8
-          } else if (answer.toLowerCase().includes("mid-range")) {
-            updatedModel.userModel.budget.sensitivity = 5
-          } else if (answer.toLowerCase().includes("premium")) {
-            updatedModel.userModel.budget.sensitivity = 2
-          } else {
-            updatedModel.userModel.budget.sensitivity = 5
-          }
-          break
-        case 1:
-          // Timeframe question
-          if (answer.toLowerCase().includes("as soon as possible")) {
-            updatedModel.userModel.timing.urgency = 8
-          } else if (answer.toLowerCase().includes("within a week")) {
-            updatedModel.userModel.timing.urgency = 6
-          } else if (answer.toLowerCase().includes("within a month")) {
-            updatedModel.userModel.timing.urgency = 4
-          } else {
-            updatedModel.userModel.timing.urgency = 5
-          }
-          break
-        case 2:
-          // Experience question
-          if (answer.toLowerCase().includes("very important")) {
-            updatedModel.userModel.quality.importance = 8
-          } else if (answer.toLowerCase().includes("somewhat important")) {
-            updatedModel.userModel.quality.importance = 6
-          } else if (answer.toLowerCase().includes("not very important")) {
-            updatedModel.userModel.quality.importance = 4
-          } else {
-            updatedModel.userModel.quality.importance = 5
-          }
-          break
-        case 3:
-          // Specific requirements question
-          if (answer.toLowerCase().includes("yes")) {
-            updatedModel.userModel.requirements.explicit.push("Specific requirements")
-          }
-          break
-      }
-
-      return updatedModel
-    })
-  }
-
-  // Proactive action handlers
-  const handleProactiveRecommendation = () => {
-    const aiMessage: Message = {
-      id: `ai-${Date.now()}`,
-      type: "ai",
-      content:
-        "I've gathered enough information to provide some recommendations. Here are some services that might be a good fit for you:",
-      timestamp: new Date(),
-      services: services.slice(0, 3),
-    }
-
-    setMessages((prev) => [...prev, aiMessage])
-    setAIModel((prevModel) => ({
-      ...prevModel,
-      conversationContext: {
-        ...prevModel.conversationContext,
-        stage: "recommending",
-        depth: prevModel.conversationContext.depth + 1,
-      },
-    }))
-  }
-
-  const handleProactiveBudgetRefinement = (input: string) => {
-    const aiMessage: Message = {
-      id: `ai-${Date.now()}`,
-      type: "ai",
-      content: "I noticed you mentioned budget concerns. Would you like me to prioritize more affordable options?",
-      timestamp: new Date(),
-      options: ["Yes, show me cheaper options", "No, continue with current options"],
-    }
-
-    setMessages((prev) => [...prev, aiMessage])
-  }
-
-  const handleProactiveGuidance = () => {
-    const aiMessage: Message = {
-      id: `ai-${Date.now()}`,
-      type: "ai",
-      content:
-        "I see you're having trouble deciding. Would you like me to highlight the best option based on your preferences?",
-      timestamp: new Date(),
-      options: ["Yes, highlight the best option", "No, I'll decide myself"],
-    }
-
-    setMessages((prev) => [...prev, aiMessage])
-  }
-
-  const handleUnderstandingStage = (
-    input: string,
-    enhancedIntent: UserIntent & { subIntents: string[]; contextualFactors: Map<string, any> },
-  ) => {
-    // Enhanced understanding stage logic here
-    // For example, you can add more sophisticated intent recognition and user model updates
-    // For now, let's just move to the recommending stage
-    setAIModel((prevModel) => ({
-      ...prevModel,
-      conversationContext: {
-        ...prevModel.conversationContext,
-        stage: "recommending",
-        depth: prevModel.conversationContext.depth + 1,
-      },
-    }))
-
-    const aiMessage: Message = {
-      id: `ai-${Date.now()}`,
-      type: "ai",
-      content: "Okay, I think I have a good understanding of your needs. Here are some recommendations:",
-      timestamp: new Date(),
-      services: services.slice(0, 3),
-    }
-
-    setMessages((prev) => [...prev, aiMessage])
-  }
-
-  const generateEnhancedRecommendations = () => {
-    // Enhanced recommendation generation logic here
-    // For example, you can use more sophisticated matching algorithms and personalization techniques
-    // For now, let's just generate some random recommendations
-    const aiMessage: Message = {
-      id: `ai-${Date.now()}`,
-      type: "ai",
-      content: "Here are some enhanced recommendations based on your preferences:",
-      timestamp: new Date(),
-      services: services.slice(0, 3),
-    }
-
-    setMessages((prev) => [...prev, aiMessage])
-  }
-
-  // Add this function after the renderEnhancedServiceCard function
-  const renderShowMoreButton = () => {
-    return (
-      <div
-        className="flex justify-center items-center mt-4 cursor-pointer"
-        onClick={() => {
-          // Generate more recommendations
-          const moreServices = services.filter((s) => !matchedServices.some((ms) => ms.id === s.id)).slice(0, 3)
-
-          if (moreServices.length > 0) {
-            setMatchedServices([...matchedServices, ...moreServices])
-          }
-        }}
-      >
-        <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center shadow-md hover:bg-indigo-700 transition-colors">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-white"
-          >
-            <path d="M12 5v14M5 12h14" />
-          </svg>
-        </div>
-      </div>
-    )
-  }
-
-  const handleServiceSelect = (serviceId: number) => {
-    // Navigate to the service details page
-    router.push(`/services/${serviceId}`)
-  }
-
-  const handleCompare = (serviceId: number) => {
-    // Implement comparison logic here
-    console.log(`Compare service with ID: ${serviceId}`)
-  }
-
-  const [filteredServices, setFilteredServices] = useState<Service[]>(services.slice(0, 3))
-
-  // Add this function near other form handlers
-  const onSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (inputValue.trim() && !isTyping) {
-      handleSubmit(e)
-    }
-  }
-
   // Add this function for voice recording toggle
   const toggleRecording = () => {
     setIsRecording(!isRecording)
@@ -3739,7 +1488,7 @@ Would you like to book this service or compare it with other options?
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/80 via-white/90 to-violet-50/80 dark:from-gray-900/90 dark:via-gray-900/95 dark:to-indigo-950/80 z-0" />
 
       {/* Enhanced grid pattern background */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5MDkwOTAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6bTAtMTJ2NmgxOHYtNkgzNnptMCIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDI0em0wIDEydjZoMTh2LTZIMzR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY6aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] bg-[size:30px_30px] z-0 opacity-30" />
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5MDkwOTAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6bTAtMTJ2NmgxOHYtNkgzNnptMCAxMnY2aDE4di02SDM2ek0yNCAzNHY2aDZ2LTZoLTZ6bTAtMzB2OmgxOHYtNkgyNHptMCAxMnY2aDE4di02SDM0ek0xMiAzNHY2aDZ2LTZoLTZ6bTAtMzB2OmgxOHYtNkgxMnptMCAxMnY2aDE4di02SDEyek0wIDM0djZoMTJ2LTZIMHptMC0zMHY2aDEydi02SDB6bTAgMTJ2OmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHptMCAxMnY2aDE4di02SDB6Ii8+PC9nPjwvZz48L3N2Zz4=')] bg-[size:30px_30px] z-0 opacity-30" />
 
       <div className="w-full relative z-10 overflow-x-hidden px-0 mx-0">
         {/* AI Matchmaker Interface */}
@@ -3752,29 +1501,51 @@ Would you like to book this service or compare it with other options?
           <div className="w-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border border-gray-200/50 dark:border-gray-800/50 overflow-hidden">
             {/* Enhanced background gradient with animated pattern */}
             <div className="absolute inset-0 bg-gradient-to-r from-violet-500/20 via-indigo-600/15 to-purple-600/20 opacity-90"></div>
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzMjI2NTkiIGZpbGwtb3BhY2l0eT0iMC4wNCI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6bTAtMTJ2NmgxOHYtNkgzNnptMCIDEydjZoMTh2LTZIMzZ6TTI0IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDI0em0wIDEydjZoMTh2LTZIMzR6TTEyIDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDEyem0wIDEydjZoMTh2LTZIMTJ6TTAgMzR2NmgxMnYtNkgwem0wLTMwdjZoMTJ2LTZIMHptMCAxMnY6aDE4di02SDB6bTAgMTJ2NmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] animate-[pulse_15s_ease-in-out_infinite] opacity-70"></div>
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzMjI2NTkiIGZpbGwtb3BhY2l0eT0iMC4wNCI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6bTAtMTJ2NmgxOHYtNkgzNnptMCAxMnY2aDE4di02SDM2ek0yNCAzNHY2aDZ2LTZoLTZ6bTAtMzB2OmgxOHYtNkgyNHptMCAxMnY2aDE4di02SDM0ek0xMiAzNHY2aDZ2LTZoLTZ6bTAtMzB2OmgxOHYtNkgxMnptMCAxMnY2aDE4di02SDEyek0wIDM0djZoMTJ2LTZIMHptMC0zMHY2aDEydi02SDB6bTAgMTJ2OmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHptMCAxMnY2aDE4di02SDB6Ii8+PC9nPjwvZz48L3N2Zz4=')] animate-[pulse_15s_ease-in-out_infinite] opacity-70"></div>
 
             {/* Enhanced header content - simplified with icon in top left */}
-            <div className="relative flex items-center justify-between p-5 border-b border-gray-200/50 dark:border-gray-800/50 backdrop-blur-sm mb-0 mt-8">
+            <div className="relative flex items-center justify-between p-5 bg-white dark:bg-gray-900 backdrop-blur-sm mb-0 mt-8">
               <div className="flex items-center">
                 <LevlLogo className="h-16 w-16 transition-all shadow-[0_4px_8px_rgba(0,0,0,0.1),0_2px_4px_rgba(0,0,0,0.1)] dark:shadow-[0_4px_8px_rgba(79,70,229,0.2),0_2px_4px_rgba(79,70,229,0.1)]" />
               </div>
               <div className="flex items-center gap-3">
+                {/* Portal Button */}
+                <Dialog open={showPortal} onOpenChange={setShowPortal}>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-lavender-400 opacity-100 bg-transparent"
+                    >
+                      <Layout className="mr-2 h-4 w-4" />
+                      Portal
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0">
+                    <DialogHeader className="sr-only">
+                      <DialogTitle>LevL Portal</DialogTitle>
+                    </DialogHeader>
+                    <div className="w-full h-full overflow-hidden">
+                      <LevlPortal />
+                    </div>
+                  </DialogContent>
+                </Dialog>
+
                 <Link
                   href="/dashboard"
-                  className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium text-foreground/80 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-lavender-400 opacity-100"
                 >
                   Dashboard
                 </Link>
                 <Link
                   href="/profile"
-                  className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium text-foreground/80 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-lavender-400"
                 >
                   Profile
                 </Link>
                 <Link
                   href="/forum"
-                  className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium text-foreground/80 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-lavender-400"
                 >
                   Forum
                 </Link>
@@ -3785,7 +1556,7 @@ Would you like to book this service or compare it with other options?
             <div className="border-b border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-r from-gray-50/80 via-white/80 to-gray-50/80 dark:from-gray-900/80 dark:via-gray-900/90 dark:to-gray-900/80 mb-0 pb-0">
               <div className="relative w-full overflow-hidden">
                 <div
-                  className="overflow-x-auto py-4 pb-2 scrollbar-hide scroll-smooth mx-auto"
+                  className="overflow-x-auto py-2 pb-1 scrollbar-hide scroll-smooth mx-auto bg-white"
                   ref={categoriesRef}
                   style={{
                     scrollbarWidth: "none",
@@ -3843,7 +1614,7 @@ after:content-[''] after:absolute after:bottom-[-15px] after:left-[5%] after:rig
             <div
               id="chat-container"
               ref={chatContainerRef}
-              className="relative overflow-y-auto p-6 pb-16 min-h-[380px] bg-gradient-to-b from-gray-50/80 via-indigo-50/10 to-white/90 dark:from-gray-900/90 dark:via-indigo-950/20 dark:to-gray-950/80 backdrop-blur-sm shadow-inner border-t border-indigo-100/20 dark:border-indigo-800/20 rounded-b-lg mt-0 pt-4"
+              className="relative overflow-y-auto p-6 pb-16 min-h-[600px] bg-white dark:bg-gray-900 backdrop-blur-sm shadow-inner border-t border-indigo-100/20 dark:border-indigo-800/20 rounded-b-lg mt-0 pt-4"
               style={{
                 scrollbarWidth: "thin",
                 scrollbarColor: "rgba(79, 70, 229, 0.2) transparent",
@@ -3919,8 +1690,8 @@ after:content-[''] after:absolute after:bottom-[-15px] after:left-[5%] after:rig
                                 <ProviderCard
                                   key={service.provider.id}
                                   provider={service.provider}
-                                  onSelect={(providerId) => handleServiceSelect(service.id)}
-                                  onViewServices={(providerId) => handleServiceSelect(service.id)}
+                                  onSelect={(providerId) => router.push(`/services/${service.id}`)}
+                                  onViewServices={(providerId) => router.push(`/services/${service.id}`)}
                                   onContact={(providerId) => router.push(`/messages?provider=${providerId}`)}
                                   matchScore={service.matchScore}
                                 />
@@ -3937,62 +1708,38 @@ after:content-[''] after:absolute after:bottom-[-15px] after:left-[5%] after:rig
                       </div>
                     )}
 
+                    {/* loading message type */}
                     {message.type === "loading" && (
                       <div className="flex">
-                        <div className="bg-white dark:bg-gray-800 rounded-xl px-3 py-2 shadow-sm border border-gray-100 dark:border-gray-700">
-                          <div className="flex items-center">
-                            <div className="flex items-center">
-                              <LevlLogo className="h-12 w-12 mr-2" />
-                              <div className="flex space-x-1.5 ml-1">
-                                <motion.div
-                                  className="h-1 w-1 bg-primary rounded-full"
-                                  animate={{ scale: [0.5, 1, 0.5] }}
-                                  transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
-                                />
-                                <motion.div
-                                  className="h-1 w-1 bg-primary rounded-full"
-                                  animate={{ scale: [0.5, 1, 0.5] }}
-                                  transition={{
-                                    duration: 1.5,
-                                    repeat: Number.POSITIVE_INFINITY,
-                                    ease: "easeInOut",
-                                    delay: 0.2,
-                                  }}
-                                />
-                                <motion.div
-                                  className="h-1 w-1 bg-primary rounded-full"
-                                  animate={{ scale: [0.5, 1, 0.5] }}
-                                  transition={{
-                                    duration: 1.5,
-                                    repeat: Number.POSITIVE_INFINITY,
-                                    ease: "easeInOut",
-                                    delay: 0.4,
-                                  }}
-                                />
-                              </div>
-                            </div>
+                        <div className="flex items-center">
+                          <LevlLogo className="h-12 w-12 mr-2" />
+                          <div className="flex space-x-1.5 ml-1">
+                            <motion.div
+                              className="h-1 w-1 bg-primary rounded-full"
+                              animate={{ scale: [0.5, 1, 0.5] }}
+                              transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+                            />
+                            <motion.div
+                              className="h-1 w-1 bg-primary rounded-full"
+                              animate={{ scale: [0.5, 1, 0.5] }}
+                              transition={{
+                                duration: 1.5,
+                                repeat: Number.POSITIVE_INFINITY,
+                                ease: "easeInOut",
+                                delay: 0.2,
+                              }}
+                            />
+                            <motion.div
+                              className="h-1 w-1 bg-primary rounded-full"
+                              animate={{ scale: [0.5, 1, 0.5] }}
+                              transition={{
+                                duration: 1.5,
+                                repeat: Number.POSITIVE_INFINITY,
+                                ease: "easeInOut",
+                                delay: 0.4,
+                              }}
+                            />
                           </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {message.type === "feedback" && (
-                      <div className="flex">
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl px-5 py-3 max-w-[80%] shadow-md border border-gray-100 dark:border-gray-700">
-                          <p className="text-sm">{message.content}</p>
-                          {message.feedbackOptions && (
-                            <div className="mt-4 flex flex-wrap gap-2">
-                              {message.feedbackOptions.map((option) => (
-                                <button
-                                  key={option}
-                                  className="px-3 py-1.5 bg-gray-100/80 dark:bg-gray-700/80 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 rounded-full text-xs font-medium transition-all duration-200 border border-gray-200/50 dark:border-gray-600/50 hover:border-indigo-300 dark:hover:border-indigo-700/50 backdrop-blur-sm hover:shadow-md"
-                                  onClick={() => handleFeedbackSelect(option)}
-                                >
-                                  {option}
-                                </button>
-                              ))}
-                            </div>
-                          )}
                         </div>
                       </div>
                     )}
@@ -4013,7 +1760,7 @@ backdrop-blur-sm transition-all duration-200"
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.4 }}
             >
-              <form onSubmit={onSubmit} className="flex items-center gap-2 max-w-4xl mx-auto">
+              <form onSubmit={handleSubmit} className="flex items-center gap-2 max-w-4xl mx-auto">
                 <div className="relative flex-1 border-none" style={{ borderBottom: "none" }}>
                   <Input
                     ref={inputRef}
@@ -4066,4 +1813,15 @@ backdrop-blur-sm transition-all duration-200"
 }
 
 // Initialize long-term memory outside the component
-const longTermMemory = new Map()
+const serviceCategoryMap: { [key: string]: string } = {
+  tvMounting: "Mounting",
+  plumbing: "Plumbing",
+  painting: "Painting",
+  furniture: "Assembly",
+  moving: "Moving",
+  cleaning: "Cleaning",
+  electrical: "Electrical",
+  landscaping: "Landscaping",
+  flooring: "Flooring",
+  roofing: "Roofing",
+}

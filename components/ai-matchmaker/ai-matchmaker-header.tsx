@@ -1,45 +1,85 @@
 "use client"
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
 import { LevlLogo } from "@/components/levl-logo"
-import { cn } from "@/lib/utils"
+import { User, MessageCircle, Layout } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { LevlPortal } from "@/components/levl-portal"
 
 export function AIMatchmakerHeader() {
-  const pathname = usePathname()
-
-  const navItems = [
-    { href: "/dashboard", label: "Dashboard" },
-    { href: "/profile", label: "Profile" },
-    { href: "/about", label: "About" },
-    { href: "/forum", label: "Forum" },
-  ]
+  const [showPortal, setShowPortal] = useState(false)
 
   return (
-    <header className="w-full py-4">
-      <div className="container flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <LevlLogo className="h-8 w-8" />
-          <span className="text-xl font-bold bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
+    <div className="flex items-center justify-between w-full mb-8 px-4 sm:px-6 lg:px-8">
+      {/* Logo */}
+      <div className="flex items-center gap-3">
+        <div className="relative">
+          <div className="absolute inset-0 bg-white/20 backdrop-blur-sm rounded-lg border border-white/20 shadow-sm pointer-events-none"></div>
+          <LevlLogo className="h-10 w-10 relative z-10" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
             LevL
-          </span>
-        </Link>
-
-        <nav className="flex items-center gap-6">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "text-sm font-medium transition-colors hover:text-primary",
-                pathname === item.href ? "text-foreground" : "text-muted-foreground",
-              )}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+          </h1>
+          <p className="text-sm text-white/70">AI Service Matchmaker</p>
+        </div>
       </div>
-    </header>
+
+      {/* Navigation Buttons */}
+      <div className="flex items-center gap-3">
+        {/* Portal Button - FIRST BUTTON */}
+        <Dialog open={showPortal} onOpenChange={setShowPortal}>
+          <DialogTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-sm"
+            >
+              <Layout className="mr-2 h-4 w-4" />
+              Portal
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0">
+            <DialogHeader className="sr-only">
+              <DialogTitle>LevL Portal</DialogTitle>
+            </DialogHeader>
+            <div className="w-full h-full overflow-hidden">
+              <LevlPortal />
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dashboard Button */}
+        <Button
+          variant="outline"
+          size="sm"
+          className="bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-sm"
+        >
+          <User className="mr-2 h-4 w-4" />
+          Dashboard
+        </Button>
+
+        {/* Profile Button */}
+        <Button
+          variant="outline"
+          size="sm"
+          className="bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-sm"
+        >
+          <User className="mr-2 h-4 w-4" />
+          Profile
+        </Button>
+
+        {/* Forum Button */}
+        <Button
+          variant="outline"
+          size="sm"
+          className="bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-sm"
+        >
+          <MessageCircle className="mr-2 h-4 w-4" />
+          Forum
+        </Button>
+      </div>
+    </div>
   )
 }

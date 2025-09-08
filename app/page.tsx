@@ -8,13 +8,11 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { LevlLogo } from "@/components/levl-logo"
 import { ThemeToggle } from "@/components/theme-toggle"
-// Import the new AI Service Matchmaker component
 import { AIServiceMatchmaker } from "@/components/ai-matchmaker/ai-service-matchmaker"
 
 export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false)
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState("all")
 
   useEffect(() => {
     setIsLoaded(true)
@@ -31,8 +29,6 @@ export default function Home() {
 
       <main className="flex-1" style={{ marginTop: 0, paddingTop: 0 }}>
         <EnhancedHeroSection />
-
-        {/* Categories Section */}
       </main>
       <footer className="w-full border-t bg-background py-6 md:py-12 relative">
         <BackgroundPattern className="opacity-30" />

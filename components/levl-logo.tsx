@@ -12,7 +12,7 @@ export function LevlLogo({ className, ...props }: SVGProps<SVGSVGElement> & { cl
 
   return (
     <div
-      className={`${className} relative overflow-hidden rounded-md`}
+      className={`${className} relative overflow-hidden rounded-md border border-gray-300`}
       style={{
         position: "relative",
         display: "flex",

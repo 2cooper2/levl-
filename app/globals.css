@@ -195,6 +195,7 @@
   .bg-grid-pattern {
     /* Remove the background-image property that creates the grid */
     background-image: none;
+    background: transparent;
   }
 
   /* Enhanced section styling */
