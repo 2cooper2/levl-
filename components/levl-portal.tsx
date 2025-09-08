@@ -7,7 +7,6 @@ import {
   BarChart3,
   Settings,
   Menu,
-  X,
   Plus,
   CheckCircle,
   User,
@@ -260,11 +259,19 @@ function Sidebar({
         <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-lavender-400/10 to-transparent rounded-bl-full"></div>
         <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-lavender-500/10 to-transparent rounded-tr-full"></div>
 
-        <div className="flex items-center justify-between p-4 lg:hidden border-b border-lavender-200/50">
-          <span className="font-semibold text-gray-800">Navigation</span>
-          <Button variant="ghost" size="sm" onClick={onClose} className="hover:bg-lavender-50">
-            <X className="h-5 w-5" />
-          </Button>
+        <div className="absolute bottom-4 left-4 right-4">
+          <div className="bg-gradient-to-r from-lavender-50 to-purple-50 rounded-xl p-4 border border-lavender-200/50">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-lavender-100 rounded-lg">
+                <Crown className="h-4 w-4 text-lavender-600" />
+              </div>
+              <div>
+                <div className="text-sm font-medium text-gray-800">Legacy Verified</div>
+                <div className="text-xs text-gray-500">Professional status</div>
+              </div>
+            </div>
+            <div className="text-xs text-gray-600">Your cross-platform reputation is verified and trusted.</div>
+          </div>
         </div>
 
         <nav className="px-4 py-6 space-y-2 relative z-10">
@@ -317,22 +324,6 @@ function Sidebar({
             )
           })}
         </nav>
-
-        {/* Sidebar footer */}
-        <div className="absolute bottom-4 left-4 right-4">
-          <div className="bg-gradient-to-r from-lavender-50 to-purple-50 rounded-xl p-4 border border-lavender-200/50">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-lavender-100 rounded-lg">
-                <Crown className="h-4 w-4 text-lavender-600" />
-              </div>
-              <div>
-                <div className="text-sm font-medium text-gray-800">Legacy Verified</div>
-                <div className="text-xs text-gray-500">Professional status</div>
-              </div>
-            </div>
-            <div className="text-xs text-gray-600">Your cross-platform reputation is verified and trusted.</div>
-          </div>
-        </div>
       </motion.div>
     </>
   )
@@ -404,14 +395,14 @@ function OverviewSection() {
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
               {[
-                { label: "Total Jobs", value: totalJobs, icon: Briefcase, color: "purple", suffix: "" },
-                { label: "Total Reviews", value: totalReviews, icon: Star, color: "indigo", suffix: "" },
-                { label: "Avg Rating", value: avgRating.toFixed(1), icon: Award, color: "purple", suffix: "★" },
+                { label: "Total Jobs", value: totalJobs, icon: Briefcase, color: "lavender", suffix: "" },
+                { label: "Total Reviews", value: totalReviews, icon: Star, color: "lavender", suffix: "" },
+                { label: "Avg Rating", value: avgRating.toFixed(1), icon: Award, color: "lavender", suffix: "★" },
                 {
-                  label: "Total Earnings",
-                  value: `$${totalEarnings.toLocaleString()}`,
-                  icon: DollarSign,
-                  color: "indigo",
+                  label: "Success Rate",
+                  value: "98%",
+                  icon: Target,
+                  color: "lavender",
                   suffix: "",
                 },
               ].map((stat, index) => (
@@ -1333,7 +1324,7 @@ export function LevlPortal() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-lavender-50 via-white to-lavender-100 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-lavender-50 via-white to-lavender-100 relative">
       {/* Premium 3D background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         {/* Main gradient orbs with 3D effect */}
@@ -1377,7 +1368,7 @@ export function LevlPortal() {
           onSectionChange={setCurrentSection}
         />
 
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto h-screen">
           <div className="p-6 lg:p-8">
             <div className="max-w-7xl mx-auto">
               <AnimatePresence mode="wait">
