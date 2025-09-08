@@ -28,6 +28,7 @@
     "@radix-ui/react-switch": "latest",
     "@radix-ui/react-tabs": "latest",
     "@radix-ui/react-toast": "latest",
+    "@radix-ui/react-tooltip": "latest",
     "@react-email/render": "^1.2.2",
     "@stripe/react-stripe-js": "latest",
     "@stripe/stripe-js": "latest",
