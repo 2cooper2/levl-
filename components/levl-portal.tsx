@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   Home,
-  BarChart3,
   Settings,
   Menu,
   Plus,
@@ -26,7 +25,6 @@ import {
   Crown,
   Award,
   Target,
-  DollarSign,
   Briefcase,
   Clock,
   ArrowRight,
@@ -40,20 +38,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Progress } from "@/components/ui/progress"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { LevlLogo } from "@/components/levl-logo"
 import { EnhancedButton } from "@/components/ui/enhanced-button"
-import { FeatureBadge } from "@/components/ui/feature-badge"
 
-// Platform data with enhanced information
+// Platform data with enhanced information and unique colors
 const platforms = [
   {
     id: "taskrabbit",
     name: "TaskRabbit",
     logo: "TR",
-    color: "from-green-400 to-green-600",
-    bgColor: "bg-green-500",
+    color: "from-emerald-400 to-emerald-600",
+    bgColor: "bg-emerald-500",
     connected: true,
     jobs: 347,
     rating: 4.8,
@@ -120,8 +116,8 @@ const platforms = [
     id: "upwork",
     name: "Upwork",
     logo: "UW",
-    color: "from-emerald-400 to-emerald-600",
-    bgColor: "bg-emerald-500",
+    color: "from-teal-400 to-teal-600",
+    bgColor: "bg-teal-500",
     connected: true,
     jobs: 89,
     rating: 4.7,
@@ -137,8 +133,8 @@ const platforms = [
     id: "fiverr",
     name: "Fiverr",
     logo: "FV",
-    color: "from-green-300 to-green-500",
-    bgColor: "bg-green-400",
+    color: "from-indigo-400 to-indigo-600",
+    bgColor: "bg-indigo-500",
     connected: false,
     jobs: 0,
     rating: 0,
@@ -160,11 +156,15 @@ function Header({ onMenuClick }: { onMenuClick: () => void }) {
       <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-lavender-400/60 to-transparent"></div>
 
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={onMenuClick} className="lg:hidden hover:bg-lavender-50">
-          <Menu className="h-5 w-5" />
-        </Button>
+        {/* Logo moved to left side on mobile */}
         <div className="flex items-center gap-3">
-          <div className="relative">
+          <div className="relative md:hidden">
+            {/* Larger white rounded square logo for mobile */}
+            <div className="w-10 h-10 bg-white rounded-lg border border-lavender-200/50 shadow-sm flex items-center justify-center">
+              <LevlLogo className="w-7 h-7" />
+            </div>
+          </div>
+          <div className="hidden md:block relative">
             <LevlLogo className="w-8 h-8" />
             <motion.div
               className="absolute inset-0 rounded-full bg-lavender-400/20"
@@ -172,20 +172,23 @@ function Header({ onMenuClick }: { onMenuClick: () => void }) {
               transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
             />
           </div>
-          <div>
+          <div className="hidden sm:block">
             <span className="font-bold text-xl bg-gradient-to-r from-lavender-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
               LevL Portal
             </span>
-            <div className="text-xs text-gray-500 -mt-1">Reputation Import & Verification</div>
+            <div className="text-xs text-gray-500 -mt-1">Don't Start From Zero - Import Your Reviews</div>
           </div>
         </div>
       </div>
 
       <div className="flex items-center gap-3">
-        <FeatureBadge type="ai" />
+        {/* Hamburger moved to right side on mobile */}
+        <Button variant="ghost" size="sm" onClick={onMenuClick} className="md:hidden">
+          <Menu className="h-5 w-5" />
+        </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-lavender-50">
+            <Button variant="ghost" className="relative h-10 w-10 rounded-full">
               <Avatar className="h-8 w-8 border-2 border-lavender-200">
                 <AvatarImage src="/placeholder-avatar.jpg" alt="User" />
                 <AvatarFallback className="bg-gradient-to-r from-lavender-300 to-lavender-500 text-white font-bold">
@@ -195,15 +198,15 @@ function Header({ onMenuClick }: { onMenuClick: () => void }) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56 bg-white/95 backdrop-blur-md border-lavender-200" align="end">
-            <DropdownMenuItem className="hover:bg-lavender-50">
+            <DropdownMenuItem>
               <User className="mr-2 h-4 w-4" />
               Profile
             </DropdownMenuItem>
-            <DropdownMenuItem className="hover:bg-lavender-50">
+            <DropdownMenuItem>
               <Settings className="mr-2 h-4 w-4" />
               Settings
             </DropdownMenuItem>
-            <DropdownMenuItem className="hover:bg-lavender-50">Sign out</DropdownMenuItem>
+            <DropdownMenuItem>Sign out</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -224,11 +227,11 @@ function Sidebar({
   onSectionChange: (section: string) => void
 }) {
   const navItems = [
+    { id: "dont-start-zero", label: "Don't Start From Zero", icon: TrendingUp, description: "Import your reviews" },
     { id: "overview", label: "Overview", icon: Home, description: "Dashboard & stats" },
     { id: "platforms", label: "Connected Platforms", icon: Link, description: "Manage connections" },
     { id: "verification", label: "Verification Status", icon: Shield, description: "Legacy verification" },
     { id: "import", label: "Import Data", icon: Download, description: "Import history" },
-    { id: "analytics", label: "Cross-Platform Analytics", icon: BarChart3, description: "Performance insights" },
     { id: "settings", label: "Settings", icon: Settings, description: "Portal preferences" },
   ]
 
@@ -303,8 +306,6 @@ function Sidebar({
                       : "text-gray-700 hover:bg-lavender-50/50 hover:text-lavender-600"
                   }
                 `}
-                whileHover={{ scale: 1.02, x: 4 }}
-                whileTap={{ scale: 0.98 }}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1 }}
@@ -339,61 +340,575 @@ function Sidebar({
   )
 }
 
-// Enhanced Overview Section
+// Enhanced Analytics Section with sophisticated depth and forum styling
+function DontStartFromZeroSection() {
+  const connectedPlatforms = platforms.filter((p) => p.connected)
+  const totalJobs = connectedPlatforms.reduce((sum, p) => sum + p.jobs, 0)
+  const totalReviews = connectedPlatforms.reduce((sum, p) => sum + p.reviews, 0)
+
+  return (
+    <div className="space-y-8">
+      {/* Hero Section - Enhanced with forum styling */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+        className="relative"
+      >
+        <Card className="relative border-0 bg-gradient-to-br from-lavender-50/95 via-white/90 to-lavender-100/90 backdrop-blur-sm shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25),0_10px_20px_-5px_rgba(0,0,0,0.2),0_0_0_1px_rgba(0,0,0,0.05)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 transform translate-y-0 translateZ-0 filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.15)] rounded-xl overflow-hidden">
+          {/* Decorative elements */}
+          <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-lavender-400/10 to-transparent rounded-bl-full transform transition-transform duration-700 group-hover:scale-110"></div>
+          <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-gradient-to-tr from-lavender-500/15 to-transparent rounded-tr-full transform transition-transform duration-700 group-hover:scale-110"></div>
+
+          {/* Animated accent line */}
+          <div className="absolute h-[2px] w-1/3 bg-gradient-to-r from-transparent via-lavender-400/60 to-transparent top-0 left-0 animate-shimmer"></div>
+
+          <CardContent className="px-8 py-20 lg:px-20 lg:py-28 relative z-10">
+            <div className="max-w-5xl mx-auto text-center">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              >
+                {/* Enhanced typography */}
+                <div className="relative mb-10">
+                  <h1 className="text-5xl lg:text-7xl font-extralight tracking-tight text-gray-900 mb-8 leading-[0.9] leading-tight">
+                    Don't Start From
+                    <motion.span
+                      className="block font-light bg-gradient-to-r from-lavender-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent relative"
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                    >
+                      Zero
+                    </motion.span>
+                  </h1>
+                </div>
+
+                <motion.p
+                  className="text-xl lg:text-2xl text-gray-600 font-light leading-relaxed max-w-4xl mx-auto mb-16"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                >
+                  Import your professional reputation and reviews from existing platforms.
+                  <span className="block mt-2 text-gray-500">Start with credibility, not from scratch.</span>
+                </motion.p>
+
+                {/* Enhanced CTA button */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  className="relative inline-block"
+                >
+                  <motion.button className="relative inline-flex items-center gap-4 px-10 py-5 bg-gradient-to-r from-lavender-400 to-lavender-500 text-white font-medium rounded-2xl shadow-[0_8px_32px_rgba(147,51,234,0.15)] hover:shadow-[0_12px_40px_rgba(147,51,234,0.2)] transition-all duration-300">
+                    <Download className="h-5 w-5 relative z-10" />
+                    <span className="relative z-10 text-lg">Import Your Legacy</span>
+                    <ArrowRight className="h-5 w-5 relative z-10" />
+                  </motion.button>
+                </motion.div>
+              </motion.div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Statistics - Enhanced with forum styling */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+      >
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {[
+            {
+              value: "10,000+",
+              label: "Professionals",
+              sublabel: "Already imported their legacy",
+              color: "from-emerald-500 to-teal-500",
+            },
+            {
+              value: "250K+",
+              label: "Reviews",
+              sublabel: "Successfully transferred",
+              color: "from-amber-500 to-orange-500",
+            },
+            {
+              value: "98%",
+              label: "Success Rate",
+              sublabel: "Faster client acquisition",
+              color: "from-lavender-500 to-purple-500",
+            },
+          ].map((stat, index) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.3,
+                ease: "easeOut",
+              }}
+              className="group"
+            >
+              <Card className="relative bg-gradient-to-br from-lavender-50/95 via-white/90 to-lavender-100/90 backdrop-blur-sm shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25),0_10px_20px_-5px_rgba(0,0,0,0.2),0_0_0_1px_rgba(0,0,0,0.05)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 transform translate-y-0 translateZ-0 filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.15)] rounded-xl overflow-hidden">
+                {/* Gradient accent */}
+                <div
+                  className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${stat.color} rounded-t-xl opacity-60`}
+                ></div>
+
+                <CardContent className="p-8 text-center">
+                  <motion.div
+                    className="text-4xl lg:text-5xl font-extralight text-gray-900 mb-3"
+                    transition={{ duration: 0.3 }}
+                  >
+                    {stat.value}
+                  </motion.div>
+                  <div className="text-lg font-medium text-gray-700 mb-2">{stat.label}</div>
+                  <div className="text-sm text-gray-500 leading-relaxed">{stat.sublabel}</div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Before vs After - Enhanced with forum styling */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+      >
+        <div className="text-center mb-16">
+          <motion.h2
+            className="text-3xl lg:text-4xl font-extralight text-gray-900 mb-6 leading-tight"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+          >
+            The Difference is
+            <motion.span
+              className="block font-light bg-gradient-to-r from-lavender-600 to-purple-600 bg-clip-text text-transparent"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+            >
+              Dramatic
+            </motion.span>
+          </motion.h2>
+          <motion.p
+            className="text-xl text-gray-600 font-light max-w-3xl mx-auto"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+          >
+            See how importing your professional history transforms your opportunities
+          </motion.p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          {/* Starting From Zero - Enhanced */}
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="group"
+          >
+            <Card className="h-full bg-gradient-to-br from-lavender-50/95 via-white/90 to-lavender-100/90 backdrop-blur-sm shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25),0_10px_20px_-5px_rgba(0,0,0,0.2),0_0_0_1px_rgba(0,0,0,0.05)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 transform translate-y-0 translateZ-0 filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.15)] rounded-xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-red-50/50 to-red-50/30 border-b border-red-100/50 px-8 py-6 relative">
+                {/* Bright red accent bar */}
+                <div className="absolute top-0 left-0 right-0 h-2 bg-red-500 rounded-t-xl"></div>
+                <div className="flex items-center gap-4 relative z-10">
+                  <motion.div
+                    className="w-3 h-3 bg-red-400 rounded-full"
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
+                  />
+                  <CardTitle className="text-xl font-medium text-gray-700">Starting From Zero</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="p-8">
+                <div className="space-y-6">
+                  {[
+                    { metric: "Jobs Completed", value: "0", description: "No proven track record" },
+                    { metric: "Client Reviews", value: "0", description: "No social proof" },
+                    { metric: "Trust Score", value: "Unknown", description: "Unestablished reputation" },
+                    { metric: "Time to First Client", value: "3-6 months", description: "Building credibility slowly" },
+                  ].map((item, index) => (
+                    <motion.div
+                      key={item.metric}
+                      className="flex justify-between items-center py-4 border-b border-gray-100/50 last:border-b-0"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                    >
+                      <div>
+                        <div className="font-medium text-gray-900 mb-1">{item.metric}</div>
+                        <div className="text-sm text-gray-500">{item.description}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-mono text-xl text-gray-400 font-light">{item.value}</div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* With Imported Legacy - Enhanced */}
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="group"
+          >
+            <Card className="h-full bg-gradient-to-br from-lavender-50/95 via-white/90 to-lavender-100/90 backdrop-blur-sm shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25),0_10px_20px_-5px_rgba(0,0,0,0.2),0_0_0_1px_rgba(0,0,0,0.05)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 transform translate-y-0 translateZ-0 filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.15)] rounded-xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-green-50/50 via-green-50/30 to-green-50/50 border-b border-green-100/50 px-8 py-6 relative">
+                {/* Bright green accent bar */}
+                <div className="absolute top-0 left-0 right-0 h-2 bg-green-500 rounded-t-xl"></div>
+                <div className="flex items-center gap-4 relative z-10">
+                  <motion.div
+                    className="w-3 h-3 bg-green-400 rounded-full"
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, delay: 0.5 }}
+                  />
+                  <CardTitle className="text-xl font-medium text-gray-700">With Imported Legacy</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="p-8">
+                <div className="space-y-6">
+                  {[
+                    { metric: "Jobs Completed", value: totalJobs.toString(), description: "Verified track record" },
+                    {
+                      metric: "Client Reviews",
+                      value: totalReviews.toString(),
+                      description: "Established social proof",
+                    },
+                    { metric: "Trust Score", value: "4.8★", description: "Proven reputation" },
+                    { metric: "Time to First Client", value: "1-7 days", description: "Instant credibility" },
+                  ].map((item, index) => (
+                    <motion.div
+                      key={item.metric}
+                      className="flex justify-between items-center py-4 border-b border-gray-100/50 last:border-b-0"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                    >
+                      <div>
+                        <div className="font-medium text-gray-900 mb-1">{item.metric}</div>
+                        <div className="text-sm text-gray-500">{item.description}</div>
+                      </div>
+                      <div className="text-right">
+                        <motion.div
+                          className="font-mono text-xl text-lavender-600 font-medium"
+                          transition={{ duration: 0.2 }}
+                        >
+                          {item.value}
+                        </motion.div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+      </motion.div>
+
+      {/* Continue with the same styling for other sections... */}
+      {/* Platform Status - Enhanced with forum styling */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+      >
+        <Card className="bg-gradient-to-br from-lavender-50/95 via-white/90 to-lavender-100/90 backdrop-blur-sm shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25),0_10px_20px_-5px_rgba(0,0,0,0.2),0_0_0_1px_rgba(0,0,0,0.05)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 transform translate-y-0 translateZ-0 filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.15)] rounded-xl overflow-hidden">
+          <CardHeader className="px-8 py-8 border-b border-gray-100/50 bg-gradient-to-r from-white to-lavender-50/30 relative">
+            {/* Animated accent line */}
+            <div className="absolute h-[2px] w-1/3 bg-gradient-to-r from-transparent via-lavender-400/60 to-transparent top-0 left-0 animate-shimmer"></div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+            >
+              <CardTitle className="text-3xl font-extralight text-gray-900 mb-2 leading-tight">
+                Your Imported Professional History
+              </CardTitle>
+              <p className="text-lg text-gray-600 font-light">Verified data from your connected platforms</p>
+            </motion.div>
+          </CardHeader>
+          <CardContent className="p-8">
+            <div className="space-y-6">
+              {platforms
+                .filter((p) => p.connected)
+                .map((platform, index) => (
+                  <motion.div
+                    key={platform.id}
+                    initial={{ opacity: 0, y: 20, x: -20 }}
+                    animate={{ opacity: 1, y: 0, x: 0 }}
+                    transition={{
+                      duration: 0.3,
+                      ease: "easeOut",
+                    }}
+                    className="group"
+                  >
+                    <div className="flex items-center justify-between py-6 px-6 rounded-xl border border-gray-100/50 bg-gradient-to-r from-white to-gray-50/30">
+                      <div className="flex items-center gap-6">
+                        <motion.div
+                          className={`w-14 h-14 rounded-xl bg-gradient-to-r ${platform.color} flex items-center justify-center text-white font-medium shadow-lg`}
+                          transition={{ duration: 0.3 }}
+                        >
+                          {platform.logo}
+                        </motion.div>
+                        <div>
+                          <div className="font-medium text-gray-900 text-lg mb-1">{platform.name}</div>
+                          <div className="text-gray-600 mb-1">
+                            <span className="font-medium text-lavender-600">{platform.jobs}</span> jobs •
+                            <span className="font-medium text-lavender-600 ml-1">{platform.reviews}</span> reviews •
+                            <span className="font-medium text-lavender-600 ml-1">{platform.rating}★</span>
+                          </div>
+                          <div className="text-sm text-gray-500">{platform.category}</div>
+                        </div>
+                      </div>
+                      <div>
+                        <Badge className="bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-green-200/50 font-medium px-4 py-2 shadow-sm">
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          Verified
+                        </Badge>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </div>
+  )
+}
+
+// AI Service Matchmaker Component with proper option flow
+function AIServiceMatchmaker() {
+  const [messages, setMessages] = useState([
+    {
+      id: 1,
+      type: "ai",
+      content: "Hi! I'm here to help you find the perfect service provider. What type of service are you looking for?",
+      options: [
+        { id: "home-services", label: "Home Services", icon: "🏠" },
+        { id: "professional-services", label: "Professional Services", icon: "💼" },
+        { id: "creative-services", label: "Creative Services", icon: "🎨" },
+        { id: "tech-services", label: "Tech Services", icon: "💻" },
+        { id: "wellness-services", label: "Wellness Services", icon: "🧘" },
+      ],
+    },
+  ])
+  const [currentStep, setCurrentStep] = useState("service-selection")
+  const [selectedService, setSelectedService] = useState("")
+  const [selectedBudget, setSelectedBudget] = useState("")
+  const [selectedTiming, setSelectedTiming] = useState("")
+
+  const handleOptionClick = (optionId: string, optionLabel: string) => {
+    // Add user message
+    const userMessage = {
+      id: messages.length + 1,
+      type: "user",
+      content: optionLabel,
+    }
+
+    let aiResponse: any = {}
+
+    if (currentStep === "service-selection") {
+      setSelectedService(optionId)
+      setCurrentStep("budget-selection")
+      aiResponse = {
+        id: messages.length + 2,
+        type: "ai",
+        content: `Great choice! ${optionLabel} it is. What's your budget range for this project?`,
+        options: [
+          { id: "budget-low", label: "Under $100", icon: "💰" },
+          { id: "budget-medium", label: "$100 - $500", icon: "💰💰" },
+          { id: "budget-high", label: "$500 - $1,500", icon: "💰💰💰" },
+          { id: "budget-premium", label: "$1,500+", icon: "💎" },
+        ],
+      }
+    } else if (currentStep === "budget-selection") {
+      setSelectedBudget(optionId)
+      setCurrentStep("timing-selection")
+      aiResponse = {
+        id: messages.length + 2,
+        type: "ai",
+        content: `Perfect! ${optionLabel} works well. When do you need this completed?`,
+        options: [
+          { id: "timing-asap", label: "ASAP (within 24 hours)", icon: "⚡" },
+          { id: "timing-week", label: "This week", icon: "📅" },
+          { id: "timing-month", label: "This month", icon: "🗓️" },
+          { id: "timing-flexible", label: "I'm flexible", icon: "⏰" },
+        ],
+      }
+    } else if (currentStep === "timing-selection") {
+      setSelectedTiming(optionId)
+      setCurrentStep("recommendations")
+      aiResponse = {
+        id: messages.length + 2,
+        type: "ai",
+        content: `Excellent! Based on your preferences (${selectedService}, ${selectedBudget}, ${optionLabel}), here are the top service providers I recommend:`,
+        recommendations: [
+          {
+            id: 1,
+            name: "Alex Thompson",
+            service: "Home Renovation Specialist",
+            rating: 4.9,
+            reviews: 127,
+            price: "$85/hour",
+            availability: "Available today",
+            image: "/professional-avatar.png",
+          },
+          {
+            id: 2,
+            name: "Sarah Chen",
+            service: "Interior Design Expert",
+            rating: 4.8,
+            reviews: 89,
+            price: "$120/hour",
+            availability: "Available this week",
+            image: "/avatar-executive.png",
+          },
+          {
+            id: 3,
+            name: "Mike Rodriguez",
+            service: "Handyman Services",
+            rating: 4.7,
+            reviews: 156,
+            price: "$65/hour",
+            availability: "Available tomorrow",
+            image: "/professional-expert-avatar.png",
+          },
+        ],
+      }
+    }
+
+    setMessages((prev) => [...prev, userMessage, aiResponse])
+  }
+
+  return (
+    <Card className="bg-gradient-to-br from-lavender-50/95 via-white/90 to-lavender-100/90 backdrop-blur-sm shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25),0_10px_20px_-5px_rgba(0,0,0,0.2),0_0_0_1px_rgba(0,0,0,0.05)] border-t border-l border-r border-lavender-200/70 border-b-2 border-b-lavender-300/80 rounded-xl overflow-hidden">
+      <CardHeader className="bg-gradient-to-r from-lavender-50/50 to-purple-50/30 border-b border-lavender-100/50 px-6 py-4">
+        <CardTitle className="flex items-center gap-3 text-xl">
+          <div className="p-2 bg-lavender-100 rounded-lg">
+            <Sparkles className="h-5 w-5 text-lavender-600" />
+          </div>
+          AI Service Matchmaker
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-6 max-h-96 overflow-y-auto">
+        <div className="space-y-4">
+          {messages.map((message) => (
+            <div key={message.id} className={`flex ${message.type === "user" ? "justify-end" : "justify-start"}`}>
+              <div
+                className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl ${
+                  message.type === "user"
+                    ? "bg-lavender-500 text-white"
+                    : "bg-white border border-gray-200 text-gray-800"
+                }`}
+              >
+                <p className="text-sm">{message.content}</p>
+
+                {message.options && (
+                  <div className="mt-3 space-y-2">
+                    {message.options.map((option) => (
+                      <button
+                        key={option.id}
+                        onClick={() => handleOptionClick(option.id, option.label)}
+                        className="w-full text-left px-3 py-2 bg-lavender-50 hover:bg-lavender-100 rounded-lg border border-lavender-200 transition-colors text-sm flex items-center gap-2"
+                      >
+                        <span>{option.icon}</span>
+                        <span>{option.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {message.recommendations && (
+                  <div className="mt-4 space-y-3">
+                    {message.recommendations.map((provider) => (
+                      <div key={provider.id} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                        <div className="flex items-center gap-3 mb-2">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={provider.image || "/placeholder.svg"} alt={provider.name} />
+                            <AvatarFallback>
+                              {provider.name
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <div className="font-medium text-sm">{provider.name}</div>
+                            <div className="text-xs text-gray-600">{provider.service}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-1">
+                            <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                            <span>
+                              {provider.rating} ({provider.reviews})
+                            </span>
+                          </div>
+                          <div className="text-lavender-600 font-medium">{provider.price}</div>
+                        </div>
+                        <div className="text-xs text-green-600 mt-1">{provider.availability}</div>
+                        <button className="w-full mt-2 px-3 py-1 bg-lavender-500 text-white rounded text-xs hover:bg-lavender-600 transition-colors">
+                          Contact Provider
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+// Enhanced Overview Section with forum styling and AI chat
 function OverviewSection() {
   const connectedPlatforms = platforms.filter((p) => p.connected)
   const totalJobs = connectedPlatforms.reduce((sum, p) => sum + p.jobs, 0)
   const totalReviews = connectedPlatforms.reduce((sum, p) => sum + p.reviews, 0)
   const avgRating = connectedPlatforms.reduce((sum, p) => sum + p.rating, 0) / connectedPlatforms.length
-  const totalEarnings = connectedPlatforms.reduce(
-    (sum, p) => sum + Number.parseFloat(p.earnings.replace(/[$,]/g, "")),
-    0,
-  )
+  const totalClients = Math.floor(totalJobs * 0.7) // Estimate unique clients
 
   return (
-    <div className="space-y-8">
-      {/* Hero Section */}
+    <div className="space-y-8 pb-8 bg-gradient-to-b from-lavender-50/50 via-white to-lavender-100/30 min-h-screen">
+      {/* Hero Section with forum styling */}
       <motion.div
         className="relative overflow-hidden"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
+        transition={{ duration: 0.3 }}
       >
-        {/* Background decorations */}
-        <div className="absolute inset-0 bg-gradient-to-br from-lavender-100/50 via-white to-purple-100/30 rounded-2xl"></div>
-        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-lavender-400/10 to-transparent rounded-bl-full"></div>
-        <div className="absolute -bottom-8 -left-8 w-48 h-48 bg-gradient-to-tr from-purple-500/10 to-transparent rounded-tr-full"></div>
+        <Card className="relative border-0 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25),0_10px_20px_-5px_rgba(0,0,0,0.2),0_0_0_1px_rgba(0,0,0,0.05)] bg-gradient-to-br from-lavender-50/95 via-white/90 to-lavender-100/90 backdrop-blur-sm border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 transform translate-y-0 translateZ-0 filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.15)] rounded-xl overflow-hidden">
+          {/* Decorative elements */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-lavender-400/10 to-transparent rounded-bl-full"></div>
+          <div className="absolute -bottom-8 -left-8 w-48 h-48 bg-gradient-to-tr from-purple-500/10 to-transparent rounded-tr-full"></div>
 
-        {/* Animated particles */}
-        {[...Array(6)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-2 h-2 bg-lavender-400/30 rounded-full"
-            style={{
-              left: `${20 + i * 15}%`,
-              top: `${30 + (i % 2) * 40}%`,
-            }}
-            animate={{
-              y: [0, -10, 0],
-              opacity: [0.3, 0.8, 0.3],
-            }}
-            transition={{
-              duration: 3 + i * 0.5,
-              repeat: Number.POSITIVE_INFINITY,
-              ease: "easeInOut",
-            }}
-          />
-        ))}
+          {/* Animated accent line */}
+          <div className="absolute h-[2px] w-1/3 bg-gradient-to-r from-transparent via-lavender-400/60 to-transparent top-0 left-0 animate-shimmer"></div>
 
-        <Card className="relative border-0 shadow-[0_25px_60px_-15px_rgba(147,51,234,0.4),0_15px_30px_-5px_rgba(147,51,234,0.3),0_5px_15px_-3px_rgba(147,51,234,0.2)] bg-white/90 backdrop-blur-xl border border-lavender-200/50">
-          <CardContent className="p-8 lg:p-12">
+          <CardContent className="p-8 lg:p-12 relative z-10">
             <div className="text-center mb-10">
               <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.2, duration: 0.5 }}
+                transition={{ delay: 0.2, duration: 0.3 }}
               >
-                <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-lavender-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-4">
+                <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-lavender-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-4 leading-tight">
                   Your Cross-Platform Legacy
                 </h1>
                 <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -408,35 +923,21 @@ function OverviewSection() {
                 { label: "Total Jobs", value: totalJobs, icon: Briefcase, color: "lavender", suffix: "" },
                 { label: "Total Reviews", value: totalReviews, icon: Star, color: "lavender", suffix: "" },
                 { label: "Avg Rating", value: avgRating.toFixed(1), icon: Award, color: "lavender", suffix: "★" },
-                {
-                  label: "Success Rate",
-                  value: "98%",
-                  icon: Target,
-                  color: "lavender",
-                  suffix: "",
-                },
+                { label: "Success Rate", value: "98", icon: Target, color: "lavender", suffix: "%" },
               ].map((stat, index) => (
                 <motion.div
                   key={stat.label}
-                  className="text-center group"
+                  className="text-center"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 + index * 0.1, duration: 0.5 }}
-                  whileHover={{ scale: 1.05 }}
+                  transition={{ duration: 0.3 }}
                 >
                   <div className="relative mb-4">
-                    <div
-                      className={`w-16 h-16 mx-auto rounded-2xl bg-gradient-to-r from-lavender-100 to-lavender-200 flex items-center justify-center group-hover:shadow-lg transition-all duration-300`}
-                    >
-                      <stat.icon className={`h-8 w-8 text-lavender-600`} />
+                    <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-r from-lavender-100 to-lavender-200 flex items-center justify-center">
+                      <stat.icon className="h-8 w-8 text-lavender-600" />
                     </div>
-                    <motion.div
-                      className={`absolute inset-0 rounded-2xl bg-lavender-400/20 scale-0 group-hover:scale-110`}
-                      whileHover={{ scale: 1.1, opacity: [0, 0.5, 0] }}
-                      transition={{ duration: 1 }}
-                    />
                   </div>
-                  <div className="text-3xl lg:text-4xl font-bold text-gray-800 mb-1">
+                  <div className="text-3xl lg:text-4xl font-bold text-gray-800 mb-1 leading-none overflow-hidden">
                     {typeof stat.value === "number" ? stat.value.toLocaleString() : stat.value}
                     {stat.suffix}
                   </div>
@@ -448,35 +949,35 @@ function OverviewSection() {
         </Card>
       </motion.div>
 
-      {/* Platform Overview Grid */}
+      {/* AI Service Matchmaker Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.2 }}
+      >
+        <AIServiceMatchmaker />
+      </motion.div>
+
+      {/* Platform Overview Grid with forum styling */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {connectedPlatforms.map((platform, index) => (
           <motion.div
             key={platform.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 + index * 0.1, duration: 0.5 }}
+            transition={{ duration: 0.3 }}
           >
-            <Card className="relative overflow-hidden group hover:shadow-[0_35px_70px_-15px_rgba(147,51,234,0.4),0_20px_40px_-8px_rgba(147,51,234,0.25)] transition-all duration-500 bg-gradient-to-br from-white/95 via-lavender-50/80 to-white/95 backdrop-blur-sm border-lavender-200/60 transform hover:scale-[1.02] hover:-translate-y-2">
-              {/* Decorative elements */}
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-lavender-400/10 to-transparent rounded-bl-full group-hover:scale-110 transition-transform duration-500"></div>
-              <div className="absolute -bottom-4 -left-4 w-20 h-20 bg-gradient-to-tr from-purple-500/10 to-transparent rounded-tr-full group-hover:scale-110 transition-transform duration-500"></div>
-
-              {/* Animated accent line */}
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-lavender-400/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
+            <Card className="relative overflow-hidden bg-gradient-to-br from-lavender-50/95 via-white/90 to-lavender-100/90 backdrop-blur-sm shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25),0_10px_20px_-5px_rgba(0,0,0,0.2),0_0_0_1px_rgba(0,0,0,0.05)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 transform translate-y-0 translateZ-0 filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.15)] rounded-xl">
               <CardHeader className="pb-4 relative z-10">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div
-                      className={`w-14 h-14 rounded-2xl bg-gradient-to-r ${platform.color} flex items-center justify-center text-white font-bold text-lg shadow-lg group-hover:scale-110 transition-transform duration-300`}
+                      className={`w-14 h-14 rounded-2xl bg-gradient-to-r ${platform.color} flex items-center justify-center text-white font-bold text-lg shadow-lg`}
                     >
                       {platform.logo}
                     </div>
                     <div>
-                      <CardTitle className="text-xl text-gray-800 group-hover:text-lavender-700 transition-colors">
-                        {platform.name}
-                      </CardTitle>
+                      <CardTitle className="text-xl text-gray-800">{platform.name}</CardTitle>
                       <div className="flex items-center gap-2 mt-1">
                         <p className="text-sm text-gray-600">Member for {platform.tenure}</p>
                         <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
@@ -510,8 +1011,8 @@ function OverviewSection() {
                     <div className="text-xs text-gray-600 font-medium">{platform.reviews} Reviews</div>
                   </div>
                   <div className="text-center p-3 bg-white/60 rounded-xl border border-lavender-100/50">
-                    <div className="text-2xl font-bold text-gray-800">{platform.earnings}</div>
-                    <div className="text-xs text-gray-600 font-medium">Total Earned</div>
+                    <div className="text-2xl font-bold text-lavender-600">{Math.floor(platform.jobs * 0.7)}</div>
+                    <div className="text-xs text-gray-600 font-medium">Unique Clients</div>
                   </div>
                   <div className="text-center p-3 bg-white/60 rounded-xl border border-lavender-100/50">
                     <div className="text-2xl font-bold text-green-600">Active</div>
@@ -520,19 +1021,11 @@ function OverviewSection() {
                 </div>
 
                 <div className="flex gap-3">
-                  <EnhancedButton
-                    variant="outline"
-                    size="sm"
-                    className="flex-1 bg-white/50 hover:bg-lavender-50 border-lavender-200"
-                  >
+                  <EnhancedButton variant="outline" size="sm" className="flex-1 bg-white/50 border-lavender-200">
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Sync Data
                   </EnhancedButton>
-                  <EnhancedButton
-                    variant="outline"
-                    size="sm"
-                    className="flex-1 bg-white/50 hover:bg-lavender-50 border-lavender-200"
-                  >
+                  <EnhancedButton variant="outline" size="sm" className="flex-1 bg-white/50 border-lavender-200">
                     <Eye className="w-4 h-4 mr-2" />
                     View Details
                   </EnhancedButton>
@@ -550,134 +1043,19 @@ function OverviewSection() {
           </motion.div>
         ))}
       </div>
-
-      {/* Verification Status */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8, duration: 0.5 }}
-      >
-        <Card className="relative overflow-hidden bg-gradient-to-br from-green-50/90 via-white/95 to-emerald-50/90 border-green-200/60 shadow-[0_25px_50px_-12px_rgba(34,197,94,0.3),0_15px_30px_-5px_rgba(34,197,94,0.2)] backdrop-blur-sm">
-          {/* Decorative elements */}
-          <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-green-400/10 to-transparent rounded-bl-full"></div>
-          <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-gradient-to-tr from-emerald-500/10 to-transparent rounded-tr-full"></div>
-
-          <CardHeader className="relative z-10">
-            <CardTitle className="flex items-center gap-3 text-xl">
-              <div className="p-2 bg-green-100 rounded-xl">
-                <Shield className="h-6 w-6 text-green-600" />
-              </div>
-              <div>
-                <span className="text-gray-800">Legacy Verification Status</span>
-                <div className="text-sm font-normal text-gray-600 mt-1">
-                  Your professional history is verified and trusted
-                </div>
-              </div>
-            </CardTitle>
-          </CardHeader>
-
-          <CardContent className="relative z-10">
-            <div className="space-y-6">
-              <div className="flex items-center justify-between p-6 bg-gradient-to-r from-green-100/80 to-emerald-100/80 rounded-2xl border border-green-200/50">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-green-200/50 rounded-2xl">
-                    <CheckCircle className="h-8 w-8 text-green-600" />
-                  </div>
-                  <div>
-                    <div className="font-semibold text-lg text-green-800">Platform History Verified</div>
-                    <div className="text-sm text-green-700">
-                      {totalJobs} jobs and {totalReviews} reviews verified across {connectedPlatforms.length} platforms
-                    </div>
-                  </div>
-                </div>
-                <Badge className="bg-green-600 hover:bg-green-700 text-white px-4 py-2">
-                  <Verified className="w-4 h-4 mr-2" />
-                  Verified
-                </Badge>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {[
-                  { label: "Platforms Connected", value: `${connectedPlatforms.length}/6`, icon: Globe },
-                  { label: "Data Accuracy", value: "98%", icon: Database },
-                  { label: "Verification Time", value: "24h", icon: Clock },
-                ].map((stat, index) => (
-                  <motion.div
-                    key={stat.label}
-                    className="text-center p-6 bg-white/80 rounded-2xl border border-green-100/50 hover:shadow-lg transition-all duration-300"
-                    whileHover={{ scale: 1.02, y: -2 }}
-                  >
-                    <div className="p-3 bg-green-100/50 rounded-xl w-fit mx-auto mb-3">
-                      <stat.icon className="h-6 w-6 text-green-600" />
-                    </div>
-                    <div className="text-2xl font-bold text-gray-800 mb-1">{stat.value}</div>
-                    <div className="text-sm text-gray-600 font-medium">{stat.label}</div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-
-      {/* Quick Actions */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1, duration: 0.5 }}
-      >
-        <Card className="bg-gradient-to-br from-lavender-50 via-white to-purple-50 border-lavender-200/50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-xl">
-              <Zap className="h-6 w-6 text-lavender-600" />
-              Quick Actions
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {[
-                { label: "Share Profile", icon: Share2, description: "Share your verified profile", color: "blue" },
-                { label: "Export Data", icon: Download, description: "Download your data", color: "green" },
-                {
-                  label: "View Public Profile",
-                  icon: ExternalLink,
-                  description: "See how others see you",
-                  color: "purple",
-                },
-              ].map((action, index) => (
-                <motion.button
-                  key={action.label}
-                  className={`p-6 bg-white/80 rounded-2xl border border-${action.color}-100/50 hover:shadow-lg transition-all duration-300 text-left group`}
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <div
-                    className={`p-3 bg-${action.color}-100/50 rounded-xl w-fit mb-4 group-hover:scale-110 transition-transform duration-300`}
-                  >
-                    <action.icon className={`h-6 w-6 text-${action.color}-600`} />
-                  </div>
-                  <div className="font-semibold text-gray-800 mb-2">{action.label}</div>
-                  <div className="text-sm text-gray-600">{action.description}</div>
-                  <ArrowRight className="h-4 w-4 text-gray-400 mt-2 group-hover:translate-x-1 transition-transform duration-300" />
-                </motion.button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
     </div>
   )
 }
 
 // Enhanced Platforms Section
-function PlatformsSection() {
+function PlatformsSectionComponent() {
   return (
     <div className="space-y-8">
       <motion.div
         className="flex items-center justify-between"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.3 }}
       >
         <div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-lavender-600 to-purple-600 bg-clip-text text-transparent">
@@ -685,7 +1063,7 @@ function PlatformsSection() {
           </h1>
           <p className="text-gray-600 mt-2">Manage your platform connections and sync your professional history</p>
         </div>
-        <EnhancedButton variant="gradient" className="bg-gradient-to-r from-lavender-400 to-purple-500">
+        <EnhancedButton variant="gradient" className="bg-gradient-to-r from-lavender-400 to-lavender-500">
           <Plus className="w-4 h-4 mr-2" />
           Connect New Platform
         </EnhancedButton>
@@ -697,13 +1075,13 @@ function PlatformsSection() {
             key={platform.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1, duration: 0.5 }}
+            transition={{ duration: 0.3 }}
           >
             <Card
-              className={`relative overflow-hidden group transition-all duration-300 ${
+              className={`relative overflow-hidden transform transition-none ${
                 platform.connected
-                  ? "bg-gradient-to-br from-white via-lavender-50/30 to-white border-lavender-200/50 hover:shadow-[0_20px_40px_-8px_rgba(147,51,234,0.15)]"
-                  : "bg-gradient-to-br from-gray-50 via-white to-gray-50 border-gray-200/50 hover:shadow-lg"
+                  ? "bg-gradient-to-br from-white via-lavender-50/30 to-white border-lavender-200/50 shadow-[0_20px_40px_-8px_rgba(147,51,234,0.15)]"
+                  : "bg-gradient-to-br from-gray-50 via-white to-gray-50 border-gray-200/50 shadow-lg"
               }`}
             >
               {/* Status indicator */}
@@ -714,13 +1092,13 @@ function PlatformsSection() {
               ></div>
 
               {/* Decorative elements */}
-              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-lavender-400/5 to-transparent rounded-bl-full group-hover:scale-110 transition-transform duration-500"></div>
+              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-lavender-400/5 to-transparent rounded-bl-full transition-none"></div>
 
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div
-                      className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${platform.color} flex items-center justify-center text-white font-bold text-xl shadow-lg group-hover:scale-110 transition-transform duration-300`}
+                      className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${platform.color} flex items-center justify-center text-white font-bold text-xl shadow-lg transition-none`}
                     >
                       {platform.logo}
                     </div>
@@ -732,7 +1110,7 @@ function PlatformsSection() {
                         </p>
                         <Badge
                           variant={platform.connected ? "default" : "secondary"}
-                          className={platform.connected ? "bg-green-600 hover:bg-green-700" : ""}
+                          className={platform.connected ? "bg-lavender-600" : ""}
                         >
                           {platform.connected ? "Connected" : "Available"}
                         </Badge>
@@ -746,11 +1124,10 @@ function PlatformsSection() {
               <CardContent>
                 {platform.connected ? (
                   <div className="space-y-6">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-3 gap-4">
                       {[
                         { label: "Jobs", value: platform.jobs, icon: Briefcase },
                         { label: "Rating", value: `${platform.rating}★`, icon: Star },
-                        { label: "Earned", value: platform.earnings, icon: DollarSign },
                         { label: "Growth", value: platform.growth, icon: TrendingUp },
                       ].map((stat) => (
                         <div
@@ -767,11 +1144,11 @@ function PlatformsSection() {
                     </div>
 
                     <div className="flex gap-3">
-                      <EnhancedButton variant="outline" size="sm" className="flex-1 bg-white/50 hover:bg-lavender-50">
+                      <EnhancedButton variant="outline" size="sm" className="flex-1 bg-white/50">
                         <RefreshCw className="w-4 h-4 mr-2" />
                         Sync Now
                       </EnhancedButton>
-                      <EnhancedButton variant="outline" size="sm" className="flex-1 bg-white/50 hover:bg-lavender-50">
+                      <EnhancedButton variant="outline" size="sm" className="flex-1 bg-white/50">
                         <Settings className="w-4 h-4 mr-2" />
                         Settings
                       </EnhancedButton>
@@ -802,7 +1179,7 @@ function PlatformsSection() {
                     </div>
                     <EnhancedButton
                       variant="gradient"
-                      className="w-full bg-gradient-to-r from-lavender-400 to-purple-500"
+                      className="w-full bg-gradient-to-r from-lavender-400 to-lavender-500"
                     >
                       <Link className="w-4 h-4 mr-2" />
                       Connect {platform.name}
@@ -819,21 +1196,17 @@ function PlatformsSection() {
 }
 
 // Enhanced Verification Section
-function VerificationSection() {
+function VerificationSectionComponent() {
   return (
     <div className="space-y-8">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
         <h1 className="text-3xl font-bold bg-gradient-to-r from-lavender-600 to-purple-600 bg-clip-text text-transparent mb-2">
           Verification Status
         </h1>
         <p className="text-gray-600">Your professional legacy verification and trust indicators</p>
       </motion.div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.5 }}
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
         <Card className="relative overflow-hidden bg-gradient-to-br from-green-50 via-white to-emerald-50 border-green-200/50 shadow-[0_25px_60px_-15px_rgba(34,197,94,0.2)]">
           {/* Decorative elements */}
           <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-green-400/10 to-transparent rounded-bl-full"></div>
@@ -862,7 +1235,7 @@ function VerificationSection() {
                   Your cross-platform history has been successfully verified and is trusted across the LevL ecosystem
                 </div>
                 <div className="flex items-center gap-4">
-                  <Badge className="bg-green-600 hover:bg-green-700 text-white px-4 py-2">
+                  <Badge className="bg-green-600 text-white px-4 py-2">
                     <Crown className="w-4 h-4 mr-2" />
                     Legacy Verified
                   </Badge>
@@ -938,11 +1311,7 @@ function VerificationSection() {
         </Card>
       </motion.div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4, duration: 0.5 }}
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
         <Card className="bg-gradient-to-br from-lavender-50 via-white to-purple-50 border-lavender-200/50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-xl">
@@ -957,11 +1326,10 @@ function VerificationSection() {
                 .map((platform, index) => (
                   <motion.div
                     key={platform.id}
-                    className="flex items-center justify-between p-6 bg-white/80 rounded-2xl border border-lavender-100/50 hover:shadow-lg transition-all duration-300"
+                    className="flex items-center justify-between p-6 bg-white/80 rounded-2xl border border-lavender-100/50 transition-none"
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.6 + index * 0.1 }}
-                    whileHover={{ scale: 1.02, x: 4 }}
                   >
                     <div className="flex items-center gap-4">
                       <div
@@ -998,10 +1366,10 @@ function VerificationSection() {
 }
 
 // Enhanced Import Section
-function ImportSection() {
+function ImportSectionComponent() {
   return (
     <div className="space-y-8">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
         <h1 className="text-3xl font-bold bg-gradient-to-r from-lavender-600 to-purple-600 bg-clip-text text-transparent mb-2">
           Import Professional History
         </h1>
@@ -1011,11 +1379,7 @@ function ImportSection() {
         </p>
       </motion.div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.5 }}
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
         <Card className="bg-gradient-to-br from-lavender-50 via-white to-purple-50 border-lavender-200/50 shadow-[0_20px_40px_-8px_rgba(147,51,234,0.15)]">
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-2xl">
@@ -1030,15 +1394,14 @@ function ImportSection() {
               {platforms.map((platform, index) => (
                 <motion.div
                   key={platform.id}
-                  className={`border-2 rounded-2xl p-6 transition-all duration-300 ${
+                  className={`border-2 rounded-2xl p-6 transition-none ${
                     platform.connected
-                      ? "border-green-200 bg-gradient-to-br from-green-50 to-white hover:shadow-lg"
-                      : "border-gray-200 bg-gradient-to-br from-gray-50 to-white hover:shadow-lg hover:border-lavender-300"
+                      ? "border-green-200 bg-gradient-to-br from-green-50 to-white shadow-lg"
+                      : "border-gray-200 bg-gradient-to-br from-gray-50 to-white shadow-lg"
                   }`}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 + index * 0.1 }}
-                  whileHover={{ scale: 1.02, y: -2 }}
                 >
                   <div className="flex items-center gap-4 mb-6">
                     <div
@@ -1076,10 +1439,7 @@ function ImportSection() {
                         </div>
                         <div className="text-xs text-gray-500">Data is automatically synced every 24 hours</div>
                       </div>
-                      <EnhancedButton
-                        variant="outline"
-                        className="w-full bg-white/50 hover:bg-green-50 border-green-200"
-                      >
+                      <EnhancedButton variant="outline" className="w-full bg-white/50 border-green-200">
                         <RefreshCw className="w-4 h-4 mr-2" />
                         Re-import Latest Data
                       </EnhancedButton>
@@ -1104,7 +1464,7 @@ function ImportSection() {
                       </div>
                       <EnhancedButton
                         variant="gradient"
-                        className="w-full bg-gradient-to-r from-lavender-400 to-purple-500"
+                        className="w-full bg-gradient-to-r from-lavender-400 to-lavender-500"
                       >
                         <Link className="w-4 h-4 mr-2" />
                         Connect & Import from {platform.name}
@@ -1116,34 +1476,34 @@ function ImportSection() {
             </div>
 
             <motion.div
-              className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-6"
+              className="bg-gradient-to-r from-lavender-50 to-purple-50 border border-lavender-200 rounded-2xl p-6"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
             >
               <div className="flex items-start gap-4">
-                <div className="p-3 bg-blue-100 rounded-2xl">
-                  <Lock className="h-6 w-6 text-blue-600" />
+                <div className="p-3 bg-lavender-100 rounded-2xl">
+                  <Lock className="h-6 w-6 text-lavender-600" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-blue-900 mb-3 text-lg">Data Privacy & Security</h4>
-                  <div className="text-sm text-blue-800 space-y-2">
+                  <h4 className="font-bold text-lavender-900 mb-3 text-lg">Data Privacy & Security</h4>
+                  <div className="text-sm text-lavender-800 space-y-2">
                     <p>Your data is encrypted and securely stored using industry-standard security protocols.</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                       <div className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-blue-600" />
+                        <CheckCircle className="h-4 w-4 text-lavender-600" />
                         <span>End-to-end encryption</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-blue-600" />
+                        <CheckCircle className="h-4 w-4 text-lavender-600" />
                         <span>No personal client data stored</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-blue-600" />
+                        <CheckCircle className="h-4 w-4 text-lavender-600" />
                         <span>GDPR compliant</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-blue-600" />
+                        <CheckCircle className="h-4 w-4 text-lavender-600" />
                         <span>Data portability guaranteed</span>
                       </div>
                     </div>
@@ -1154,140 +1514,39 @@ function ImportSection() {
           </CardContent>
         </Card>
       </motion.div>
-    </div>
-  )
-}
 
-// Enhanced Analytics Section
-function AnalyticsSection() {
-  const connectedPlatforms = platforms.filter((p) => p.connected)
-
-  return (
-    <div className="space-y-8">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-lavender-600 to-purple-600 bg-clip-text text-transparent mb-2">
-          Cross-Platform Analytics
-        </h1>
-        <p className="text-gray-600">
-          Comprehensive insights into your professional performance across all connected platforms
-        </p>
-      </motion.div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {[
-          {
-            title: "Performance Overview",
-            icon: Activity,
-            data: [
-              { label: "Job Completion Rate", value: 98, color: "green" },
-              { label: "On-Time Delivery", value: 94, color: "blue" },
-              { label: "Customer Satisfaction", value: 96, color: "purple" },
-            ],
-          },
-          {
-            title: "Platform Distribution",
-            icon: Globe,
-            data: connectedPlatforms.map((p) => ({
-              label: p.name,
-              value: p.jobs,
-              color: p.bgColor.replace("bg-", ""),
-            })),
-          },
-          {
-            title: "Earnings Breakdown",
-            icon: DollarSign,
-            data: connectedPlatforms.map((p) => ({
-              label: p.name,
-              value: p.earnings,
-              color: p.bgColor.replace("bg-", ""),
-            })),
-          },
-        ].map((section, index) => (
-          <motion.div
-            key={section.title}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1, duration: 0.5 }}
-          >
-            <Card className="bg-gradient-to-br from-white via-lavender-50/30 to-white border-lavender-200/50 hover:shadow-[0_20px_40px_-8px_rgba(147,51,234,0.15)] transition-all duration-300">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-lg">
-                  <div className="p-2 bg-lavender-100 rounded-xl">
-                    <section.icon className="h-5 w-5 text-lavender-600" />
-                  </div>
-                  {section.title}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {section.data.map((item, itemIndex) => (
-                    <div key={item.label} className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="font-medium text-gray-700">{item.label}</span>
-                        <span className="font-bold text-gray-800">
-                          {typeof item.value === "number" && section.title === "Performance Overview"
-                            ? `${item.value}%`
-                            : item.value}
-                        </span>
-                      </div>
-                      {section.title === "Performance Overview" ? (
-                        <Progress value={item.value} className="h-3" />
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <div className={`w-4 h-4 bg-${item.color}-500 rounded`}></div>
-                          <span className="text-sm font-medium text-gray-600">{item.value}</span>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4, duration: 0.5 }}
-      >
+      {/* Quick Actions */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
         <Card className="bg-gradient-to-br from-lavender-50 via-white to-purple-50 border-lavender-200/50">
           <CardHeader>
-            <CardTitle className="flex items-center gap-3 text-xl">
-              <div className="p-3 bg-lavender-100 rounded-2xl">
-                <TrendingUp className="h-6 w-6 text-lavender-600" />
-              </div>
-              Rating Trends & Performance
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <Zap className="h-6 w-6 text-lavender-600" />
+              Quick Actions
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {connectedPlatforms.map((platform, index) => (
-                <motion.div
-                  key={platform.id}
-                  className="text-center p-6 bg-white/80 rounded-2xl border border-lavender-100/50 hover:shadow-lg transition-all duration-300 group"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.6 + index * 0.1 }}
-                  whileHover={{ scale: 1.05, y: -4 }}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[
+                { label: "Share Profile", icon: Share2, description: "Share your verified profile", color: "lavender" },
+                { label: "Export Data", icon: Download, description: "Download your data", color: "lavender" },
+                {
+                  label: "View Public Profile",
+                  icon: ExternalLink,
+                  description: "See how others see you",
+                  color: "lavender",
+                },
+              ].map((action, index) => (
+                <motion.button
+                  key={action.label}
+                  className={`p-6 bg-white/80 rounded-2xl border border-lavender-100/50 transition-none text-left group`}
                 >
-                  <div
-                    className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${platform.color} flex items-center justify-center text-white font-bold text-xl mx-auto mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300`}
-                  >
-                    {platform.logo}
+                  <div className={`p-3 bg-lavender-100/50 rounded-xl w-fit mx-auto mb-4 transition-none`}>
+                    <action.icon className={`h-6 w-6 text-lavender-600`} />
                   </div>
-                  <div className="text-3xl font-bold text-gray-800 mb-1 flex items-center justify-center gap-1">
-                    {platform.rating}
-                    <Star className="h-6 w-6 text-yellow-500 fill-yellow-500" />
-                  </div>
-                  <div className="text-sm text-gray-600 mb-2">{platform.reviews} reviews</div>
-                  <div className="text-xs text-gray-500 mb-3">{platform.name}</div>
-                  <div className="flex items-center justify-center gap-1">
-                    <TrendingUp className="h-3 w-3 text-green-600" />
-                    <span className="text-sm font-semibold text-green-600">{platform.growth}</span>
-                  </div>
-                </motion.div>
+                  <div className="font-semibold text-gray-800 mb-2">{action.label}</div>
+                  <div className="text-sm text-gray-600">{action.description}</div>
+                  <ArrowRight className="h-4 w-4 text-gray-400 mt-2 transition-none" />
+                </motion.button>
               ))}
             </div>
           </CardContent>
@@ -1300,20 +1559,20 @@ function AnalyticsSection() {
 // Main Portal Component
 export function LevlPortal() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [currentSection, setCurrentSection] = useState("overview")
+  const [currentSection, setCurrentSection] = useState("dont-start-zero")
 
   const renderMainContent = () => {
     switch (currentSection) {
+      case "dont-start-zero":
+        return <DontStartFromZeroSection />
       case "overview":
         return <OverviewSection />
       case "platforms":
-        return <PlatformsSection />
+        return <PlatformsSectionComponent />
       case "verification":
-        return <VerificationSection />
+        return <VerificationSectionComponent />
       case "import":
-        return <ImportSection />
-      case "analytics":
-        return <AnalyticsSection />
+        return <ImportSectionComponent />
       default:
         return (
           <motion.div
@@ -1335,39 +1594,11 @@ export function LevlPortal() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-lavender-50 via-white to-lavender-100 relative">
-      {/* Premium 3D background elements */}
+      {/* Remove the entire floating particles section and replace with simple background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        {/* Main gradient orbs with 3D effect */}
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-lavender-400/30 to-purple-500/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob shadow-[0_0_100px_rgba(147,51,234,0.3)]"></div>
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-tr from-lavender-500/25 to-indigo-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-60 animate-blob animation-delay-2000 shadow-[0_0_120px_rgba(99,102,241,0.25)]"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-gradient-to-r from-lavender-300/20 to-purple-400/15 rounded-full mix-blend-multiply filter blur-2xl opacity-50 animate-blob animation-delay-4000"></div>
-
-        {/* Floating particles for depth */}
-        {[...Array(12)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-3 h-3 bg-gradient-to-r from-lavender-400/40 to-purple-500/30 rounded-full shadow-lg"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              y: [0, -30, 0],
-              x: [0, Math.random() * 20 - 10, 0],
-              opacity: [0.3, 0.8, 0.3],
-              scale: [1, 1.2, 1],
-            }}
-            transition={{
-              duration: 4 + Math.random() * 3,
-              repeat: Number.POSITIVE_INFINITY,
-              ease: "easeInOut",
-              delay: Math.random() * 2,
-            }}
-          />
-        ))}
-
-        {/* 3D grid overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(147,51,234,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(147,51,234,0.03)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
+        {/* Simple gradient background for mobile */}
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-lavender-400/20 to-lavender-500/10 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-tr from-lavender-500/15 to-lavender-400/10 rounded-full mix-blend-multiply filter blur-3xl opacity-40"></div>
       </div>
 
       <div className="flex min-h-screen">
@@ -1380,7 +1611,7 @@ export function LevlPortal() {
 
         <main className="flex-1 overflow-y-auto h-screen">
           <Header onMenuClick={() => setSidebarOpen(true)} />
-          <div className="p-6 lg:p-8">
+          <div className="p-4 sm:p-6 lg:p-8">
             <div className="max-w-7xl mx-auto">
               <AnimatePresence mode="wait">
                 <motion.div
@@ -1426,3 +1657,5 @@ export function LevlPortal() {
     </div>
   )
 }
+
+export default LevlPortal

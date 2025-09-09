@@ -587,8 +587,9 @@ const initialMessages: Message[] = [
   {
     id: "welcome",
     type: "ai",
-    content: "Hello Im LevL AI! Tap or scroll to find a service you need from above!",
+    content: "Hi! I'm LevL AI, your personal service matchmaker. What service are you looking for today?",
     timestamp: new Date(),
+    options: ["TV Mounting", "Furniture Assembly", "Painting", "Plumbing Repair", "Moving Help", "Home Cleaning"],
   },
 ]
 
@@ -1163,31 +1164,276 @@ export function AIServiceMatchmaker() {
     specificRequirements: null,
   })
 
-  // Process user input
+  // Process user input with proper option handling
   const processUserInput = (input: string) => {
-    // Simple AI response simulation
+    const intent = detectUserIntent(input)
+
+    // Handle initial option selection
+    if (
+      messages.length <= 2 &&
+      ["TV Mounting", "Furniture Assembly", "Painting", "Plumbing Repair", "Moving Help", "Home Cleaning"].includes(
+        input,
+      )
+    ) {
+      // User selected a service category
+      simulateTyping(() => {
+        const followUpMessage: Message = {
+          id: `ai-${Date.now()}`,
+          type: "ai",
+          content: `Great choice! Tell me more about your ${input.toLowerCase()} needs. What's your budget range?`,
+          timestamp: new Date(),
+          options: ["Under $100", "$100-$300", "$300-$500", "Over $500", "I'm flexible"],
+        }
+        setMessages((prev) => [...prev, followUpMessage])
+      }, 1500)
+      return
+    }
+
+    // Handle budget selection
+    if (["Under $100", "$100-$300", "$300-$500", "Over $500", "I'm flexible"].includes(input)) {
+      simulateTyping(() => {
+        const timingMessage: Message = {
+          id: `ai-${Date.now()}`,
+          type: "ai",
+          content: "Perfect! When do you need this service completed?",
+          timestamp: new Date(),
+          options: ["ASAP", "This week", "Within 2 weeks", "I'm flexible with timing"],
+        }
+        setMessages((prev) => [...prev, timingMessage])
+      }, 1500)
+      return
+    }
+
+    // Handle timing selection and show service recommendations
+    if (["ASAP", "This week", "Within 2 weeks", "I'm flexible with timing"].includes(input)) {
+      simulateTyping(() => {
+        // Filter services based on user preferences (you can enhance this logic)
+        const recommendedServices = services.slice(0, 3) // Get top 3 services
+
+        const recommendationMessage: Message = {
+          id: `ai-${Date.now()}`,
+          type: "ai",
+          content: "Based on your preferences, here are the top service providers I recommend:",
+          timestamp: new Date(),
+          services: recommendedServices,
+        }
+        setMessages((prev) => [...prev, recommendationMessage])
+      }, 1500)
+      return
+    }
+
+    // Handle general text input
     simulateTyping(() => {
       const aiMessage: Message = {
         id: `ai-${Date.now()}`,
         type: "ai",
-        content: "I understand you're looking for help. Let me find some great service providers for you!",
+        content:
+          "I understand you're looking for help. Let me ask a few questions to find the perfect service provider for you. What type of service do you need?",
+        timestamp: new Date(),
+        options: ["TV Mounting", "Furniture Assembly", "Painting", "Plumbing Repair", "Moving Help", "Home Cleaning"],
+      }
+      setMessages((prev) => [...prev, aiMessage])
+    }, 1500)
+  }
+
+  // Ask initial questions
+  const askInitialQuestions = () => {
+    simulateTyping(() => {
+      const aiMessage: Message = {
+        id: `ai-${Date.now()}`,
+        type: "ai",
+        content: questions[currentQuestion],
+        timestamp: new Date(),
+      }
+
+      setMessages((prev) => [...prev, aiMessage])
+    }, 1500)
+  }
+
+  // Process answers to initial questions
+  const processInitialAnswers = (input: string) => {
+    // Update detected preferences
+    setDetectedPreferences((prev) => ({
+      ...prev,
+      budget: prev.budget || (questions[currentQuestion].includes("budget") ? input : null),
+      timeframe: prev.timeframe || (questions[currentQuestion].includes("time") ? input : null),
+      experienceImportance:
+        prev.experienceImportance || (questions[currentQuestion].includes("experience") ? input : null),
+      hasSpecificRequirements:
+        prev.hasSpecificRequirements || (questions[currentQuestion].includes("requirements") ? true : false),
+      specificRequirements:
+        prev.specificRequirements || (questions[currentQuestion].includes("requirements") ? input : null),
+    }))
+
+    // Move to next question or service-specific questions
+    if (currentQuestion < questions.length - 1) {
+      setCurrentQuestion((prev) => prev + 1)
+      askInitialQuestions()
+    } else {
+      // Move to service-specific questions
+      setConversationStage("service-specific")
+      setAIModel((prev) => ({
+        ...prev,
+        conversationContext: { ...prev.conversationContext, stage: "service-specific" },
+      }))
+      askServiceSpecificQuestion()
+    }
+  }
+
+  // Ask service-specific questions
+  const askServiceSpecificQuestion = () => {
+    if (!aiModel.conversationContext.currentServiceType) {
+      console.error("No service type selected")
+      return
+    }
+
+    const serviceType = aiModel.conversationContext.currentServiceType
+    const questionIndex = aiModel.conversationContext.currentServiceQuestion
+    const questions = serviceSpecificQuestions[serviceType].questions
+
+    if (questionIndex < questions.length) {
+      simulateTyping(() => {
+        const aiMessage: Message = {
+          id: `ai-${Date.now()}`,
+          type: "ai",
+          content: questions[questionIndex],
+          timestamp: new Date(),
+          options: serviceSpecificQuestions[serviceType].options[questions[questionIndex]],
+        }
+
+        setMessages((prev) => [...prev, aiMessage])
+      }, 1500)
+    } else {
+      // Move to recommending stage
+      setConversationStage("recommending")
+      setAIModel((prev) => ({
+        ...prev,
+        conversationContext: { ...prev.conversationContext, stage: "recommending" },
+      }))
+      generateRecommendations()
+    }
+  }
+
+  // Process service-specific answers
+  const processServiceSpecificAnswers = (input: string) => {
+    if (!aiModel.conversationContext.currentServiceType) {
+      console.error("No service type selected")
+      return
+    }
+
+    const serviceType = aiModel.conversationContext.currentServiceType
+    const questionIndex = aiModel.conversationContext.currentServiceQuestion
+    const questions = serviceSpecificQuestions[serviceType].questions
+
+    // Update service-specific answers
+    setAIModel((prev) => {
+      const updatedAnswers = new Map(prev.conversationContext.serviceSpecificAnswers)
+      updatedAnswers.set(questions[questionIndex], input)
+
+      return {
+        ...prev,
+        conversationContext: {
+          ...prev.conversationContext,
+          serviceSpecificAnswers: updatedAnswers,
+        },
+      }
+    })
+
+    // Move to next question or recommending stage
+    if (questionIndex < serviceSpecificQuestions[serviceType].questions.length - 1) {
+      setAIModel((prev) => ({
+        ...prev,
+        conversationContext: {
+          ...prev.conversationContext,
+          currentServiceQuestion: prev.conversationContext.currentServiceQuestion + 1,
+        },
+      }))
+      askServiceSpecificQuestion()
+    } else {
+      // Move to recommending stage
+      setConversationStage("recommending")
+      setAIModel((prev) => ({
+        ...prev,
+        conversationContext: { ...prev.conversationContext, stage: "recommending" },
+      }))
+      generateRecommendations()
+    }
+  }
+
+  // Generate recommendations
+  const generateRecommendations = () => {
+    simulateTyping(() => {
+      // Filter services based on user preferences
+      const filteredServices = services.filter((service) => {
+        if (aiModel.userModel.categories.size > 0) {
+          const categoryConfidence = aiModel.userModel.categories.get(service.category) || 0
+          if (categoryConfidence < aiModel.confidenceThreshold) {
+            return false
+          }
+        }
+        return true
+      })
+
+      // Sort services by match score
+      const sortedServices = filteredServices.sort((a, b) => b.matchScore - a.matchScore)
+
+      // Select top 3 services
+      const topServices = sortedServices.slice(0, 3)
+
+      const aiMessage: Message = {
+        id: `ai-${Date.now()}`,
+        type: "ai",
+        content: "Based on your preferences, here are some top recommendations:",
+        timestamp: new Date(),
+        services: topServices,
+      }
+
+      setMessages((prev) => [...prev, aiMessage])
+    }, 1500)
+  }
+
+  // Refine recommendations
+  const refineRecommendations = (input: string) => {
+    simulateTyping(() => {
+      const aiMessage: Message = {
+        id: `ai-${Date.now()}`,
+        type: "ai",
+        content: "Thank you for your feedback. I'm refining the recommendations based on your input.",
         timestamp: new Date(),
       }
 
       setMessages((prev) => [...prev, aiMessage])
 
-      // Show some sample services
-      setTimeout(() => {
-        const servicesMessage: Message = {
-          id: `services-${Date.now()}`,
-          type: "ai",
-          content: "Here are some top-rated service providers:",
-          timestamp: new Date(),
-          services: services.slice(0, 3),
-        }
+      // Generate new recommendations based on feedback
+      generateRecommendations()
+    }, 1500)
+  }
 
-        setMessages((prev) => [...prev, servicesMessage])
-      }, 1000)
+  // Finalize recommendations
+  const finalizeRecommendations = (input: string) => {
+    simulateTyping(() => {
+      const aiMessage: Message = {
+        id: `ai-${Date.now()}`,
+        type: "ai",
+        content: "Here are the final recommendations. I hope you find them helpful!",
+        timestamp: new Date(),
+      }
+
+      setMessages((prev) => [...prev, aiMessage])
+    }, 1500)
+  }
+
+  // End conversation
+  const endConversation = (input: string) => {
+    simulateTyping(() => {
+      const aiMessage: Message = {
+        id: `ai-${Date.now()}`,
+        type: "ai",
+        content: "Thank you for using our service. Have a great day!",
+        timestamp: new Date(),
+      }
+
+      setMessages((prev) => [...prev, aiMessage])
     }, 1500)
   }
 
@@ -1200,20 +1446,34 @@ export function AIServiceMatchmaker() {
     setInputValue("")
     setIsTyping(false)
     setMatchedServices([])
+    setCurrentQuestion(0)
+    setConversationStage("initial")
+    setDetectedPreferences({
+      category: null,
+      budget: null,
+      timeframe: null,
+      experienceImportance: null,
+      hasSpecificRequirements: false,
+      specificRequirements: null,
+    })
+    setAIModel((prev) => ({
+      ...initialAIModel,
+      conversationContext: { ...initialAIModel.conversationContext, currentServiceType: serviceType },
+    }))
 
     // Simple response for category selection
     simulateTyping(() => {
       const aiMessage: Message = {
         id: `ai-${Date.now()}`,
         type: "ai",
-        content: `Great choice! I'll help you find the best ${serviceType} services. Here are some top providers:`,
+        content: `Great choice! I'll help you find the best ${
+          serviceCategoryMap[serviceType] || serviceType
+        } services.`,
         timestamp: new Date(),
-        services: services
-          .filter((service) => service.category.toLowerCase().includes(serviceType.toLowerCase()))
-          .slice(0, 3),
       }
 
       setMessages((prev) => [...prev, aiMessage])
+      processUserInput("")
     }, 1000)
   }
 
@@ -1501,7 +1761,7 @@ export function AIServiceMatchmaker() {
           <div className="w-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border border-gray-200/50 dark:border-gray-800/50 overflow-hidden">
             {/* Enhanced background gradient with animated pattern */}
             <div className="absolute inset-0 bg-gradient-to-r from-violet-500/20 via-indigo-600/15 to-purple-600/20 opacity-90"></div>
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzMjI2NTkiIGZpbGwtb3BhY2l0eT0iMC4wNCI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6bTAtMTJ2NmgxOHYtNkgzNnptMCAxMnY2aDE4di02SDM2ek0yNCAzNHY2aDZ2LTZoLTZ6bTAtMzB2OmgxOHYtNkgyNHptMCAxMnY2aDE4di02SDM0ek0xMiAzNHY2aDZ2LTZoLTZ6bTAtMzB2OmgxOHYtNkgxMnptMCAxMnY2aDE4di02SDEyek0wIDM0djZoMTJ2LTZIMHptMC0zMHY2aDEydi02SDB6bTAgMTJ2OmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHptMCAxMnY2aDE4di02SDB6Ii8+PC9nPjwvZz48L3N2Zz4=')] animate-[pulse_15s_ease-in-out_infinite] opacity-70"></div>
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzMjI2NTkiIGZpbGwtb3BhY2l0eT0iMC4wNCI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDMvZGQiPjxnIGZpbGw9IiMzMjI2NTkiIGZpbGwtb3BhY2l0eT0iMC4wNCI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6bTAtMTJ2NmgxOHYtNkgzNnptMCAxMnY2aDE4di02SDM2ek0yNCAzNHY2aDZ2LTZoLTZ6bTAtMzB2OmgxOHYtNkgyNHptMCAxMnY2aDE4di02SDM0ek0xMiAzNHY2aDZ2LTZoLTZ6bTAtMzB2OmgxOHYtNkgxMnptMCAxMnY2aDE4di02SDEyek0wIDM0djZoMTJ2LTZIMHptMC0zMHY2aDEydi02SDB6bTAgMTJ2OmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHptMCAxMnY2aDE4di02SDB6Ii8+PC9nPjwvZz48L3N2Zz4=')] animate-[pulse_15s_ease-in-out_infinite] opacity-70"></div>
 
             {/* Enhanced header content - simplified with icon in top left */}
             <div className="relative flex items-center justify-between p-5 bg-white dark:bg-gray-900 backdrop-blur-sm mb-0 mt-8">
