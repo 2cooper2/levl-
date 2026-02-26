@@ -29,140 +29,129 @@ import {
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 
-// Seeded review ratings per author - mix of high, mid, and low ratings
+// Seeded review ratings per author - whole numbers 1-5, mix of high and low counts
 const authorReviewData: Record<string, { rating: number; reviewCount: number }> = {
-  ToolEnthusiast: { rating: 4.1, reviewCount: 23 },
-  HandyPro: { rating: 5, reviewCount: 187 },
-  DIYQueen: { rating: 4.8, reviewCount: 94 },
-  FurnitureNewbie: { rating: 2.3, reviewCount: 4 },
-  AssemblyExpert: { rating: 5, reviewCount: 312 },
-  DIYEnthusiast: { rating: 3.8, reviewCount: 17 },
-  CarefulPacker: { rating: 3.2, reviewCount: 9 },
-  MoveCoordinator: { rating: 5, reviewCount: 156 },
-  AntiquesCollector: { rating: 4.6, reviewCount: 42 },
-  DecorLover: { rating: 2.8, reviewCount: 6 },
-  HardwareSpecialist: { rating: 5, reviewCount: 245 },
-  CleanFreak: { rating: 3.5, reviewCount: 11 },
-  CleaningPro: { rating: 4.9, reviewCount: 203 },
-  DIYPlumber: { rating: 4.1, reviewCount: 28 },
-  PlumbingExpert: { rating: 5, reviewCount: 389 },
-  PaintingNewbie: { rating: 1.9, reviewCount: 2 },
-  PaintContractor: { rating: 5, reviewCount: 274 },
-  DIYMounter: { rating: 3.4, reviewCount: 14 },
-  ContractorPro: { rating: 4.7, reviewCount: 128 },
-  SpacePlanner: { rating: 4.3, reviewCount: 31 },
-  InteriorDesigner: { rating: 5, reviewCount: 167 },
-  CableHater: { rating: 2.6, reviewCount: 5 },
-  AVInstaller: { rating: 4.9, reviewCount: 198 },
-  GreenThumb: { rating: 3.9, reviewCount: 22 },
-  LandscaperPro: { rating: 5, reviewCount: 341 },
-  WFHWarrior: { rating: 4.4, reviewCount: 37 },
-  OrganizationConsultant: { rating: 4.8, reviewCount: 89 },
-  ToolNewbie: { rating: 2.1, reviewCount: 3 },
-  RenovationRookie: { rating: 3.6, reviewCount: 8 },
-  DogOwner: { rating: 4.2, reviewCount: 19 },
-  You: { rating: 4.5, reviewCount: 12 },
-  MilwaukeeFan: { rating: 5, reviewCount: 421 },
-  BudgetBuilder: { rating: 3.4, reviewCount: 15 },
-  IKEAVeteran: { rating: 4.9, reviewCount: 276 },
-  FirstTimer: { rating: 2.1, reviewCount: 3 },
-  MovingDay: { rating: 4.5, reviewCount: 63 },
-  BubbleWrapKing: { rating: 5, reviewCount: 184 },
-  WallMaster: { rating: 4.8, reviewCount: 152 },
-  HomeRenovator: { rating: 5, reviewCount: 508 },
-  ShowerGuru: { rating: 4.3, reviewCount: 47 },
-  SparkleQueen: { rating: 3.1, reviewCount: 12 },
-  PipeWizard: { rating: 5, reviewCount: 467 },
-  WeekendWarrior: { rating: 4.2, reviewCount: 38 },
-  EdgeMaster: { rating: 5, reviewCount: 329 },
-  RollerPro: { rating: 4.6, reviewCount: 91 },
-  DrillSergeant: { rating: 5, reviewCount: 553 },
-  MasonryMike: { rating: 4.4, reviewCount: 67 },
-  RoomPlanner: { rating: 4.7, reviewCount: 112 },
-  TinySpaceLiving: { rating: 3.9, reviewCount: 29 },
-  TechMountPro: { rating: 5, reviewCount: 372 },
-  NeatFreak: { rating: 4.1, reviewCount: 55 },
-  TurfBuilder: { rating: 5, reviewCount: 289 },
-  ShadeLawnGuy: { rating: 3.7, reviewCount: 18 },
-  DeskMinimalist: { rating: 4.8, reviewCount: 143 },
-  ProductivityNerd: { rating: 3.5, reviewCount: 21 },
+  ToolEnthusiast: { rating: 4, reviewCount: 230 },
+  HandyPro: { rating: 5, reviewCount: 1187 },
+  DIYQueen: { rating: 5, reviewCount: 894 },
+  FurnitureNewbie: { rating: 2, reviewCount: 14 },
+  AssemblyExpert: { rating: 5, reviewCount: 1312 },
+  DIYEnthusiast: { rating: 4, reviewCount: 117 },
+  CarefulPacker: { rating: 3, reviewCount: 39 },
+  MoveCoordinator: { rating: 5, reviewCount: 756 },
+  AntiquesCollector: { rating: 4, reviewCount: 342 },
+  DecorLover: { rating: 3, reviewCount: 26 },
+  HardwareSpecialist: { rating: 5, reviewCount: 1245 },
+  CleanFreak: { rating: 3, reviewCount: 41 },
+  CleaningPro: { rating: 5, reviewCount: 803 },
+  DIYPlumber: { rating: 4, reviewCount: 128 },
+  PlumbingExpert: { rating: 5, reviewCount: 2389 },
+  PaintingNewbie: { rating: 2, reviewCount: 12 },
+  PaintContractor: { rating: 5, reviewCount: 1274 },
+  DIYMounter: { rating: 3, reviewCount: 54 },
+  ContractorPro: { rating: 5, reviewCount: 1628 },
+  SpacePlanner: { rating: 4, reviewCount: 231 },
+  InteriorDesigner: { rating: 5, reviewCount: 967 },
+  CableHater: { rating: 2, reviewCount: 15 },
+  AVInstaller: { rating: 5, reviewCount: 1198 },
+  GreenThumb: { rating: 4, reviewCount: 122 },
+  LandscaperPro: { rating: 5, reviewCount: 2341 },
+  WFHWarrior: { rating: 4, reviewCount: 237 },
+  OrganizationConsultant: { rating: 5, reviewCount: 489 },
+  ToolNewbie: { rating: 2, reviewCount: 8 },
+  RenovationRookie: { rating: 3, reviewCount: 28 },
+  DogOwner: { rating: 4, reviewCount: 119 },
+  You: { rating: 4, reviewCount: 52 },
+  MilwaukeeFan: { rating: 5, reviewCount: 1421 },
+  BudgetBuilder: { rating: 3, reviewCount: 65 },
+  IKEAVeteran: { rating: 5, reviewCount: 876 },
+  FirstTimer: { rating: 2, reviewCount: 7 },
+  MovingDay: { rating: 4, reviewCount: 363 },
+  BubbleWrapKing: { rating: 5, reviewCount: 584 },
+  WallMaster: { rating: 5, reviewCount: 1152 },
+  HomeRenovator: { rating: 5, reviewCount: 2508 },
+  ShowerGuru: { rating: 4, reviewCount: 347 },
+  SparkleQueen: { rating: 3, reviewCount: 42 },
+  PipeWizard: { rating: 5, reviewCount: 1467 },
+  WeekendWarrior: { rating: 4, reviewCount: 238 },
+  EdgeMaster: { rating: 5, reviewCount: 1329 },
+  RollerPro: { rating: 4, reviewCount: 491 },
+  DrillSergeant: { rating: 5, reviewCount: 2553 },
+  MasonryMike: { rating: 5, reviewCount: 667 },
+  RoomPlanner: { rating: 4, reviewCount: 312 },
+  TinySpaceLiving: { rating: 3, reviewCount: 89 },
+  TechMountPro: { rating: 5, reviewCount: 1372 },
+  NeatFreak: { rating: 4, reviewCount: 255 },
+  TurfBuilder: { rating: 5, reviewCount: 1289 },
+  ShadeLawnGuy: { rating: 3, reviewCount: 78 },
+  DeskMinimalist: { rating: 5, reviewCount: 543 },
+  ProductivityNerd: { rating: 3, reviewCount: 61 },
 }
 
 function getAuthorReview(name: string) {
   if (authorReviewData[name]) return authorReviewData[name]
-  // Fallback: generate from name hash for any new/unknown authors
   let hash = 0
   for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash)
-  const rating = Math.round(((Math.abs(hash) % 41) / 10 + 1) * 10) / 10 // 1.0 - 5.0
-  const reviewCount = Math.abs(hash) % 300 + 1
+  const rating = (Math.abs(hash) % 5) + 1
+  const reviewCount = Math.abs(hash) % 500 + 10
   return { rating: Math.min(rating, 5), reviewCount }
 }
 
 function ReviewStarBadge({ authorName }: { authorName: string }) {
   const { rating, reviewCount } = getAuthorReview(authorName)
-  const displayRating = rating === 5 ? "5" : rating.toFixed(1)
 
   return (
-    <span className="inline-flex items-center gap-1 ml-2">
+    <span className="inline-flex items-center gap-1 ml-1.5">
       <span
         className="relative inline-flex items-center justify-center"
         style={{
-          width: 34,
-          height: 34,
-          filter: "drop-shadow(0 2px 4px rgba(124, 58, 237, 0.45)) drop-shadow(0 1px 2px rgba(124, 58, 237, 0.25))",
+          width: 24,
+          height: 24,
+          filter: "drop-shadow(0 2px 3px rgba(124, 58, 237, 0.5)) drop-shadow(0 1px 1px rgba(124, 58, 237, 0.3))",
         }}
       >
-        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <linearGradient id={`starGrad-${authorName}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <linearGradient id={`sg-${authorName}`} x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#A78BFA" />
-              <stop offset="35%" stopColor="#8B5CF6" />
-              <stop offset="70%" stopColor="#7C3AED" />
+              <stop offset="40%" stopColor="#8B5CF6" />
               <stop offset="100%" stopColor="#6D28D9" />
             </linearGradient>
-            <linearGradient id={`starShine-${authorName}`} x1="30%" y1="0%" x2="70%" y2="60%">
-              <stop offset="0%" stopColor="rgba(255,255,255,0.35)" />
+            <linearGradient id={`ss-${authorName}`} x1="20%" y1="0%" x2="80%" y2="50%">
+              <stop offset="0%" stopColor="rgba(255,255,255,0.4)" />
               <stop offset="100%" stopColor="rgba(255,255,255,0)" />
             </linearGradient>
           </defs>
-          {/* Base star shape */}
           <path
             d="M12 2L14.9 8.6L22 9.3L16.8 14L18.2 21L12 17.5L5.8 21L7.2 14L2 9.3L9.1 8.6L12 2Z"
-            fill={`url(#starGrad-${authorName})`}
+            fill={`url(#sg-${authorName})`}
             stroke="#5B21B6"
-            strokeWidth="0.4"
+            strokeWidth="0.5"
             strokeLinejoin="round"
           />
-          {/* Top-left shine overlay for 3D pop */}
           <path
             d="M12 2L14.9 8.6L22 9.3L16.8 14L18.2 21L12 17.5L5.8 21L7.2 14L2 9.3L9.1 8.6L12 2Z"
-            fill={`url(#starShine-${authorName})`}
+            fill={`url(#ss-${authorName})`}
           />
-          {/* Inner bevel highlight */}
           <path
-            d="M12 4.8L14 8.9L18.6 9.4L15.2 12.5L16 17L12 14.9L8 17L8.8 12.5L5.4 9.4L10 8.9L12 4.8Z"
+            d="M12 5L13.8 9L18 9.4L14.9 12.2L15.7 16.5L12 14.4L8.3 16.5L9.1 12.2L6 9.4L10.2 9L12 5Z"
             fill="rgba(255,255,255,0.1)"
-            stroke="rgba(255,255,255,0.08)"
-            strokeWidth="0.3"
           />
         </svg>
-        {/* Rating number - large and bold */}
         <span
           className="absolute inset-0 flex items-center justify-center font-black text-white"
           style={{
-            fontSize: rating === 5 ? 13 : 10.5,
+            fontSize: 11,
             lineHeight: 1,
             paddingTop: 1,
-            letterSpacing: "-0.03em",
-            textShadow: "0 1px 2px rgba(0,0,0,0.3)",
+            textShadow: "0 1px 2px rgba(0,0,0,0.35)",
           }}
         >
-          {displayRating}
+          {rating}
         </span>
       </span>
-      {/* Review count */}
       <span className="text-xs font-bold" style={{ color: "#7C3AED" }}>
-        {reviewCount.toLocaleString()}
+        ({reviewCount.toLocaleString()})
       </span>
     </span>
   )
@@ -172,14 +161,14 @@ function ReviewStarBadge({ authorName }: { authorName: string }) {
 const forumTopics = [
   {
     id: 1,
-    title: "Best power drill for home DIY projects under $150?",
+    title: "What drill are you guys running on residential jobs under $150?",
     author: "ToolEnthusiast",
     replies: 14,
     likes: 32,
     lastActive: "2 hours ago",
     tags: ["tools", "power-tools", "recommendations"],
     preview:
-      "I'm looking to invest in a quality power drill for various home projects. Need something versatile with good battery life that won't break the bank. Any recommendations under $150?",
+      "Need a solid backup drill for lighter residential work - hanging fixtures, cabinet installs, general repairs. Something with decent battery life that I can toss in the van without worrying about it. What are you guys running?",
     responses: [
       {
         author: "HandyPro",
@@ -255,14 +244,14 @@ const forumTopics = [
   },
   {
     id: 2,
-    title: "Tips for assembling IKEA furniture efficiently?",
+    title: "Fastest way to knock out flat-pack furniture assembly jobs?",
     author: "FurnitureNewbie",
     replies: 8,
     likes: 15,
     lastActive: "3 days ago",
     tags: ["assembly", "furniture", "tools"],
     preview:
-      "Just bought several IKEA pieces for my new apartment. Any tips for assembling them quickly and correctly? Tools I should have on hand?",
+      "Getting more clients asking for IKEA and flat-pack assembly. What's your workflow to get through these fast without callbacks? Any tools that speed things up beyond the basic Allen key?",
     responses: [
       {
         author: "AssemblyExpert",
@@ -338,14 +327,14 @@ const forumTopics = [
   },
   {
     id: 3,
-    title: "Best packing materials for fragile items?",
+    title: "How are you guys packing fragile items on moving jobs?",
     author: "CarefulPacker",
     replies: 5,
     likes: 10,
     lastActive: "1 week ago",
     tags: ["moving", "packing", "fragile"],
     preview:
-      "I have several valuable glass and ceramic items to pack for an upcoming move. What packing materials provide the best protection beyond basic bubble wrap?",
+      "Had a claim last month for a broken antique vase during a residential move. Need to tighten up my packing process for fragile items. What materials and techniques are you running to avoid damage callbacks?",
     responses: [
       {
         author: "MoveCoordinator",
@@ -421,14 +410,14 @@ const forumTopics = [
   },
   {
     id: 4,
-    title: "Best anchors for hanging heavy mirrors on drywall?",
+    title: "What anchors are you trusting for 40lb+ mounts on drywall?",
     author: "DecorLover",
     replies: 4,
     likes: 6,
     lastActive: "5 days ago",
     tags: ["mounting", "hardware", "drywall"],
     preview:
-      "I have a 40-pound decorative mirror to hang on drywall. What anchors would you recommend that won't fail over time? Studs aren't in the right position.",
+      "Got a job tomorrow - client wants a 40lb decorative mirror centered on a wall with no studs behind it. What anchors are you guys using for heavy drywall-only mounts? Can't afford a callback on this one.",
     responses: [
       {
         author: "HardwareSpecialist",
@@ -497,14 +486,14 @@ const forumTopics = [
   },
   {
     id: 5,
-    title: "Most effective cleaning solution for shower glass?",
+    title: "What's actually cutting through hard water on shower glass for you guys?",
     author: "CleanFreak",
     replies: 7,
     likes: 12,
     lastActive: "2 days ago",
     tags: ["cleaning", "bathroom", "glass"],
     preview:
-      "My shower glass gets cloudy with hard water stains no matter what I try. What cleaning products or DIY solutions actually work for stubborn mineral buildup?",
+      "Client keeps calling me back about cloudy shower glass after a bathroom reno. I've tried vinegar solutions but they're not cutting it on heavy mineral buildup. What products are you guys actually using on jobs?",
     responses: [
       {
         author: "CleaningPro",
@@ -573,14 +562,14 @@ const forumTopics = [
   },
   {
     id: 6,
-    title: "Tools needed for basic plumbing repairs?",
+    title: "What's in your plumbing tool bag for residential service calls?",
     author: "DIYPlumber",
     replies: 9,
     likes: 18,
     lastActive: "1 day ago",
     tags: ["plumbing", "tools", "repairs"],
     preview:
-      "Want to handle simple plumbing issues myself. What's a good starter tool kit for tasks like fixing leaky faucets, unclogging drains, and replacing p-traps?",
+      "Expanding into basic plumbing repairs - faucet swaps, drain clearing, p-trap replacements. What tools are you guys keeping in the van for standard residential plumbing calls? Trying to build out my kit.",
     responses: [
       {
         author: "PlumbingExpert",
@@ -649,14 +638,14 @@ const forumTopics = [
   },
   {
     id: 7,
-    title: "Best technique for painting clean edges without tape?",
+    title: "How are you cutting in clean lines without tape on paint jobs?",
     author: "PaintingNewbie",
     replies: 15,
     likes: 22,
     lastActive: "3 days ago",
     tags: ["painting", "techniques", "edges"],
     preview:
-      "I'm tired of paint bleeding under tape. Are there techniques for cutting in edges freehand with professional results? What brush works best for this?",
+      "Taping every ceiling line is killing my time on interior jobs. I see experienced painters freehand cutting in perfect lines. What brush and technique are you using to get clean edges without tape?",
     responses: [
       {
         author: "PaintContractor",
@@ -725,14 +714,14 @@ const forumTopics = [
   },
   {
     id: 8,
-    title: "Best drill bits for concrete walls?",
+    title: "What bits and setup are you running for concrete anchor jobs?",
     author: "DIYMounter",
     replies: 6,
     likes: 9,
     lastActive: "4 days ago",
     tags: ["drilling", "concrete", "tools"],
     preview:
-      "Need to mount several items on concrete walls. Regular bits aren't working. What type of drill bits should I use, and do I need a hammer drill or will my regular drill work?",
+      "Got a commercial job with 50+ mounts into poured concrete walls. My regular hammer drill is burning through bits. What SDS+ setup and bits are you guys running for high-volume concrete work?",
     responses: [
       {
         author: "ContractorPro",
@@ -801,14 +790,14 @@ const forumTopics = [
   },
   {
     id: 9,
-    title: "How to properly measure for furniture before buying?",
+    title: "How are you handling measurement and layout for furniture install jobs?",
     author: "SpacePlanner",
     replies: 11,
     likes: 17,
     lastActive: "2 days ago",
     tags: ["furniture", "measuring", "planning"],
     preview:
-      "I've made mistakes buying furniture that didn't fit my space well. What's the best approach to measuring rooms and planning furniture layout before purchasing?",
+      "Had a client order a sectional that didn't fit through their doorframe. Now I'm doing pre-purchase measuring as a service. What's your process for room measurement and furniture layout planning on jobs?",
     responses: [
       {
         author: "InteriorDesigner",
@@ -877,14 +866,14 @@ const forumTopics = [
   },
   {
     id: 10,
-    title: "In-wall cable management solutions for mounted TVs?",
+    title: "What cable management kits are you using for TV mount jobs?",
     author: "CableHater",
     replies: 8,
     likes: 14,
     lastActive: "6 days ago",
     tags: ["mounting", "cables", "organization"],
     preview:
-      "What are the best products for running TV cables through walls? Looking for something that's code-compliant and relatively easy to install for a DIYer.",
+      "Doing a lot of TV mounting jobs lately and clients always want clean cable runs. What in-wall cable management kits are you guys using that are code-compliant and fast to install?",
     responses: [
       {
         author: "AVInstaller",
@@ -953,14 +942,14 @@ const forumTopics = [
   },
   {
     id: 11,
-    title: "Best grass seed for shady areas?",
+    title: "What seed mix are you guys throwing down on shaded lawn jobs?",
     author: "GreenThumb",
     replies: 7,
     likes: 11,
     lastActive: "5 days ago",
     tags: ["landscaping", "lawn", "shade"],
     preview:
-      "Part of my yard gets only 2-3 hours of direct sunlight. Regular grass seed isn't thriving there. What varieties work best in shady conditions in the Northeast?",
+      "Got a landscaping client with heavy tree cover - maybe 2-3 hours of direct sun. Standard seed mixes keep failing. What shade-tolerant blends are you running in the Northeast that actually establish?",
     responses: [
       {
         author: "LandscaperPro",
@@ -1029,14 +1018,14 @@ const forumTopics = [
   },
   {
     id: 12,
-    title: "Space-saving home office organization ideas?",
+    title: "Best storage solutions you've built for small home offices?",
     author: "WFHWarrior",
     replies: 10,
     likes: 19,
     lastActive: "3 days ago",
     tags: ["organization", "home-office", "small-space"],
     preview:
-      "My home office is tiny (8x8 ft). Looking for creative storage and organization solutions that maximize the limited space while keeping everything accessible.",
+      "Getting a lot of requests for home office builds in tight spaces - closet conversions, 8x8 rooms, etc. What storage and organization solutions are you guys installing that clients love? Need ideas beyond basic shelving.",
     responses: [
       {
         author: "OrganizationConsultant",
@@ -1628,7 +1617,7 @@ export function ForumTab() {
 
         {/* Forum categories */}
         <div className="flex flex-wrap gap-2 mb-2 relative z-10">
-          {["All Topics", "Recommendations", "How-To", "Tips & Tricks", "Product Reviews", "DIY Projects"].map(
+          {["All Topics", "Recommendations", "How-To", "Tips & Tricks", "Product Reviews"].map(
             (category) => (
               <button
                 key={category}
@@ -1984,12 +1973,7 @@ ${viewMode === "card" ? "min-h-[240px]" : "min-h-[120px]"}`}
                     </div>
                   </div>
 
-                  {/* Preview text with enhanced styling */}
-                  <div className="mt-4 text-sm text-gray-600 leading-relaxed bg-white/50 p-3 rounded-lg border border-lavender-100/50 hover:bg-white/80 transition-all duration-200">
-                    <p className="md:line-clamp-2 line-clamp-none">{topic.preview}</p>
-                  </div>
-
-                  {/* Author info with comment */}
+                  {/* Author original post */}
                   <div
                     className="mt-5 pt-4 border-t border-lavender-200/30"
                     onMouseEnter={() => setShowUserTooltip(topic.id)}
@@ -2001,7 +1985,6 @@ ${viewMode === "card" ? "min-h-[240px]" : "min-h-[120px]"}`}
                           {topic.author.charAt(0)}
                         </div>
 
-                        {/* User tooltip with enhanced styling */}
                         {showUserTooltip === topic.id && (
                           <motion.div
                             className="absolute bottom-full left-0 mb-2 w-60 bg-white rounded-lg shadow-xl p-4 z-50 border border-lavender-200"
@@ -2047,96 +2030,141 @@ ${viewMode === "card" ? "min-h-[240px]" : "min-h-[120px]"}`}
                     </div>
                   </div>
 
-                  {/* Expanded topic with responses - enhanced styling */}
+                  {/* First 3 comments always visible in topic box */}
+                  {topic.responses && topic.responses.length > 0 && (
+                    <div className="space-y-3 mt-4">
+                      {topic.responses.slice(0, 3).map((response, index) => (
+                        <div
+                          key={index}
+                          className="bg-white/80 rounded-lg p-4 shadow-sm border border-lavender-100/50"
+                        >
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <div className="flex items-center">
+                                <div className="h-7 w-7 rounded-full bg-gradient-to-r from-lavender-300 to-lavender-400 flex items-center justify-center text-sm font-bold text-white border border-lavender-200/50 shadow-md mr-2">
+                                  {response.author.charAt(0)}
+                                </div>
+                                <span className="text-sm font-medium text-gray-700">{response.author}</span>
+                                <ReviewStarBadge authorName={response.author} />
+                              </div>
+                              <div className="text-xs text-gray-500 mt-1">{response.time}</div>
+                              <div className="mt-2 text-gray-600">{response.content}</div>
+                            </div>
+                            <div className="flex items-center">
+                              <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                className={`flex items-center px-2 py-1 rounded-full transition-colors duration-200 ${
+                                  userVotes[`${topic.id}-${index}`]?.up
+                                    ? "bg-lavender-100 text-lavender-700"
+                                    : "bg-white/70 text-gray-600 hover:bg-lavender-50"
+                                }`}
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleVote(topic.id, index, "up")
+                                }}
+                              >
+                                <ThumbsUp className="h-3 w-3 mr-1" />
+                                <span>{response.likes}</span>
+                              </motion.button>
+                              <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                className={`ml-2 flex items-center px-2 py-1 rounded-full transition-colors duration-200 ${
+                                  userVotes[`${topic.id}-${index}`]?.down
+                                    ? "bg-red-100 text-red-700"
+                                    : "bg-white/70 text-gray-600 hover:bg-red-50"
+                                }`}
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleVote(topic.id, index, "down")
+                                }}
+                              >
+                                <ThumbsUp className="h-3 w-3 mr-1 transform rotate-180" />
+                              </motion.button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Show More button - shows 7 more comments */}
+                      {topic.responses.length > 3 && !expandedComments[topic.id] && (
+                        <button
+                          className="w-full py-2.5 px-4 rounded-lg border border-lavender-200/60 bg-lavender-50/50 text-sm font-medium text-lavender-700 hover:bg-lavender-100/60 hover:border-lavender-300/60 transition-colors duration-200 flex items-center justify-center gap-2"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setExpandedComments((prev) => ({ ...prev, [topic.id]: true }))
+                          }}
+                        >
+                          <MessageSquare className="h-3.5 w-3.5" />
+                          Show {Math.min(topic.responses.length - 3, 7)} more {Math.min(topic.responses.length - 3, 7) === 1 ? "reply" : "replies"}
+                        </button>
+                      )}
+
+                      {/* Expanded comments - 7 more after the initial 3 */}
+                      {expandedComments[topic.id] && topic.responses.slice(3, 10).map((response, idx) => {
+                        const index = idx + 3
+                        return (
+                          <div
+                            key={index}
+                            className="bg-white/80 rounded-lg p-4 shadow-sm border border-lavender-100/50"
+                          >
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <div className="flex items-center">
+                                  <div className="h-7 w-7 rounded-full bg-gradient-to-r from-lavender-300 to-lavender-400 flex items-center justify-center text-sm font-bold text-white border border-lavender-200/50 shadow-md mr-2">
+                                    {response.author.charAt(0)}
+                                  </div>
+                                  <span className="text-sm font-medium text-gray-700">{response.author}</span>
+                                  <ReviewStarBadge authorName={response.author} />
+                                </div>
+                                <div className="text-xs text-gray-500 mt-1">{response.time}</div>
+                                <div className="mt-2 text-gray-600">{response.content}</div>
+                              </div>
+                              <div className="flex items-center">
+                                <motion.button
+                                  whileHover={{ scale: 1.1 }}
+                                  whileTap={{ scale: 0.9 }}
+                                  className={`flex items-center px-2 py-1 rounded-full transition-colors duration-200 ${
+                                    userVotes[`${topic.id}-${index}`]?.up
+                                      ? "bg-lavender-100 text-lavender-700"
+                                      : "bg-white/70 text-gray-600 hover:bg-lavender-50"
+                                  }`}
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleVote(topic.id, index, "up")
+                                  }}
+                                >
+                                  <ThumbsUp className="h-3 w-3 mr-1" />
+                                  <span>{response.likes}</span>
+                                </motion.button>
+                                <motion.button
+                                  whileHover={{ scale: 1.1 }}
+                                  whileTap={{ scale: 0.9 }}
+                                  className={`ml-2 flex items-center px-2 py-1 rounded-full transition-colors duration-200 ${
+                                    userVotes[`${topic.id}-${index}`]?.down
+                                      ? "bg-red-100 text-red-700"
+                                      : "bg-white/70 text-gray-600 hover:bg-red-50"
+                                  }`}
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleVote(topic.id, index, "down")
+                                  }}
+                                >
+                                  <ThumbsUp className="h-3 w-3 mr-1 transform rotate-180" />
+                                </motion.button>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+
+                  {/* Reply input - always visible at bottom of topic box */}
                   {activeTopic === topic.id && (
                     <div className="mt-5 pt-5 border-t border-lavender-200/30">
-                      <div className="space-y-4 mt-2 overflow-visible">
-                        {topic.responses && topic.responses.length > 0 ? (
-                          <>
-                            {(expandedComments[topic.id] ? topic.responses : topic.responses.slice(0, 3)).map((response, index) => (
-                              <div
-                                key={index}
-                                className="bg-white/80 rounded-lg p-4 shadow-sm border border-lavender-100/50"
-                              >
-                                <div className="flex justify-between items-start">
-                                  <div>
-                                    <div className="flex items-center">
-                                      <div className="h-7 w-7 rounded-full bg-gradient-to-r from-lavender-300 to-lavender-400 flex items-center justify-center text-sm font-bold text-white border border-lavender-200/50 shadow-md mr-2">
-                                        {response.author.charAt(0)}
-                                      </div>
-                                      <span className="text-sm font-medium text-gray-700">{response.author}</span>
-                                      <ReviewStarBadge authorName={response.author} />
-                                    </div>
-                                    <div className="text-xs text-gray-500 mt-1">{response.time}</div>
-                                    <div className="mt-2 text-gray-600">{response.content}</div>
-                                  </div>
-                                  <div className="flex items-center">
-                                    <motion.button
-                                      whileHover={{ scale: 1.1 }}
-                                      whileTap={{ scale: 0.9 }}
-                                      className={`flex items-center px-2 py-1 rounded-full transition-colors duration-200 ${
-                                        userVotes[`${topic.id}-${index}`]?.up
-                                          ? "bg-lavender-100 text-lavender-700"
-                                          : "bg-white/70 text-gray-600 hover:bg-lavender-50"
-                                      }`}
-                                      onClick={(e) => {
-                                        e.stopPropagation()
-                                        handleVote(topic.id, index, "up")
-                                      }}
-                                    >
-                                      <ThumbsUp className="h-3 w-3 mr-1" />
-                                      <span>{response.likes}</span>
-                                    </motion.button>
-                                    <motion.button
-                                      whileHover={{ scale: 1.1 }}
-                                      whileTap={{ scale: 0.9 }}
-                                      className={`ml-2 flex items-center px-2 py-1 rounded-full transition-colors duration-200 ${
-                                        userVotes[`${topic.id}-${index}`]?.down
-                                          ? "bg-red-100 text-red-700"
-                                          : "bg-white/70 text-gray-600 hover:bg-red-50"
-                                      }`}
-                                      onClick={(e) => {
-                                        e.stopPropagation()
-                                        handleVote(topic.id, index, "down")
-                                      }}
-                                    >
-                                      <ThumbsUp className="h-3 w-3 mr-1 transform rotate-180" />
-                                    </motion.button>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                            {topic.responses.length > 3 && !expandedComments[topic.id] && (
-                              <button
-                                className="w-full py-2.5 px-4 rounded-lg border border-lavender-200/60 bg-lavender-50/50 text-sm font-medium text-lavender-700 hover:bg-lavender-100/60 hover:border-lavender-300/60 transition-colors duration-200 flex items-center justify-center gap-2"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setExpandedComments((prev) => ({ ...prev, [topic.id]: true }))
-                                }}
-                              >
-                                <MessageSquare className="h-3.5 w-3.5" />
-                                Show {topic.responses.length - 3} more {topic.responses.length - 3 === 1 ? "reply" : "replies"}
-                              </button>
-                            )}
-                            {expandedComments[topic.id] && topic.responses.length > 3 && (
-                              <button
-                                className="w-full py-2.5 px-4 rounded-lg border border-lavender-200/60 bg-lavender-50/50 text-sm font-medium text-lavender-700 hover:bg-lavender-100/60 hover:border-lavender-300/60 transition-colors duration-200 flex items-center justify-center gap-2"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setExpandedComments((prev) => ({ ...prev, [topic.id]: false }))
-                                }}
-                              >
-                                Show less
-                              </button>
-                            )}
-                          </>
-                        ) : (
-                          <div className="text-gray-500">No responses yet. Be the first to reply!</div>
-                        )}
-                      </div>
-
-                      {/* Reply input */}
-                      <div className="mt-5">
+                      <div className="mt-0">
                         <textarea
                           placeholder="Write your reply..."
                           className="w-full h-20 px-3 py-2 text-sm bg-white/5 dark:bg-black/20 rounded-md border border-white/10 focus:border-lavender-500/50 focus:ring-1 focus:ring-lavender-400/30 outline-none transition-colors resize-none text-gray-800"
