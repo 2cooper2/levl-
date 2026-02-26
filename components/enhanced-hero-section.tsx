@@ -498,7 +498,7 @@ export function EnhancedHeroSection() {
   const skillsRef = useRef<HTMLDivElement>(null)
   const progressInterval = useRef<NodeJS.Timeout>()
   const chartRef = useRef<HTMLCanvasElement>(null)
-  const chartAnimationRef = useRef<number>(0)
+  const chartAnimationRef = useRef<number>(0) // kept for compatibility
   const [showTooltip, setShowTooltip] = useState(false)
   const [tooltipContent, setTooltipContent] = useState({ title: "", description: "" })
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 })
@@ -638,129 +638,102 @@ export function EnhancedHeroSection() {
 
     ctx.scale(dpr, dpr)
 
-    let animationId: number
-    let lastDrawTime = 0
-    const targetFPS = 5 // Very low FPS - chart data changes slowly, no need for high framerate
+    // Draw chart once statically - no animation loop needed
+    try {
+      const width = rect.width
+      const height = rect.height
 
-    const drawChart = (currentTime: number) => {
-      if (currentTime - lastDrawTime < 1000 / targetFPS) {
-        animationId = requestAnimationFrame(drawChart)
-        return
+      ctx.clearRect(0, 0, width, height)
+
+      // Draw grid lines
+      ctx.beginPath()
+      for (let i = 0; i < width; i += 20) {
+        ctx.moveTo(i, 0)
+        ctx.lineTo(i, height)
       }
-      lastDrawTime = currentTime
-
-      try {
-        const width = rect.width
-        const height = rect.height
-
-        ctx.clearRect(0, 0, width, height)
-
-        // Draw grid lines
-        ctx.beginPath()
-        for (let i = 0; i < width; i += 20) {
-          ctx.moveTo(i, 0)
-          ctx.lineTo(i, height)
-        }
-        for (let i = 0; i < height; i += 20) {
-          ctx.moveTo(0, i)
-          ctx.lineTo(width, i)
-        }
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.05)"
-        ctx.stroke()
-
-        // Generate earnings data - simulating growth over time
-        const now = Date.now()
-        const points = 60
-        const data = Array.from({ length: points }, (_, i) => {
-          const x = (width / points) * i
-
-          // Current earnings line (with some fluctuation)
-          const baseY = height * 0.8 - (i / points) * height * 0.6
-          const currentY = baseY + Math.sin((now + i * 1000) / 2000) * 5
-
-          // Projected earnings with skill advancement (higher, less fluctuation)
-          const projectedY = baseY * 0.7 + Math.sin((now + i * 3000) / 6000) * 2
-
-          return { x, currentY, projectedY }
-        })
-
-        // Draw area under current earnings line
-        ctx.beginPath()
-        ctx.moveTo(0, height)
-        data.forEach((point) => {
-          ctx.lineTo(point.x, point.currentY)
-        })
-        ctx.lineTo(width, height)
-        ctx.closePath()
-        ctx.fillStyle = "rgba(76, 110, 245, 0.1)"
-        ctx.fill()
-
-        // Draw area under projected earnings line
-        ctx.beginPath()
-        data.forEach((point, i) => {
-          ctx.lineTo(point.x, point.projectedY)
-        })
-        ctx.lineTo(width, height)
-        ctx.closePath()
-        ctx.fillStyle = "rgba(121, 80, 242, 0.1)"
-        ctx.fill()
-
-        // Draw current earnings line
-        ctx.beginPath()
-        data.forEach((point, i) => {
-          if (i === 0) ctx.moveTo(point.x, point.currentY)
-          else ctx.lineTo(point.x, point.currentY)
-        })
-        ctx.strokeStyle = "#4C6EF5"
-        ctx.lineWidth = 2
-        ctx.stroke()
-
-        // Draw projected earnings line
-        ctx.beginPath()
-        data.forEach((point, i) => {
-          if (i === 0) ctx.moveTo(point.x, point.projectedY)
-          else ctx.lineTo(point.x, point.projectedY)
-        })
-        ctx.strokeStyle = "#7950F2"
-        ctx.lineWidth = 2
-        ctx.stroke()
-
-        // Add labels
-        ctx.fillStyle = "#4C6EF5"
-        ctx.font = "10px Arial"
-        ctx.fillText("Current Earnings", 10, 15)
-
-        ctx.fillStyle = "#7950F2"
-        ctx.font = "10px Arial"
-        ctx.fillText("Projected Earnings", 10, 30)
-
-        // Add data points with hover effect
-        data
-          .filter((_, i) => i % 10 === 0)
-          .forEach((point, i) => {
-            ctx.beginPath()
-            ctx.arc(point.x, point.currentY, 3, 0, Math.PI * 2)
-            ctx.fillStyle = "#4C6EF5"
-            ctx.fill()
-
-            ctx.beginPath()
-            ctx.arc(point.x, point.projectedY, 3, 0, Math.PI * 2)
-            ctx.fillStyle = "#7950F2"
-            ctx.fill()
-          })
-
-        animationId = requestAnimationFrame(drawChart)
-      } catch (error) {
-        console.error("Error drawing chart:", error)
+      for (let i = 0; i < height; i += 20) {
+        ctx.moveTo(0, i)
+        ctx.lineTo(width, i)
       }
-    }
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.05)"
+      ctx.stroke()
 
-    animationId = requestAnimationFrame(drawChart)
+      // Generate static earnings data
+      const points = 60
+      const data = Array.from({ length: points }, (_, i) => {
+        const x = (width / points) * i
+        const baseY = height * 0.8 - (i / points) * height * 0.6
+        const currentY = baseY + Math.sin(i * 0.5) * 5
+        const projectedY = baseY * 0.7 + Math.sin(i * 0.3) * 2
+        return { x, currentY, projectedY }
+      })
 
-    return () => {
-      if (animationId) {
-        cancelAnimationFrame(animationId)
-      }
+      // Draw area under current earnings line
+      ctx.beginPath()
+      ctx.moveTo(0, height)
+      data.forEach((point) => {
+        ctx.lineTo(point.x, point.currentY)
+      })
+      ctx.lineTo(width, height)
+      ctx.closePath()
+      ctx.fillStyle = "rgba(76, 110, 245, 0.1)"
+      ctx.fill()
+
+      // Draw area under projected earnings line
+      ctx.beginPath()
+      data.forEach((point) => {
+        ctx.lineTo(point.x, point.projectedY)
+      })
+      ctx.lineTo(width, height)
+      ctx.closePath()
+      ctx.fillStyle = "rgba(121, 80, 242, 0.1)"
+      ctx.fill()
+
+      // Draw current earnings line
+      ctx.beginPath()
+      data.forEach((point, i) => {
+        if (i === 0) ctx.moveTo(point.x, point.currentY)
+        else ctx.lineTo(point.x, point.currentY)
+      })
+      ctx.strokeStyle = "#4C6EF5"
+      ctx.lineWidth = 2
+      ctx.stroke()
+
+      // Draw projected earnings line
+      ctx.beginPath()
+      data.forEach((point, i) => {
+        if (i === 0) ctx.moveTo(point.x, point.projectedY)
+        else ctx.lineTo(point.x, point.projectedY)
+      })
+      ctx.strokeStyle = "#7950F2"
+      ctx.lineWidth = 2
+      ctx.stroke()
+
+      // Add labels
+      ctx.fillStyle = "#4C6EF5"
+      ctx.font = "10px Arial"
+      ctx.fillText("Current Earnings", 10, 15)
+
+      ctx.fillStyle = "#7950F2"
+      ctx.font = "10px Arial"
+      ctx.fillText("Projected Earnings", 10, 30)
+
+      // Add data points
+      data
+        .filter((_, i) => i % 10 === 0)
+        .forEach((point) => {
+          ctx.beginPath()
+          ctx.arc(point.x, point.currentY, 3, 0, Math.PI * 2)
+          ctx.fillStyle = "#4C6EF5"
+          ctx.fill()
+
+          ctx.beginPath()
+          ctx.arc(point.x, point.projectedY, 3, 0, Math.PI * 2)
+          ctx.fillStyle = "#7950F2"
+          ctx.fill()
+        })
+    } catch (error) {
+      console.error("Error drawing chart:", error)
     }
   }, [activeTab, activeSkill])
 
