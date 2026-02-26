@@ -32,67 +32,68 @@ import { useRouter } from "next/navigation"
 // Seeded review ratings per author - mix of high, mid, and low ratings
 const authorReviewData: Record<string, { rating: number; reviewCount: number }> = {
   ToolEnthusiast: { rating: 4.1, reviewCount: 23 },
-  HandyPro: { rating: 5, reviewCount: 487 },
+  HandyPro: { rating: 5, reviewCount: 187 },
   DIYQueen: { rating: 4.8, reviewCount: 94 },
   FurnitureNewbie: { rating: 2.3, reviewCount: 4 },
-  AssemblyExpert: { rating: 5, reviewCount: 612 },
+  AssemblyExpert: { rating: 5, reviewCount: 312 },
   DIYEnthusiast: { rating: 3.8, reviewCount: 17 },
   CarefulPacker: { rating: 3.2, reviewCount: 9 },
-  MoveCoordinator: { rating: 5, reviewCount: 356 },
-  AntiquesCollector: { rating: 4.6, reviewCount: 142 },
+  MoveCoordinator: { rating: 5, reviewCount: 156 },
+  AntiquesCollector: { rating: 4.6, reviewCount: 42 },
   DecorLover: { rating: 2.8, reviewCount: 6 },
-  HardwareSpecialist: { rating: 5, reviewCount: 745 },
+  HardwareSpecialist: { rating: 5, reviewCount: 245 },
   CleanFreak: { rating: 3.5, reviewCount: 11 },
-  CleaningPro: { rating: 4.9, reviewCount: 403 },
+  CleaningPro: { rating: 4.9, reviewCount: 203 },
   DIYPlumber: { rating: 4.1, reviewCount: 28 },
-  PlumbingExpert: { rating: 5, reviewCount: 889 },
+  PlumbingExpert: { rating: 5, reviewCount: 389 },
   PaintingNewbie: { rating: 1.9, reviewCount: 2 },
-  PaintContractor: { rating: 5, reviewCount: 574 },
+  PaintContractor: { rating: 5, reviewCount: 274 },
   DIYMounter: { rating: 3.4, reviewCount: 14 },
-  ContractorPro: { rating: 4.7, reviewCount: 328 },
+  ContractorPro: { rating: 4.7, reviewCount: 128 },
   SpacePlanner: { rating: 4.3, reviewCount: 31 },
-  InteriorDesigner: { rating: 5, reviewCount: 467 },
+  InteriorDesigner: { rating: 5, reviewCount: 167 },
   CableHater: { rating: 2.6, reviewCount: 5 },
-  AVInstaller: { rating: 4.9, reviewCount: 398 },
+  AVInstaller: { rating: 4.9, reviewCount: 198 },
   GreenThumb: { rating: 3.9, reviewCount: 22 },
-  LandscaperPro: { rating: 5, reviewCount: 741 },
+  LandscaperPro: { rating: 5, reviewCount: 341 },
   WFHWarrior: { rating: 4.4, reviewCount: 37 },
-  OrganizationConsultant: { rating: 4.8, reviewCount: 189 },
+  OrganizationConsultant: { rating: 4.8, reviewCount: 89 },
   ToolNewbie: { rating: 2.1, reviewCount: 3 },
   RenovationRookie: { rating: 3.6, reviewCount: 8 },
   DogOwner: { rating: 4.2, reviewCount: 19 },
   You: { rating: 4.5, reviewCount: 12 },
-  PowerToolPro: { rating: 5, reviewCount: 523 },
-  DrillMaster: { rating: 4.6, reviewCount: 214 },
-  IKEAHacker: { rating: 4.9, reviewCount: 371 },
-  FlatpackKing: { rating: 3.1, reviewCount: 15 },
-  MovingDay: { rating: 4.4, reviewCount: 88 },
-  BubbleWrapFan: { rating: 2.9, reviewCount: 7 },
-  WallMountKing: { rating: 5, reviewCount: 634 },
-  DrywallDoctor: { rating: 4.3, reviewCount: 176 },
-  ShowerGuru: { rating: 4.7, reviewCount: 245 },
-  SparkleQueen: { rating: 3.4, reviewCount: 19 },
-  PipeWrench: { rating: 5, reviewCount: 512 },
-  LeakFixer: { rating: 4.2, reviewCount: 67 },
-  BrushStroke: { rating: 4.8, reviewCount: 298 },
-  ColorWheel: { rating: 3.7, reviewCount: 24 },
-  MasonryMaster: { rating: 5, reviewCount: 451 },
-  ConcreteKid: { rating: 2.5, reviewCount: 8 },
-  RoomPlanner: { rating: 4.5, reviewCount: 112 },
-  MeasureTwice: { rating: 4.1, reviewCount: 53 },
-  WireNinja: { rating: 5, reviewCount: 387 },
-  TechSetup: { rating: 3.8, reviewCount: 41 },
-  TurfMaster: { rating: 4.9, reviewCount: 503 },
-  YardWork101: { rating: 3.3, reviewCount: 12 },
-  DeskSetup: { rating: 4.6, reviewCount: 156 },
-  ProductivityGuru: { rating: 5, reviewCount: 421 },
+  MilwaukeeFan: { rating: 5, reviewCount: 421 },
+  BudgetBuilder: { rating: 3.4, reviewCount: 15 },
+  IKEAVeteran: { rating: 4.9, reviewCount: 276 },
+  FirstTimer: { rating: 2.1, reviewCount: 3 },
+  MovingDay: { rating: 4.5, reviewCount: 63 },
+  BubbleWrapKing: { rating: 5, reviewCount: 184 },
+  WallMaster: { rating: 4.8, reviewCount: 152 },
+  HomeRenovator: { rating: 5, reviewCount: 508 },
+  ShowerGuru: { rating: 4.3, reviewCount: 47 },
+  SparkleQueen: { rating: 3.1, reviewCount: 12 },
+  PipeWizard: { rating: 5, reviewCount: 467 },
+  WeekendWarrior: { rating: 4.2, reviewCount: 38 },
+  EdgeMaster: { rating: 5, reviewCount: 329 },
+  RollerPro: { rating: 4.6, reviewCount: 91 },
+  DrillSergeant: { rating: 5, reviewCount: 553 },
+  MasonryMike: { rating: 4.4, reviewCount: 67 },
+  RoomPlanner: { rating: 4.7, reviewCount: 112 },
+  TinySpaceLiving: { rating: 3.9, reviewCount: 29 },
+  TechMountPro: { rating: 5, reviewCount: 372 },
+  NeatFreak: { rating: 4.1, reviewCount: 55 },
+  TurfBuilder: { rating: 5, reviewCount: 289 },
+  ShadeLawnGuy: { rating: 3.7, reviewCount: 18 },
+  DeskMinimalist: { rating: 4.8, reviewCount: 143 },
+  ProductivityNerd: { rating: 3.5, reviewCount: 21 },
 }
 
 function getAuthorReview(name: string) {
   if (authorReviewData[name]) return authorReviewData[name]
+  // Fallback: generate from name hash for any new/unknown authors
   let hash = 0
   for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash)
-  const rating = Math.round(((Math.abs(hash) % 41) / 10 + 1) * 10) / 10
+  const rating = Math.round(((Math.abs(hash) % 41) / 10 + 1) * 10) / 10 // 1.0 - 5.0
   const reviewCount = Math.abs(hash) % 300 + 1
   return { rating: Math.min(rating, 5), reviewCount }
 }
@@ -101,60 +102,58 @@ function ReviewStarBadge({ authorName }: { authorName: string }) {
   const { rating, reviewCount } = getAuthorReview(authorName)
   const displayRating = rating === 5 ? "5" : rating.toFixed(1)
 
-  // Color tiers based on rating
-  const starFill = rating >= 4.5 ? "#7C3AED" : rating >= 3.5 ? "#8B5CF6" : rating >= 2.5 ? "#A78BFA" : "#C4B5FD"
-  const starStroke = rating >= 4.5 ? "#6D28D9" : rating >= 3.5 ? "#7C3AED" : rating >= 2.5 ? "#8B5CF6" : "#A78BFA"
-  const glowColor = rating >= 4.5 ? "rgba(124, 58, 237, 0.3)" : "rgba(139, 92, 246, 0.15)"
-
   return (
-    <span className="inline-flex items-center gap-1 ml-2">
-      {/* Star with rating inside - larger, with depth */}
-      <span
-        className="relative inline-flex items-center justify-center shrink-0"
-        style={{
-          width: 26,
-          height: 26,
-          filter: `drop-shadow(0 1px 2px ${glowColor})`,
-        }}
-      >
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          {/* Shadow layer */}
+    <span className="inline-flex items-center gap-1.5 ml-2">
+      {/* Star with rating inside - larger with depth */}
+      <span className="relative inline-flex items-center justify-center" style={{ width: 26, height: 26 }}>
+        {/* Shadow/glow layer */}
+        <svg
+          width="26"
+          height="26"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="absolute"
+          style={{ filter: "blur(2px)", opacity: 0.35 }}
+        >
           <path
             d="M12 2L14.9 8.6L22 9.3L16.8 14L18.2 21L12 17.5L5.8 21L7.2 14L2 9.3L9.1 8.6L12 2Z"
-            fill="rgba(0,0,0,0.1)"
-            transform="translate(0.5, 0.5)"
-          />
-          {/* Main star fill */}
-          <path
-            d="M12 2L14.9 8.6L22 9.3L16.8 14L18.2 21L12 17.5L5.8 21L7.2 14L2 9.3L9.1 8.6L12 2Z"
-            fill={starFill}
-            stroke={starStroke}
-            strokeWidth="0.75"
-            strokeLinejoin="round"
-          />
-          {/* Inner highlight for 3D depth */}
-          <path
-            d="M12 4.5L14.1 9.2L19.2 9.7L15.4 13.1L16.5 18.1L12 15.5L7.5 18.1L8.6 13.1L4.8 9.7L9.9 9.2L12 4.5Z"
-            fill="rgba(255,255,255,0.15)"
+            fill="#7C3AED"
           />
         </svg>
+        {/* Main star */}
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="relative">
+          <defs>
+            <linearGradient id={`starGrad-${authorName}`} x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#8B5CF6" />
+              <stop offset="50%" stopColor="#7C3AED" />
+              <stop offset="100%" stopColor="#6D28D9" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M12 2L14.9 8.6L22 9.3L16.8 14L18.2 21L12 17.5L5.8 21L7.2 14L2 9.3L9.1 8.6L12 2Z"
+            fill={`url(#starGrad-${authorName})`}
+            stroke="#6D28D9"
+            strokeWidth="0.5"
+            strokeLinejoin="round"
+          />
+          {/* Inner highlight for depth */}
+          <path
+            d="M12 4.5L14.1 9.2L19.2 9.7L15.4 13.1L16.4 18.2L12 15.7L7.6 18.2L8.6 13.1L4.8 9.7L9.9 9.2L12 4.5Z"
+            fill="rgba(255,255,255,0.12)"
+          />
+        </svg>
+        {/* Rating number */}
         <span
-          className="absolute inset-0 flex items-center justify-center text-white font-extrabold leading-none"
-          style={{
-            fontSize: rating === 5 ? 9.5 : 8,
-            textShadow: "0 1px 1px rgba(0,0,0,0.25)",
-            paddingTop: 1,
-          }}
+          className="absolute inset-0 flex items-center justify-center font-extrabold text-white drop-shadow-sm"
+          style={{ fontSize: rating === 5 ? 10 : 8.5, lineHeight: 1, paddingTop: 1, letterSpacing: "-0.02em" }}
         >
           {displayRating}
         </span>
       </span>
       {/* Review count */}
-      <span
-        className="text-xs font-bold leading-none"
-        style={{ color: starFill }}
-      >
-        {reviewCount}
+      <span className="text-xs font-bold" style={{ color: "#7C3AED" }}>
+        {reviewCount.toLocaleString()}
       </span>
     </span>
   )
@@ -188,25 +187,25 @@ const forumTopics = [
         likes: 5,
       },
       {
-        author: "PowerToolPro",
-        time: "25 minutes ago",
+        author: "MilwaukeeFan",
+        time: "45 minutes ago",
         content:
-          "Can't go wrong with the Milwaukee M18. It's slightly above budget at $160 but the brushless motor makes it last 3x longer. I've used mine on over 200 jobs and it still runs like new.",
-        likes: 12,
+          "Milwaukee M18 Fuel is hands down the best in that range. More torque than DeWalt, and the brushless motor means it'll last you a decade. I've used mine on everything from drywall to deck screws.",
+        likes: 11,
       },
       {
-        author: "DrillMaster",
+        author: "BudgetBuilder",
+        time: "20 minutes ago",
+        content:
+          "Honestly, for under $150 the Ryobi ONE+ is underrated. Not as powerful as the big brands, but the battery works with 200+ tools in their system. Great starter ecosystem.",
+        likes: 3,
+      },
+      {
+        author: "ContractorPro",
         time: "15 minutes ago",
         content:
-          "For under $150 the Ryobi ONE+ HP is actually really underrated. The brushless version has serious torque and the battery system is compatible with 300+ Ryobi tools if you want to expand later.",
-        likes: 4,
-      },
-      {
-        author: "ToolNewbie",
-        time: "10 minutes ago",
-        content:
-          "I just bought a cheap one from Harbor Freight and it works fine for hanging shelves. Do you really need to spend $150?",
-        likes: 1,
+          "Whatever you pick, make sure you get one with a brushless motor. They run cooler, last longer, and deliver more consistent power. The extra $20-30 is always worth it.",
+        likes: 6,
       },
     ],
   },
@@ -236,18 +235,25 @@ const forumTopics = [
         likes: 2,
       },
       {
-        author: "IKEAHacker",
+        author: "IKEAVeteran",
         time: "2 days ago",
         content:
-          "Pro tip: lay out ALL the pieces first and check the parts list before you even start. I've assembled over 300 IKEA pieces and the #1 mistake people make is skipping a step then having to disassemble. Also, wood glue on the dowels makes everything way sturdier.",
-        likes: 15,
+          "I've assembled over 50 IKEA pieces. My biggest tip: lay out ALL the parts and check the inventory list first. Nothing worse than getting halfway through and finding a missing dowel. Also, wood glue on cam locks makes them rock solid.",
+        likes: 14,
       },
       {
-        author: "FlatpackKing",
+        author: "FirstTimer",
         time: "2 days ago",
         content:
-          "Honestly the instructions are usually fine if you just take your time. I always put on a podcast and don't rush it. The KALLAX is the easiest to start with.",
-        likes: 3,
+          "Just did my first KALLAX and it took me 3 hours lol. Wish I'd read this thread first. The electric screwdriver tip is gold.",
+        likes: 1,
+      },
+      {
+        author: "HomeRenovator",
+        time: "1 day ago",
+        content:
+          "Pro tip: build everything on a large piece of cardboard. Protects your floors and makes it easy to slide the finished piece into position. Also invest in a right-angle drill attachment for tight spots.",
+        likes: 9,
       },
     ],
   },
@@ -280,15 +286,22 @@ const forumTopics = [
         author: "MovingDay",
         time: "6 days ago",
         content:
-          "Packing peanuts are messy and shift during transport. Use crumpled packing paper tightly around each item and fill every gap in the box. If the box rattles when you shake it, it needs more padding.",
-        likes: 6,
+          "Packing peanuts are messy and shift around. Use crumpled packing paper to fill voids instead - it stays in place better. For plates, stack vertically like records, not flat. They're much stronger on their edge.",
+        likes: 7,
       },
       {
-        author: "BubbleWrapFan",
+        author: "BubbleWrapKing",
         time: "5 days ago",
         content:
-          "I just use towels and blankets I already own. Saves money and they cushion things pretty well. Worked fine for my last move.",
-        likes: 2,
+          "Forget regular bubble wrap - get the self-sealing bubble pouches. They save so much time. I moved 200+ wine glasses across the country with zero breaks using them plus cell divider boxes.",
+        likes: 12,
+      },
+      {
+        author: "FirstTimer",
+        time: "4 days ago",
+        content:
+          "Would regular towels and t-shirts work for wrapping dishes? Trying to save money on packing materials for my first move.",
+        likes: 0,
       },
     ],
   },
@@ -311,25 +324,25 @@ const forumTopics = [
         likes: 3,
       },
       {
-        author: "WallMountKing",
-        time: "5 days ago",
-        content:
-          "Always try to hit at least one stud if possible - even a single stud anchor point plus one toggle bolt is way more secure than two toggle bolts alone. Use a stud finder with deep scan mode. For a 40lb mirror, I'd use a French cleat system mounted to the stud.",
-        likes: 11,
-      },
-      {
-        author: "DrywallDoctor",
+        author: "WallMaster",
         time: "4 days ago",
         content:
-          "The Hillman WallDog screws are also decent for medium-weight items and don't require pre-drilling. But for 40lbs, definitely go toggle bolts or find a stud. I've seen too many mirrors crash down from cheap plastic anchors.",
-        likes: 7,
+          "For 40 lbs you definitely want snap toggles, not plastic anchors. I've seen too many mirrors crash down from cheap drywall anchors. Also use a level and measure twice - a crooked heavy mirror is a pain to reposition.",
+        likes: 8,
       },
       {
-        author: "FurnitureNewbie",
+        author: "HomeRenovator",
         time: "4 days ago",
         content:
-          "I used command strips for my mirror and it fell off after a week. Don't be like me lol. Toggle bolts are the way to go.",
-        likes: 4,
+          "If you can reach even one stud, use a French cleat system. One side on the stud, the other side with toggle bolts. Distributes weight evenly and makes it easy to level. I hang all my heavy pieces this way.",
+        likes: 15,
+      },
+      {
+        author: "BudgetBuilder",
+        time: "3 days ago",
+        content:
+          "I used the 3M Command strips rated for 16lbs each - used 4 of them for a 30lb mirror and it's been fine for 6 months. Probably not ideal for 40lbs though.",
+        likes: 2,
       },
     ],
   },
@@ -355,15 +368,22 @@ const forumTopics = [
         author: "ShowerGuru",
         time: "2 days ago",
         content:
-          "Bar Keepers Friend makes a spray specifically for glass. It cuts through hard water stains like nothing else. Apply, wait 5 min, wipe off. Then apply Rain-X to the clean glass - water will bead right off and stains build up way slower.",
+          "Bar Keeper's Friend makes a spray specifically for glass shower doors. It cuts through hard water like nothing else. Apply, wait 5 minutes, wipe. For prevention, apply Rain-X to your shower glass - water just beads off.",
         likes: 9,
       },
       {
         author: "SparkleQueen",
         time: "1 day ago",
         content:
-          "I tried the vinegar thing and it worked okay but the smell was horrible. Honestly I just use a Magic Eraser now and it does a decent enough job.",
-        likes: 2,
+          "I tried the vinegar thing and it didn't really work for me. Ended up buying a magic eraser and that was way easier honestly. Not sure if it scratches glass though?",
+        likes: 1,
+      },
+      {
+        author: "HomeRenovator",
+        time: "1 day ago",
+        content:
+          "Magic erasers are fine on glass but they wear out fast on textured surfaces. For heavy mineral buildup, get a pumice stone specifically made for glass - they work incredibly well and won't scratch tempered glass.",
+        likes: 7,
       },
     ],
   },
@@ -386,18 +406,25 @@ const forumTopics = [
         likes: 7,
       },
       {
-        author: "PipeWrench",
+        author: "PipeWizard",
         time: "1 day ago",
         content:
-          "Don't forget a headlamp - you'll be working under sinks in dark cabinets. Also get a tube of plumber's putty and silicone caulk. For drain clogs, a hand auger is 10x better than chemical drain cleaners which can damage pipes.",
-        likes: 10,
+          "Don't forget a headlamp and a bucket! You'll be working in dark cabinets and water WILL spill. Also get a tube of plumber's grease - makes reassembly of faucet cartridges so much easier.",
+        likes: 11,
       },
       {
-        author: "LeakFixer",
+        author: "WeekendWarrior",
         time: "20 hours ago",
         content:
-          "YouTube is your best friend for plumbing. I learned to replace my entire kitchen faucet from a 15-minute video. Just make sure you turn off the water supply first - learned that the hard way.",
-        likes: 5,
+          "I'd add a toilet auger to that list. Different from a regular drain snake and specifically designed for toilet clogs. Saved me a $200 plumber visit last month.",
+        likes: 4,
+      },
+      {
+        author: "BudgetBuilder",
+        time: "18 hours ago",
+        content:
+          "YouTube is your best friend for plumbing. Watch the repair video BEFORE you start taking things apart. Ask me how I know lol.",
+        likes: 6,
       },
     ],
   },
@@ -420,25 +447,25 @@ const forumTopics = [
         likes: 12,
       },
       {
-        author: "BrushStroke",
+        author: "EdgeMaster",
         time: "3 days ago",
         content:
-          "Frog Tape is way better than regular blue tape if you do want to use tape - it has a paint-block technology that prevents bleeding. But if you want to go freehand, the Purdy XL Glide angled brush is the industry standard. Dip, tap, don't wipe.",
-        likes: 8,
+          "The Wooster Shortcut is the best brush for cutting in, period. The angled handle gives you way more control. Also, slightly dampen the brush before loading paint - it flows much smoother along the edge.",
+        likes: 18,
       },
       {
-        author: "ColorWheel",
+        author: "RollerPro",
         time: "2 days ago",
         content:
-          "I tried cutting in freehand and it looked terrible. Some of us just don't have steady hands. I went back to tape and Frog Tape works way better than the blue stuff.",
+          "If you absolutely can't freehand, try the Accubrush edge painter. It's a roller with a shield that runs along the ceiling line. Not perfect, but way faster than tape for straight edges.",
+        likes: 5,
+      },
+      {
+        author: "FirstTimer",
+        time: "2 days ago",
+        content:
+          "I've been practicing on cardboard boxes like someone suggested and it really does help. My lines are getting much cleaner after just 30 minutes of practice.",
         likes: 3,
-      },
-      {
-        author: "PaintingNewbie",
-        time: "2 days ago",
-        content:
-          "Thanks everyone! I'm going to try the angled brush technique on a closet first before I tackle the living room. Practice wall here I come.",
-        likes: 2,
       },
     ],
   },
@@ -461,18 +488,25 @@ const forumTopics = [
         likes: 4,
       },
       {
-        author: "MasonryMaster",
-        time: "4 days ago",
+        author: "DrillSergeant",
+        time: "3 days ago",
         content:
-          "SDS-plus bits in a rotary hammer are the gold standard for concrete. Don't even bother with regular drill bits - you'll burn through them and overheat your drill. Bosch and Hilti make the best SDS bits. Start with a smaller pilot hole then step up to your final size.",
+          "SDS+ rotary hammer is the way to go for concrete. Night and day difference from a regular hammer drill. You can rent one from Home Depot for about $40/day if you don't want to buy. Bosch and Hilti make the best ones.",
         likes: 13,
       },
       {
-        author: "ConcreteKid",
+        author: "MasonryMike",
         time: "3 days ago",
         content:
-          "I tried using a regular drill with masonry bits and it took forever. Ended up renting a hammer drill from Home Depot for $40/day and it was so much easier.",
-        likes: 3,
+          "Important tip: use the right speed. Slower RPM with more hammer action for concrete. Fast RPM burns out bits. Also, pull the bit out periodically to clear dust from the hole - it reduces friction and heat.",
+        likes: 8,
+      },
+      {
+        author: "WeekendWarrior",
+        time: "2 days ago",
+        content:
+          "Learned the hard way that you need a different anchor for concrete vs. drywall. Tapcon screws are great for concrete - they cut their own threads. Just make sure you drill the pilot hole the exact size specified.",
+        likes: 5,
       },
     ],
   },
@@ -498,15 +532,22 @@ const forumTopics = [
         author: "RoomPlanner",
         time: "2 days ago",
         content:
-          "The RoomSketcher app is amazing for this. You input your room dimensions and can drag furniture to scale. Saved me from buying a couch that would have blocked my hallway. It's free for basic use.",
-        likes: 6,
+          "The free app 'MagicPlan' lets you scan your room with your phone camera and creates a floor plan automatically. Then you can drag furniture templates into it. Saved me from buying a couch that was 4 inches too wide.",
+        likes: 10,
       },
       {
-        author: "MeasureTwice",
+        author: "TinySpaceLiving",
         time: "1 day ago",
         content:
-          "Always measure the diagonal of doorways and stairwells too, not just width and height. I once couldn't get a mattress up my stairs because of a tight turn, even though the numbers on paper looked fine.",
+          "Biggest mistake people make is not accounting for door swing and drawer pull-out space. That 36\" dresser needs 36\" of clearance in front of it. Use cardboard cutouts on the floor to simulate furniture before buying.",
         likes: 4,
+      },
+      {
+        author: "MovingDay",
+        time: "1 day ago",
+        content:
+          "Always measure the diagonal of doorways too, not just width and height. That's what determines if your sofa can actually get through. Had to return a beautiful sectional because of a 29\" doorframe.",
+        likes: 7,
       },
     ],
   },
@@ -529,18 +570,25 @@ const forumTopics = [
         likes: 6,
       },
       {
-        author: "WireNinja",
+        author: "TechMountPro",
         time: "5 days ago",
         content:
-          "The DataComm recessed media plate kit is another great option. Use a fish tape or glow rod to pull cables through the wall. Remember: power cables MUST go through a proper in-wall rated power kit - you can't just run a regular extension cord through the wall, it's a fire code violation.",
+          "One thing people miss: you can NOT run power cables through walls without a proper power bridge kit. It's an electrical code violation. HDMI and speaker wire are fine, but power needs a code-compliant solution like the PowerBridge TWO-CK.",
         likes: 14,
       },
       {
-        author: "TechSetup",
+        author: "NeatFreak",
         time: "5 days ago",
         content:
-          "If you don't want to go in-wall, the SimpleCord cable concealer channels are a decent surface-mount alternative. You can paint them to match your wall. Not as clean as in-wall but way easier to install.",
-        likes: 3,
+          "If you don't want to cut into walls, the SimpleCord cable cover kit looks surprisingly clean. Paint it to match your wall color. My wife couldn't even tell which wall had the cables.",
+        likes: 4,
+      },
+      {
+        author: "HomeRenovator",
+        time: "4 days ago",
+        content:
+          "Pro tip: run a pull string through the wall first using a fish tape. Then attach all your cables to it and pull them through at once. Saves you from fighting each cable through individually.",
+        likes: 9,
       },
     ],
   },
@@ -563,18 +611,25 @@ const forumTopics = [
         likes: 6,
       },
       {
-        author: "TurfMaster",
+        author: "TurfBuilder",
         time: "4 days ago",
         content:
-          "In the Northeast, I'd also consider overseeding with perennial ryegrass for quick establishment, then the fescue will fill in over time. Make sure you aerate first and top-dress with compost. Seed-to-soil contact is everything. Water lightly twice a day until germination.",
-        likes: 11,
+          "In the Northeast, I've had great results with Pennington Dense Shade mix. The key is also improving soil drainage in shady areas - leaves tend to accumulate and create acidic, compacted soil. Top dress with compost before seeding.",
+        likes: 10,
       },
       {
-        author: "YardWork101",
-        time: "4 days ago",
+        author: "ShadeLawnGuy",
+        time: "3 days ago",
         content:
-          "Have you considered just doing a ground cover like clover instead? It stays green in shade, doesn't need mowing, and is way less maintenance than grass.",
+          "Also consider how much foot traffic the area gets. Fine fescues don't handle heavy traffic well. If kids play there, you might want to look at shade-tolerant St. Augustine or just go with a ground cover like clover.",
         likes: 3,
+      },
+      {
+        author: "WeekendWarrior",
+        time: "3 days ago",
+        content:
+          "I gave up on grass in my heavily shaded area and planted hostas and ferns instead. Looks way better than patchy grass ever did. Sometimes the answer isn't a different grass seed - it's embracing the shade.",
+        likes: 8,
       },
     ],
   },
@@ -597,17 +652,24 @@ const forumTopics = [
         likes: 7,
       },
       {
-        author: "DeskSetup",
+        author: "DeskMinimalist",
         time: "2 days ago",
         content:
-          "Under-desk cable trays are a must - they instantly make your space look cleaner. I also recommend a clamp-on desk shelf for your monitor to free up the actual desk surface. IKEA ALEX drawers fit perfectly in a small space too.",
-        likes: 5,
+          "Magnetic cable clips on the side of your desk keep charging cables tidy. I also use a under-desk drawer (ALEX from IKEA) and a headphone hook. My 8x8 office looks twice the size now because the desk is always clear.",
+        likes: 11,
       },
       {
-        author: "ProductivityGuru",
+        author: "ProductivityNerd",
         time: "2 days ago",
         content:
-          "Vertical space is your best friend in an 8x8. Wall-mounted fold-down desk + wall shelves above + good lighting. I transformed a closet into a home office using this approach. Also get a small filing cabinet on wheels that slides under the desk.",
+          "Vertical file organizers on the wall save a ton of desk space. Also, get a power strip with USB ports that mounts under the desk. Keeps everything off the floor and out of sight.",
+        likes: 3,
+      },
+      {
+        author: "TinySpaceLiving",
+        time: "1 day ago",
+        content:
+          "A fold-down wall desk changed my life. When I'm done working, I fold it up and my office becomes a guest room. IKEA NORBERG is $50 and holds a laptop + monitor easily.",
         likes: 9,
       },
     ],
@@ -694,29 +756,7 @@ export function ForumTab() {
           tags: ["tools", "beginner", "recommendations"],
           preview:
             "Setting up my first home workshop. What are the essential power tools I should invest in first? Looking for quality but budget-friendly options.",
-          responses: [
-            {
-              author: "PowerToolPro",
-              time: "5 days ago",
-              content:
-                "Start with a drill/driver, circular saw, and orbital sander. Those three will cover 80% of projects. Ryobi ONE+ system is great for beginners because the batteries are interchangeable across all their tools.",
-              likes: 9,
-            },
-            {
-              author: "HandyPro",
-              time: "5 days ago",
-              content:
-                "Add a jigsaw and a good set of clamps to that list. Clamps are the most underrated tool in any workshop. You can never have too many.",
-              likes: 6,
-            },
-            {
-              author: "ContractorPro",
-              time: "4 days ago",
-              content:
-                "Don't overlook a quality workbench and good lighting. A stable surface and being able to see what you're doing makes everything easier and safer.",
-              likes: 4,
-            },
-          ],
+          responses: [],
         },
         {
           id: topics.length + 2,
@@ -728,29 +768,7 @@ export function ForumTab() {
           tags: ["wallpaper", "removal", "walls"],
           preview:
             "Bought a house with outdated wallpaper in several rooms. What's the most effective method to remove it without damaging the drywall underneath?",
-          responses: [
-            {
-              author: "PaintContractor",
-              time: "3 days ago",
-              content:
-                "Score the wallpaper with a Paper Tiger tool, then spray with a 50/50 vinegar-water solution. Let it soak 15 minutes, then use a wide putty knife at a low angle. Work in sections. A wallpaper steamer works even better for stubborn adhesive.",
-              likes: 11,
-            },
-            {
-              author: "BrushStroke",
-              time: "2 days ago",
-              content:
-                "DIF wallpaper remover concentrate is the best product I've used. Mix it in a pump sprayer and be generous. The key is patience - let the solution do the work instead of forcing it with the scraper.",
-              likes: 7,
-            },
-            {
-              author: "DecorLover",
-              time: "2 days ago",
-              content:
-                "I used a fabric softener and hot water mix and it worked surprisingly well! Just be careful not to gouge the drywall with your scraper.",
-              likes: 3,
-            },
-          ],
+          responses: [],
         },
         {
           id: topics.length + 3,
@@ -762,29 +780,7 @@ export function ForumTab() {
           tags: ["cleaning", "vacuum", "pets"],
           preview:
             "Have two shedding dogs and hardwood floors with area rugs. Need a powerful cordless vacuum specifically good for pet hair. Budget around $300.",
-          responses: [
-            {
-              author: "CleaningPro",
-              time: "4 days ago",
-              content:
-                "Dyson V12 Detect Slim is excellent for pet hair and within your budget. The laser dust detection is amazing for seeing pet hair on hardwood. Battery lasts about 60 minutes on low which is plenty for most homes.",
-              likes: 8,
-            },
-            {
-              author: "SparkleQueen",
-              time: "3 days ago",
-              content:
-                "Samsung Jet 75 Pet is a solid alternative to Dyson at a lower price. It comes with a pet hair turbo brush and the dustbin is easy to empty without touching the gross stuff.",
-              likes: 4,
-            },
-            {
-              author: "CleanFreak",
-              time: "3 days ago",
-              content:
-                "Get a robot vacuum too if you can - running a Roomba daily between your main vacuuming sessions makes a huge difference with shedding dogs. The iRobot j7+ handles pet hair really well.",
-              likes: 6,
-            },
-          ],
+          responses: [],
         },
       ]
       setTopics([...topics, ...newTopics])
@@ -1625,10 +1621,7 @@ ${viewMode === "card" ? "min-h-[240px]" : "min-h-[120px]"}`}
                       <div className="space-y-4 mt-2 overflow-visible">
                         {topic.responses && topic.responses.length > 0 ? (
                           <>
-                            {(expandedComments[topic.id]
-                              ? topic.responses
-                              : topic.responses.slice(0, 3)
-                            ).map((response, index) => (
+                            {(expandedComments[topic.id] ? topic.responses : topic.responses.slice(0, 3)).map((response, index) => (
                               <div
                                 key={index}
                                 className="bg-white/80 rounded-lg p-4 shadow-sm border border-lavender-100/50"
@@ -1683,7 +1676,7 @@ ${viewMode === "card" ? "min-h-[240px]" : "min-h-[120px]"}`}
                             ))}
                             {topic.responses.length > 3 && !expandedComments[topic.id] && (
                               <button
-                                className="w-full py-2.5 text-sm font-medium text-lavender-600 hover:text-lavender-700 bg-lavender-50/80 hover:bg-lavender-100/80 rounded-lg border border-lavender-200/50 transition-all duration-200 flex items-center justify-center gap-1.5"
+                                className="w-full py-2.5 px-4 rounded-lg border border-lavender-200/60 bg-lavender-50/50 text-sm font-medium text-lavender-700 hover:bg-lavender-100/60 hover:border-lavender-300/60 transition-colors duration-200 flex items-center justify-center gap-2"
                                 onClick={(e) => {
                                   e.stopPropagation()
                                   setExpandedComments((prev) => ({ ...prev, [topic.id]: true }))
@@ -1693,9 +1686,9 @@ ${viewMode === "card" ? "min-h-[240px]" : "min-h-[120px]"}`}
                                 Show {topic.responses.length - 3} more {topic.responses.length - 3 === 1 ? "reply" : "replies"}
                               </button>
                             )}
-                            {topic.responses.length > 3 && expandedComments[topic.id] && (
+                            {expandedComments[topic.id] && topic.responses.length > 3 && (
                               <button
-                                className="w-full py-2.5 text-sm font-medium text-gray-500 hover:text-gray-600 bg-gray-50/80 hover:bg-gray-100/80 rounded-lg border border-gray-200/50 transition-all duration-200 flex items-center justify-center gap-1.5"
+                                className="w-full py-2.5 px-4 rounded-lg border border-lavender-200/60 bg-lavender-50/50 text-sm font-medium text-lavender-700 hover:bg-lavender-100/60 hover:border-lavender-300/60 transition-colors duration-200 flex items-center justify-center gap-2"
                                 onClick={(e) => {
                                   e.stopPropagation()
                                   setExpandedComments((prev) => ({ ...prev, [topic.id]: false }))
