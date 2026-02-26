@@ -29,6 +29,83 @@ import {
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 
+// Seeded review ratings per author - mix of high, mid, and low ratings
+const authorReviewData: Record<string, { rating: number; reviewCount: number }> = {
+  ToolEnthusiast: { rating: 4.1, reviewCount: 23 },
+  HandyPro: { rating: 5, reviewCount: 187 },
+  DIYQueen: { rating: 4.8, reviewCount: 94 },
+  FurnitureNewbie: { rating: 2.3, reviewCount: 4 },
+  AssemblyExpert: { rating: 5, reviewCount: 312 },
+  DIYEnthusiast: { rating: 3.8, reviewCount: 17 },
+  CarefulPacker: { rating: 3.2, reviewCount: 9 },
+  MoveCoordinator: { rating: 5, reviewCount: 156 },
+  AntiquesCollector: { rating: 4.6, reviewCount: 42 },
+  DecorLover: { rating: 2.8, reviewCount: 6 },
+  HardwareSpecialist: { rating: 5, reviewCount: 245 },
+  CleanFreak: { rating: 3.5, reviewCount: 11 },
+  CleaningPro: { rating: 4.9, reviewCount: 203 },
+  DIYPlumber: { rating: 4.1, reviewCount: 28 },
+  PlumbingExpert: { rating: 5, reviewCount: 389 },
+  PaintingNewbie: { rating: 1.9, reviewCount: 2 },
+  PaintContractor: { rating: 5, reviewCount: 274 },
+  DIYMounter: { rating: 3.4, reviewCount: 14 },
+  ContractorPro: { rating: 4.7, reviewCount: 128 },
+  SpacePlanner: { rating: 4.3, reviewCount: 31 },
+  InteriorDesigner: { rating: 5, reviewCount: 167 },
+  CableHater: { rating: 2.6, reviewCount: 5 },
+  AVInstaller: { rating: 4.9, reviewCount: 198 },
+  GreenThumb: { rating: 3.9, reviewCount: 22 },
+  LandscaperPro: { rating: 5, reviewCount: 341 },
+  WFHWarrior: { rating: 4.4, reviewCount: 37 },
+  OrganizationConsultant: { rating: 4.8, reviewCount: 89 },
+  ToolNewbie: { rating: 2.1, reviewCount: 3 },
+  RenovationRookie: { rating: 3.6, reviewCount: 8 },
+  DogOwner: { rating: 4.2, reviewCount: 19 },
+  You: { rating: 4.5, reviewCount: 12 },
+}
+
+function getAuthorReview(name: string) {
+  if (authorReviewData[name]) return authorReviewData[name]
+  // Fallback: generate from name hash for any new/unknown authors
+  let hash = 0
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash)
+  const rating = Math.round(((Math.abs(hash) % 41) / 10 + 1) * 10) / 10 // 1.0 - 5.0
+  const reviewCount = Math.abs(hash) % 300 + 1
+  return { rating: Math.min(rating, 5), reviewCount }
+}
+
+function ReviewStarBadge({ authorName }: { authorName: string }) {
+  const { rating, reviewCount } = getAuthorReview(authorName)
+  const displayRating = rating === 5 ? "5" : rating.toFixed(1)
+
+  return (
+    <span className="inline-flex items-center gap-1 ml-1.5">
+      {/* Star with rating number inside */}
+      <span className="relative inline-flex items-center justify-center" style={{ width: 20, height: 20 }}>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M12 2L14.9 8.6L22 9.3L16.8 14L18.2 21L12 17.5L5.8 21L7.2 14L2 9.3L9.1 8.6L12 2Z"
+            fill="#7C3AED"
+            stroke="#7C3AED"
+            strokeWidth="1"
+            strokeLinejoin="round"
+          />
+        </svg>
+        <span
+          className="absolute inset-0 flex items-center justify-center text-white font-bold"
+          style={{ fontSize: rating === 5 ? 7 : 6, lineHeight: 1, paddingTop: 1 }}
+        >
+          {displayRating}
+        </span>
+      </span>
+      {/* Review count */}
+      <span className="text-xs font-semibold" style={{ color: "#7C3AED" }}>
+        ({reviewCount})
+      </span>
+    </span>
+  )
+}
+
 // Define forumTopics
 const forumTopics = [
   {
@@ -1201,7 +1278,10 @@ ${viewMode === "card" ? "min-h-[240px]" : "min-h-[120px]"}`}
                               {topic.author.charAt(0)}
                             </div>
                             <div>
-                              <div className="font-medium text-gray-800">{topic.author}</div>
+                              <div className="flex items-center font-medium text-gray-800">
+                                {topic.author}
+                                <ReviewStarBadge authorName={topic.author} />
+                              </div>
                               <div className="text-xs text-gray-500">Member since 2023</div>
                               <div className="flex items-center mt-2 text-xs text-gray-600">
                                 <div className="flex items-center bg-lavender-50 px-2 py-1 rounded-full">
@@ -1221,7 +1301,10 @@ ${viewMode === "card" ? "min-h-[240px]" : "min-h-[120px]"}`}
                       )}
                     </div>
                     <div className="ml-2">
-                      <span className="text-sm font-medium text-gray-700">{topic.author}</span>
+                      <div className="flex items-center">
+                        <span className="text-sm font-medium text-gray-700">{topic.author}</span>
+                        <ReviewStarBadge authorName={topic.author} />
+                      </div>
                       <div className="text-xs text-gray-500">Active contributor</div>
                     </div>
                   </div>
@@ -1243,6 +1326,7 @@ ${viewMode === "card" ? "min-h-[240px]" : "min-h-[120px]"}`}
                                       {response.author.charAt(0)}
                                     </div>
                                     <span className="text-sm font-medium text-gray-700">{response.author}</span>
+                                    <ReviewStarBadge authorName={response.author} />
                                   </div>
                                   <div className="text-xs text-gray-500 mt-1">{response.time}</div>
                                   <div className="mt-2 text-gray-600">{response.content}</div>
