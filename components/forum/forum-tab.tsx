@@ -103,50 +103,59 @@ function ReviewStarBadge({ authorName }: { authorName: string }) {
   const displayRating = rating === 5 ? "5" : rating.toFixed(1)
 
   return (
-    <span className="inline-flex items-center gap-1.5 ml-2">
-      {/* Star with rating inside - larger with depth */}
-      <span className="relative inline-flex items-center justify-center" style={{ width: 26, height: 26 }}>
-        {/* Shadow/glow layer */}
-        <svg
-          width="26"
-          height="26"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="absolute"
-          style={{ filter: "blur(2px)", opacity: 0.35 }}
-        >
-          <path
-            d="M12 2L14.9 8.6L22 9.3L16.8 14L18.2 21L12 17.5L5.8 21L7.2 14L2 9.3L9.1 8.6L12 2Z"
-            fill="#7C3AED"
-          />
-        </svg>
-        {/* Main star */}
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="relative">
+    <span className="inline-flex items-center gap-1 ml-2">
+      <span
+        className="relative inline-flex items-center justify-center"
+        style={{
+          width: 34,
+          height: 34,
+          filter: "drop-shadow(0 2px 4px rgba(124, 58, 237, 0.45)) drop-shadow(0 1px 2px rgba(124, 58, 237, 0.25))",
+        }}
+      >
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <linearGradient id={`starGrad-${authorName}`} x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#8B5CF6" />
-              <stop offset="50%" stopColor="#7C3AED" />
+              <stop offset="0%" stopColor="#A78BFA" />
+              <stop offset="35%" stopColor="#8B5CF6" />
+              <stop offset="70%" stopColor="#7C3AED" />
               <stop offset="100%" stopColor="#6D28D9" />
             </linearGradient>
+            <linearGradient id={`starShine-${authorName}`} x1="30%" y1="0%" x2="70%" y2="60%">
+              <stop offset="0%" stopColor="rgba(255,255,255,0.35)" />
+              <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+            </linearGradient>
           </defs>
+          {/* Base star shape */}
           <path
             d="M12 2L14.9 8.6L22 9.3L16.8 14L18.2 21L12 17.5L5.8 21L7.2 14L2 9.3L9.1 8.6L12 2Z"
             fill={`url(#starGrad-${authorName})`}
-            stroke="#6D28D9"
-            strokeWidth="0.5"
+            stroke="#5B21B6"
+            strokeWidth="0.4"
             strokeLinejoin="round"
           />
-          {/* Inner highlight for depth */}
+          {/* Top-left shine overlay for 3D pop */}
           <path
-            d="M12 4.5L14.1 9.2L19.2 9.7L15.4 13.1L16.4 18.2L12 15.7L7.6 18.2L8.6 13.1L4.8 9.7L9.9 9.2L12 4.5Z"
-            fill="rgba(255,255,255,0.12)"
+            d="M12 2L14.9 8.6L22 9.3L16.8 14L18.2 21L12 17.5L5.8 21L7.2 14L2 9.3L9.1 8.6L12 2Z"
+            fill={`url(#starShine-${authorName})`}
+          />
+          {/* Inner bevel highlight */}
+          <path
+            d="M12 4.8L14 8.9L18.6 9.4L15.2 12.5L16 17L12 14.9L8 17L8.8 12.5L5.4 9.4L10 8.9L12 4.8Z"
+            fill="rgba(255,255,255,0.1)"
+            stroke="rgba(255,255,255,0.08)"
+            strokeWidth="0.3"
           />
         </svg>
-        {/* Rating number */}
+        {/* Rating number - large and bold */}
         <span
-          className="absolute inset-0 flex items-center justify-center font-extrabold text-white drop-shadow-sm"
-          style={{ fontSize: rating === 5 ? 10 : 8.5, lineHeight: 1, paddingTop: 1, letterSpacing: "-0.02em" }}
+          className="absolute inset-0 flex items-center justify-center font-black text-white"
+          style={{
+            fontSize: rating === 5 ? 13 : 10.5,
+            lineHeight: 1,
+            paddingTop: 1,
+            letterSpacing: "-0.03em",
+            textShadow: "0 1px 2px rgba(0,0,0,0.3)",
+          }}
         >
           {displayRating}
         </span>
@@ -207,6 +216,41 @@ const forumTopics = [
           "Whatever you pick, make sure you get one with a brushless motor. They run cooler, last longer, and deliver more consistent power. The extra $20-30 is always worth it.",
         likes: 6,
       },
+      {
+        author: "DrillSergeant",
+        time: "10 minutes ago",
+        content:
+          "I test drills for a living. At the $150 price point, the Makita XFD131 is unbeatable for precision work. Lighter than Milwaukee, better chuck than DeWalt. The variable speed trigger is the smoothest I've used.",
+        likes: 14,
+      },
+      {
+        author: "HomeRenovator",
+        time: "10 minutes ago",
+        content:
+          "One thing nobody mentions: get a drill with a built-in LED light. When you're working inside cabinets or under sinks, that light is a lifesaver. Both DeWalt and Milwaukee have great ones.",
+        likes: 7,
+      },
+      {
+        author: "WallMaster",
+        time: "8 minutes ago",
+        content:
+          "If you're going to be drilling into masonry at all, spend the extra and get a hammer drill combo. The DeWalt DCD996 is just above your budget but it does everything - wood, metal, and concrete.",
+        likes: 9,
+      },
+      {
+        author: "WeekendWarrior",
+        time: "5 minutes ago",
+        content:
+          "Bought the Ryobi based on this thread two months ago. No regrets. Already added the circular saw and impact driver to the collection. The battery ecosystem argument is real.",
+        likes: 4,
+      },
+      {
+        author: "FirstTimer",
+        time: "3 minutes ago",
+        content:
+          "This is so helpful! Going with the DeWalt 20V MAX. Quick question though - should I get the kit with two batteries or is one enough to start?",
+        likes: 1,
+      },
     ],
   },
   {
@@ -254,6 +298,41 @@ const forumTopics = [
         content:
           "Pro tip: build everything on a large piece of cardboard. Protects your floors and makes it easy to slide the finished piece into position. Also invest in a right-angle drill attachment for tight spots.",
         likes: 9,
+      },
+      {
+        author: "DrillSergeant",
+        time: "1 day ago",
+        content:
+          "Biggest mistake people make: overtightening cam locks. They only need a quarter turn once they click. Overtighten and you strip the particle board. Also, never use a power drill on cam locks.",
+        likes: 6,
+      },
+      {
+        author: "ContractorPro",
+        time: "20 hours ago",
+        content:
+          "For the PAX wardrobes specifically - build them on the floor then tilt up. Way easier than trying to build vertically. Get a friend to help with the tilt, those things are heavy.",
+        likes: 10,
+      },
+      {
+        author: "MovingDay",
+        time: "18 hours ago",
+        content:
+          "If you have multiple pieces, assemble them in order of complexity. Start with the easiest one to build confidence. KALLAX is great for beginners, save the PAX or BESTA for last.",
+        likes: 3,
+      },
+      {
+        author: "WallMaster",
+        time: "15 hours ago",
+        content:
+          "Always anchor tall furniture to the wall. IKEA includes the hardware for a reason. I've seen a fully loaded KALLAX topple over - not pretty. Takes 5 minutes and could save a life.",
+        likes: 15,
+      },
+      {
+        author: "BudgetBuilder",
+        time: "12 hours ago",
+        content:
+          "Hot tip: check the as-is section at IKEA for display models that are already assembled. Got a HEMNES dresser for 60% off. Just had to disassemble and reassemble at home.",
+        likes: 2,
       },
     ],
   },
@@ -303,6 +382,41 @@ const forumTopics = [
           "Would regular towels and t-shirts work for wrapping dishes? Trying to save money on packing materials for my first move.",
         likes: 0,
       },
+      {
+        author: "HomeRenovator",
+        time: "3 days ago",
+        content:
+          "Towels and t-shirts work great for casual moves! Just make sure there's padding between every item. Pro tip: stuff socks inside glasses and mugs for extra cushioning from the inside out.",
+        likes: 8,
+      },
+      {
+        author: "MoveCoordinator",
+        time: "3 days ago",
+        content:
+          "For anyone moving long distance: label fragile boxes on ALL sides, not just the top. Movers stack boxes and if they can't see the label from every angle, your grandmother's china might end up under 50lbs of books.",
+        likes: 12,
+      },
+      {
+        author: "HandyPro",
+        time: "2 days ago",
+        content:
+          "Dish barrel boxes from U-Haul are worth every penny. Double-walled and extra tall so you can pack plates vertically with dividers. Spent $15 on boxes and saved thousands in potential breakage.",
+        likes: 5,
+      },
+      {
+        author: "WeekendWarrior",
+        time: "2 days ago",
+        content:
+          "We wrapped everything in packing paper, then put it in the dishwasher racks - the racks act as perfect dividers. Moved an entire kitchen with zero breaks using this method.",
+        likes: 4,
+      },
+      {
+        author: "CleaningPro",
+        time: "1 day ago",
+        content:
+          "Don't forget about your bathroom! Mirrors, perfume bottles, and ceramic soap dispensers are just as fragile. I use the same packing techniques for bathroom items as I do for kitchen.",
+        likes: 2,
+      },
     ],
   },
   {
@@ -343,6 +457,41 @@ const forumTopics = [
         content:
           "I used the 3M Command strips rated for 16lbs each - used 4 of them for a 30lb mirror and it's been fine for 6 months. Probably not ideal for 40lbs though.",
         likes: 2,
+      },
+      {
+        author: "DrillSergeant",
+        time: "2 days ago",
+        content:
+          "Use a stud finder with AC wire detection. Last thing you want is to drill into an electrical wire. The Franklin ProSensor is the most accurate consumer stud finder I've tested.",
+        likes: 11,
+      },
+      {
+        author: "MasonryMike",
+        time: "2 days ago",
+        content:
+          "If your wall is plaster over lath (common in older homes), toggle bolts won't work the same. You need molly bolts designed for plaster or find the wood lath strips behind. Knock on the wall - plaster sounds different than drywall.",
+        likes: 7,
+      },
+      {
+        author: "IKEAVeteran",
+        time: "1 day ago",
+        content:
+          "IKEA sells anti-tip wall anchors that work great for mirrors too. They come with the hardware and a template. I've hung 3 heavy mirrors with them, all still solid after 2 years.",
+        likes: 4,
+      },
+      {
+        author: "AntiquesCollector",
+        time: "1 day ago",
+        content:
+          "For antique or ornate mirrors, consider a picture rail system. No holes in the wall at all - the mirror hangs from a rail at the ceiling. Adjustable height and easy to reposition. Museums use this method.",
+        likes: 9,
+      },
+      {
+        author: "FirstTimer",
+        time: "22 hours ago",
+        content:
+          "Update: used toggle bolts as suggested + found one stud. Mirror has been up for a week and feels rock solid. Thanks everyone!",
+        likes: 6,
       },
     ],
   },
@@ -385,6 +534,41 @@ const forumTopics = [
           "Magic erasers are fine on glass but they wear out fast on textured surfaces. For heavy mineral buildup, get a pumice stone specifically made for glass - they work incredibly well and won't scratch tempered glass.",
         likes: 7,
       },
+      {
+        author: "HandyPro",
+        time: "1 day ago",
+        content:
+          "Prevention is key. After every shower, hit the glass with a squeegee - takes 30 seconds. I haven't had to deep clean my shower glass in 6 months since starting this habit.",
+        likes: 10,
+      },
+      {
+        author: "PlumbingExpert",
+        time: "20 hours ago",
+        content:
+          "Hard water is the root cause. If you're constantly fighting buildup, consider a whole-house water softener or at least a shower head filter. Fixes the problem at the source rather than treating symptoms.",
+        likes: 13,
+      },
+      {
+        author: "BubbleWrapKing",
+        time: "18 hours ago",
+        content:
+          "Dryer sheets! Seriously. Wet a dryer sheet and rub the glass - the anti-static coating repels water and prevents spots. Cheap and works surprisingly well between deep cleans.",
+        likes: 3,
+      },
+      {
+        author: "NeatFreak",
+        time: "15 hours ago",
+        content:
+          "I use a daily shower spray (Method brand) right after showering. Just spray and walk away, no wiping. Combined with a monthly deep clean, my glass stays crystal clear. Way easier than waiting for buildup.",
+        likes: 6,
+      },
+      {
+        author: "DIYQueen",
+        time: "12 hours ago",
+        content:
+          "For anyone with really bad hard water stains that nothing else removes: CLR (Calcium Lime Rust) remover. Apply with a sponge, wait 2 minutes, wipe off. Night and day difference. Just ventilate well.",
+        likes: 8,
+      },
     ],
   },
   {
@@ -425,6 +609,41 @@ const forumTopics = [
         content:
           "YouTube is your best friend for plumbing. Watch the repair video BEFORE you start taking things apart. Ask me how I know lol.",
         likes: 6,
+      },
+      {
+        author: "HomeRenovator",
+        time: "16 hours ago",
+        content:
+          "Add a propane torch and solder to that list if you have copper pipes. Learning to sweat a copper joint takes 10 minutes and saves you hundreds vs calling a plumber for every small repair.",
+        likes: 8,
+      },
+      {
+        author: "ShowerGuru",
+        time: "14 hours ago",
+        content:
+          "A basin wrench is the most important tool nobody buys. Trying to tighten faucet nuts without one is pure torture. The Husky telescoping basin wrench from Home Depot is $15 and worth every cent.",
+        likes: 11,
+      },
+      {
+        author: "DrillSergeant",
+        time: "12 hours ago",
+        content:
+          "Teflon tape tip: wrap it clockwise (when looking at the thread end-on). Most people wrap it the wrong direction and it unravels when you screw the fitting on. Also, 3-5 wraps is plenty.",
+        likes: 14,
+      },
+      {
+        author: "MasonryMike",
+        time: "10 hours ago",
+        content:
+          "Know where your main water shutoff is BEFORE you start any plumbing project. Also, open faucets downstream to drain pressure before disconnecting anything. Learned that one the wet way.",
+        likes: 5,
+      },
+      {
+        author: "ContractorPro",
+        time: "8 hours ago",
+        content:
+          "Invest in a good pair of channel locks (Channellock brand, made in USA). The cheap ones slip and round off fittings. My 430s have lasted 15 years of daily professional use.",
+        likes: 9,
       },
     ],
   },
@@ -467,6 +686,41 @@ const forumTopics = [
           "I've been practicing on cardboard boxes like someone suggested and it really does help. My lines are getting much cleaner after just 30 minutes of practice.",
         likes: 3,
       },
+      {
+        author: "HomeRenovator",
+        time: "1 day ago",
+        content:
+          "The secret nobody tells you: slightly overlap your cut-in line with the roller. This blends the brush texture into the roller texture so you don't see where one ends and the other begins.",
+        likes: 12,
+      },
+      {
+        author: "MilwaukeeFan",
+        time: "1 day ago",
+        content:
+          "Purdy XL Glide is the GOAT brush for cutting in. More expensive than the Wooster but the bristle tips are insanely fine. One coat coverage on every pass. Worth the $15 price tag.",
+        likes: 7,
+      },
+      {
+        author: "WallMaster",
+        time: "20 hours ago",
+        content:
+          "Temperature matters. Paint too cold and it drags, too warm and it dries before you can work it. 65-75F is the sweet spot. I won't paint if the room is outside that range.",
+        likes: 5,
+      },
+      {
+        author: "DIYQueen",
+        time: "16 hours ago",
+        content:
+          "For ceilings: paint the ceiling first, then cut in your wall color over any ceiling paint that got on the wall. Way easier than trying to cut a straight line looking up.",
+        likes: 9,
+      },
+      {
+        author: "DrillSergeant",
+        time: "12 hours ago",
+        content:
+          "If you're painting multiple rooms the same color, don't clean your brush between rooms. Wrap it in plastic wrap or a wet paper towel. Saves time and your brush lasts longer.",
+        likes: 4,
+      },
     ],
   },
   {
@@ -507,6 +761,41 @@ const forumTopics = [
         content:
           "Learned the hard way that you need a different anchor for concrete vs. drywall. Tapcon screws are great for concrete - they cut their own threads. Just make sure you drill the pilot hole the exact size specified.",
         likes: 5,
+      },
+      {
+        author: "WallMaster",
+        time: "1 day ago",
+        content:
+          "Wear a proper N95 mask when drilling concrete. Silica dust is no joke - it causes permanent lung damage. Also safety glasses. A piece of concrete in your eye will ruin your whole week.",
+        likes: 16,
+      },
+      {
+        author: "HomeRenovator",
+        time: "1 day ago",
+        content:
+          "Tape a small ziplock bag below the drill point to catch dust. Or have someone hold a vacuum nozzle right next to the bit while you drill. Keeps cleanup minimal especially on finished walls.",
+        likes: 6,
+      },
+      {
+        author: "HandyPro",
+        time: "20 hours ago",
+        content:
+          "For mounting TV brackets on concrete, use sleeve anchors instead of Tapcons. They have much higher shear strength which matters when you're hanging 50+ lbs that sticks out from the wall.",
+        likes: 10,
+      },
+      {
+        author: "BudgetBuilder",
+        time: "18 hours ago",
+        content:
+          "The Harbor Freight SDS+ rotary hammer is surprisingly decent for occasional use. $50 vs $200+ for Bosch. Mine has done about 100 holes in concrete basement walls and still going strong.",
+        likes: 3,
+      },
+      {
+        author: "PlumbingExpert",
+        time: "15 hours ago",
+        content:
+          "Before drilling into concrete floors, check for radiant heating pipes or embedded electrical conduit. A thermal camera or wire tracer can save you from a very expensive mistake.",
+        likes: 8,
       },
     ],
   },
@@ -549,6 +838,41 @@ const forumTopics = [
           "Always measure the diagonal of doorways too, not just width and height. That's what determines if your sofa can actually get through. Had to return a beautiful sectional because of a 29\" doorframe.",
         likes: 7,
       },
+      {
+        author: "HomeRenovator",
+        time: "1 day ago",
+        content:
+          "IKEA's online planner is free and surprisingly accurate for kitchen and bedroom layouts. You can drag real products into a 3D room model. Saved me from ordering a bed that wouldn't fit past my staircase.",
+        likes: 11,
+      },
+      {
+        author: "HandyPro",
+        time: "20 hours ago",
+        content:
+          "Measure twice, buy once. Also account for baseboards - they add 0.5-0.75 inches. A king bed frame that technically fits your wall measurement might not actually fit once you account for baseboards on both sides.",
+        likes: 8,
+      },
+      {
+        author: "ContractorPro",
+        time: "18 hours ago",
+        content:
+          "For open floor plans, use area rugs to define zones BEFORE buying furniture. Place the rugs first, then measure within those zones. Gives you a much better sense of scale than just tape on the floor.",
+        likes: 5,
+      },
+      {
+        author: "DIYQueen",
+        time: "15 hours ago",
+        content:
+          "Don't forget ceiling height if you're buying tall bookcases or armoires. Standard is 8ft but older homes can be 7.5ft or less. Also measure ceiling fans and light fixtures that hang down.",
+        likes: 6,
+      },
+      {
+        author: "BudgetBuilder",
+        time: "12 hours ago",
+        content:
+          "Facebook Marketplace tip: always ask for dimensions from the seller, and bring a tape measure. Listings are often wrong. Learned this after driving 45 minutes for a 'queen' bed frame that was actually full size.",
+        likes: 3,
+      },
     ],
   },
   {
@@ -589,6 +913,41 @@ const forumTopics = [
         content:
           "Pro tip: run a pull string through the wall first using a fish tape. Then attach all your cables to it and pull them through at once. Saves you from fighting each cable through individually.",
         likes: 9,
+      },
+      {
+        author: "ContractorPro",
+        time: "3 days ago",
+        content:
+          "For renters who can't cut walls: get a flat HDMI cable and run it behind the baseboard. Pop the baseboard off, hot glue the cable to the wall, snap the baseboard back on. Completely invisible.",
+        likes: 12,
+      },
+      {
+        author: "DrillSergeant",
+        time: "3 days ago",
+        content:
+          "Label every single cable before you hide it. Use a label maker or colored electrical tape. Future you will be incredibly thankful when you need to swap one cable out of a bundle of 8.",
+        likes: 7,
+      },
+      {
+        author: "WeekendWarrior",
+        time: "2 days ago",
+        content:
+          "Velcro cable ties are way better than zip ties. You can adjust, add, or remove cables without cutting anything. I buy the rolls from Amazon and cut to length. Game changer for behind the TV.",
+        likes: 5,
+      },
+      {
+        author: "WallMaster",
+        time: "2 days ago",
+        content:
+          "If your TV is above a fireplace, there's usually a gap between the mantel and the wall. You can often run cables through that gap without any wall cutting. Check with a flashlight first.",
+        likes: 8,
+      },
+      {
+        author: "BudgetBuilder",
+        time: "1 day ago",
+        content:
+          "The cheapest solution: a $3 paintable cord cover from Walmart. I ran one from my TV to the outlet, painted it the same color as my wall, and honestly you can barely see it. Not perfect but 90% there.",
+        likes: 4,
       },
     ],
   },
@@ -631,6 +990,41 @@ const forumTopics = [
           "I gave up on grass in my heavily shaded area and planted hostas and ferns instead. Looks way better than patchy grass ever did. Sometimes the answer isn't a different grass seed - it's embracing the shade.",
         likes: 8,
       },
+      {
+        author: "HomeRenovator",
+        time: "2 days ago",
+        content:
+          "If you do go with fescue, overseed every fall. Shade grass thins out over time and needs reinforcement. I do this every September and my shaded lawn looks better each year.",
+        likes: 6,
+      },
+      {
+        author: "HandyPro",
+        time: "2 days ago",
+        content:
+          "Raise your mower height in shaded areas to at least 3.5-4 inches. Taller grass blades capture more sunlight. Most people mow shade areas too short which weakens the grass even more.",
+        likes: 10,
+      },
+      {
+        author: "ContractorPro",
+        time: "1 day ago",
+        content:
+          "Consider thinning tree branches to let more light through rather than fighting with shade-tolerant grass. A certified arborist can selectively prune to improve light by 30-40% without hurting the tree.",
+        likes: 13,
+      },
+      {
+        author: "DIYQueen",
+        time: "1 day ago",
+        content:
+          "Micro clover mixed with fescue is my favorite combo for shade. The clover fixes nitrogen so you don't need to fertilize, stays green year-round, and fills in any thin spots. Looks beautiful too.",
+        likes: 7,
+      },
+      {
+        author: "FirstTimer",
+        time: "20 hours ago",
+        content:
+          "Tried the clover suggestion from last month - it's already sprouting and looks great mixed in with the fescue. Way easier than I expected. Just rake, seed, and water.",
+        likes: 3,
+      },
     ],
   },
   {
@@ -671,6 +1065,41 @@ const forumTopics = [
         content:
           "A fold-down wall desk changed my life. When I'm done working, I fold it up and my office becomes a guest room. IKEA NORBERG is $50 and holds a laptop + monitor easily.",
         likes: 9,
+      },
+      {
+        author: "HomeRenovator",
+        time: "1 day ago",
+        content:
+          "Install a single floating shelf above your monitor at eye level. Put your webcam, small plant, and a few reference books there. Clears desk space AND looks professional on video calls.",
+        likes: 8,
+      },
+      {
+        author: "HandyPro",
+        time: "20 hours ago",
+        content:
+          "Acoustic panels on the wall behind you serve double duty: they improve sound for calls AND act as a visual backdrop. The felt ones from Amazon are $30 for a 6-pack and easy to install.",
+        likes: 11,
+      },
+      {
+        author: "ContractorPro",
+        time: "18 hours ago",
+        content:
+          "If you're in a closet office setup, add a small USB fan for ventilation. Those spaces get hot fast with a computer running. A clip-on fan aimed at you makes all the difference.",
+        likes: 5,
+      },
+      {
+        author: "DrillSergeant",
+        time: "15 hours ago",
+        content:
+          "French cleats on the wall behind your desk. You can hang shelves, tool holders, file organizers - all interchangeable and reconfigurable. One afternoon to install, lifetime of flexibility.",
+        likes: 14,
+      },
+      {
+        author: "WeekendWarrior",
+        time: "12 hours ago",
+        content:
+          "Don't forget lighting! A small LED desk lamp with adjustable color temperature reduces eye strain massively. I use the BenQ ScreenBar - clips to your monitor and doesn't take any desk space at all.",
+        likes: 6,
       },
     ],
   },
@@ -1560,58 +1989,61 @@ ${viewMode === "card" ? "min-h-[240px]" : "min-h-[120px]"}`}
                     <p className="md:line-clamp-2 line-clamp-none">{topic.preview}</p>
                   </div>
 
-                  {/* Author info with enhanced styling */}
+                  {/* Author info with comment */}
                   <div
-                    className="flex items-center mt-5 pt-4 border-t border-lavender-200/30"
+                    className="mt-5 pt-4 border-t border-lavender-200/30"
                     onMouseEnter={() => setShowUserTooltip(topic.id)}
                     onMouseLeave={() => setShowUserTooltip(null)}
                   >
-                    <div className="relative">
-                      <div className="h-9 w-9 rounded-full bg-gradient-to-r from-lavender-300 to-lavender-400 flex items-center justify-center text-sm font-bold text-white border border-lavender-200/50 shadow-md">
-                        {topic.author.charAt(0)}
-                      </div>
+                    <div className="flex items-start">
+                      <div className="relative flex-shrink-0">
+                        <div className="h-9 w-9 rounded-full bg-gradient-to-r from-lavender-300 to-lavender-400 flex items-center justify-center text-sm font-bold text-white border border-lavender-200/50 shadow-md">
+                          {topic.author.charAt(0)}
+                        </div>
 
-                      {/* User tooltip with enhanced styling */}
-                      {showUserTooltip === topic.id && (
-                        <motion.div
-                          className="absolute bottom-full left-0 mb-2 w-60 bg-white rounded-lg shadow-xl p-4 z-50 border border-lavender-200"
-                          initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          transition={{ duration: 0.2, type: "spring", stiffness: 500 }}
-                        >
-                          <div className="flex items-start gap-3">
-                            <div className="h-12 w-12 rounded-full bg-gradient-to-r from-lavender-400 to-lavender-500 flex items-center justify-center text-base font-bold text-white shadow-md">
-                              {topic.author.charAt(0)}
-                            </div>
-                            <div>
-                              <div className="flex items-center font-medium text-gray-800">
-                                {topic.author}
-                                <ReviewStarBadge authorName={topic.author} />
+                        {/* User tooltip with enhanced styling */}
+                        {showUserTooltip === topic.id && (
+                          <motion.div
+                            className="absolute bottom-full left-0 mb-2 w-60 bg-white rounded-lg shadow-xl p-4 z-50 border border-lavender-200"
+                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            transition={{ duration: 0.2, type: "spring", stiffness: 500 }}
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className="h-12 w-12 rounded-full bg-gradient-to-r from-lavender-400 to-lavender-500 flex items-center justify-center text-base font-bold text-white shadow-md">
+                                {topic.author.charAt(0)}
                               </div>
-                              <div className="text-xs text-gray-500">Member since 2023</div>
-                              <div className="flex items-center mt-2 text-xs text-gray-600">
-                                <div className="flex items-center bg-lavender-50 px-2 py-1 rounded-full">
-                                  <Star className="h-3 w-3 text-yellow-500 fill-yellow-500 mr-1" />
-                                  <span>4.8</span>
+                              <div>
+                                <div className="flex items-center font-medium text-gray-800">
+                                  {topic.author}
+                                  <ReviewStarBadge authorName={topic.author} />
                                 </div>
-                                <span className="mx-1.5">•</span>
-                                <div className="flex items-center bg-lavender-50 px-2 py-1 rounded-full">
-                                  <MessageSquare className="h-3 w-3 text-lavender-500 mr-1" />
-                                  <span>42 topics</span>
+                                <div className="text-xs text-gray-500">Member since 2023</div>
+                                <div className="flex items-center mt-2 text-xs text-gray-600">
+                                  <div className="flex items-center bg-lavender-50 px-2 py-1 rounded-full">
+                                    <Star className="h-3 w-3 text-yellow-500 fill-yellow-500 mr-1" />
+                                    <span>4.8</span>
+                                  </div>
+                                  <span className="mx-1.5">•</span>
+                                  <div className="flex items-center bg-lavender-50 px-2 py-1 rounded-full">
+                                    <MessageSquare className="h-3 w-3 text-lavender-500 mr-1" />
+                                    <span>42 topics</span>
+                                  </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                          <div className="absolute -bottom-2 left-4 w-4 h-4 bg-white border-b border-r border-lavender-200 transform rotate-45"></div>
-                        </motion.div>
-                      )}
-                    </div>
-                    <div className="ml-2">
-                      <div className="flex items-center">
-                        <span className="text-sm font-medium text-gray-700">{topic.author}</span>
-                        <ReviewStarBadge authorName={topic.author} />
+                            <div className="absolute -bottom-2 left-4 w-4 h-4 bg-white border-b border-r border-lavender-200 transform rotate-45"></div>
+                          </motion.div>
+                        )}
                       </div>
-                      <div className="text-xs text-gray-500">Active contributor</div>
+                      <div className="ml-2 flex-1 min-w-0">
+                        <div className="flex items-center">
+                          <span className="text-sm font-medium text-gray-700">{topic.author}</span>
+                          <ReviewStarBadge authorName={topic.author} />
+                        </div>
+                        <div className="text-xs text-gray-500">Active contributor</div>
+                        <div className="mt-2 text-sm text-gray-600 leading-relaxed">{topic.preview}</div>
+                      </div>
                     </div>
                   </div>
 
