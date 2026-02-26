@@ -606,28 +606,20 @@ export function EnhancedHeroSection() {
     }
   }, [activeSkill, skills])
 
-  // Animate the skill path visualization
+  // Skill path visualization - run once on mount only, no repeating interval
   useEffect(() => {
     if (!skillsRef.current) return
 
-    const animateNodes = () => {
-      const nodes = skillsRef.current?.querySelectorAll(".skill-node") || []
-
-      nodes.forEach((node, index) => {
-        const delay = index * 300
+    const nodes = skillsRef.current?.querySelectorAll(".skill-node") || []
+    nodes.forEach((node, index) => {
+      const delay = index * 300
+      setTimeout(() => {
+        node.classList.add("animate-pulse")
         setTimeout(() => {
-          node.classList.add("animate-pulse")
-          setTimeout(() => {
-            node.classList.remove("animate-pulse")
-          }, 1000)
-        }, delay)
-      })
-    }
-
-    animateNodes()
-    const interval = setInterval(animateNodes, 5000)
-
-    return () => clearInterval(interval)
+          node.classList.remove("animate-pulse")
+        }, 1000)
+      }, delay)
+    })
   }, [])
 
   useEffect(() => {
@@ -778,7 +770,7 @@ export function EnhancedHeroSection() {
 
   return (
     <>
-      <section className="w-full relative overflow-hidden bg-gradient-to-br from-white via-lavender-100/30 to-white">
+      <section className="w-full relative overflow-hidden bg-gradient-to-br from-white via-lavender-100/30 to-white" style={{ willChange: "auto", transform: "translateZ(0)" }}>
         {/* Animated background elements */}
         <div className="absolute inset-0 bg-gradient-to-br from-white via-lavender-50 to-white/90 z-0" />
 
@@ -887,43 +879,20 @@ animate-pulse"
                   {/* Additional decorative elements */}
                   <div className="absolute bottom-0 right-0 w-24 h-24 bg-gradient-to-tl from-lavender-300/5 to-transparent rounded-tl-full"></div>
                   <div className="absolute top-1/2 left-0 w-12 h-24 bg-gradient-to-r from-lavender-400/5 to-transparent"></div>
-                  {/* Improved tech pattern overlay with subtle animation */}
-                  <motion.div
-                    className="tech-pattern absolute inset-0 bg-[radial-gradient(circle_at_10px_10px,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none z-1"
-                    animate={{
-                      opacity: [0.3, 0.5, 0.3],
-                      scale: [1, 1.02, 1],
-                    }}
-                    transition={{
-                      duration: 8,
-                      repeat: Number.POSITIVE_INFINITY,
-                      repeatType: "reverse",
-                      ease: "easeInOut",
-                    }}
+                  {/* Improved tech pattern overlay */}
+                  <div
+                    className="tech-pattern absolute inset-0 bg-[radial-gradient(circle_at_10px_10px,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none z-1 opacity-40"
                   />
 
-                  {/* Enhanced background overlay with gradient animation */}
-                  <motion.div
+                  {/* Enhanced background overlay */}
+                  <div
                     className="absolute inset-0 bg-gradient-to-br from-purple-50/10 via-transparent to-purple-100/10 pointer-events-none"
-                    animate={{
-                      background: [
-                        "radial-gradient(circle at 20% 30%, rgba(233, 213, 255, 0.1), transparent 70%)",
-                        "radial-gradient(circle at 70% 60%, rgba(233, 213, 255, 0.1), transparent 70%)",
-                        "radial-gradient(circle at 20% 30%, rgba(233, 213, 255, 0.1), transparent 70%)",
-                      ],
-                    }}
-                    transition={{
-                      duration: 15,
-                      repeat: Number.POSITIVE_INFINITY,
-                      repeatType: "reverse",
-                      ease: "easeInOut",
-                    }}
                   />
 
-                  {/* Circuit lines with improved styling */}
+                  {/* Circuit lines with CSS-only animations */}
                   <div className="circuit-lines">
                     {circuitLines.map((line, i) => (
-                      <motion.div
+                      <div
                         key={`line-${i}`}
                         className="circuit-line"
                         style={{
@@ -932,22 +901,12 @@ animate-pulse"
                           width: `${line.width}px`,
                           background:
                             "linear-gradient(90deg, rgba(168, 85, 247, 0.05), rgba(168, 85, 247, 0.1), rgba(168, 85, 247, 0.05))",
-                        }}
-                        animate={{
-                          opacity: [0.3, 0.7, 0.3],
-                          width: [line.width, line.width + 20, line.width],
-                        }}
-                        transition={{
-                          duration: 5 + (i % 3),
-                          repeat: Number.POSITIVE_INFINITY,
-                          repeatType: "reverse",
-                          ease: "easeInOut",
-                          delay: i * 0.5,
+                          opacity: 0.4,
                         }}
                       />
                     ))}
                     {circuitDots.map((dot, i) => (
-                      <motion.div
+                      <div
                         key={`dot-${i}`}
                         className="circuit-dot"
                         style={{
@@ -955,17 +914,7 @@ animate-pulse"
                           left: `${dot.left}%`,
                           backgroundColor: "rgba(168, 85, 247, 0.1)",
                           boxShadow: "0 0 5px rgba(168, 85, 247, 0.1)",
-                        }}
-                        animate={{
-                          scale: [1, 1.5, 1],
-                          opacity: [0.5, 0.8, 0.5],
-                        }}
-                        transition={{
-                          duration: 3 + (i % 2),
-                          repeat: Number.POSITIVE_INFINITY,
-                          repeatType: "reverse",
-                          ease: "easeInOut",
-                          delay: i * 0.3,
+                          opacity: 0.6,
                         }}
                       />
                     ))}
@@ -991,62 +940,15 @@ animate-pulse"
                     <div className="flex items-center justify-between lg:col-span-12">
                       <div className="flex items-center">
                         <div className="h-10 w-10 rounded-full bg-gradient-to-r from-lavender-300 to-lavender-500 flex items-center justify-center mr-3 relative group">
-                          <motion.div
-                            animate={
-                              !isMobile
-                                ? {
-                                    y: [0, -3, 0],
-                                    rotate: [0, 2, -2, 0],
-                                  }
-                                : {}
-                            }
-                            transition={{
-                              duration: 4,
-                              repeat: Number.POSITIVE_INFINITY,
-                              repeatType: "reverse",
-                              ease: "easeInOut",
-                            }}
-                          >
-                            <Rocket className="h-5 w-5 text-white" />
-                          </motion.div>
-                          <motion.div
-                            className="absolute inset-0 rounded-full bg-white/30 scale-0"
-                            whileHover={!isMobile ? { scale: 1.5, opacity: [0, 0.5, 0] } : {}}
-                            transition={{ duration: 1 }}
-                          />
-                          {/* Orbital rings around the rocket icon */}
-                          <motion.div
+                          <Rocket className="h-5 w-5 text-white" />
+                          {/* Static orbital rings */}
+                          <div
                             className="absolute inset-0 rounded-full border border-white/20"
-                            animate={
-                              !isMobile
-                                ? {
-                                    scale: [1.1, 1.3, 1.1],
-                                    opacity: [0.7, 1, 0.7],
-                                  }
-                                : {}
-                            }
-                            transition={{
-                              duration: 3,
-                              repeat: Number.POSITIVE_INFINITY,
-                              ease: "easeInOut",
-                            }}
+                            style={{ transform: "scale(1.2)", opacity: 0.7 }}
                           />
-                          <motion.div
+                          <div
                             className="absolute inset-0 rounded-full border border-white/10"
-                            animate={
-                              !isMobile
-                                ? {
-                                    scale: [1.4, 1.6, 1.4],
-                                    opacity: [0.5, 0.8, 0.5],
-                                  }
-                                : {}
-                            }
-                            transition={{
-                              duration: 3.5,
-                              repeat: Number.POSITIVE_INFINITY,
-                              ease: "easeInOut",
-                              delay: 0.2,
-                            }}
+                            style={{ transform: "scale(1.5)", opacity: 0.5 }}
                           />
                         </div>
                         <h3 className="text-xl font-bold text-gray-800">
@@ -1103,10 +1005,8 @@ animate-pulse"
                           )}
                           {activeSkill === index && (
                             <span className="ml-1.5 flex items-center">
-                              <motion.div
-                                className="h-1.5 w-1.5 rounded-full bg-white"
-                                animate={{ scale: [1, 1.5, 1] }}
-                                transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
+                              <div
+                                className="h-1.5 w-1.5 rounded-full bg-white animate-pulse"
                               />
                             </span>
                           )}
@@ -1168,18 +1068,7 @@ animate-pulse"
                               <div className="flex-1">
                                 <div className="flex items-center">
                                   <div className="h-10 w-10 rounded-xl bg-gradient-to-r from-lavender-300 to-lavender-500 flex items-center justify-center mr-3 relative group shadow-md shadow-lavender-300/20">
-                                    <motion.div
-                                      animate={{
-                                        scale: [1, 1.1, 1],
-                                      }}
-                                      transition={{
-                                        duration: 2,
-                                        repeat: Number.POSITIVE_INFINITY,
-                                        repeatType: "reverse",
-                                      }}
-                                    >
-                                      {skills[activeSkill].icon}
-                                    </motion.div>
+                                    {skills[activeSkill].icon}
                                     <div className="absolute inset-0 rounded-xl bg-purple-400/50 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                                   </div>
                                   <div>
@@ -1238,18 +1127,9 @@ animate-pulse"
                                     ease: [0.34, 1.56, 0.64, 1],
                                   }}
                                 >
-                                  {/* Animated shine effect */}
-                                  <motion.div
-                                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
-                                    animate={{
-                                      x: ["-100%", "100%"],
-                                    }}
-                                    transition={{
-                                      repeat: Number.POSITIVE_INFINITY,
-                                      repeatType: "loop",
-                                      duration: 2,
-                                      ease: "easeInOut",
-                                    }}
+                                  {/* Shine effect via CSS */}
+                                  <div
+                                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer"
                                   />
                                 </motion.div>
 
@@ -1344,10 +1224,9 @@ animate-pulse"
                               <div className="h-12 w-12 rounded-full bg-lavender-100 flex items-center justify-center text-sm font-bold text-lavender-500 shadow-inner relative">
                                 {skills[activeSkill].testimonial.author.split(" ")[0][0]}
                                 {skills[activeSkill].testimonial.author.split(" ")[1][0]}
-                                <motion.div
+                                <div
                                   className="absolute inset-0 rounded-full border border-purple-400/30"
-                                  animate={{ scale: [1, 1.1, 1] }}
-                                  transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
+                                  style={{ transform: "scale(1.05)" }}
                                 />
                               </div>
                               <div className="flex-1">
