@@ -21,7 +21,7 @@ import {
   Users,
   Target,
   Zap,
-  WrenchIcon as ScrewDriver,
+  HardDrive as ScrewDriver,
   Hammer,
   Paintbrush,
 } from "lucide-react"
@@ -509,46 +509,38 @@ export function EnhancedHeroSection() {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
   const [showSignupModal, setShowSignupModal] = useState(false)
 
-  const [circuitLines, setCircuitLines] = useState<
-    Array<{
-      top: number
-      width: number
-      left: number
-    }>
-  >([])
+  const [circuitLines] = useState(() =>
+    Array.from({ length: 8 }, (_, i) => ({
+      top: Math.random() * 100,
+      width: 50 + Math.random() * 150,
+      left: Math.random() * 100,
+    })),
+  )
 
-  const [circuitDots, setCircuitDots] = useState<
-    Array<{
-      top: number
-      left: number
-    }>
-  >([])
+  const [circuitDots] = useState(() =>
+    Array.from({ length: 12 }, (_, i) => ({
+      top: Math.random() * 100,
+      left: Math.random() * 100,
+    })),
+  )
 
-  const [glowDots, setGlowDots] = useState<
-    Array<{
-      top: number
-      left: number
-      delay: number
-    }>
-  >([])
+  const [glowDots] = useState(() =>
+    Array.from({ length: 15 }, (_, i) => ({
+      top: Math.random() * 100,
+      left: Math.random() * 100,
+      delay: Math.random() * 5,
+    })),
+  )
 
-  const [dataFlows, setDataFlows] = useState<
-    Array<{
-      top: number
-      left: number
-      delay: number
-    }>
-  >([])
+  const [dataFlows] = useState(() =>
+    Array.from({ length: 10 }, (_, i) => ({
+      top: Math.random() * 100,
+      left: Math.random() * 100,
+      delay: Math.random() * 4,
+    })),
+  )
 
-  const [particles, setParticles] = useState<
-    Array<{
-      id: number
-      x: number
-      y: number
-      size: number
-      duration: number
-    }>
-  >(
+  const [particles] = useState(() =>
     Array.from({ length: 20 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
@@ -570,53 +562,21 @@ export function EnhancedHeroSection() {
     router.push("/stripe-checkout")
   }
 
-  // Generate decorative elements
-  useEffect(() => {
-    // Generate circuit lines
-    const lines = Array.from({ length: 8 }, (_, i) => ({
-      top: Math.random() * 100,
-      width: 50 + Math.random() * 150,
-      left: Math.random() * 100,
-    }))
-    setCircuitLines(lines)
-
-    // Generate circuit dots
-    const dots = Array.from({ length: 12 }, (_, i) => ({
-      top: Math.random() * 100,
-      left: Math.random() * 100,
-    }))
-    setCircuitDots(dots)
-
-    // Generate glow dots
-    const glows = Array.from({ length: 15 }, (_, i) => ({
-      top: Math.random() * 100,
-      left: Math.random() * 100,
-      delay: Math.random() * 5,
-    }))
-    setGlowDots(glows)
-
-    // Generate data flows
-    const flows = Array.from({ length: 10 }, (_, i) => ({
-      top: Math.random() * 100,
-      left: Math.random() * 100,
-      delay: Math.random() * 4,
-    }))
-    setDataFlows(flows)
-  }, [])
+  // Decorative elements are now initialized once with useState
 
   // Removed auto-rotation of skills as requested
   useEffect(() => {
     // Skills will now stay on the selected skill without auto-rotating
   }, [])
 
-  // Diamond glint effect
+  // Diamond glint effect - use longer interval to reduce state updates
   useEffect(() => {
     const glintInterval = setInterval(() => {
       setShowDiamondGlint(true)
       setTimeout(() => {
         setShowDiamondGlint(false)
       }, 800)
-    }, 3000)
+    }, 8000)
 
     return () => clearInterval(glintInterval)
   }, [])
@@ -670,7 +630,6 @@ export function EnhancedHeroSection() {
     return () => clearInterval(interval)
   }, [])
 
-  // Draw the earnings growth chart
   useEffect(() => {
     if (!chartRef.current || activeTab !== "analytics") return
 
@@ -688,8 +647,16 @@ export function EnhancedHeroSection() {
     ctx.scale(dpr, dpr)
 
     let animationId: number
+    let lastDrawTime = 0
+    const targetFPS = 5 // Very low FPS - chart data changes slowly, no need for high framerate
 
-    const drawChart = () => {
+    const drawChart = (currentTime: number) => {
+      if (currentTime - lastDrawTime < 1000 / targetFPS) {
+        animationId = requestAnimationFrame(drawChart)
+        return
+      }
+      lastDrawTime = currentTime
+
       try {
         const width = rect.width
         const height = rect.height
@@ -796,7 +763,7 @@ export function EnhancedHeroSection() {
       }
     }
 
-    drawChart()
+    animationId = requestAnimationFrame(drawChart)
 
     return () => {
       if (animationId) {
@@ -821,9 +788,9 @@ export function EnhancedHeroSection() {
         {/* Enhanced gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-lavender-200/20 to-white/90 z-0" />
 
-        {/* Particle system */}
+        {/* Particle system - CSS only to avoid React re-render flickering */}
         {particles.map((particle) => (
-          <motion.div
+          <div
             key={particle.id}
             className="absolute rounded-full bg-primary/10 z-0"
             style={{
@@ -831,17 +798,8 @@ export function EnhancedHeroSection() {
               top: `${particle.y}%`,
               width: particle.size,
               height: particle.size,
-            }}
-            animate={{
-              x: [0, Math.random() * 100 - 50],
-              y: [0, Math.random() * 100 - 50],
-              opacity: [0, 0.5, 0],
-            }}
-            transition={{
-              duration: particle.duration,
-              repeat: Number.POSITIVE_INFINITY,
-              repeatType: "reverse",
-              ease: "easeInOut",
+              animation: `pulse-glow ${particle.duration}s ease-in-out infinite`,
+              animationDelay: `${particle.id * 0.3}s`,
             }}
           />
         ))}

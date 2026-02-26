@@ -50,6 +50,9 @@ const EnhancedCard = forwardRef<HTMLDivElement, EnhancedCardProps>(
 
 EnhancedCard.displayName = "EnhancedCard"
 
+export const EnhancedCardContent = CardContent
+export const EnhancedCardFooter = CardFooter
+
 // Export the EnhancedCard as the default export and also export all the original card components
 export { EnhancedCard }
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }

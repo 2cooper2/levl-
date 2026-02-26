@@ -61,12 +61,18 @@ export function AnimatedGradientBackground() {
       opacity: 0.08,
     })
 
-    const animate = () => {
-      // Use a more efficient clear method
-      ctx.globalAlpha = 0.03
-      ctx.fillStyle = "rgba(var(--background), 1)"
-      ctx.fillRect(0, 0, width, height)
-      ctx.globalAlpha = 1
+    let animationId: number
+    let lastDrawTime = 0
+    const targetFPS = 5 // Very low FPS - this is a subtle background, no need for 60fps
+
+    const animate = (currentTime: number) => {
+      animationId = requestAnimationFrame(animate)
+
+      if (currentTime - lastDrawTime < 1000 / targetFPS) return
+      lastDrawTime = currentTime
+
+      // Full clear to prevent ghosting/flickering
+      ctx.clearRect(0, 0, width, height)
 
       // Draw and update circles
       for (const circle of circles) {
@@ -97,14 +103,13 @@ export function AnimatedGradientBackground() {
         ctx.arc(circle.x, circle.y, circle.radius, 0, Math.PI * 2)
         ctx.fill()
       }
-
-      requestAnimationFrame(animate)
     }
 
-    animate()
+    animationId = requestAnimationFrame(animate)
 
     return () => {
       window.removeEventListener("resize", resizeCanvas)
+      if (animationId) cancelAnimationFrame(animationId)
     }
   }, [])
 
