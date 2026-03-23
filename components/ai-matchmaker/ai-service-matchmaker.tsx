@@ -265,16 +265,126 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
     }
     if (option === "Brick") {
       return (
-        <div className="relative w-full h-full flex items-center justify-center">
-          <div className="grid grid-cols-3 gap-0.5 p-1">
-            {[...Array(6)].map((_, i) => (
-              <motion.div 
-                key={i}
-                className="w-3 h-2 bg-red-400 rounded-[1px]"
-                animate={{ opacity: [0.7, 1, 0.7] }}
-                transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.1 }}
-              />
-            ))}
+        <div className="relative w-full h-full overflow-hidden">
+          {/* Realistic brick wall with mortar joints */}
+          <div className="absolute inset-0 bg-[#c9b9a8]">
+            {/* Mortar base color */}
+            <div className="absolute inset-0 bg-gradient-to-br from-[#d4c8ba] via-[#c9bba8] to-[#bfb09c]" />
+            
+            {/* Row 1 - full bricks */}
+            <motion.div 
+              className="absolute top-[2px] left-[2px] w-[38%] h-[28%] rounded-[2px]"
+              style={{
+                background: 'linear-gradient(145deg, #c45a3d 0%, #a8412a 35%, #8b3422 70%, #7a2d1d 100%)',
+                boxShadow: 'inset 2px 1px 3px rgba(255,200,180,0.25), inset -1px -1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.25)'
+              }}
+              animate={{ boxShadow: ["inset 2px 1px 3px rgba(255,200,180,0.25), inset -1px -1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.25)", "inset 2px 1px 4px rgba(255,200,180,0.3), inset -1px -1px 2px rgba(0,0,0,0.35), 0 1px 2px rgba(0,0,0,0.25)", "inset 2px 1px 3px rgba(255,200,180,0.25), inset -1px -1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.25)"] }}
+              transition={{ duration: 2.5, repeat: Infinity }}
+            >
+              {/* Brick texture spots */}
+              <div className="absolute top-[20%] left-[15%] w-[3px] h-[2px] bg-[#8b3422]/40 rounded-full" />
+              <div className="absolute top-[60%] right-[20%] w-[2px] h-[2px] bg-[#6b2418]/30 rounded-full" />
+            </motion.div>
+            
+            <motion.div 
+              className="absolute top-[2px] left-[42%] w-[38%] h-[28%] rounded-[2px]"
+              style={{
+                background: 'linear-gradient(140deg, #b84d35 0%, #9c3d28 40%, #7f2f1f 75%, #6e2819 100%)',
+                boxShadow: 'inset 2px 1px 3px rgba(255,180,160,0.22), inset -1px -1px 2px rgba(0,0,0,0.28), 0 1px 2px rgba(0,0,0,0.22)'
+              }}
+              animate={{ boxShadow: ["inset 2px 1px 3px rgba(255,180,160,0.22), inset -1px -1px 2px rgba(0,0,0,0.28), 0 1px 2px rgba(0,0,0,0.22)", "inset 2px 1px 4px rgba(255,180,160,0.28), inset -1px -1px 2px rgba(0,0,0,0.32), 0 1px 2px rgba(0,0,0,0.22)", "inset 2px 1px 3px rgba(255,180,160,0.22), inset -1px -1px 2px rgba(0,0,0,0.28), 0 1px 2px rgba(0,0,0,0.22)"] }}
+              transition={{ duration: 2.8, repeat: Infinity, delay: 0.3 }}
+            >
+              <div className="absolute top-[40%] left-[30%] w-[2px] h-[3px] bg-[#7f2f1f]/35 rounded-full" />
+            </motion.div>
+
+            <motion.div 
+              className="absolute top-[2px] right-[2px] w-[16%] h-[28%] rounded-[2px]"
+              style={{
+                background: 'linear-gradient(150deg, #d06245 0%, #b54a32 50%, #8f3825 100%)',
+                boxShadow: 'inset 1px 1px 2px rgba(255,190,170,0.2), inset -1px -1px 2px rgba(0,0,0,0.25), 0 1px 2px rgba(0,0,0,0.2)'
+              }}
+              animate={{ boxShadow: ["inset 1px 1px 2px rgba(255,190,170,0.2), inset -1px -1px 2px rgba(0,0,0,0.25), 0 1px 2px rgba(0,0,0,0.2)", "inset 1px 1px 3px rgba(255,190,170,0.26), inset -1px -1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2)", "inset 1px 1px 2px rgba(255,190,170,0.2), inset -1px -1px 2px rgba(0,0,0,0.25), 0 1px 2px rgba(0,0,0,0.2)"] }}
+              transition={{ duration: 2.2, repeat: Infinity, delay: 0.6 }}
+            />
+            
+            {/* Row 2 - offset bricks (staggered pattern) */}
+            <motion.div 
+              className="absolute top-[34%] left-[2px] w-[18%] h-[28%] rounded-[2px]"
+              style={{
+                background: 'linear-gradient(135deg, #be5038 0%, #9e3c28 45%, #82301e 80%, #722a1a 100%)',
+                boxShadow: 'inset 1px 1px 2px rgba(255,185,165,0.2), inset -1px -1px 2px rgba(0,0,0,0.26), 0 1px 2px rgba(0,0,0,0.22)'
+              }}
+              animate={{ boxShadow: ["inset 1px 1px 2px rgba(255,185,165,0.2), inset -1px -1px 2px rgba(0,0,0,0.26), 0 1px 2px rgba(0,0,0,0.22)", "inset 1px 1px 3px rgba(255,185,165,0.26), inset -1px -1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.22)", "inset 1px 1px 2px rgba(255,185,165,0.2), inset -1px -1px 2px rgba(0,0,0,0.26), 0 1px 2px rgba(0,0,0,0.22)"] }}
+              transition={{ duration: 3, repeat: Infinity, delay: 0.9 }}
+            />
+            
+            <motion.div 
+              className="absolute top-[34%] left-[22%] w-[38%] h-[28%] rounded-[2px]"
+              style={{
+                background: 'linear-gradient(142deg, #cc5c40 0%, #aa4530 38%, #8c3623 72%, #783020 100%)',
+                boxShadow: 'inset 2px 1px 3px rgba(255,195,175,0.24), inset -1px -1px 2px rgba(0,0,0,0.28), 0 1px 2px rgba(0,0,0,0.24)'
+              }}
+              animate={{ boxShadow: ["inset 2px 1px 3px rgba(255,195,175,0.24), inset -1px -1px 2px rgba(0,0,0,0.28), 0 1px 2px rgba(0,0,0,0.24)", "inset 2px 1px 4px rgba(255,195,175,0.3), inset -1px -1px 2px rgba(0,0,0,0.32), 0 1px 2px rgba(0,0,0,0.24)", "inset 2px 1px 3px rgba(255,195,175,0.24), inset -1px -1px 2px rgba(0,0,0,0.28), 0 1px 2px rgba(0,0,0,0.24)"] }}
+              transition={{ duration: 2.6, repeat: Infinity, delay: 1.2 }}
+            >
+              <div className="absolute top-[25%] right-[25%] w-[3px] h-[2px] bg-[#6b2418]/30 rounded-full" />
+              <div className="absolute bottom-[30%] left-[20%] w-[2px] h-[2px] bg-[#8c3623]/35 rounded-full" />
+            </motion.div>
+            
+            <motion.div 
+              className="absolute top-[34%] right-[2px] w-[36%] h-[28%] rounded-[2px]"
+              style={{
+                background: 'linear-gradient(148deg, #c25540 0%, #a6422d 42%, #884032 78%, #753525 100%)',
+                boxShadow: 'inset 2px 1px 3px rgba(255,188,168,0.22), inset -1px -1px 2px rgba(0,0,0,0.27), 0 1px 2px rgba(0,0,0,0.23)'
+              }}
+              animate={{ boxShadow: ["inset 2px 1px 3px rgba(255,188,168,0.22), inset -1px -1px 2px rgba(0,0,0,0.27), 0 1px 2px rgba(0,0,0,0.23)", "inset 2px 1px 4px rgba(255,188,168,0.28), inset -1px -1px 2px rgba(0,0,0,0.32), 0 1px 2px rgba(0,0,0,0.23)", "inset 2px 1px 3px rgba(255,188,168,0.22), inset -1px -1px 2px rgba(0,0,0,0.27), 0 1px 2px rgba(0,0,0,0.23)"] }}
+              transition={{ duration: 2.4, repeat: Infinity, delay: 1.5 }}
+            >
+              <div className="absolute top-[50%] left-[40%] w-[2px] h-[2px] bg-[#753525]/40 rounded-full" />
+            </motion.div>
+            
+            {/* Row 3 - same as row 1 pattern */}
+            <motion.div 
+              className="absolute bottom-[2px] left-[2px] w-[38%] h-[28%] rounded-[2px]"
+              style={{
+                background: 'linear-gradient(138deg, #c85a3e 0%, #ac4630 36%, #8e3824 68%, #7c3120 100%)',
+                boxShadow: 'inset 2px 1px 3px rgba(255,192,172,0.23), inset -1px -1px 2px rgba(0,0,0,0.29), 0 1px 2px rgba(0,0,0,0.24)'
+              }}
+              animate={{ boxShadow: ["inset 2px 1px 3px rgba(255,192,172,0.23), inset -1px -1px 2px rgba(0,0,0,0.29), 0 1px 2px rgba(0,0,0,0.24)", "inset 2px 1px 4px rgba(255,192,172,0.29), inset -1px -1px 2px rgba(0,0,0,0.34), 0 1px 2px rgba(0,0,0,0.24)", "inset 2px 1px 3px rgba(255,192,172,0.23), inset -1px -1px 2px rgba(0,0,0,0.29), 0 1px 2px rgba(0,0,0,0.24)"] }}
+              transition={{ duration: 2.7, repeat: Infinity, delay: 1.8 }}
+            >
+              <div className="absolute top-[35%] left-[60%] w-[2px] h-[3px] bg-[#7c3120]/35 rounded-full" />
+            </motion.div>
+            
+            <motion.div 
+              className="absolute bottom-[2px] left-[42%] w-[38%] h-[28%] rounded-[2px]"
+              style={{
+                background: 'linear-gradient(144deg, #ba5038 0%, #9c3f2a 40%, #803220 74%, #702b1b 100%)',
+                boxShadow: 'inset 2px 1px 3px rgba(255,185,165,0.21), inset -1px -1px 2px rgba(0,0,0,0.27), 0 1px 2px rgba(0,0,0,0.22)'
+              }}
+              animate={{ boxShadow: ["inset 2px 1px 3px rgba(255,185,165,0.21), inset -1px -1px 2px rgba(0,0,0,0.27), 0 1px 2px rgba(0,0,0,0.22)", "inset 2px 1px 4px rgba(255,185,165,0.27), inset -1px -1px 2px rgba(0,0,0,0.32), 0 1px 2px rgba(0,0,0,0.22)", "inset 2px 1px 3px rgba(255,185,165,0.21), inset -1px -1px 2px rgba(0,0,0,0.27), 0 1px 2px rgba(0,0,0,0.22)"] }}
+              transition={{ duration: 3.1, repeat: Infinity, delay: 2.1 }}
+            >
+              <div className="absolute top-[55%] right-[30%] w-[3px] h-[2px] bg-[#803220]/32 rounded-full" />
+            </motion.div>
+
+            <motion.div 
+              className="absolute bottom-[2px] right-[2px] w-[16%] h-[28%] rounded-[2px]"
+              style={{
+                background: 'linear-gradient(152deg, #d26548 0%, #b24e35 48%, #923c28 100%)',
+                boxShadow: 'inset 1px 1px 2px rgba(255,195,178,0.2), inset -1px -1px 2px rgba(0,0,0,0.24), 0 1px 2px rgba(0,0,0,0.2)'
+              }}
+              animate={{ boxShadow: ["inset 1px 1px 2px rgba(255,195,178,0.2), inset -1px -1px 2px rgba(0,0,0,0.24), 0 1px 2px rgba(0,0,0,0.2)", "inset 1px 1px 3px rgba(255,195,178,0.26), inset -1px -1px 2px rgba(0,0,0,0.29), 0 1px 2px rgba(0,0,0,0.2)", "inset 1px 1px 2px rgba(255,195,178,0.2), inset -1px -1px 2px rgba(0,0,0,0.24), 0 1px 2px rgba(0,0,0,0.2)"] }}
+              transition={{ duration: 2.3, repeat: Infinity, delay: 2.4 }}
+            />
+            
+            {/* Mortar texture in joints */}
+            <div className="absolute inset-0 pointer-events-none" style={{
+              backgroundImage: `radial-gradient(circle at 50% 32%, rgba(180,170,155,0.15) 0.5px, transparent 0.5px),
+                               radial-gradient(circle at 20% 65%, rgba(170,160,145,0.12) 0.5px, transparent 0.5px)`,
+              backgroundSize: '6px 6px'
+            }} />
           </div>
         </div>
       )
@@ -595,7 +705,7 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
   }
 
   return (
-    <div className={`w-12 h-12 rounded-lg ${guide.bgColor} flex items-center justify-center overflow-hidden shadow-inner mb-1`}>
+    <div className="w-20 h-16 rounded-lg overflow-hidden shadow-inner mb-1">
       {getAnimation()}
     </div>
   )
