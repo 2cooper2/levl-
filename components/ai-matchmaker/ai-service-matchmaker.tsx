@@ -29,6 +29,360 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Layout } from "lucide-react"
 import { LevlPortal } from "@/components/levl-portal"
+import Image from "next/image"
+
+// Visual guides for technical options - shows animated previews inline
+const optionVisualGuides: Record<string, { 
+  type: "animation" | "image"
+  description: string
+  animationFrames?: string[] // CSS animation keyframes description
+  bgColor?: string
+  icon?: React.ReactNode
+}> = {
+  // Mount types
+  "Fixed (flat against wall)": {
+    type: "animation",
+    description: "TV sits flat against wall, no movement",
+    bgColor: "bg-gradient-to-br from-slate-100 to-slate-200",
+  },
+  "Tilting (angle adjustment)": {
+    type: "animation", 
+    description: "TV can tilt up/down to reduce glare",
+    bgColor: "bg-gradient-to-br from-blue-100 to-blue-200",
+  },
+  "Full-motion/Articulating (swivel and tilt)": {
+    type: "animation",
+    description: "TV extends out and swivels in any direction",
+    bgColor: "bg-gradient-to-br from-purple-100 to-purple-200",
+  },
+  "Ceiling mount": {
+    type: "animation",
+    description: "TV hangs down from ceiling",
+    bgColor: "bg-gradient-to-br from-amber-100 to-amber-200",
+  },
+  // Wall types
+  "Drywall/Sheetrock": {
+    type: "animation",
+    description: "Standard interior wall, needs studs or anchors",
+    bgColor: "bg-gradient-to-br from-gray-100 to-gray-200",
+  },
+  "Brick": {
+    type: "animation",
+    description: "Solid brick requires masonry drill bits",
+    bgColor: "bg-gradient-to-br from-red-100 to-red-200",
+  },
+  "Concrete": {
+    type: "animation",
+    description: "Very solid, needs hammer drill and concrete anchors",
+    bgColor: "bg-gradient-to-br from-stone-100 to-stone-200",
+  },
+  "Wood/Plaster": {
+    type: "animation",
+    description: "Older homes, may need special anchoring",
+    bgColor: "bg-gradient-to-br from-amber-100 to-orange-200",
+  },
+  "Stone": {
+    type: "animation",
+    description: "Natural stone, requires careful drilling",
+    bgColor: "bg-gradient-to-br from-zinc-200 to-zinc-300",
+  },
+  "Metal studs": {
+    type: "animation",
+    description: "Thinner than wood, needs toggle bolts",
+    bgColor: "bg-gradient-to-br from-slate-200 to-slate-300",
+  },
+  // Cable management
+  "Yes, hide all cables in wall": {
+    type: "animation",
+    description: "Cables routed through wall, completely hidden",
+    bgColor: "bg-gradient-to-br from-green-100 to-green-200",
+  },
+  "Yes, use cable covers": {
+    type: "animation",
+    description: "Cables covered with paintable plastic channels",
+    bgColor: "bg-gradient-to-br from-teal-100 to-teal-200",
+  },
+  "No, cables visible is fine": {
+    type: "animation",
+    description: "Cables hang freely from TV to outlet",
+    bgColor: "bg-gradient-to-br from-gray-100 to-gray-150",
+  },
+  // Plumbing issues
+  "Clogged drain": {
+    type: "animation",
+    description: "Water draining slowly or not at all",
+    bgColor: "bg-gradient-to-br from-blue-100 to-cyan-200",
+  },
+  "Leaky pipe/faucet": {
+    type: "animation",
+    description: "Water dripping from pipes or faucet",
+    bgColor: "bg-gradient-to-br from-sky-100 to-sky-200",
+  },
+  "Water heater issue": {
+    type: "animation",
+    description: "No hot water or temperature problems",
+    bgColor: "bg-gradient-to-br from-orange-100 to-red-200",
+  },
+  "Toilet problem": {
+    type: "animation",
+    description: "Running, clogged, or not flushing properly",
+    bgColor: "bg-gradient-to-br from-indigo-100 to-indigo-200",
+  },
+  // Paint finishes
+  "Textured finish": {
+    type: "animation",
+    description: "Adds depth and pattern to walls",
+    bgColor: "bg-gradient-to-br from-amber-100 to-yellow-200",
+  },
+  "Faux finish": {
+    type: "animation",
+    description: "Mimics marble, wood, or other materials",
+    bgColor: "bg-gradient-to-br from-rose-100 to-pink-200",
+  },
+  "High-gloss/specialty coating": {
+    type: "animation",
+    description: "Shiny, reflective surface finish",
+    bgColor: "bg-gradient-to-br from-violet-100 to-purple-200",
+  },
+}
+
+// Animated visual preview component
+const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { option: string }) {
+  const guide = optionVisualGuides[option]
+  if (!guide) return null
+
+  // Different animations based on option type
+  const getAnimation = () => {
+    // Mount type animations
+    if (option === "Fixed (flat against wall)") {
+      return (
+        <div className="relative w-full h-full flex items-center justify-center">
+          <div className="w-8 h-12 bg-gray-300 rounded-sm absolute left-1/2 -translate-x-1/2" /> {/* Wall */}
+          <motion.div 
+            className="w-6 h-4 bg-gray-800 rounded-sm border border-gray-600 absolute"
+            style={{ left: "50%", x: "-50%" }}
+          /> {/* TV flat */}
+        </div>
+      )
+    }
+    if (option === "Tilting (angle adjustment)") {
+      return (
+        <div className="relative w-full h-full flex items-center justify-center">
+          <div className="w-8 h-12 bg-gray-300 rounded-sm absolute left-1/2 -translate-x-1/2" />
+          <motion.div 
+            className="w-6 h-4 bg-gray-800 rounded-sm border border-gray-600 absolute origin-top"
+            style={{ left: "50%", x: "-50%" }}
+            animate={{ rotateX: [0, 15, 0, -10, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </div>
+      )
+    }
+    if (option === "Full-motion/Articulating (swivel and tilt)") {
+      return (
+        <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
+          <div className="w-3 h-12 bg-gray-300 rounded-sm absolute left-2" />
+          <motion.div 
+            className="absolute left-4 flex items-center"
+            animate={{ 
+              x: [0, 8, 8, 0],
+              rotateY: [0, 0, 25, 0],
+            }}
+            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <div className="w-4 h-0.5 bg-gray-500" /> {/* Arm */}
+            <div className="w-6 h-4 bg-gray-800 rounded-sm border border-gray-600" />
+          </motion.div>
+        </div>
+      )
+    }
+    if (option === "Ceiling mount") {
+      return (
+        <div className="relative w-full h-full flex flex-col items-center">
+          <div className="w-full h-2 bg-gray-300" /> {/* Ceiling */}
+          <motion.div 
+            className="flex flex-col items-center"
+            animate={{ y: [0, 2, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <div className="w-0.5 h-3 bg-gray-500" /> {/* Pole */}
+            <div className="w-6 h-4 bg-gray-800 rounded-sm border border-gray-600" />
+          </motion.div>
+        </div>
+      )
+    }
+    // Wall type animations
+    if (option === "Drywall/Sheetrock") {
+      return (
+        <div className="relative w-full h-full flex items-center justify-center">
+          <div className="w-10 h-10 bg-white border-2 border-gray-300 rounded-sm flex items-center justify-center">
+            <div className="w-6 h-6 border border-dashed border-gray-400 rounded-sm" />
+          </div>
+        </div>
+      )
+    }
+    if (option === "Brick") {
+      return (
+        <div className="relative w-full h-full flex items-center justify-center">
+          <div className="grid grid-cols-3 gap-0.5 p-1">
+            {[...Array(6)].map((_, i) => (
+              <motion.div 
+                key={i}
+                className="w-3 h-2 bg-red-400 rounded-[1px]"
+                animate={{ opacity: [0.7, 1, 0.7] }}
+                transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.1 }}
+              />
+            ))}
+          </div>
+        </div>
+      )
+    }
+    if (option === "Concrete") {
+      return (
+        <div className="relative w-full h-full flex items-center justify-center">
+          <motion.div 
+            className="w-10 h-10 bg-gradient-to-br from-gray-400 to-gray-500 rounded-sm"
+            animate={{ boxShadow: ["inset 0 0 10px rgba(0,0,0,0.2)", "inset 0 0 5px rgba(0,0,0,0.1)", "inset 0 0 10px rgba(0,0,0,0.2)"] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <div className="w-full h-full flex items-center justify-center text-[8px] text-gray-600 font-bold">SOLID</div>
+          </motion.div>
+        </div>
+      )
+    }
+    // Cable management animations
+    if (option === "Yes, hide all cables in wall") {
+      return (
+        <div className="relative w-full h-full flex items-center justify-center">
+          <div className="w-3 h-12 bg-gray-200 absolute left-3 rounded-sm" /> {/* Wall */}
+          <div className="w-5 h-3 bg-gray-700 absolute top-2 left-4 rounded-sm" /> {/* TV */}
+          <motion.div 
+            className="absolute left-4 top-5 w-0.5 h-0 bg-green-500"
+            animate={{ height: [0, 6, 6], opacity: [1, 1, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          />
+          <div className="w-2 h-2 bg-gray-400 absolute bottom-2 left-4 rounded-sm" /> {/* Outlet */}
+        </div>
+      )
+    }
+    if (option === "Yes, use cable covers") {
+      return (
+        <div className="relative w-full h-full flex items-center justify-center">
+          <div className="w-3 h-12 bg-gray-200 absolute left-3 rounded-sm" />
+          <div className="w-5 h-3 bg-gray-700 absolute top-2 left-4 rounded-sm" />
+          <motion.div 
+            className="absolute left-5 top-5 w-1 rounded-sm bg-white border border-gray-300"
+            animate={{ height: [0, 7] }}
+            transition={{ duration: 1, repeat: Infinity, repeatDelay: 1 }}
+          />
+          <div className="w-2 h-2 bg-gray-400 absolute bottom-2 left-4 rounded-sm" />
+        </div>
+      )
+    }
+    if (option === "No, cables visible is fine") {
+      return (
+        <div className="relative w-full h-full flex items-center justify-center">
+          <div className="w-3 h-12 bg-gray-200 absolute left-3 rounded-sm" />
+          <div className="w-5 h-3 bg-gray-700 absolute top-2 left-4 rounded-sm" />
+          <motion.svg 
+            className="absolute left-5 top-5" 
+            width="8" height="10" 
+            viewBox="0 0 8 10"
+            animate={{ pathLength: [0, 1] }}
+          >
+            <motion.path 
+              d="M1 0 Q 4 5, 2 10" 
+              stroke="#333" 
+              strokeWidth="0.5" 
+              fill="none"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 1, repeat: Infinity, repeatDelay: 0.5 }}
+            />
+          </motion.svg>
+          <div className="w-2 h-2 bg-gray-400 absolute bottom-2 left-4 rounded-sm" />
+        </div>
+      )
+    }
+    // Plumbing animations
+    if (option === "Clogged drain") {
+      return (
+        <div className="relative w-full h-full flex items-center justify-center">
+          <div className="w-6 h-2 bg-gray-300 rounded-t-full" /> {/* Sink */}
+          <div className="absolute top-4 w-2 h-4 bg-gray-400 rounded-b-sm" /> {/* Pipe */}
+          <motion.div 
+            className="absolute top-3 w-4 h-1 bg-blue-400 rounded-full"
+            animate={{ y: [0, 1, 0], opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 1, repeat: Infinity }}
+          />
+          <motion.div 
+            className="absolute top-5 w-1.5 h-1.5 bg-amber-600 rounded-full"
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ duration: 0.5, repeat: Infinity }}
+          />
+        </div>
+      )
+    }
+    if (option === "Leaky pipe/faucet") {
+      return (
+        <div className="relative w-full h-full flex flex-col items-center justify-center">
+          <div className="w-3 h-2 bg-gray-400 rounded-t-sm" /> {/* Faucet */}
+          <div className="w-1 h-3 bg-gray-400" /> {/* Spout */}
+          {[0, 1, 2].map((i) => (
+            <motion.div
+              key={i}
+              className="absolute w-1 h-1 bg-blue-400 rounded-full"
+              style={{ top: "60%" }}
+              animate={{ 
+                y: [0, 8, 16],
+                opacity: [1, 0.7, 0],
+                scale: [1, 0.8, 0.5]
+              }}
+              transition={{ 
+                duration: 0.8, 
+                repeat: Infinity, 
+                delay: i * 0.3,
+                ease: "easeIn"
+              }}
+            />
+          ))}
+        </div>
+      )
+    }
+    if (option === "Water heater issue") {
+      return (
+        <div className="relative w-full h-full flex items-center justify-center">
+          <div className="w-6 h-10 bg-gray-300 rounded-sm border border-gray-400 flex flex-col items-center justify-center">
+            <motion.div 
+              className="w-4 h-1 rounded-full"
+              animate={{ backgroundColor: ["#60a5fa", "#f97316", "#60a5fa"] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+            <motion.div 
+              className="text-[6px] mt-1 font-bold"
+              animate={{ color: ["#3b82f6", "#ea580c", "#3b82f6"] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              TEMP
+            </motion.div>
+          </div>
+        </div>
+      )
+    }
+    // Default fallback - show description text
+    return (
+      <div className="w-full h-full flex items-center justify-center p-1">
+        <span className="text-[7px] text-gray-600 text-center leading-tight">{guide.description}</span>
+      </div>
+    )
+  }
+
+  return (
+    <div className={`w-12 h-12 rounded-lg ${guide.bgColor} flex items-center justify-center overflow-hidden shadow-inner mb-1`}>
+      {getAnimation()}
+    </div>
+  )
+})
 
 type ServiceProvider = {
   id: number
@@ -1033,19 +1387,40 @@ const MessageItem = memo(
             <p className="text-sm relative z-10">{message.content}</p>
 
             {message.options && (
-              <div className="mt-4 flex flex-wrap gap-2 relative z-10">
-                {message.options.map((option, index) => (
-                  <motion.button
-                    key={`${message.id}-${option}-${index}`}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: index * 0.05, duration: 0.2 }}
-                    className="px-3 py-1.5 bg-white/90 dark:bg-gray-800/90 hover:bg-lavender-100/90 dark:hover:bg-lavender-900/30 rounded-full text-xs font-medium transition-all duration-200 border border-lavender-200/70 dark:border-lavender-700/50 hover:border-lavender-300 dark:hover:border-lavender-600/70 backdrop-blur-sm hover:shadow-md"
-                    onClick={() => handleOptionClick(option)}
-                  >
-                    {option}
-                  </motion.button>
-                ))}
+              <div className="mt-4 relative z-10">
+                {/* Check if any options have visual guides */}
+                {message.options.some(opt => optionVisualGuides[opt]) ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {message.options.map((option, index) => (
+                      <motion.button
+                        key={`${message.id}-${option}-${index}`}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: index * 0.05, duration: 0.2 }}
+                        className="flex flex-col items-center p-2 bg-white/90 dark:bg-gray-800/90 hover:bg-lavender-100/90 dark:hover:bg-lavender-900/30 rounded-xl text-xs font-medium transition-all duration-200 border border-lavender-200/70 dark:border-lavender-700/50 hover:border-lavender-400 dark:hover:border-lavender-500/70 backdrop-blur-sm hover:shadow-lg hover:scale-[1.02]"
+                        onClick={() => handleOptionClick(option)}
+                      >
+                        <OptionVisualPreview option={option} />
+                        <span className="text-center leading-tight mt-1">{option}</span>
+                      </motion.button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {message.options.map((option, index) => (
+                      <motion.button
+                        key={`${message.id}-${option}-${index}`}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: index * 0.05, duration: 0.2 }}
+                        className="px-3 py-1.5 bg-white/90 dark:bg-gray-800/90 hover:bg-lavender-100/90 dark:hover:bg-lavender-900/30 rounded-full text-xs font-medium transition-all duration-200 border border-lavender-200/70 dark:border-lavender-700/50 hover:border-lavender-300 dark:hover:border-lavender-600/70 backdrop-blur-sm hover:shadow-md"
+                        onClick={() => handleOptionClick(option)}
+                      >
+                        {option}
+                      </motion.button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
             {message.services && (
