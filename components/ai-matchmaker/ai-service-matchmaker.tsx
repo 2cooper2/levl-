@@ -168,23 +168,8 @@ const optionVisualGuides: Record<string, {
 }
 
 // Animated visual preview component
-const OptionVisualPreview = memo(function OptionVisualPreview({ option, isActive = true }: { option: string; isActive?: boolean }) {
+const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { option: string }) {
   const guide = optionVisualGuides[option]
-  const [isVisible, setIsVisible] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
-  
-  useEffect(() => {
-    if (!isActive) {
-      setIsVisible(false)
-      return
-    }
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsVisible(entry.isIntersecting),
-      { threshold: 0.1 }
-    )
-    if (containerRef.current) observer.observe(containerRef.current)
-    return () => observer.disconnect()
-  }, [isActive])
   
   if (!guide) return null
 
@@ -1550,10 +1535,8 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option, isActive
   }
 
   return (
-    <div ref={containerRef} className="w-full aspect-[5/4] rounded-lg overflow-hidden shadow-inner" style={{ willChange: 'transform', transform: 'translateZ(0)' }}>
-      {isVisible ? getAnimation() : (
-        <div className={`w-full h-full ${guide.bgColor || 'bg-gray-100'}`} />
-      )}
+    <div className="w-full aspect-[5/4] rounded-lg overflow-hidden shadow-inner">
+      {getAnimation()}
     </div>
   )
 })
@@ -2520,12 +2503,10 @@ const MessageItem = memo(
     message,
     onOptionSelect,
     router,
-    isActiveOptions = false,
   }: {
     message: Message
     onOptionSelect: (option: string) => void
     router: ReturnType<typeof useRouter>
-    isActiveOptions?: boolean
   }) => {
     const handleOptionClick = useCallback(
       (option: string) => {
@@ -2584,7 +2565,7 @@ const MessageItem = memo(
                 className={`flex flex-col items-center overflow-hidden bg-white/90 dark:bg-gray-800/90 hover:bg-lavender-100/90 dark:hover:bg-lavender-900/30 rounded-xl text-xs font-medium transition-all duration-200 border border-lavender-200/70 dark:border-lavender-700/50 hover:border-lavender-400 dark:hover:border-lavender-500/70 backdrop-blur-sm hover:shadow-lg hover:scale-[1.02] ${!hasVisualGuide ? 'justify-center min-h-[80px]' : ''}`}
                 onClick={() => handleOptionClick(option)}
                 >
-                <OptionVisualPreview option={option} isActive={isActiveOptions} />
+                <OptionVisualPreview option={option} />
                 <span className={`text-center leading-tight px-2 py-1.5 w-full ${hasVisualGuide ? 'bg-white/80 dark:bg-gray-800/80' : ''}`}>{option}</span>
                 </motion.button>
                       )
@@ -3196,6 +3177,10 @@ translate-y-[-4px] hover:translate-y-[-8px]"
               style={{
                 scrollbarWidth: "thin",
                 scrollbarColor: "rgba(79, 70, 229, 0.2) transparent",
+                transform: "translateZ(0)",
+                backfaceVisibility: "hidden",
+                perspective: 1000,
+                willChange: "scroll-position",
               }}
             >
               <style jsx>{`
@@ -3211,23 +3196,16 @@ translate-y-[-4px] hover:translate-y-[-8px]"
                   background: rgba(79, 70, 229, 0.4);
                 }
               `}</style>
-              <div className="space-y-6 w-full">
-                <AnimatePresence initial={false}>
-                  {(() => {
-                    // Find the last AI message with options to mark as active
-                    const lastAiWithOptionsIndex = messages.reduce((lastIdx, msg, idx) => 
-                      msg.type === 'ai' && msg.options && msg.options.length > 0 ? idx : lastIdx, -1)
-                    
-                    return messages.map((message, idx) => (
-                      <MessageItem
-                        key={message.id}
-                        message={message}
-                        onOptionSelect={handleOptionSelect}
-                        router={router}
-                        isActiveOptions={idx === lastAiWithOptionsIndex}
-                      />
-                    ))
-                  })()}
+              <div className="space-y-6 w-full" style={{ transform: "translateZ(0)", backfaceVisibility: "hidden" }}>
+                <AnimatePresence mode="popLayout" initial={false}>
+                  {messages.map((message) => (
+                    <MessageItem
+                      key={message.id}
+                      message={message}
+                      onOptionSelect={handleOptionSelect}
+                      router={router}
+                    />
+                  ))}
                 </AnimatePresence>
                 <div ref={messagesEndRef} />
               </div>
