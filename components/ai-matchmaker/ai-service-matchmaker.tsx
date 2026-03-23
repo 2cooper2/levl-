@@ -353,29 +353,25 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
         <div className="relative w-full h-full overflow-hidden">
           {/* Concrete texture base */}
           <div className="absolute inset-0 bg-gradient-to-br from-gray-400 via-gray-500 to-gray-600">
-            {/* Aggregate texture */}
-            <svg className="absolute inset-0 w-full h-full opacity-40" viewBox="0 0 60 60">
-              <defs>
-                <filter id="concrete-noise">
-                  <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" result="noise"/>
-                  <feDiffuseLighting in="noise" lightingColor="white" surfaceScale="1.5">
-                    <feDistantLight azimuth="45" elevation="60"/>
-                  </feDiffuseLighting>
-                </filter>
-              </defs>
-              <rect width="100%" height="100%" filter="url(#concrete-noise)" opacity="0.3"/>
-            </svg>
+            {/* Aggregate texture - using dots pattern instead of filter */}
+            <div className="absolute inset-0 opacity-30" style={{ 
+              backgroundImage: `radial-gradient(circle at 20% 30%, rgba(180,180,180,0.4) 1px, transparent 1px),
+                               radial-gradient(circle at 60% 20%, rgba(160,160,160,0.3) 1.5px, transparent 1.5px),
+                               radial-gradient(circle at 80% 70%, rgba(170,170,170,0.35) 1px, transparent 1px),
+                               radial-gradient(circle at 40% 80%, rgba(150,150,150,0.4) 2px, transparent 2px),
+                               radial-gradient(circle at 10% 60%, rgba(190,190,190,0.3) 1px, transparent 1px)`,
+              backgroundSize: '20px 20px'
+            }} />
             {/* Pebbles/aggregate */}
-            {[...Array(20)].map((_, i) => (
+            {[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19].map((i) => (
               <motion.div
                 key={i}
-                className="absolute rounded-full"
+                className="absolute rounded-full bg-gray-400/60"
                 style={{
-                  width: `${Math.random() * 3 + 2}px`,
-                  height: `${Math.random() * 3 + 2}px`,
-                  left: `${Math.random() * 90}%`,
-                  top: `${Math.random() * 90}%`,
-                  background: `rgba(${150 + Math.random() * 50}, ${150 + Math.random() * 50}, ${150 + Math.random() * 50}, 0.6)`,
+                  width: `${2 + (i % 3)}px`,
+                  height: `${2 + (i % 3)}px`,
+                  left: `${(i * 17) % 90}%`,
+                  top: `${(i * 23) % 90}%`,
                 }}
                 animate={{ opacity: [0.4, 0.7, 0.4] }}
                 transition={{ duration: 2, repeat: Infinity, delay: i * 0.1 }}
