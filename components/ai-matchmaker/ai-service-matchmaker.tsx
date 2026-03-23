@@ -79,12 +79,17 @@ const optionVisualGuides: Record<string, {
   "Plaster": {
     type: "animation",
     description: "Older homes, may need special anchoring",
-    bgColor: "bg-gradient-to-br from-amber-50 to-cream-100",
+    bgColor: "bg-gradient-to-br from-amber-100 to-orange-200",
   },
   "Stone": {
     type: "animation",
     description: "Natural stone, requires careful drilling",
     bgColor: "bg-gradient-to-br from-zinc-200 to-zinc-300",
+  },
+  "Metal studs": {
+    type: "animation",
+    description: "Thinner than wood, needs toggle bolts",
+    bgColor: "bg-gradient-to-br from-slate-200 to-slate-300",
   },
   // Cable management
   "Yes, hide all cables in wall": {
@@ -209,9 +214,29 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
     // Wall type animations
     if (option === "Drywall/Sheetrock") {
       return (
-        <div className="relative w-full h-full flex items-center justify-center">
-          <div className="w-10 h-10 bg-white border-2 border-gray-300 rounded-sm flex items-center justify-center">
-            <div className="w-6 h-6 border border-dashed border-gray-400 rounded-sm" />
+        <div className="relative w-full h-full overflow-hidden">
+          {/* Drywall texture - smooth with subtle paper texture */}
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-100 via-white to-gray-50">
+            {/* Subtle texture dots */}
+            <div className="absolute inset-0 opacity-30" style={{ 
+              backgroundImage: `radial-gradient(circle at 30% 20%, rgba(200,200,200,0.3) 0.5px, transparent 0.5px),
+                               radial-gradient(circle at 70% 60%, rgba(180,180,180,0.2) 0.5px, transparent 0.5px),
+                               radial-gradient(circle at 50% 80%, rgba(190,190,190,0.25) 0.5px, transparent 0.5px)`,
+              backgroundSize: '8px 8px'
+            }} />
+            {/* Joint line */}
+            <div className="absolute top-0 bottom-0 left-1/2 w-[1px] bg-gray-200/50" />
+            {/* Screw dimples */}
+            <motion.div 
+              className="absolute top-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-gray-200"
+              animate={{ opacity: [0.3, 0.6, 0.3] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+            <motion.div 
+              className="absolute bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-gray-200"
+              animate={{ opacity: [0.3, 0.6, 0.3] }}
+              transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+            />
           </div>
         </div>
       )
@@ -235,34 +260,103 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
     if (option === "Concrete") {
       return (
         <div className="relative w-full h-full overflow-hidden">
-          {/* Concrete wall texture */}
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-400 via-gray-450 to-gray-500">
-            {/* Aggregate speckles */}
-            <div className="absolute inset-0" style={{
-              backgroundImage: `radial-gradient(circle at 15% 25%, rgba(120,120,120,0.4) 1px, transparent 1px),
-                               radial-gradient(circle at 45% 15%, rgba(100,100,100,0.3) 1.5px, transparent 1.5px),
-                               radial-gradient(circle at 75% 35%, rgba(140,140,140,0.35) 1px, transparent 1px),
-                               radial-gradient(circle at 25% 65%, rgba(110,110,110,0.4) 1px, transparent 1px),
-                               radial-gradient(circle at 85% 75%, rgba(130,130,130,0.3) 1px, transparent 1px),
-                               radial-gradient(circle at 55% 85%, rgba(105,105,105,0.35) 1.5px, transparent 1.5px)`,
+          {/* Concrete texture base */}
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-400 via-gray-500 to-gray-600">
+            {/* Aggregate texture using CSS patterns */}
+            <div className="absolute inset-0 opacity-40" style={{ 
+              backgroundImage: `radial-gradient(circle at 25% 25%, rgba(120,120,120,0.5) 1px, transparent 1px),
+                               radial-gradient(circle at 75% 30%, rgba(100,100,100,0.4) 1.5px, transparent 1.5px),
+                               radial-gradient(circle at 50% 70%, rgba(140,140,140,0.4) 1px, transparent 1px),
+                               radial-gradient(circle at 20% 80%, rgba(110,110,110,0.5) 1px, transparent 1px),
+                               radial-gradient(circle at 80% 75%, rgba(130,130,130,0.4) 1.5px, transparent 1.5px)`,
               backgroundSize: '12px 12px'
             }} />
-            {/* Surface imperfections */}
-            <div className="absolute inset-0 opacity-20" style={{
-              backgroundImage: `linear-gradient(45deg, transparent 40%, rgba(0,0,0,0.1) 50%, transparent 60%),
-                               linear-gradient(-45deg, transparent 40%, rgba(255,255,255,0.05) 50%, transparent 60%)`,
-              backgroundSize: '8px 8px'
-            }} />
-            {/* Subtle form lines */}
-            <div className="absolute top-[30%] left-0 right-0 h-[1px] bg-gray-500/20" />
-            <div className="absolute top-[70%] left-0 right-0 h-[1px] bg-gray-500/20" />
+            {/* Small pebble marks */}
+            {[0,1,2,3,4,5,6,7].map((i) => (
+              <motion.div
+                key={i}
+                className="absolute rounded-full bg-gray-500/60"
+                style={{
+                  width: `${2 + (i % 2)}px`,
+                  height: `${2 + (i % 2)}px`,
+                  left: `${10 + (i * 11) % 80}%`,
+                  top: `${15 + (i * 13) % 70}%`,
+                }}
+                animate={{ opacity: [0.3, 0.5, 0.3] }}
+                transition={{ duration: 2.5, repeat: Infinity, delay: i * 0.2 }}
+              />
+            ))}
+            {/* Surface variation */}
+            <div className="absolute inset-0 bg-gradient-to-t from-gray-600/20 to-transparent" />
           </div>
-          {/* Subtle shimmer */}
-          <motion.div 
-            className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent"
-            animate={{ opacity: [0.1, 0.2, 0.1] }}
-            transition={{ duration: 3, repeat: Infinity }}
-          />
+        </div>
+      )
+    }
+    if (option === "Plaster") {
+      return (
+        <div className="relative w-full h-full overflow-hidden">
+          {/* Plaster wall texture - smooth with slight imperfections */}
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100">
+            {/* Plaster texture - subtle bumpy surface */}
+            <div className="absolute inset-0 opacity-40" style={{ 
+              backgroundImage: `radial-gradient(ellipse at 20% 30%, rgba(200,180,150,0.4) 1px, transparent 1px),
+                               radial-gradient(ellipse at 60% 20%, rgba(190,170,140,0.3) 1.5px, transparent 1.5px),
+                               radial-gradient(ellipse at 40% 60%, rgba(210,190,160,0.35) 1px, transparent 1px),
+                               radial-gradient(ellipse at 80% 70%, rgba(195,175,145,0.4) 1px, transparent 1px),
+                               radial-gradient(ellipse at 30% 80%, rgba(185,165,135,0.3) 1px, transparent 1px)`,
+              backgroundSize: '10px 10px'
+            }} />
+            {/* Subtle crack lines typical of old plaster */}
+            <motion.div 
+              className="absolute top-3 left-2 w-4 h-[0.5px] bg-amber-200/40 rotate-12"
+              animate={{ opacity: [0.2, 0.4, 0.2] }}
+              transition={{ duration: 3, repeat: Infinity }}
+            />
+            <motion.div 
+              className="absolute bottom-4 right-3 w-3 h-[0.5px] bg-amber-200/40 -rotate-6"
+              animate={{ opacity: [0.2, 0.4, 0.2] }}
+              transition={{ duration: 3, repeat: Infinity, delay: 1 }}
+            />
+            {/* Surface variation */}
+            <div className="absolute inset-0 bg-gradient-to-br from-transparent via-orange-100/20 to-amber-100/30" />
+          </div>
+        </div>
+      )
+    }
+    if (option === "Stone") {
+      return (
+        <div className="relative w-full h-full overflow-hidden">
+          {/* Natural stone wall texture */}
+          <div className="absolute inset-0 bg-gradient-to-br from-stone-300 via-stone-400 to-stone-500">
+            {/* Stone shapes using CSS borders */}
+            <div className="absolute inset-1 grid grid-cols-2 grid-rows-2 gap-[2px]">
+              <motion.div 
+                className="bg-gradient-to-br from-stone-300 to-stone-500 rounded-[2px] border-[0.5px] border-stone-600/30"
+                animate={{ opacity: [0.85, 1, 0.85] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+              <motion.div 
+                className="bg-gradient-to-br from-stone-400 to-stone-500 rounded-[2px] border-[0.5px] border-stone-600/30"
+                animate={{ opacity: [0.9, 1, 0.9] }}
+                transition={{ duration: 2.2, repeat: Infinity, delay: 0.3 }}
+              />
+              <motion.div 
+                className="bg-gradient-to-br from-stone-350 to-stone-450 rounded-[2px] border-[0.5px] border-stone-600/30"
+                animate={{ opacity: [0.88, 1, 0.88] }}
+                transition={{ duration: 1.8, repeat: Infinity, delay: 0.6 }}
+              />
+              <motion.div 
+                className="bg-gradient-to-br from-stone-300 to-stone-400 rounded-[2px] border-[0.5px] border-stone-600/30"
+                animate={{ opacity: [0.82, 1, 0.82] }}
+                transition={{ duration: 2.5, repeat: Infinity, delay: 0.9 }}
+              />
+            </div>
+            {/* Mortar lines */}
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute top-1/2 left-1 right-1 h-[2px] bg-stone-600/20" />
+              <div className="absolute top-1 bottom-1 left-1/2 w-[2px] bg-stone-600/20" />
+            </div>
+          </div>
         </div>
       )
     }
@@ -625,14 +719,14 @@ const serviceSpecificQuestions: ServiceSpecificQuestions = {
         "Over 75 inches",
         "Unsure",
       ],
-      "What type of wall do you have?": [
-        "Drywall/Sheetrock",
-        "Brick",
-        "Concrete",
-        "Plaster",
-        "Stone",
-        "Unsure",
-      ],
+  "What type of wall do you have?": [
+    "Drywall/Sheetrock",
+    "Brick",
+    "Concrete",
+    "Plaster",
+    "Stone",
+    "Unsure",
+  ],
       "Do you already have a wall mount, or do you need one included?": [
         "I have a mount",
         "I need a mount included",
