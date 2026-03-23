@@ -210,16 +210,15 @@ export function PersonalizedDashboard() {
           ))}
         </div>
 
-        {/* Subtle noise texture */}
-        <div className="absolute inset-0 opacity-[0.02] mix-blend-overlay pointer-events-none">
-          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-            <filter id="noise">
-              <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" />
-              <feColorMatrix type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0" />
-            </filter>
-            <rect width="100%" height="100%" filter="url(#noise)" />
-          </svg>
-        </div>
+        {/* Subtle noise texture using CSS */}
+        <div 
+          className="absolute inset-0 opacity-[0.015] mix-blend-overlay pointer-events-none"
+          style={{
+            backgroundImage: `radial-gradient(circle at 25% 25%, rgba(0,0,0,0.1) 1px, transparent 1px),
+                             radial-gradient(circle at 75% 75%, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+            backgroundSize: '4px 4px',
+          }}
+        />
       </div>
 
       <div className="relative z-10">

@@ -4,19 +4,13 @@ import Link from "next/link"
 import { AnimatedGradientBackground } from "@/components/animated-gradient-background"
 import { BackgroundPattern } from "@/components/background-pattern"
 import { EnhancedHeroSection } from "@/components/enhanced-hero-section"
-import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { LevlLogo } from "@/components/levl-logo"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { AIServiceMatchmaker } from "@/components/ai-matchmaker/ai-service-matchmaker"
 
 export default function Home() {
-  const [isLoaded, setIsLoaded] = useState(false)
   const router = useRouter()
-
-  useEffect(() => {
-    setIsLoaded(true)
-  }, [])
 
   return (
     <div className="flex min-h-screen flex-col" style={{ margin: 0, padding: 0 }}>

@@ -21,7 +21,7 @@ import {
   Users,
   Target,
   Zap,
-  WrenchIcon as ScrewDriver,
+  HardDrive as ScrewDriver,
   Hammer,
   Paintbrush,
 } from "lucide-react"
@@ -498,7 +498,7 @@ export function EnhancedHeroSection() {
   const skillsRef = useRef<HTMLDivElement>(null)
   const progressInterval = useRef<NodeJS.Timeout>()
   const chartRef = useRef<HTMLCanvasElement>(null)
-  const chartAnimationRef = useRef<number>(0)
+  const chartAnimationRef = useRef<number>(0) // kept for compatibility
   const [showTooltip, setShowTooltip] = useState(false)
   const [tooltipContent, setTooltipContent] = useState({ title: "", description: "" })
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 })
@@ -509,46 +509,38 @@ export function EnhancedHeroSection() {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
   const [showSignupModal, setShowSignupModal] = useState(false)
 
-  const [circuitLines, setCircuitLines] = useState<
-    Array<{
-      top: number
-      width: number
-      left: number
-    }>
-  >([])
+  const [circuitLines] = useState(() =>
+    Array.from({ length: 8 }, (_, i) => ({
+      top: Math.random() * 100,
+      width: 50 + Math.random() * 150,
+      left: Math.random() * 100,
+    })),
+  )
 
-  const [circuitDots, setCircuitDots] = useState<
-    Array<{
-      top: number
-      left: number
-    }>
-  >([])
+  const [circuitDots] = useState(() =>
+    Array.from({ length: 12 }, (_, i) => ({
+      top: Math.random() * 100,
+      left: Math.random() * 100,
+    })),
+  )
 
-  const [glowDots, setGlowDots] = useState<
-    Array<{
-      top: number
-      left: number
-      delay: number
-    }>
-  >([])
+  const [glowDots] = useState(() =>
+    Array.from({ length: 15 }, (_, i) => ({
+      top: Math.random() * 100,
+      left: Math.random() * 100,
+      delay: Math.random() * 5,
+    })),
+  )
 
-  const [dataFlows, setDataFlows] = useState<
-    Array<{
-      top: number
-      left: number
-      delay: number
-    }>
-  >([])
+  const [dataFlows] = useState(() =>
+    Array.from({ length: 10 }, (_, i) => ({
+      top: Math.random() * 100,
+      left: Math.random() * 100,
+      delay: Math.random() * 4,
+    })),
+  )
 
-  const [particles, setParticles] = useState<
-    Array<{
-      id: number
-      x: number
-      y: number
-      size: number
-      duration: number
-    }>
-  >(
+  const [particles] = useState(() =>
     Array.from({ length: 20 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
@@ -570,53 +562,21 @@ export function EnhancedHeroSection() {
     router.push("/stripe-checkout")
   }
 
-  // Generate decorative elements
-  useEffect(() => {
-    // Generate circuit lines
-    const lines = Array.from({ length: 8 }, (_, i) => ({
-      top: Math.random() * 100,
-      width: 50 + Math.random() * 150,
-      left: Math.random() * 100,
-    }))
-    setCircuitLines(lines)
-
-    // Generate circuit dots
-    const dots = Array.from({ length: 12 }, (_, i) => ({
-      top: Math.random() * 100,
-      left: Math.random() * 100,
-    }))
-    setCircuitDots(dots)
-
-    // Generate glow dots
-    const glows = Array.from({ length: 15 }, (_, i) => ({
-      top: Math.random() * 100,
-      left: Math.random() * 100,
-      delay: Math.random() * 5,
-    }))
-    setGlowDots(glows)
-
-    // Generate data flows
-    const flows = Array.from({ length: 10 }, (_, i) => ({
-      top: Math.random() * 100,
-      left: Math.random() * 100,
-      delay: Math.random() * 4,
-    }))
-    setDataFlows(flows)
-  }, [])
+  // Decorative elements are now initialized once with useState
 
   // Removed auto-rotation of skills as requested
   useEffect(() => {
     // Skills will now stay on the selected skill without auto-rotating
   }, [])
 
-  // Diamond glint effect
+  // Diamond glint effect - use longer interval to reduce state updates
   useEffect(() => {
     const glintInterval = setInterval(() => {
       setShowDiamondGlint(true)
       setTimeout(() => {
         setShowDiamondGlint(false)
       }, 800)
-    }, 3000)
+    }, 8000)
 
     return () => clearInterval(glintInterval)
   }, [])
@@ -646,31 +606,22 @@ export function EnhancedHeroSection() {
     }
   }, [activeSkill, skills])
 
-  // Animate the skill path visualization
+  // Skill path visualization - run once on mount only, no repeating interval
   useEffect(() => {
     if (!skillsRef.current) return
 
-    const animateNodes = () => {
-      const nodes = skillsRef.current?.querySelectorAll(".skill-node") || []
-
-      nodes.forEach((node, index) => {
-        const delay = index * 300
+    const nodes = skillsRef.current?.querySelectorAll(".skill-node") || []
+    nodes.forEach((node, index) => {
+      const delay = index * 300
+      setTimeout(() => {
+        node.classList.add("animate-pulse")
         setTimeout(() => {
-          node.classList.add("animate-pulse")
-          setTimeout(() => {
-            node.classList.remove("animate-pulse")
-          }, 1000)
-        }, delay)
-      })
-    }
-
-    animateNodes()
-    const interval = setInterval(animateNodes, 5000)
-
-    return () => clearInterval(interval)
+          node.classList.remove("animate-pulse")
+        }, 1000)
+      }, delay)
+    })
   }, [])
 
-  // Draw the earnings growth chart
   useEffect(() => {
     if (!chartRef.current || activeTab !== "analytics") return
 
@@ -687,121 +638,102 @@ export function EnhancedHeroSection() {
 
     ctx.scale(dpr, dpr)
 
-    let animationId: number
+    // Draw chart once statically - no animation loop needed
+    try {
+      const width = rect.width
+      const height = rect.height
 
-    const drawChart = () => {
-      try {
-        const width = rect.width
-        const height = rect.height
+      ctx.clearRect(0, 0, width, height)
 
-        ctx.clearRect(0, 0, width, height)
-
-        // Draw grid lines
-        ctx.beginPath()
-        for (let i = 0; i < width; i += 20) {
-          ctx.moveTo(i, 0)
-          ctx.lineTo(i, height)
-        }
-        for (let i = 0; i < height; i += 20) {
-          ctx.moveTo(0, i)
-          ctx.lineTo(width, i)
-        }
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.05)"
-        ctx.stroke()
-
-        // Generate earnings data - simulating growth over time
-        const now = Date.now()
-        const points = 60
-        const data = Array.from({ length: points }, (_, i) => {
-          const x = (width / points) * i
-
-          // Current earnings line (with some fluctuation)
-          const baseY = height * 0.8 - (i / points) * height * 0.6
-          const currentY = baseY + Math.sin((now + i * 1000) / 2000) * 5
-
-          // Projected earnings with skill advancement (higher, less fluctuation)
-          const projectedY = baseY * 0.7 + Math.sin((now + i * 3000) / 6000) * 2
-
-          return { x, currentY, projectedY }
-        })
-
-        // Draw area under current earnings line
-        ctx.beginPath()
-        ctx.moveTo(0, height)
-        data.forEach((point) => {
-          ctx.lineTo(point.x, point.currentY)
-        })
-        ctx.lineTo(width, height)
-        ctx.closePath()
-        ctx.fillStyle = "rgba(76, 110, 245, 0.1)"
-        ctx.fill()
-
-        // Draw area under projected earnings line
-        ctx.beginPath()
-        data.forEach((point, i) => {
-          ctx.lineTo(point.x, point.projectedY)
-        })
-        ctx.lineTo(width, height)
-        ctx.closePath()
-        ctx.fillStyle = "rgba(121, 80, 242, 0.1)"
-        ctx.fill()
-
-        // Draw current earnings line
-        ctx.beginPath()
-        data.forEach((point, i) => {
-          if (i === 0) ctx.moveTo(point.x, point.currentY)
-          else ctx.lineTo(point.x, point.currentY)
-        })
-        ctx.strokeStyle = "#4C6EF5"
-        ctx.lineWidth = 2
-        ctx.stroke()
-
-        // Draw projected earnings line
-        ctx.beginPath()
-        data.forEach((point, i) => {
-          if (i === 0) ctx.moveTo(point.x, point.projectedY)
-          else ctx.lineTo(point.x, point.projectedY)
-        })
-        ctx.strokeStyle = "#7950F2"
-        ctx.lineWidth = 2
-        ctx.stroke()
-
-        // Add labels
-        ctx.fillStyle = "#4C6EF5"
-        ctx.font = "10px Arial"
-        ctx.fillText("Current Earnings", 10, 15)
-
-        ctx.fillStyle = "#7950F2"
-        ctx.font = "10px Arial"
-        ctx.fillText("Projected Earnings", 10, 30)
-
-        // Add data points with hover effect
-        data
-          .filter((_, i) => i % 10 === 0)
-          .forEach((point, i) => {
-            ctx.beginPath()
-            ctx.arc(point.x, point.currentY, 3, 0, Math.PI * 2)
-            ctx.fillStyle = "#4C6EF5"
-            ctx.fill()
-
-            ctx.beginPath()
-            ctx.arc(point.x, point.projectedY, 3, 0, Math.PI * 2)
-            ctx.fillStyle = "#7950F2"
-            ctx.fill()
-          })
-
-        animationId = requestAnimationFrame(drawChart)
-      } catch (error) {
-        console.error("Error drawing chart:", error)
+      // Draw grid lines
+      ctx.beginPath()
+      for (let i = 0; i < width; i += 20) {
+        ctx.moveTo(i, 0)
+        ctx.lineTo(i, height)
       }
-    }
-
-    drawChart()
-
-    return () => {
-      if (animationId) {
-        cancelAnimationFrame(animationId)
+      for (let i = 0; i < height; i += 20) {
+        ctx.moveTo(0, i)
+        ctx.lineTo(width, i)
       }
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.05)"
+      ctx.stroke()
+
+      // Generate static earnings data
+      const points = 60
+      const data = Array.from({ length: points }, (_, i) => {
+        const x = (width / points) * i
+        const baseY = height * 0.8 - (i / points) * height * 0.6
+        const currentY = baseY + Math.sin(i * 0.5) * 5
+        const projectedY = baseY * 0.7 + Math.sin(i * 0.3) * 2
+        return { x, currentY, projectedY }
+      })
+
+      // Draw area under current earnings line
+      ctx.beginPath()
+      ctx.moveTo(0, height)
+      data.forEach((point) => {
+        ctx.lineTo(point.x, point.currentY)
+      })
+      ctx.lineTo(width, height)
+      ctx.closePath()
+      ctx.fillStyle = "rgba(76, 110, 245, 0.1)"
+      ctx.fill()
+
+      // Draw area under projected earnings line
+      ctx.beginPath()
+      data.forEach((point) => {
+        ctx.lineTo(point.x, point.projectedY)
+      })
+      ctx.lineTo(width, height)
+      ctx.closePath()
+      ctx.fillStyle = "rgba(121, 80, 242, 0.1)"
+      ctx.fill()
+
+      // Draw current earnings line
+      ctx.beginPath()
+      data.forEach((point, i) => {
+        if (i === 0) ctx.moveTo(point.x, point.currentY)
+        else ctx.lineTo(point.x, point.currentY)
+      })
+      ctx.strokeStyle = "#4C6EF5"
+      ctx.lineWidth = 2
+      ctx.stroke()
+
+      // Draw projected earnings line
+      ctx.beginPath()
+      data.forEach((point, i) => {
+        if (i === 0) ctx.moveTo(point.x, point.projectedY)
+        else ctx.lineTo(point.x, point.projectedY)
+      })
+      ctx.strokeStyle = "#7950F2"
+      ctx.lineWidth = 2
+      ctx.stroke()
+
+      // Add labels
+      ctx.fillStyle = "#4C6EF5"
+      ctx.font = "10px Arial"
+      ctx.fillText("Current Earnings", 10, 15)
+
+      ctx.fillStyle = "#7950F2"
+      ctx.font = "10px Arial"
+      ctx.fillText("Projected Earnings", 10, 30)
+
+      // Add data points
+      data
+        .filter((_, i) => i % 10 === 0)
+        .forEach((point) => {
+          ctx.beginPath()
+          ctx.arc(point.x, point.currentY, 3, 0, Math.PI * 2)
+          ctx.fillStyle = "#4C6EF5"
+          ctx.fill()
+
+          ctx.beginPath()
+          ctx.arc(point.x, point.projectedY, 3, 0, Math.PI * 2)
+          ctx.fillStyle = "#7950F2"
+          ctx.fill()
+        })
+    } catch (error) {
+      console.error("Error drawing chart:", error)
     }
   }, [activeTab, activeSkill])
 
@@ -811,7 +743,7 @@ export function EnhancedHeroSection() {
 
   return (
     <>
-      <section className="w-full relative overflow-hidden bg-gradient-to-br from-white via-lavender-100/30 to-white">
+      <section className="w-full relative overflow-hidden bg-gradient-to-br from-white via-lavender-100/30 to-white" style={{ willChange: "auto", transform: "translateZ(0)" }}>
         {/* Animated background elements */}
         <div className="absolute inset-0 bg-gradient-to-br from-white via-lavender-50 to-white/90 z-0" />
 
@@ -821,9 +753,9 @@ export function EnhancedHeroSection() {
         {/* Enhanced gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-lavender-200/20 to-white/90 z-0" />
 
-        {/* Particle system */}
+        {/* Particle system - CSS only to avoid React re-render flickering */}
         {particles.map((particle) => (
-          <motion.div
+          <div
             key={particle.id}
             className="absolute rounded-full bg-primary/10 z-0"
             style={{
@@ -831,17 +763,8 @@ export function EnhancedHeroSection() {
               top: `${particle.y}%`,
               width: particle.size,
               height: particle.size,
-            }}
-            animate={{
-              x: [0, Math.random() * 100 - 50],
-              y: [0, Math.random() * 100 - 50],
-              opacity: [0, 0.5, 0],
-            }}
-            transition={{
-              duration: particle.duration,
-              repeat: Number.POSITIVE_INFINITY,
-              repeatType: "reverse",
-              ease: "easeInOut",
+              animation: `pulse-glow ${particle.duration}s ease-in-out infinite`,
+              animationDelay: `${particle.id * 0.3}s`,
             }}
           />
         ))}
@@ -929,43 +852,20 @@ animate-pulse"
                   {/* Additional decorative elements */}
                   <div className="absolute bottom-0 right-0 w-24 h-24 bg-gradient-to-tl from-lavender-300/5 to-transparent rounded-tl-full"></div>
                   <div className="absolute top-1/2 left-0 w-12 h-24 bg-gradient-to-r from-lavender-400/5 to-transparent"></div>
-                  {/* Improved tech pattern overlay with subtle animation */}
-                  <motion.div
-                    className="tech-pattern absolute inset-0 bg-[radial-gradient(circle_at_10px_10px,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none z-1"
-                    animate={{
-                      opacity: [0.3, 0.5, 0.3],
-                      scale: [1, 1.02, 1],
-                    }}
-                    transition={{
-                      duration: 8,
-                      repeat: Number.POSITIVE_INFINITY,
-                      repeatType: "reverse",
-                      ease: "easeInOut",
-                    }}
+                  {/* Improved tech pattern overlay */}
+                  <div
+                    className="tech-pattern absolute inset-0 bg-[radial-gradient(circle_at_10px_10px,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none z-1 opacity-40"
                   />
 
-                  {/* Enhanced background overlay with gradient animation */}
-                  <motion.div
+                  {/* Enhanced background overlay */}
+                  <div
                     className="absolute inset-0 bg-gradient-to-br from-purple-50/10 via-transparent to-purple-100/10 pointer-events-none"
-                    animate={{
-                      background: [
-                        "radial-gradient(circle at 20% 30%, rgba(233, 213, 255, 0.1), transparent 70%)",
-                        "radial-gradient(circle at 70% 60%, rgba(233, 213, 255, 0.1), transparent 70%)",
-                        "radial-gradient(circle at 20% 30%, rgba(233, 213, 255, 0.1), transparent 70%)",
-                      ],
-                    }}
-                    transition={{
-                      duration: 15,
-                      repeat: Number.POSITIVE_INFINITY,
-                      repeatType: "reverse",
-                      ease: "easeInOut",
-                    }}
                   />
 
-                  {/* Circuit lines with improved styling */}
+                  {/* Circuit lines with CSS-only animations */}
                   <div className="circuit-lines">
                     {circuitLines.map((line, i) => (
-                      <motion.div
+                      <div
                         key={`line-${i}`}
                         className="circuit-line"
                         style={{
@@ -974,22 +874,12 @@ animate-pulse"
                           width: `${line.width}px`,
                           background:
                             "linear-gradient(90deg, rgba(168, 85, 247, 0.05), rgba(168, 85, 247, 0.1), rgba(168, 85, 247, 0.05))",
-                        }}
-                        animate={{
-                          opacity: [0.3, 0.7, 0.3],
-                          width: [line.width, line.width + 20, line.width],
-                        }}
-                        transition={{
-                          duration: 5 + (i % 3),
-                          repeat: Number.POSITIVE_INFINITY,
-                          repeatType: "reverse",
-                          ease: "easeInOut",
-                          delay: i * 0.5,
+                          opacity: 0.4,
                         }}
                       />
                     ))}
                     {circuitDots.map((dot, i) => (
-                      <motion.div
+                      <div
                         key={`dot-${i}`}
                         className="circuit-dot"
                         style={{
@@ -997,17 +887,7 @@ animate-pulse"
                           left: `${dot.left}%`,
                           backgroundColor: "rgba(168, 85, 247, 0.1)",
                           boxShadow: "0 0 5px rgba(168, 85, 247, 0.1)",
-                        }}
-                        animate={{
-                          scale: [1, 1.5, 1],
-                          opacity: [0.5, 0.8, 0.5],
-                        }}
-                        transition={{
-                          duration: 3 + (i % 2),
-                          repeat: Number.POSITIVE_INFINITY,
-                          repeatType: "reverse",
-                          ease: "easeInOut",
-                          delay: i * 0.3,
+                          opacity: 0.6,
                         }}
                       />
                     ))}
@@ -1033,62 +913,15 @@ animate-pulse"
                     <div className="flex items-center justify-between lg:col-span-12">
                       <div className="flex items-center">
                         <div className="h-10 w-10 rounded-full bg-gradient-to-r from-lavender-300 to-lavender-500 flex items-center justify-center mr-3 relative group">
-                          <motion.div
-                            animate={
-                              !isMobile
-                                ? {
-                                    y: [0, -3, 0],
-                                    rotate: [0, 2, -2, 0],
-                                  }
-                                : {}
-                            }
-                            transition={{
-                              duration: 4,
-                              repeat: Number.POSITIVE_INFINITY,
-                              repeatType: "reverse",
-                              ease: "easeInOut",
-                            }}
-                          >
-                            <Rocket className="h-5 w-5 text-white" />
-                          </motion.div>
-                          <motion.div
-                            className="absolute inset-0 rounded-full bg-white/30 scale-0"
-                            whileHover={!isMobile ? { scale: 1.5, opacity: [0, 0.5, 0] } : {}}
-                            transition={{ duration: 1 }}
-                          />
-                          {/* Orbital rings around the rocket icon */}
-                          <motion.div
+                          <Rocket className="h-5 w-5 text-white" />
+                          {/* Static orbital rings */}
+                          <div
                             className="absolute inset-0 rounded-full border border-white/20"
-                            animate={
-                              !isMobile
-                                ? {
-                                    scale: [1.1, 1.3, 1.1],
-                                    opacity: [0.7, 1, 0.7],
-                                  }
-                                : {}
-                            }
-                            transition={{
-                              duration: 3,
-                              repeat: Number.POSITIVE_INFINITY,
-                              ease: "easeInOut",
-                            }}
+                            style={{ transform: "scale(1.2)", opacity: 0.7 }}
                           />
-                          <motion.div
+                          <div
                             className="absolute inset-0 rounded-full border border-white/10"
-                            animate={
-                              !isMobile
-                                ? {
-                                    scale: [1.4, 1.6, 1.4],
-                                    opacity: [0.5, 0.8, 0.5],
-                                  }
-                                : {}
-                            }
-                            transition={{
-                              duration: 3.5,
-                              repeat: Number.POSITIVE_INFINITY,
-                              ease: "easeInOut",
-                              delay: 0.2,
-                            }}
+                            style={{ transform: "scale(1.5)", opacity: 0.5 }}
                           />
                         </div>
                         <h3 className="text-xl font-bold text-gray-800">
@@ -1145,10 +978,8 @@ animate-pulse"
                           )}
                           {activeSkill === index && (
                             <span className="ml-1.5 flex items-center">
-                              <motion.div
-                                className="h-1.5 w-1.5 rounded-full bg-white"
-                                animate={{ scale: [1, 1.5, 1] }}
-                                transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
+                              <div
+                                className="h-1.5 w-1.5 rounded-full bg-white animate-pulse"
                               />
                             </span>
                           )}
@@ -1210,18 +1041,7 @@ animate-pulse"
                               <div className="flex-1">
                                 <div className="flex items-center">
                                   <div className="h-10 w-10 rounded-xl bg-gradient-to-r from-lavender-300 to-lavender-500 flex items-center justify-center mr-3 relative group shadow-md shadow-lavender-300/20">
-                                    <motion.div
-                                      animate={{
-                                        scale: [1, 1.1, 1],
-                                      }}
-                                      transition={{
-                                        duration: 2,
-                                        repeat: Number.POSITIVE_INFINITY,
-                                        repeatType: "reverse",
-                                      }}
-                                    >
-                                      {skills[activeSkill].icon}
-                                    </motion.div>
+                                    {skills[activeSkill].icon}
                                     <div className="absolute inset-0 rounded-xl bg-purple-400/50 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                                   </div>
                                   <div>
@@ -1280,18 +1100,9 @@ animate-pulse"
                                     ease: [0.34, 1.56, 0.64, 1],
                                   }}
                                 >
-                                  {/* Animated shine effect */}
-                                  <motion.div
-                                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
-                                    animate={{
-                                      x: ["-100%", "100%"],
-                                    }}
-                                    transition={{
-                                      repeat: Number.POSITIVE_INFINITY,
-                                      repeatType: "loop",
-                                      duration: 2,
-                                      ease: "easeInOut",
-                                    }}
+                                  {/* Shine effect via CSS */}
+                                  <div
+                                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer"
                                   />
                                 </motion.div>
 
@@ -1386,10 +1197,9 @@ animate-pulse"
                               <div className="h-12 w-12 rounded-full bg-lavender-100 flex items-center justify-center text-sm font-bold text-lavender-500 shadow-inner relative">
                                 {skills[activeSkill].testimonial.author.split(" ")[0][0]}
                                 {skills[activeSkill].testimonial.author.split(" ")[1][0]}
-                                <motion.div
+                                <div
                                   className="absolute inset-0 rounded-full border border-purple-400/30"
-                                  animate={{ scale: [1, 1.1, 1] }}
-                                  transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
+                                  style={{ transform: "scale(1.05)" }}
                                 />
                               </div>
                               <div className="flex-1">

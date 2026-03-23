@@ -20,30 +20,50 @@ export async function detectIntent(input: string, conversationHistory: string[] 
   try {
     // Prepare the prompt for the LLM
     const prompt = `
-      You are an AI assistant that analyzes user messages to detect their intent in a service marketplace context.
-      
-      Based on the following user message, determine:
-      1. The primary intent type (booking, comparison, information, save, general, refinement, feedback)
-      2. A confidence score (0.0 to 1.0)
-      3. Any entities mentioned (service types, qualities, etc.)
-      4. Any sub-intents present
-      5. Any contextual factors (budget sensitivity, quality focus, time urgency, etc.)
-      
-      Previous conversation context:
-      ${conversationHistory.slice(-3).join("\n")}
-      
-      User message: "${input}"
-      
+      You are an advanced NLP system analyzing user messages in a service marketplace context.
+
+      ANALYSIS FRAMEWORK:
+      1. Primary Intent (booking, comparison, information, save, general, refinement, feedback)
+      2. Confidence Score (0.0 to 1.0) - Be realistic, not overconfident
+      3. Entities (service types, qualities, requirements, constraints)
+      4. Sub-intents (secondary goals within the message)
+      5. Contextual Factors (emotional state, urgency, budget sensitivity, quality focus)
+      6. Implicit Needs (unstated but implied requirements)
+
+      PREVIOUS CONVERSATION:
+      ${conversationHistory.slice(-5).join("\n")}
+
+      CURRENT USER MESSAGE: "${input}"
+
+      ADVANCED DETECTION RULES:
+      - Detect urgency from words like "ASAP", "urgent", "emergency", "soon", "quick"
+      - Identify budget concerns from "cheap", "affordable", "expensive", "cost", "budget"
+      - Recognize quality focus from "best", "top-rated", "professional", "certified", "experienced"
+      - Spot comparison intent from "vs", "compare", "better", "difference", "which"
+      - Detect hesitation from "not sure", "maybe", "thinking about", "considering"
+      - Identify satisfaction/dissatisfaction from tone and sentiment words
+
+      CONTEXT AWARENESS:
+      - Consider how this message relates to previous messages
+      - Identify if user is changing direction or refining previous statements
+      - Detect if user is expressing implicit concerns
+
       Respond in JSON format only:
       {
         "type": "intent_type",
         "confidence": 0.0,
         "entities": ["entity1", "entity2"],
-        "subIntents": ["subIntent1", "subIntent2"],
+        "subIntents": ["subIntent1"],
         "contextualFactors": {
-          "factor1": true,
-          "factor2": true
-        }
+          "urgency": "low|medium|high",
+          "budgetSensitive": true|false,
+          "qualityFocused": true|false,
+          "needsReassurance": true|false,
+          "comparingSeveral": true|false
+        },
+        "implicitNeeds": ["need1", "need2"],
+        "emotionalTone": "neutral|positive|negative|anxious|excited",
+        "conversationSignal": "exploring|narrowing|deciding|hesitating|confirming"
       }
     `
 
@@ -84,6 +104,9 @@ export async function detectIntent(input: string, conversationHistory: string[] 
       entities: intentData.entities || [],
       subIntents: intentData.subIntents || [],
       contextualFactors: new Map(Object.entries(intentData.contextualFactors || {})),
+      implicitNeeds: intentData.implicitNeeds || [],
+      emotionalTone: intentData.emotionalTone || "neutral",
+      conversationSignal: intentData.conversationSignal || "general",
     }
 
     // Store in cache
@@ -93,13 +116,16 @@ export async function detectIntent(input: string, conversationHistory: string[] 
     const supabase = createClientDatabaseClient()
     await supabase.from("matchmaker_nlp_logs").insert({
       input,
-      context: conversationHistory.slice(-3),
+      context: conversationHistory.slice(-5),
       detected_intent: {
         type: intent.type,
         confidence: intent.confidence,
         entities: intent.entities,
         subIntents: intent.subIntents,
         contextualFactors: Object.fromEntries(intent.contextualFactors),
+        implicitNeeds: intent.implicitNeeds,
+        emotionalTone: intent.emotionalTone,
+        conversationSignal: intent.conversationSignal,
       },
       created_at: new Date().toISOString(),
     })
@@ -115,6 +141,9 @@ export async function detectIntent(input: string, conversationHistory: string[] 
       entities: [],
       subIntents: [],
       contextualFactors: new Map(),
+      implicitNeeds: [],
+      emotionalTone: "neutral",
+      conversationSignal: "general",
     }
   }
 }

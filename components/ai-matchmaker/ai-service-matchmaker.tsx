@@ -2,11 +2,10 @@
 
 import type React from "react"
 
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useRef, useCallback, useMemo, memo } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 
-// Add import for EnhancedCategoryCard
 import { EnhancedCategoryCard } from "@/components/enhanced-category-card"
 import {
   Briefcase,
@@ -19,29 +18,699 @@ import {
   Leaf,
   Construction,
   HardHat,
-  Star,
 } from "lucide-react"
 import { LevlLogo } from "@/components/levl-logo"
 
-// Add these imports
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 
-// Import the ProviderCard component
 import { ProviderCard } from "@/components/ai-matchmaker/provider-card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Layout } from "lucide-react"
 import { LevlPortal } from "@/components/levl-portal"
+import Image from "next/image"
 
-// Long-term memory
-const longTermMemoryData = new Map<string, any>([
-  ["userLocation", "San Francisco, CA"],
-  ["preferredLanguage", "English"],
-  ["pastServices", ["TV Mounting", "Furniture Assembly"]],
-])
+// Visual guides for technical options - shows animated previews inline
+const optionVisualGuides: Record<string, { 
+  type: "animation" | "image"
+  description: string
+  animationFrames?: string[] // CSS animation keyframes description
+  bgColor?: string
+  icon?: React.ReactNode
+}> = {
+  // Mount types
+  "Fixed (flat against wall)": {
+    type: "animation",
+    description: "TV sits flat against wall, no movement",
+    bgColor: "bg-gradient-to-br from-slate-100 to-slate-200",
+  },
+  "Tilting (angle adjustment)": {
+    type: "animation", 
+    description: "TV can tilt up/down to reduce glare",
+    bgColor: "bg-gradient-to-br from-blue-100 to-blue-200",
+  },
+  "Full-motion/Articulating (swivel and tilt)": {
+    type: "animation",
+    description: "TV extends out and swivels in any direction",
+    bgColor: "bg-gradient-to-br from-purple-100 to-purple-200",
+  },
+  "Ceiling mount": {
+    type: "animation",
+    description: "TV hangs down from ceiling",
+    bgColor: "bg-gradient-to-br from-amber-100 to-amber-200",
+  },
+  // Wall types
+  "Drywall/Sheetrock": {
+    type: "animation",
+    description: "Standard interior wall, needs studs or anchors",
+    bgColor: "bg-gradient-to-br from-gray-100 to-gray-200",
+  },
+  "Brick": {
+    type: "animation",
+    description: "Solid brick requires masonry drill bits",
+    bgColor: "bg-gradient-to-br from-red-100 to-red-200",
+  },
+  "Concrete": {
+    type: "animation",
+    description: "Very solid, needs hammer drill and concrete anchors",
+    bgColor: "bg-gradient-to-br from-stone-100 to-stone-200",
+  },
+  "Plaster": {
+    type: "animation",
+    description: "Older homes, may need special anchoring",
+    bgColor: "bg-gradient-to-br from-amber-100 to-orange-200",
+  },
+  "Stone": {
+    type: "animation",
+    description: "Natural stone, requires careful drilling",
+    bgColor: "bg-gradient-to-br from-zinc-200 to-zinc-300",
+  },
+  "Metal studs": {
+    type: "animation",
+    description: "Thinner than wood, needs toggle bolts",
+    bgColor: "bg-gradient-to-br from-slate-200 to-slate-300",
+  },
+  // Cable management
+  "Yes, hide all cables in wall": {
+    type: "animation",
+    description: "Cables routed through wall, completely hidden",
+    bgColor: "bg-gradient-to-br from-green-100 to-green-200",
+  },
+  "Yes, use cable covers": {
+    type: "animation",
+    description: "Cables covered with paintable plastic channels",
+    bgColor: "bg-gradient-to-br from-teal-100 to-teal-200",
+  },
+  "No, cables visible is fine": {
+    type: "animation",
+    description: "Cables hang freely from TV to outlet",
+    bgColor: "bg-gradient-to-br from-gray-100 to-gray-150",
+  },
+  // Plumbing issues
+  "Clogged drain": {
+    type: "animation",
+    description: "Water draining slowly or not at all",
+    bgColor: "bg-gradient-to-br from-blue-100 to-cyan-200",
+  },
+  "Leaky pipe/faucet": {
+    type: "animation",
+    description: "Water dripping from pipes or faucet",
+    bgColor: "bg-gradient-to-br from-sky-100 to-sky-200",
+  },
+  "Water heater issue": {
+    type: "animation",
+    description: "No hot water or temperature problems",
+    bgColor: "bg-gradient-to-br from-orange-100 to-red-200",
+  },
+  "Toilet problem": {
+    type: "animation",
+    description: "Running, clogged, or not flushing properly",
+    bgColor: "bg-gradient-to-br from-indigo-100 to-indigo-200",
+  },
+  // Paint finishes
+  "Textured finish": {
+    type: "animation",
+    description: "Adds depth and pattern to walls",
+    bgColor: "bg-gradient-to-br from-amber-100 to-yellow-200",
+  },
+  "Faux finish": {
+    type: "animation",
+    description: "Mimics marble, wood, or other materials",
+    bgColor: "bg-gradient-to-br from-rose-100 to-pink-200",
+  },
+  "High-gloss/specialty coating": {
+    type: "animation",
+    description: "Shiny, reflective surface finish",
+    bgColor: "bg-gradient-to-br from-violet-100 to-purple-200",
+  },
+}
 
-// Define service types
+// Animated visual preview component
+const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { option: string }) {
+  const guide = optionVisualGuides[option]
+  if (!guide) return null
+
+  // Different animations based on option type
+  const getAnimation = () => {
+    // Mount type animations
+    if (option === "Fixed (flat against wall)") {
+      return (
+        <div className="relative w-full h-full flex items-center justify-center">
+          <div className="w-8 h-12 bg-gray-300 rounded-sm absolute left-1/2 -translate-x-1/2" /> {/* Wall */}
+          <motion.div 
+            className="w-6 h-4 bg-gray-800 rounded-sm border border-gray-600 absolute"
+            style={{ left: "50%", x: "-50%" }}
+          /> {/* TV flat */}
+        </div>
+      )
+    }
+    if (option === "Tilting (angle adjustment)") {
+      return (
+        <div className="relative w-full h-full flex items-center justify-center">
+          <div className="w-8 h-12 bg-gray-300 rounded-sm absolute left-1/2 -translate-x-1/2" />
+          <motion.div 
+            className="w-6 h-4 bg-gray-800 rounded-sm border border-gray-600 absolute origin-top"
+            style={{ left: "50%", x: "-50%" }}
+            animate={{ rotateX: [0, 15, 0, -10, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </div>
+      )
+    }
+    if (option === "Full-motion/Articulating (swivel and tilt)") {
+      return (
+        <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
+          <div className="w-3 h-12 bg-gray-300 rounded-sm absolute left-2" />
+          <motion.div 
+            className="absolute left-4 flex items-center"
+            animate={{ 
+              x: [0, 8, 8, 0],
+              rotateY: [0, 0, 25, 0],
+            }}
+            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <div className="w-4 h-0.5 bg-gray-500" /> {/* Arm */}
+            <div className="w-6 h-4 bg-gray-800 rounded-sm border border-gray-600" />
+          </motion.div>
+        </div>
+      )
+    }
+    if (option === "Ceiling mount") {
+      return (
+        <div className="relative w-full h-full flex flex-col items-center">
+          <div className="w-full h-2 bg-gray-300" /> {/* Ceiling */}
+          <motion.div 
+            className="flex flex-col items-center"
+            animate={{ y: [0, 2, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <div className="w-0.5 h-3 bg-gray-500" /> {/* Pole */}
+            <div className="w-6 h-4 bg-gray-800 rounded-sm border border-gray-600" />
+          </motion.div>
+        </div>
+      )
+    }
+    // Wall type animations
+    if (option === "Drywall/Sheetrock") {
+      return (
+        <div className="relative w-full h-full overflow-hidden">
+          {/* Drywall/Sheetrock - orange peel texture typical of modern homes */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#f5f5f0] via-[#eeede8] to-[#e8e7e2]">
+            {/* Orange peel bumpy texture - characteristic of drywall */}
+            <div className="absolute inset-0" style={{ 
+              backgroundImage: `
+                radial-gradient(ellipse 2px 1.5px at 15% 20%, rgba(220,218,210,0.7) 0%, transparent 100%),
+                radial-gradient(ellipse 1.5px 2px at 35% 15%, rgba(215,213,205,0.6) 0%, transparent 100%),
+                radial-gradient(ellipse 2px 1.5px at 55% 25%, rgba(225,223,215,0.65) 0%, transparent 100%),
+                radial-gradient(ellipse 1.5px 2px at 75% 18%, rgba(218,216,208,0.7) 0%, transparent 100%),
+                radial-gradient(ellipse 2px 2px at 25% 45%, rgba(222,220,212,0.6) 0%, transparent 100%),
+                radial-gradient(ellipse 1.5px 1.5px at 45% 40%, rgba(220,218,210,0.65) 0%, transparent 100%),
+                radial-gradient(ellipse 2px 1.5px at 65% 48%, rgba(217,215,207,0.7) 0%, transparent 100%),
+                radial-gradient(ellipse 1.5px 2px at 85% 42%, rgba(223,221,213,0.6) 0%, transparent 100%),
+                radial-gradient(ellipse 2px 1.5px at 20% 70%, rgba(219,217,209,0.65) 0%, transparent 100%),
+                radial-gradient(ellipse 1.5px 2px at 40% 65%, rgba(221,219,211,0.7) 0%, transparent 100%),
+                radial-gradient(ellipse 2px 2px at 60% 72%, rgba(216,214,206,0.6) 0%, transparent 100%),
+                radial-gradient(ellipse 1.5px 1.5px at 80% 68%, rgba(224,222,214,0.65) 0%, transparent 100%),
+                radial-gradient(ellipse 2px 1.5px at 30% 90%, rgba(218,216,208,0.7) 0%, transparent 100%),
+                radial-gradient(ellipse 1.5px 2px at 70% 85%, rgba(220,218,210,0.6) 0%, transparent 100%)
+              `,
+              backgroundSize: '100% 100%'
+            }} />
+            {/* Taped seam line - vertical joint compound */}
+            <div className="absolute top-0 bottom-0 left-1/2 w-[3px] -translate-x-1/2">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#e0dfd8]/40 to-transparent" />
+            </div>
+            {/* Screw dimples filled with joint compound */}
+            <motion.div 
+              className="absolute top-3 left-1/2 -translate-x-1/2 w-[3px] h-[3px] rounded-full bg-[#e5e4dd] shadow-[inset_0_0.5px_1px_rgba(0,0,0,0.1)]"
+              animate={{ boxShadow: ["inset 0 0.5px 1px rgba(0,0,0,0.1)", "inset 0 0.5px 1px rgba(0,0,0,0.15)", "inset 0 0.5px 1px rgba(0,0,0,0.1)"] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+            <motion.div 
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 w-[3px] h-[3px] rounded-full bg-[#e5e4dd] shadow-[inset_0_0.5px_1px_rgba(0,0,0,0.1)]"
+              animate={{ boxShadow: ["inset 0 0.5px 1px rgba(0,0,0,0.1)", "inset 0 0.5px 1px rgba(0,0,0,0.15)", "inset 0 0.5px 1px rgba(0,0,0,0.1)"] }}
+              transition={{ duration: 2, repeat: Infinity, delay: 0.3 }}
+            />
+            <motion.div 
+              className="absolute bottom-3 left-1/2 -translate-x-1/2 w-[3px] h-[3px] rounded-full bg-[#e5e4dd] shadow-[inset_0_0.5px_1px_rgba(0,0,0,0.1)]"
+              animate={{ boxShadow: ["inset 0 0.5px 1px rgba(0,0,0,0.1)", "inset 0 0.5px 1px rgba(0,0,0,0.15)", "inset 0 0.5px 1px rgba(0,0,0,0.1)"] }}
+              transition={{ duration: 2, repeat: Infinity, delay: 0.6 }}
+            />
+            {/* Subtle light/shadow for depth */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-black/5" />
+          </div>
+        </div>
+      )
+    }
+    if (option === "Brick") {
+      return (
+        <div className="relative w-full h-full overflow-hidden">
+          {/* Realistic brick wall with mortar joints */}
+          <div className="absolute inset-0 bg-[#c9b9a8]">
+            {/* Mortar base color */}
+            <div className="absolute inset-0 bg-gradient-to-br from-[#d4c8ba] via-[#c9bba8] to-[#bfb09c]" />
+            
+            {/* Row 1 - full bricks */}
+            <motion.div 
+              className="absolute top-[2px] left-[2px] w-[38%] h-[28%] rounded-[2px]"
+              style={{
+                background: 'linear-gradient(145deg, #c45a3d 0%, #a8412a 35%, #8b3422 70%, #7a2d1d 100%)',
+                boxShadow: 'inset 2px 1px 3px rgba(255,200,180,0.25), inset -1px -1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.25)'
+              }}
+              animate={{ boxShadow: ["inset 2px 1px 3px rgba(255,200,180,0.25), inset -1px -1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.25)", "inset 2px 1px 4px rgba(255,200,180,0.3), inset -1px -1px 2px rgba(0,0,0,0.35), 0 1px 2px rgba(0,0,0,0.25)", "inset 2px 1px 3px rgba(255,200,180,0.25), inset -1px -1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.25)"] }}
+              transition={{ duration: 2.5, repeat: Infinity }}
+            >
+              {/* Brick texture spots */}
+              <div className="absolute top-[20%] left-[15%] w-[3px] h-[2px] bg-[#8b3422]/40 rounded-full" />
+              <div className="absolute top-[60%] right-[20%] w-[2px] h-[2px] bg-[#6b2418]/30 rounded-full" />
+            </motion.div>
+            
+            <motion.div 
+              className="absolute top-[2px] left-[42%] w-[38%] h-[28%] rounded-[2px]"
+              style={{
+                background: 'linear-gradient(140deg, #b84d35 0%, #9c3d28 40%, #7f2f1f 75%, #6e2819 100%)',
+                boxShadow: 'inset 2px 1px 3px rgba(255,180,160,0.22), inset -1px -1px 2px rgba(0,0,0,0.28), 0 1px 2px rgba(0,0,0,0.22)'
+              }}
+              animate={{ boxShadow: ["inset 2px 1px 3px rgba(255,180,160,0.22), inset -1px -1px 2px rgba(0,0,0,0.28), 0 1px 2px rgba(0,0,0,0.22)", "inset 2px 1px 4px rgba(255,180,160,0.28), inset -1px -1px 2px rgba(0,0,0,0.32), 0 1px 2px rgba(0,0,0,0.22)", "inset 2px 1px 3px rgba(255,180,160,0.22), inset -1px -1px 2px rgba(0,0,0,0.28), 0 1px 2px rgba(0,0,0,0.22)"] }}
+              transition={{ duration: 2.8, repeat: Infinity, delay: 0.3 }}
+            >
+              <div className="absolute top-[40%] left-[30%] w-[2px] h-[3px] bg-[#7f2f1f]/35 rounded-full" />
+            </motion.div>
+
+            <motion.div 
+              className="absolute top-[2px] right-[2px] w-[16%] h-[28%] rounded-[2px]"
+              style={{
+                background: 'linear-gradient(150deg, #d06245 0%, #b54a32 50%, #8f3825 100%)',
+                boxShadow: 'inset 1px 1px 2px rgba(255,190,170,0.2), inset -1px -1px 2px rgba(0,0,0,0.25), 0 1px 2px rgba(0,0,0,0.2)'
+              }}
+              animate={{ boxShadow: ["inset 1px 1px 2px rgba(255,190,170,0.2), inset -1px -1px 2px rgba(0,0,0,0.25), 0 1px 2px rgba(0,0,0,0.2)", "inset 1px 1px 3px rgba(255,190,170,0.26), inset -1px -1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2)", "inset 1px 1px 2px rgba(255,190,170,0.2), inset -1px -1px 2px rgba(0,0,0,0.25), 0 1px 2px rgba(0,0,0,0.2)"] }}
+              transition={{ duration: 2.2, repeat: Infinity, delay: 0.6 }}
+            />
+            
+            {/* Row 2 - offset bricks (staggered pattern) */}
+            <motion.div 
+              className="absolute top-[34%] left-[2px] w-[18%] h-[28%] rounded-[2px]"
+              style={{
+                background: 'linear-gradient(135deg, #be5038 0%, #9e3c28 45%, #82301e 80%, #722a1a 100%)',
+                boxShadow: 'inset 1px 1px 2px rgba(255,185,165,0.2), inset -1px -1px 2px rgba(0,0,0,0.26), 0 1px 2px rgba(0,0,0,0.22)'
+              }}
+              animate={{ boxShadow: ["inset 1px 1px 2px rgba(255,185,165,0.2), inset -1px -1px 2px rgba(0,0,0,0.26), 0 1px 2px rgba(0,0,0,0.22)", "inset 1px 1px 3px rgba(255,185,165,0.26), inset -1px -1px 2px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.22)", "inset 1px 1px 2px rgba(255,185,165,0.2), inset -1px -1px 2px rgba(0,0,0,0.26), 0 1px 2px rgba(0,0,0,0.22)"] }}
+              transition={{ duration: 3, repeat: Infinity, delay: 0.9 }}
+            />
+            
+            <motion.div 
+              className="absolute top-[34%] left-[22%] w-[38%] h-[28%] rounded-[2px]"
+              style={{
+                background: 'linear-gradient(142deg, #cc5c40 0%, #aa4530 38%, #8c3623 72%, #783020 100%)',
+                boxShadow: 'inset 2px 1px 3px rgba(255,195,175,0.24), inset -1px -1px 2px rgba(0,0,0,0.28), 0 1px 2px rgba(0,0,0,0.24)'
+              }}
+              animate={{ boxShadow: ["inset 2px 1px 3px rgba(255,195,175,0.24), inset -1px -1px 2px rgba(0,0,0,0.28), 0 1px 2px rgba(0,0,0,0.24)", "inset 2px 1px 4px rgba(255,195,175,0.3), inset -1px -1px 2px rgba(0,0,0,0.32), 0 1px 2px rgba(0,0,0,0.24)", "inset 2px 1px 3px rgba(255,195,175,0.24), inset -1px -1px 2px rgba(0,0,0,0.28), 0 1px 2px rgba(0,0,0,0.24)"] }}
+              transition={{ duration: 2.6, repeat: Infinity, delay: 1.2 }}
+            >
+              <div className="absolute top-[25%] right-[25%] w-[3px] h-[2px] bg-[#6b2418]/30 rounded-full" />
+              <div className="absolute bottom-[30%] left-[20%] w-[2px] h-[2px] bg-[#8c3623]/35 rounded-full" />
+            </motion.div>
+            
+            <motion.div 
+              className="absolute top-[34%] right-[2px] w-[36%] h-[28%] rounded-[2px]"
+              style={{
+                background: 'linear-gradient(148deg, #c25540 0%, #a6422d 42%, #884032 78%, #753525 100%)',
+                boxShadow: 'inset 2px 1px 3px rgba(255,188,168,0.22), inset -1px -1px 2px rgba(0,0,0,0.27), 0 1px 2px rgba(0,0,0,0.23)'
+              }}
+              animate={{ boxShadow: ["inset 2px 1px 3px rgba(255,188,168,0.22), inset -1px -1px 2px rgba(0,0,0,0.27), 0 1px 2px rgba(0,0,0,0.23)", "inset 2px 1px 4px rgba(255,188,168,0.28), inset -1px -1px 2px rgba(0,0,0,0.32), 0 1px 2px rgba(0,0,0,0.23)", "inset 2px 1px 3px rgba(255,188,168,0.22), inset -1px -1px 2px rgba(0,0,0,0.27), 0 1px 2px rgba(0,0,0,0.23)"] }}
+              transition={{ duration: 2.4, repeat: Infinity, delay: 1.5 }}
+            >
+              <div className="absolute top-[50%] left-[40%] w-[2px] h-[2px] bg-[#753525]/40 rounded-full" />
+            </motion.div>
+            
+            {/* Row 3 - same as row 1 pattern */}
+            <motion.div 
+              className="absolute bottom-[2px] left-[2px] w-[38%] h-[28%] rounded-[2px]"
+              style={{
+                background: 'linear-gradient(138deg, #c85a3e 0%, #ac4630 36%, #8e3824 68%, #7c3120 100%)',
+                boxShadow: 'inset 2px 1px 3px rgba(255,192,172,0.23), inset -1px -1px 2px rgba(0,0,0,0.29), 0 1px 2px rgba(0,0,0,0.24)'
+              }}
+              animate={{ boxShadow: ["inset 2px 1px 3px rgba(255,192,172,0.23), inset -1px -1px 2px rgba(0,0,0,0.29), 0 1px 2px rgba(0,0,0,0.24)", "inset 2px 1px 4px rgba(255,192,172,0.29), inset -1px -1px 2px rgba(0,0,0,0.34), 0 1px 2px rgba(0,0,0,0.24)", "inset 2px 1px 3px rgba(255,192,172,0.23), inset -1px -1px 2px rgba(0,0,0,0.29), 0 1px 2px rgba(0,0,0,0.24)"] }}
+              transition={{ duration: 2.7, repeat: Infinity, delay: 1.8 }}
+            >
+              <div className="absolute top-[35%] left-[60%] w-[2px] h-[3px] bg-[#7c3120]/35 rounded-full" />
+            </motion.div>
+            
+            <motion.div 
+              className="absolute bottom-[2px] left-[42%] w-[38%] h-[28%] rounded-[2px]"
+              style={{
+                background: 'linear-gradient(144deg, #ba5038 0%, #9c3f2a 40%, #803220 74%, #702b1b 100%)',
+                boxShadow: 'inset 2px 1px 3px rgba(255,185,165,0.21), inset -1px -1px 2px rgba(0,0,0,0.27), 0 1px 2px rgba(0,0,0,0.22)'
+              }}
+              animate={{ boxShadow: ["inset 2px 1px 3px rgba(255,185,165,0.21), inset -1px -1px 2px rgba(0,0,0,0.27), 0 1px 2px rgba(0,0,0,0.22)", "inset 2px 1px 4px rgba(255,185,165,0.27), inset -1px -1px 2px rgba(0,0,0,0.32), 0 1px 2px rgba(0,0,0,0.22)", "inset 2px 1px 3px rgba(255,185,165,0.21), inset -1px -1px 2px rgba(0,0,0,0.27), 0 1px 2px rgba(0,0,0,0.22)"] }}
+              transition={{ duration: 3.1, repeat: Infinity, delay: 2.1 }}
+            >
+              <div className="absolute top-[55%] right-[30%] w-[3px] h-[2px] bg-[#803220]/32 rounded-full" />
+            </motion.div>
+
+            <motion.div 
+              className="absolute bottom-[2px] right-[2px] w-[16%] h-[28%] rounded-[2px]"
+              style={{
+                background: 'linear-gradient(152deg, #d26548 0%, #b24e35 48%, #923c28 100%)',
+                boxShadow: 'inset 1px 1px 2px rgba(255,195,178,0.2), inset -1px -1px 2px rgba(0,0,0,0.24), 0 1px 2px rgba(0,0,0,0.2)'
+              }}
+              animate={{ boxShadow: ["inset 1px 1px 2px rgba(255,195,178,0.2), inset -1px -1px 2px rgba(0,0,0,0.24), 0 1px 2px rgba(0,0,0,0.2)", "inset 1px 1px 3px rgba(255,195,178,0.26), inset -1px -1px 2px rgba(0,0,0,0.29), 0 1px 2px rgba(0,0,0,0.2)", "inset 1px 1px 2px rgba(255,195,178,0.2), inset -1px -1px 2px rgba(0,0,0,0.24), 0 1px 2px rgba(0,0,0,0.2)"] }}
+              transition={{ duration: 2.3, repeat: Infinity, delay: 2.4 }}
+            />
+            
+            {/* Mortar texture in joints */}
+            <div className="absolute inset-0 pointer-events-none" style={{
+              backgroundImage: `radial-gradient(circle at 50% 32%, rgba(180,170,155,0.15) 0.5px, transparent 0.5px),
+                               radial-gradient(circle at 20% 65%, rgba(170,160,145,0.12) 0.5px, transparent 0.5px)`,
+              backgroundSize: '6px 6px'
+            }} />
+          </div>
+        </div>
+      )
+    }
+    if (option === "Concrete") {
+      return (
+        <div className="relative w-full h-full overflow-hidden">
+          {/* Poured concrete wall - raw industrial look */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#8a8a88] via-[#7d7d7b] to-[#737371]">
+            {/* Exposed aggregate - visible sand and small pebbles */}
+            <div className="absolute inset-0" style={{ 
+              backgroundImage: `
+                radial-gradient(ellipse 3px 2px at 12% 15%, rgba(95,90,85,0.8) 0%, transparent 100%),
+                radial-gradient(ellipse 2px 3px at 28% 22%, rgba(110,105,100,0.7) 0%, transparent 100%),
+                radial-gradient(ellipse 2.5px 2px at 45% 18%, rgba(85,80,75,0.75) 0%, transparent 100%),
+                radial-gradient(ellipse 2px 2.5px at 65% 25%, rgba(100,95,90,0.7) 0%, transparent 100%),
+                radial-gradient(ellipse 3px 2px at 82% 20%, rgba(90,85,80,0.8) 0%, transparent 100%),
+                radial-gradient(ellipse 2px 2px at 18% 42%, rgba(105,100,95,0.7) 0%, transparent 100%),
+                radial-gradient(ellipse 2.5px 3px at 38% 48%, rgba(80,75,70,0.8) 0%, transparent 100%),
+                radial-gradient(ellipse 2px 2px at 55% 45%, rgba(115,110,105,0.65) 0%, transparent 100%),
+                radial-gradient(ellipse 3px 2.5px at 72% 52%, rgba(88,83,78,0.75) 0%, transparent 100%),
+                radial-gradient(ellipse 2px 2px at 88% 48%, rgba(98,93,88,0.7) 0%, transparent 100%),
+                radial-gradient(ellipse 2.5px 2px at 22% 72%, rgba(92,87,82,0.8) 0%, transparent 100%),
+                radial-gradient(ellipse 2px 2.5px at 42% 78%, rgba(108,103,98,0.7) 0%, transparent 100%),
+                radial-gradient(ellipse 2px 2px at 58% 75%, rgba(82,77,72,0.75) 0%, transparent 100%),
+                radial-gradient(ellipse 3px 2px at 78% 82%, rgba(102,97,92,0.7) 0%, transparent 100%)
+              `,
+              backgroundSize: '100% 100%'
+            }} />
+            {/* Form tie holes - characteristic of poured concrete */}
+            <motion.div 
+              className="absolute top-[25%] left-[20%] w-[4px] h-[4px] rounded-full bg-[#5a5855] shadow-[inset_1px_1px_2px_rgba(0,0,0,0.4)]"
+              animate={{ boxShadow: ["inset 1px 1px 2px rgba(0,0,0,0.4)", "inset 1px 1px 3px rgba(0,0,0,0.5)", "inset 1px 1px 2px rgba(0,0,0,0.4)"] }}
+              transition={{ duration: 3, repeat: Infinity }}
+            />
+            <motion.div 
+              className="absolute top-[25%] right-[20%] w-[4px] h-[4px] rounded-full bg-[#5a5855] shadow-[inset_1px_1px_2px_rgba(0,0,0,0.4)]"
+              animate={{ boxShadow: ["inset 1px 1px 2px rgba(0,0,0,0.4)", "inset 1px 1px 3px rgba(0,0,0,0.5)", "inset 1px 1px 2px rgba(0,0,0,0.4)"] }}
+              transition={{ duration: 3, repeat: Infinity, delay: 0.5 }}
+            />
+            <motion.div 
+              className="absolute top-[75%] left-[20%] w-[4px] h-[4px] rounded-full bg-[#5a5855] shadow-[inset_1px_1px_2px_rgba(0,0,0,0.4)]"
+              animate={{ boxShadow: ["inset 1px 1px 2px rgba(0,0,0,0.4)", "inset 1px 1px 3px rgba(0,0,0,0.5)", "inset 1px 1px 2px rgba(0,0,0,0.4)"] }}
+              transition={{ duration: 3, repeat: Infinity, delay: 1 }}
+            />
+            <motion.div 
+              className="absolute top-[75%] right-[20%] w-[4px] h-[4px] rounded-full bg-[#5a5855] shadow-[inset_1px_1px_2px_rgba(0,0,0,0.4)]"
+              animate={{ boxShadow: ["inset 1px 1px 2px rgba(0,0,0,0.4)", "inset 1px 1px 3px rgba(0,0,0,0.5)", "inset 1px 1px 2px rgba(0,0,0,0.4)"] }}
+              transition={{ duration: 3, repeat: Infinity, delay: 1.5 }}
+            />
+            {/* Horizontal form line from pour */}
+            <div className="absolute top-1/2 left-0 right-0 h-[1px] bg-[#6a6a68]/50" />
+            {/* Surface weathering/variation */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/10" />
+          </div>
+        </div>
+      )
+    }
+    if (option === "Plaster") {
+      return (
+        <div className="relative w-full h-full overflow-hidden">
+          {/* Old plaster wall - characteristic of pre-1950s homes */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#f0ebe0] via-[#e8e2d5] to-[#dfd8ca]">
+            {/* Plaster texture - hand-troweled swirl marks */}
+            <div className="absolute inset-0" style={{ 
+              backgroundImage: `
+                radial-gradient(ellipse 8px 3px at 15% 20%, rgba(210,200,180,0.3) 0%, transparent 100%),
+                radial-gradient(ellipse 6px 4px at 40% 15%, rgba(200,190,170,0.25) 0%, transparent 100%),
+                radial-gradient(ellipse 7px 3px at 70% 25%, rgba(215,205,185,0.3) 0%, transparent 100%),
+                radial-gradient(ellipse 5px 4px at 25% 45%, rgba(205,195,175,0.25) 0%, transparent 100%),
+                radial-gradient(ellipse 8px 3px at 55% 50%, rgba(195,185,165,0.3) 0%, transparent 100%),
+                radial-gradient(ellipse 6px 4px at 80% 48%, rgba(210,200,180,0.25) 0%, transparent 100%),
+                radial-gradient(ellipse 7px 3px at 20% 75%, rgba(200,190,170,0.3) 0%, transparent 100%),
+                radial-gradient(ellipse 5px 4px at 50% 80%, rgba(215,205,185,0.25) 0%, transparent 100%),
+                radial-gradient(ellipse 8px 3px at 75% 72%, rgba(195,185,165,0.3) 0%, transparent 100%)
+              `,
+              backgroundSize: '100% 100%'
+            }} />
+            {/* Hairline cracks - spider web pattern typical of old plaster */}
+            <svg className="absolute inset-0 w-full h-full opacity-30" viewBox="0 0 60 60" preserveAspectRatio="none">
+              <motion.path 
+                d="M 8 5 Q 12 8, 15 12 Q 18 15, 22 14" 
+                stroke="#b5a890" 
+                strokeWidth="0.3" 
+                fill="none"
+                animate={{ opacity: [0.3, 0.5, 0.3] }}
+                transition={{ duration: 4, repeat: Infinity }}
+              />
+              <motion.path 
+                d="M 15 12 Q 16 16, 14 20" 
+                stroke="#b5a890" 
+                strokeWidth="0.25" 
+                fill="none"
+                animate={{ opacity: [0.25, 0.45, 0.25] }}
+                transition={{ duration: 4, repeat: Infinity, delay: 0.5 }}
+              />
+              <motion.path 
+                d="M 45 42 Q 48 45, 52 48 Q 54 51, 55 55" 
+                stroke="#b5a890" 
+                strokeWidth="0.3" 
+                fill="none"
+                animate={{ opacity: [0.3, 0.5, 0.3] }}
+                transition={{ duration: 4, repeat: Infinity, delay: 1 }}
+              />
+              <motion.path 
+                d="M 52 48 Q 50 50, 48 53" 
+                stroke="#b5a890" 
+                strokeWidth="0.25" 
+                fill="none"
+                animate={{ opacity: [0.25, 0.45, 0.25] }}
+                transition={{ duration: 4, repeat: Infinity, delay: 1.5 }}
+              />
+            </svg>
+            {/* Subtle color variation from age/paint layers */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#d8d0c2]/30 via-transparent to-[#f5f0e5]/20" />
+            {/* Slight surface undulation shadow */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/5" />
+          </div>
+        </div>
+      )
+    }
+    if (option === "Stone") {
+      return (
+        <div className="relative w-full h-full overflow-hidden">
+          {/* Fieldstone/natural stone wall - irregular shapes with mortar */}
+          <div className="absolute inset-0 bg-[#9a9590]">
+            {/* Mortar background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-[#a8a39d] via-[#9a958f] to-[#8c8781]" />
+            
+            {/* Individual fieldstones - irregular shapes */}
+            {/* Top left large stone */}
+            <motion.div 
+              className="absolute top-[3px] left-[3px] w-[45%] h-[42%] rounded-[4px_2px_6px_3px]"
+              style={{
+                background: 'linear-gradient(135deg, #b5ad9f 0%, #9a928a 40%, #7d766e 100%)',
+                boxShadow: 'inset 2px 2px 4px rgba(255,255,255,0.15), inset -1px -1px 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.3)'
+              }}
+              animate={{ boxShadow: ["inset 2px 2px 4px rgba(255,255,255,0.15), inset -1px -1px 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.3)", "inset 2px 2px 5px rgba(255,255,255,0.2), inset -1px -1px 3px rgba(0,0,0,0.25), 0 1px 2px rgba(0,0,0,0.3)", "inset 2px 2px 4px rgba(255,255,255,0.15), inset -1px -1px 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.3)"] }}
+              transition={{ duration: 3, repeat: Infinity }}
+            />
+            
+            {/* Top right stone */}
+            <motion.div 
+              className="absolute top-[4px] right-[3px] w-[48%] h-[38%] rounded-[2px_5px_3px_6px]"
+              style={{
+                background: 'linear-gradient(145deg, #c4bbb0 0%, #a8a095 35%, #8a8278 100%)',
+                boxShadow: 'inset 2px 2px 4px rgba(255,255,255,0.12), inset -1px -1px 3px rgba(0,0,0,0.18), 0 1px 2px rgba(0,0,0,0.25)'
+              }}
+              animate={{ boxShadow: ["inset 2px 2px 4px rgba(255,255,255,0.12), inset -1px -1px 3px rgba(0,0,0,0.18), 0 1px 2px rgba(0,0,0,0.25)", "inset 2px 2px 5px rgba(255,255,255,0.17), inset -1px -1px 3px rgba(0,0,0,0.22), 0 1px 2px rgba(0,0,0,0.25)", "inset 2px 2px 4px rgba(255,255,255,0.12), inset -1px -1px 3px rgba(0,0,0,0.18), 0 1px 2px rgba(0,0,0,0.25)"] }}
+              transition={{ duration: 3.2, repeat: Infinity, delay: 0.4 }}
+            />
+            
+            {/* Bottom left stone */}
+            <motion.div 
+              className="absolute bottom-[3px] left-[3px] w-[42%] h-[48%] rounded-[5px_3px_2px_4px]"
+              style={{
+                background: 'linear-gradient(160deg, #bab2a5 0%, #9e968a 45%, #827b70 100%)',
+                boxShadow: 'inset 2px 2px 4px rgba(255,255,255,0.14), inset -1px -1px 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.28)'
+              }}
+              animate={{ boxShadow: ["inset 2px 2px 4px rgba(255,255,255,0.14), inset -1px -1px 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.28)", "inset 2px 2px 5px rgba(255,255,255,0.19), inset -1px -1px 3px rgba(0,0,0,0.24), 0 1px 2px rgba(0,0,0,0.28)", "inset 2px 2px 4px rgba(255,255,255,0.14), inset -1px -1px 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.28)"] }}
+              transition={{ duration: 2.8, repeat: Infinity, delay: 0.8 }}
+            />
+            
+            {/* Bottom right stone */}
+            <motion.div 
+              className="absolute bottom-[4px] right-[3px] w-[50%] h-[45%] rounded-[3px_6px_4px_2px]"
+              style={{
+                background: 'linear-gradient(125deg, #afa799 0%, #958d82 50%, #79726a 100%)',
+                boxShadow: 'inset 2px 2px 4px rgba(255,255,255,0.13), inset -1px -1px 3px rgba(0,0,0,0.19), 0 1px 2px rgba(0,0,0,0.26)'
+              }}
+              animate={{ boxShadow: ["inset 2px 2px 4px rgba(255,255,255,0.13), inset -1px -1px 3px rgba(0,0,0,0.19), 0 1px 2px rgba(0,0,0,0.26)", "inset 2px 2px 5px rgba(255,255,255,0.18), inset -1px -1px 3px rgba(0,0,0,0.23), 0 1px 2px rgba(0,0,0,0.26)", "inset 2px 2px 4px rgba(255,255,255,0.13), inset -1px -1px 3px rgba(0,0,0,0.19), 0 1px 2px rgba(0,0,0,0.26)"] }}
+              transition={{ duration: 3.5, repeat: Infinity, delay: 1.2 }}
+            />
+            
+            {/* Small accent stone in middle gap */}
+            <div 
+              className="absolute top-[44%] left-[46%] w-[12%] h-[14%] rounded-[2px]"
+              style={{
+                background: 'linear-gradient(140deg, #a9a196 0%, #8a837a 100%)',
+                boxShadow: 'inset 1px 1px 2px rgba(255,255,255,0.1), 0 1px 1px rgba(0,0,0,0.2)'
+              }}
+            />
+            
+            {/* Mortar texture in gaps */}
+            <div className="absolute inset-0 pointer-events-none" style={{
+              backgroundImage: `radial-gradient(circle at 48% 50%, rgba(120,115,108,0.4) 1px, transparent 1px)`,
+              backgroundSize: '4px 4px'
+            }} />
+          </div>
+        </div>
+      )
+    }
+    // Cable management animations
+    if (option === "Yes, hide all cables in wall") {
+      return (
+        <div className="relative w-full h-full flex items-center justify-center">
+          <div className="w-3 h-12 bg-gray-200 absolute left-3 rounded-sm" /> {/* Wall */}
+          <div className="w-5 h-3 bg-gray-700 absolute top-2 left-4 rounded-sm" /> {/* TV */}
+          <motion.div 
+            className="absolute left-4 top-5 w-0.5 h-0 bg-green-500"
+            animate={{ height: [0, 6, 6], opacity: [1, 1, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          />
+          <div className="w-2 h-2 bg-gray-400 absolute bottom-2 left-4 rounded-sm" /> {/* Outlet */}
+        </div>
+      )
+    }
+    if (option === "Yes, use cable covers") {
+      return (
+        <div className="relative w-full h-full flex items-center justify-center">
+          <div className="w-3 h-12 bg-gray-200 absolute left-3 rounded-sm" />
+          <div className="w-5 h-3 bg-gray-700 absolute top-2 left-4 rounded-sm" />
+          <motion.div 
+            className="absolute left-5 top-5 w-1 rounded-sm bg-white border border-gray-300"
+            animate={{ height: [0, 7] }}
+            transition={{ duration: 1, repeat: Infinity, repeatDelay: 1 }}
+          />
+          <div className="w-2 h-2 bg-gray-400 absolute bottom-2 left-4 rounded-sm" />
+        </div>
+      )
+    }
+    if (option === "No, cables visible is fine") {
+      return (
+        <div className="relative w-full h-full flex items-center justify-center">
+          <div className="w-3 h-12 bg-gray-200 absolute left-3 rounded-sm" />
+          <div className="w-5 h-3 bg-gray-700 absolute top-2 left-4 rounded-sm" />
+          <motion.svg 
+            className="absolute left-5 top-5" 
+            width="8" height="10" 
+            viewBox="0 0 8 10"
+            animate={{ pathLength: [0, 1] }}
+          >
+            <motion.path 
+              d="M1 0 Q 4 5, 2 10" 
+              stroke="#333" 
+              strokeWidth="0.5" 
+              fill="none"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 1, repeat: Infinity, repeatDelay: 0.5 }}
+            />
+          </motion.svg>
+          <div className="w-2 h-2 bg-gray-400 absolute bottom-2 left-4 rounded-sm" />
+        </div>
+      )
+    }
+    // Plumbing animations
+    if (option === "Clogged drain") {
+      return (
+        <div className="relative w-full h-full flex items-center justify-center">
+          <div className="w-6 h-2 bg-gray-300 rounded-t-full" /> {/* Sink */}
+          <div className="absolute top-4 w-2 h-4 bg-gray-400 rounded-b-sm" /> {/* Pipe */}
+          <motion.div 
+            className="absolute top-3 w-4 h-1 bg-blue-400 rounded-full"
+            animate={{ y: [0, 1, 0], opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 1, repeat: Infinity }}
+          />
+          <motion.div 
+            className="absolute top-5 w-1.5 h-1.5 bg-amber-600 rounded-full"
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ duration: 0.5, repeat: Infinity }}
+          />
+        </div>
+      )
+    }
+    if (option === "Leaky pipe/faucet") {
+      return (
+        <div className="relative w-full h-full flex flex-col items-center justify-center">
+          <div className="w-3 h-2 bg-gray-400 rounded-t-sm" /> {/* Faucet */}
+          <div className="w-1 h-3 bg-gray-400" /> {/* Spout */}
+          {[0, 1, 2].map((i) => (
+            <motion.div
+              key={i}
+              className="absolute w-1 h-1 bg-blue-400 rounded-full"
+              style={{ top: "60%" }}
+              animate={{ 
+                y: [0, 8, 16],
+                opacity: [1, 0.7, 0],
+                scale: [1, 0.8, 0.5]
+              }}
+              transition={{ 
+                duration: 0.8, 
+                repeat: Infinity, 
+                delay: i * 0.3,
+                ease: "easeIn"
+              }}
+            />
+          ))}
+        </div>
+      )
+    }
+    if (option === "Water heater issue") {
+      return (
+        <div className="relative w-full h-full flex items-center justify-center">
+          <div className="w-6 h-10 bg-gray-300 rounded-sm border border-gray-400 flex flex-col items-center justify-center">
+            <motion.div 
+              className="w-4 h-1 rounded-full"
+              animate={{ backgroundColor: ["#60a5fa", "#f97316", "#60a5fa"] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+            <motion.div 
+              className="text-[6px] mt-1 font-bold"
+              animate={{ color: ["#3b82f6", "#ea580c", "#3b82f6"] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              TEMP
+            </motion.div>
+          </div>
+        </div>
+      )
+    }
+    // Default fallback - show description text
+    return (
+      <div className="w-full h-full flex items-center justify-center p-1">
+        <span className="text-[7px] text-gray-600 text-center leading-tight">{guide.description}</span>
+      </div>
+    )
+  }
+
+  return (
+    <div className="w-20 h-16 rounded-lg overflow-hidden shadow-inner mb-1">
+      {getAnimation()}
+    </div>
+  )
+})
+
 type ServiceProvider = {
   id: number
   name: string
@@ -70,10 +739,12 @@ type Service = {
 
 interface Message {
   id: string
-  type: "user" | "ai" | "system"
+  type: "user" | "ai" | "system" | "loading"
   content: string
   timestamp: Date
   suggestions?: string[]
+  options?: string[]
+  services?: Service[]
   context?: {
     intent?: string
     confidence?: number
@@ -88,26 +759,6 @@ interface Message {
   }
 }
 
-interface ServiceRecommendation {
-  id: string
-  title: string
-  provider: string
-  rating: number
-  price: string
-  description: string
-  matchScore: number
-  availability: string
-  location: string
-  specialties: string[]
-  responseTime: string
-  completionRate: number
-  badges: string[]
-  reasoning: string[]
-  pros: string[]
-  cons: string[]
-}
-
-// Sample services data
 const services: Service[] = [
   {
     id: 1,
@@ -255,374 +906,95 @@ const services: Service[] = [
   },
 ]
 
-// Mock functions for NLP and reasoning
-const detectUserIntent = (input: string) => {
-  const intent: any = {
-    type: "general",
-    confidence: 0.5,
-    entities: [],
-  }
-
-  const lowerInput = input.toLowerCase()
-
-  if (lowerInput.includes("mount tv") || lowerInput.includes("tv mounting")) {
-    intent.type = "booking"
-    intent.confidence = 0.8
-    intent.entities = ["Mounting"]
-  } else if (lowerInput.includes("furniture assembly")) {
-    intent.type = "booking"
-    intent.confidence = 0.8
-    intent.entities = ["Assembly"]
-  } else if (lowerInput.includes("painting") || lowerInput.includes("paint home")) {
-    intent.type = "booking"
-    intent.confidence = 0.8
-    intent.entities = ["Painting"]
-  } else if (lowerInput.includes("smart home") || lowerInput.includes("home automation")) {
-    intent.type = "booking"
-    intent.confidence = 0.8
-    intent.entities = ["Technology"]
-  } else if (lowerInput.includes("plumbing") || lowerInput.includes("fix sink")) {
-    intent.type = "booking"
-    intent.confidence = 0.8
-    intent.entities = ["Plumbing"]
-  } else if (lowerInput.includes("photography") || lowerInput.includes("take photos")) {
-    intent.type = "booking"
-    intent.confidence = 0.8
-    intent.entities = ["Photography"]
-  } else if (lowerInput.includes("budget") || lowerInput.includes("price")) {
-    intent.type = "refinement"
-    intent.confidence = 0.7
-    intent.entities = ["Budget"]
-  } else if (lowerInput.includes("quality") || lowerInput.includes("rating")) {
-    intent.type = "refinement"
-    intent.confidence = 0.7
-    intent.entities = ["Quality"]
-  } else if (lowerInput.includes("time") || lowerInput.includes("when")) {
-    intent.type = "refinement"
-    intent.confidence = 0.7
-    intent.entities = ["Timing"]
-  } else if (lowerInput.includes("more") || lowerInput.includes("other options")) {
-    intent.type = "information"
-    intent.confidence = 0.6
-  }
-
-  return intent
-}
-
-const analyzeSentiment = (input: string) => {
-  let type = "neutral"
-  let confidence = 0.5
-
-  const lowerInput = input.toLowerCase()
-
-  if (lowerInput.includes("perfect") || lowerInput.includes("great") || lowerInput.includes("good")) {
-    type = "positive"
-    confidence = 0.8
-  } else if (lowerInput.includes("bad") || lowerInput.includes("not right") || lowerInput.includes("expensive")) {
-    type = "negative"
-    confidence = 0.7
-  }
-
-  return { type, confidence }
-}
-
-const determineQueryComplexity = (input: string, stage: string) => {
-  let complexity = "simple"
-
-  if (stage === "understanding") {
-    complexity = "medium"
-  } else if (stage === "recommending") {
-    complexity = "complex"
-  }
-
-  return 1500
-}
-
-const updateUserModel = (currentModel: any, input: string, intent: any, context: any) => {
-  const updatedModel = { ...currentModel }
-
-  if (intent.entities.includes("Mounting")) {
-    updatedModel.category = "Mounting"
-  } else if (intent.entities.includes("Assembly")) {
-    updatedModel.category = "Assembly"
-  } else if (intent.entities.includes("Painting")) {
-    updatedModel.category = "Painting"
-  } else if (intent.entities.includes("Technology")) {
-    updatedModel.category = "Technology"
-  } else if (intent.entities.includes("Plumbing")) {
-    updatedModel.category = "Plumbing"
-  } else if (intent.entities.includes("Photography")) {
-    updatedModel.category = "Photography"
-  }
-
-  return updatedModel
-}
-
-const extractUserConcerns = (input: string) => {
-  const concerns: string[] = []
-
-  const lowerInput = input.toLowerCase()
-
-  if (lowerInput.includes("expensive") || lowerInput.includes("pricey") || lowerInput.includes("cost")) {
-    concerns.push("price")
-  }
-
-  if (
-    lowerInput.includes("quality") ||
-    lowerInput.includes("good") ||
-    lowerInput.includes("best") ||
-    lowerInput.includes("reliable")
-  ) {
-    concerns.push("quality")
-  }
-
-  if (lowerInput.includes("time") || lowerInput.includes("urgent") || lowerInput.includes("schedule")) {
-    concerns.push("timing")
-  }
-
-  return concerns
-}
-
-const generatePersonalizedRecommendationIntro = (userModel: any) => {
-  let intro = "Based on your needs, here are some top recommendations:"
-
-  if (userModel.category) {
-    intro = `Since you're interested in ${userModel.category} services, here are some great options:`
-  }
-
-  return intro
-}
-
-const generateRefinementResponseIntro = (refinementIterations: number) => {
-  let intro = "Here are some refined recommendations based on your feedback:"
-
-  if (refinementIterations > 1) {
-    intro = "I've made some further adjustments based on your feedback. Let's see if these options are a better fit:"
-  }
-
-  return intro
-}
-
-const generatePersonalizedExplanation = (matches: any, userModel: any, reasoning: any) => {
-  let explanation = "Here's why I recommended these services:"
-
-  if (matches.length > 0) {
-    explanation += `\n\nTop match: ${matches[0].service.title}`
-  }
-
-  return explanation
-}
-
-const generateDiverseAlternativesFn = (currentMatches: any, allServices: any, userModel: any) => {
-  const matches = [...currentMatches]
-  const reasoning: any = []
-
-  return { matches, reasoning }
-}
-
-const matchServicesWithReasoning = (services: any, userModel: any) => {
-  const matches: any = services.map((service: any) => ({
-    service,
-    matchScore: Math.floor(Math.random() * 50) + 50,
-  }))
-  const reasoning: any = []
-
-  return { matches, reasoning }
-}
-
-// Advanced AI system types
-interface ReasoningStep {
-  id: string
-  step: string
-  reasoning: string
-  conclusion: string
-  confidence: number
-  timestamp: Date
-}
-
-interface UserIntent {
-  type: "booking" | "comparison" | "information" | "save" | "general" | "refinement" | "feedback"
-  confidence: number
-  entities: string[]
-  context?: string
-}
-
-interface UserPreferenceModel {
-  categories: Map<string, number> // category -> confidence
-  budget: {
-    sensitivity: number // 0-10 scale
-    range: [number, number] | null
-    flexibility: number // 0-10 scale
-  }
-  quality: {
-    importance: number // 0-10 scale
-    minimumRating: number | null
-    certificationRequired: boolean
-  }
-  timing: {
-    urgency: number // 0-10 scale
-    specificDate: Date | null
-    flexibility: 5 // 0-10 scale
-  }
-  requirements: {
-    explicit: string[]
-    implicit: Map<string, number> // requirement -> importance
-    dealBreakers: string[]
-  }
-  history: {
-    viewedServices: number[]
-    interactionCount: number
-    satisfactionTrend: number[] // -1 to 1 scale
-    refinementIterations: number
-  }
-}
-
-// Service-specific question flows
 interface ServiceSpecificQuestions {
-  tvMounting: {
-    questions: string[]
-    options: { [key: string]: string[] }
-    required: boolean[]
-  }
-  plumbing: {
-    questions: string[]
-    options: string[]
-    required: boolean[]
-  }
-  painting: {
-    questions: string[]
-    options: { [key: string]: string[] }
-    required: boolean[]
-  }
-  furniture: {
-    questions: string[]
-    options: string[]
-    required: boolean[]
-  }
   [key: string]: {
     questions: string[]
-    options: string[]
+    options: { [key: string]: string[] }
     required: boolean[]
   }
 }
 
-// Enhanced reasoning engine with multi-step thinking
-interface EnhancedReasoning {
-  contextualMemory: {
-    shortTerm: Map<string, any>
-    longTerm: Map<string, any>
-    conversationFlow: string[]
-  }
-  reasoningCapabilities: {
-    chainOfThought: boolean
-    selfCritique: boolean
-    uncertaintyHandling: number
-    explorationFactor: number
-  }
-  adaptivePersonalization: {
-    learningRate: number
-    preferenceWeights: Map<string, number>
-    confidenceThresholds: Map<string, number>
-  }
-  proactiveCapabilities: {
-    suggestionThreshold: number
-    anticipationFactors: string[]
-    interventionLevel: "low" | "medium" | "high"
-  }
-}
-
-interface AIModelState {
-  reasoningTrace: ReasoningStep[]
-  confidenceThreshold: number
-  explorationFactor: number // How much to explore vs exploit
-  lastUserIntent: UserIntent | null
-  userModel: UserPreferenceModel
-  conversationContext: {
-    stage: "initial" | "understanding" | "service-specific" | "recommending" | "refining" | "finalizing"
-    depth: number
-    lastRecommendations: (number | string)[]
-    explanationProvided: boolean
-    comparisonMode: boolean
-    currentServiceType: string | null
-    serviceSpecificAnswers: Map<string, string>
-    currentServiceQuestion: number
-  }
-  enhancedReasoning: EnhancedReasoning
-}
-
-// Enhanced service matching types
-interface ServiceMatch {
-  service: Service
-  matchScore: number
-  matchReasons: {
-    factor: string
-    score: number
-    explanation: string
-  }[]
-  confidenceScore: number
-}
-
-interface MatchingResult {
-  matches: ServiceMatch[]
-  reasoning: ReasoningStep[]
-  diversityScore: number
-  coverageScore: number
-}
-
-// Define message types
-type MessageType = "user" | "ai" | "service" | "options" | "loading" | "feedback"
-
-interface Message {
-  id: string
-  type: MessageType
-  content: string
-  timestamp: Date
-  options?: string[]
-  services?: Service[]
-  feedbackOptions?: string[]
-}
-
-// Predefined conversation flows
-const initialMessages: Message[] = [
-  {
-    id: "welcome",
-    type: "ai",
-    content: "Hi! I'm LevL AI, your personal service matchmaker. What service are you looking for today?",
-    timestamp: new Date(),
-    options: ["TV Mounting", "Furniture Assembly", "Painting", "Plumbing Repair", "Moving Help", "Home Cleaning"],
-  },
-]
-
-// Service-specific questions for different service types
 const serviceSpecificQuestions: ServiceSpecificQuestions = {
   tvMounting: {
     questions: [
+      "What size is your TV?",
       "What type of wall do you have?",
       "Do you already have a wall mount, or do you need one included?",
-      "What size is your TV?",
+      "What type of mount would you prefer?",
       "Do you need cable management (hiding cables in the wall)?",
+      "Will you have a soundbar or other accessories to mount/attach with the TV?",
       "Is the mounting location near a power outlet?",
+      "Do you need help with any additional setup (streaming devices, gaming consoles, etc.)?",
     ],
     options: {
-      "What type of wall do you have?": ["Drywall/Sheetrock", "Brick", "Concrete", "Wood/Plaster", "Not sure"],
+      "What size is your TV?": [
+        "Under 32 inches",
+        "32-42 inches",
+        "43-55 inches",
+        "56-65 inches",
+        "66-75 inches",
+        "Over 75 inches",
+        "Unsure",
+      ],
+  "What type of wall do you have?": [
+    "Drywall/Sheetrock",
+    "Brick",
+    "Concrete",
+    "Plaster",
+    "Stone",
+    "Unsure",
+  ],
       "Do you already have a wall mount, or do you need one included?": [
         "I have a mount",
         "I need a mount included",
-        "Not sure yet",
+        "I need help choosing a mount",
+        "Unsure",
       ],
-      "What size is your TV?": ["Under 40 inches", "40-55 inches", "55-65 inches", "65-75 inches", "Over 75 inches"],
-      "Do you need cable management (hiding cables in the wall)?": ["Yes", "No", "Not sure"],
-      "Is the mounting location near a power outlet?": ["Yes", "No", "Not sure"],
+      "What type of mount would you prefer?": [
+        "Fixed (flat against wall)",
+        "Tilting (angle adjustment)",
+        "Full-motion/Articulating (swivel and tilt)",
+        "Ceiling mount",
+        "Let professional recommend",
+        "Unsure",
+      ],
+      "Do you need cable management (hiding cables in the wall)?": [
+        "Yes, hide all cables in wall",
+        "Yes, use cable covers",
+        "No, cables visible is fine",
+        "Unsure",
+      ],
+      "Will you have a soundbar or other accessories to mount/attach with the TV?": [
+        "Yes, soundbar",
+        "Yes, soundbar and subwoofer",
+        "Yes, multiple accessories",
+        "No additional accessories",
+        "Unsure",
+      ],
+      "Is the mounting location near a power outlet?": [
+        "Yes, within 3 feet",
+        "Yes, but farther away",
+        "No, need outlet installed",
+        "Unsure",
+      ],
+      "Do you need help with any additional setup (streaming devices, gaming consoles, etc.)?": [
+        "Yes, full entertainment system setup",
+        "Yes, just basic device connection",
+        "No, just TV mounting",
+        "Unsure",
+      ],
     },
-    required: [true, true, true, false, false],
+    required: [true, true, true, false, false, false, false, false],
   },
   plumbing: {
     questions: [
       "What type of plumbing issue are you experiencing?",
       "How urgent is this plumbing situation?",
       "Is there active water leakage?",
+      "Where is the problem located?",
       "Have you tried any DIY fixes already?",
       "How old is your plumbing system?",
+      "Do you need emergency shutoff assistance?",
     ],
     options: {
       "What type of plumbing issue are you experiencing?": [
@@ -631,142 +1003,337 @@ const serviceSpecificQuestions: ServiceSpecificQuestions = {
         "Water heater issue",
         "Toilet problem",
         "Installation of new fixture",
+        "Sewer line issue",
+        "Water pressure problem",
         "Other",
+        "Unsure",
       ],
       "How urgent is this plumbing situation?": [
         "Emergency (need help immediately)",
         "Urgent (today or tomorrow)",
         "Standard (this week)",
         "Flexible (whenever available)",
+        "Unsure",
       ],
-      "Is there active water leakage?": ["Yes, significant", "Yes, minor", "No", "Not sure"],
-      "Have you tried any DIY fixes already?": ["Yes", "No"],
-      "How old is your plumbing system?": [
-        "Less than 5 years",
-        "5-15 years",
-        "15-25 years",
-        "Over 25 years",
-        "Not sure",
+      "Is there active water leakage?": [
+        "Yes, significant leak",
+        "Yes, minor dripping",
+        "No active leak",
+        "Water shut off",
+        "Unsure",
+      ],
+      "Where is the problem located?": [
+        "Kitchen",
+        "Bathroom",
+        "Basement",
+        "Laundry room",
+        "Outside/Yard",
+        "Multiple locations",
+        "Unsure",
+      ],
+      "Have you tried any DIY fixes already?": ["Yes, still not working", "Yes, made it worse", "No", "Unsure"],
+      "How old is your plumbing system?": ["Less than 5 years", "5-15 years", "15-25 years", "Over 25 years", "Unsure"],
+      "Do you need emergency shutoff assistance?": [
+        "Yes, water still running",
+        "Already shut off",
+        "Don't know how to shut off",
+        "Not needed",
+        "Unsure",
       ],
     },
-    required: [true, true, true, false, false],
+    required: [true, true, true, false, false, false, false],
   },
   painting: {
     questions: [
       "What area needs painting?",
       "Do you need interior or exterior painting?",
       "What is the approximate square footage?",
-      "Do you need any special finishes or techniques?",
+      "What is the current wall condition?",
       "Do walls need repair before painting?",
+      "Do you need any special finishes or techniques?",
+      "Do you have a color scheme in mind?",
+      "Do you need help with color selection?",
     ],
     options: {
-      "What area needs painting?": ["Entire home", "Several rooms", "Single room", "Accent wall", "Exterior", "Other"],
-      "Do you need interior or exterior painting?": ["Interior", "Exterior", "Both"],
+      "What area needs painting?": [
+        "Single room",
+        "Multiple rooms (2-3)",
+        "Multiple rooms (4+)",
+        "Entire home interior",
+        "Exterior only",
+        "Both interior and exterior",
+        "Commercial space",
+        "Unsure",
+      ],
+      "Do you need interior or exterior painting?": ["Interior only", "Exterior only", "Both", "Unsure"],
       "What is the approximate square footage?": [
         "Under 500 sq ft",
         "500-1000 sq ft",
         "1000-2000 sq ft",
-        "Over 2000 sq ft",
-        "Not sure",
+        "2000-3000 sq ft",
+        "Over 3000 sq ft",
+        "Unsure",
+      ],
+      "What is the current wall condition?": [
+        "Good condition",
+        "Minor imperfections",
+        "Visible damage/holes",
+        "Major repair needed",
+        "Unsure",
+      ],
+      "Do walls need repair before painting?": [
+        "Yes, significant repairs needed",
+        "Yes, minor patching needed",
+        "No, walls are ready",
+        "Need professional assessment",
+        "Unsure",
       ],
       "Do you need any special finishes or techniques?": [
         "Standard paint job",
         "Textured finish",
         "Faux finish",
-        "Mural/design",
-        "Other",
+        "Accent wall with special technique",
+        "Mural or custom design",
+        "High-gloss/specialty coating",
+        "Unsure",
       ],
-      "Do walls need repair before painting?": [
-        "Yes, significant repairs",
-        "Yes, minor repairs",
-        "No, walls are ready",
-        "Not sure",
+      "Do you have a color scheme in mind?": [
+        "Yes, I know exact colors",
+        "Have some ideas",
+        "Need complete guidance",
+        "Unsure",
+      ],
+      "Do you need help with color selection?": [
+        "Yes, full color consultation",
+        "Yes, just some advice",
+        "No, I have colors chosen",
+        "Unsure",
       ],
     },
-    required: [true, true, true, false, false],
+    required: [true, true, true, false, false, false, false, false],
   },
   furniture: {
     questions: [
       "What type of furniture needs assembly?",
       "How many pieces need assembly?",
+      "What is the brand/source of the furniture?",
       "Do you have all the necessary tools?",
       "Are the assembly instructions available?",
+      "Is the furniture already delivered to your location?",
       "Do you need the packaging materials removed after assembly?",
+      "Are there any special requirements (stairs, tight spaces, etc.)?",
     ],
     options: {
       "What type of furniture needs assembly?": [
-        "Bed/Mattress",
-        "Table/Desk",
-        "Chair/Sofa",
-        "Shelving/Bookcase",
-        "Cabinet/Dresser",
+        "Bed frame",
+        "Dresser/Chest",
+        "Desk/Table",
+        "Chair/Seating",
+        "Bookshelf/Storage unit",
+        "Entertainment center",
+        "Outdoor furniture",
+        "Office furniture",
         "Multiple types",
-        "Other",
+        "Unsure",
       ],
-      "How many pieces need assembly?": ["1 piece", "2-3 pieces", "4-5 pieces", "More than 5 pieces"],
-      "Do you have all the necessary tools?": ["Yes", "No", "Not sure"],
-      "Are the assembly instructions available?": ["Yes", "No", "Not sure"],
-      "Do you need the packaging materials removed after assembly?": ["Yes", "No", "Not sure"],
+      "How many pieces need assembly?": [
+        "1 piece",
+        "2-3 pieces",
+        "4-5 pieces",
+        "6-10 pieces",
+        "More than 10 pieces",
+        "Unsure",
+      ],
+      "What is the brand/source of the furniture?": [
+        "IKEA",
+        "Wayfair",
+        "Amazon",
+        "West Elm",
+        "CB2/Crate & Barrel",
+        "Target",
+        "Other big box store",
+        "Custom/Local",
+        "Unsure",
+      ],
+      "Do you have all the necessary tools?": ["Yes, all tools ready", "Missing some tools", "No tools", "Unsure"],
+      "Are the assembly instructions available?": [
+        "Yes, have instructions",
+        "Lost/missing instructions",
+        "Instructions unclear",
+        "No instructions included",
+        "Unsure",
+      ],
+      "Is the furniture already delivered to your location?": [
+        "Yes, at location",
+        "Partially delivered",
+        "Not yet delivered",
+        "Need help with delivery too",
+        "Unsure",
+      ],
+      "Do you need the packaging materials removed after assembly?": [
+        "Yes, remove all packaging",
+        "Yes, but I'll keep boxes",
+        "No, I'll handle disposal",
+        "Unsure",
+      ],
+      "Are there any special requirements (stairs, tight spaces, etc.)?": [
+        "Need to move up/down stairs",
+        "Tight doorways/hallways",
+        "Elevator access required",
+        "Heavy/oversized pieces",
+        "No special requirements",
+        "Unsure",
+      ],
     },
-    required: [true, true, false, false, false],
+    required: [true, true, false, false, false, false, false, false],
   },
   moving: {
     questions: [
       "What type of move are you planning?",
       "How many rooms need to be moved?",
+      "What is the distance of your move?",
       "Do you need packing services?",
       "Do you have any large or specialty items?",
+      "What floors are you moving from/to?",
+      "Do you need storage services?",
       "What's your preferred moving date?",
     ],
     options: {
       "What type of move are you planning?": [
-        "Local (within city)",
-        "Long distance",
+        "Residential - full home",
+        "Residential - apartment",
         "Office/Commercial",
-        "Single item",
-        "Storage move",
+        "Single item/Partial",
+        "Storage unit",
+        "Unsure",
       ],
-      "How many rooms need to be moved?": ["Studio/1 bedroom", "2-3 bedrooms", "4+ bedrooms", "Office space"],
-      "Do you need packing services?": ["Yes, full packing", "Partial packing", "No, I'll pack myself"],
+      "How many rooms need to be moved?": [
+        "Studio/1 bedroom",
+        "2 bedrooms",
+        "3 bedrooms",
+        "4+ bedrooms",
+        "Office space",
+        "Unsure",
+      ],
+      "What is the distance of your move?": [
+        "Same building",
+        "Local (under 10 miles)",
+        "Local (10-50 miles)",
+        "Long distance (50-200 miles)",
+        "Cross-country",
+        "Unsure",
+      ],
+      "Do you need packing services?": [
+        "Yes, full packing",
+        "Partial packing (fragile items only)",
+        "Just packing materials provided",
+        "No, I'll pack myself",
+        "Unsure",
+      ],
       "Do you have any large or specialty items?": [
         "Piano",
         "Pool table",
         "Artwork/Antiques",
         "Exercise equipment",
-        "None",
+        "Large furniture",
+        "Multiple specialty items",
+        "No specialty items",
+        "Unsure",
       ],
-      "What's your preferred moving date?": ["Within a week", "1-2 weeks", "3-4 weeks", "Flexible/Not sure"],
+      "What floors are you moving from/to?": [
+        "Ground floor both locations",
+        "Elevator access both",
+        "Stairs at one or both",
+        "High-rise building",
+        "Unsure",
+      ],
+      "Do you need storage services?": [
+        "Yes, short-term (1-3 months)",
+        "Yes, long-term (3+ months)",
+        "No storage needed",
+        "Unsure",
+      ],
+      "What's your preferred moving date?": [
+        "Within a week",
+        "1-2 weeks",
+        "3-4 weeks",
+        "1-2 months",
+        "Flexible/Not sure",
+        "Unsure",
+      ],
     },
-    required: [true, true, false, false, true],
+    required: [true, true, true, false, false, false, false, true],
   },
   cleaning: {
     questions: [
       "What type of cleaning service do you need?",
       "What is the size of your space?",
       "How often do you need cleaning?",
+      "What is the current condition of your space?",
       "Are there any specific areas that need special attention?",
       "Do you have any pets?",
+      "Do you need cleaning supplies provided?",
+      "Any allergies or product preferences?",
     ],
     options: {
       "What type of cleaning service do you need?": [
-        "Regular cleaning",
+        "Regular/Standard cleaning",
         "Deep cleaning",
         "Move-in/Move-out",
         "Post-construction",
+        "Post-renovation",
         "Office cleaning",
+        "Event cleanup",
+        "Unsure",
       ],
-      "What is the size of your space?": ["Studio/1 bedroom", "2-3 bedrooms", "4+ bedrooms", "Commercial space"],
-      "How often do you need cleaning?": ["One-time", "Weekly", "Bi-weekly", "Monthly"],
+      "What is the size of your space?": [
+        "Studio/1 bedroom",
+        "2-3 bedrooms",
+        "4+ bedrooms",
+        "Small office",
+        "Large office/Commercial",
+        "Unsure",
+      ],
+      "How often do you need cleaning?": [
+        "One-time deep clean",
+        "Weekly",
+        "Bi-weekly",
+        "Monthly",
+        "Occasional/as needed",
+        "Unsure",
+      ],
+      "What is the current condition of your space?": [
+        "Generally clean, needs maintenance",
+        "Moderately dirty",
+        "Very dirty/neglected",
+        "Post-construction mess",
+        "Unsure",
+      ],
       "Are there any specific areas that need special attention?": [
-        "Kitchen",
-        "Bathrooms",
+        "Kitchen (appliances, cabinets)",
+        "Bathrooms (deep scrub)",
         "Carpets/Upholstery",
         "Windows",
-        "None",
+        "Floors (all types)",
+        "All areas equally",
+        "Unsure",
       ],
-      "Do you have any pets?": ["Yes, cats", "Yes, dogs", "Yes, other pets", "No pets"],
+      "Do you have any pets?": ["Yes, cats", "Yes, dogs", "Yes, multiple pets", "Yes, other pets", "No pets", "Unsure"],
+      "Do you need cleaning supplies provided?": [
+        "Yes, provide all supplies",
+        "I have basic supplies",
+        "I have all supplies",
+        "Unsure",
+      ],
+      "Any allergies or product preferences?": [
+        "Eco-friendly products only",
+        "Fragrance-free",
+        "Chemical allergies",
+        "No preferences",
+        "Unsure",
+      ],
     },
-    required: [true, true, true, false, false],
+    required: [true, true, true, false, false, false, false, false],
   },
   electrical: {
     questions: [
@@ -774,69 +1341,126 @@ const serviceSpecificQuestions: ServiceSpecificQuestions = {
       "Is this a repair or new installation?",
       "How urgent is this electrical work?",
       "Is the property residential or commercial?",
+      "What is the scope of work?",
       "Has this issue occurred before?",
+      "Do you need a permit for this work?",
     ],
     options: {
       "What type of electrical work do you need?": [
         "Outlet/Switch installation",
-        "Lighting installation",
+        "Lighting installation/fixture",
         "Electrical panel work",
-        "Wiring",
-        "Troubleshooting",
+        "Wiring/Rewiring",
+        "Circuit breaker issue",
+        "Smart home integration",
+        "Troubleshooting/Diagnosis",
+        "Safety inspection",
         "Other",
+        "Unsure",
       ],
-      "Is this a repair or new installation?": ["Repair", "New installation", "Upgrade", "Inspection"],
+      "Is this a repair or new installation?": [
+        "Repair existing",
+        "New installation",
+        "Upgrade existing",
+        "Inspection only",
+        "Unsure",
+      ],
       "How urgent is this electrical work?": [
-        "Emergency (same day)",
+        "Emergency (safety hazard)",
         "Urgent (1-2 days)",
         "Standard (this week)",
-        "Flexible",
+        "Flexible scheduling",
+        "Unsure",
       ],
-      "Is the property residential or commercial?": ["Residential", "Commercial", "Industrial"],
-      "Has this issue occurred before?": ["Yes, multiple times", "Yes, once", "No, first time", "Not sure"],
+      "Is the property residential or commercial?": ["Residential", "Commercial", "Industrial", "Unsure"],
+      "What is the scope of work?": ["Single room", "Multiple rooms", "Entire home/building", "Outdoor work", "Unsure"],
+      "Has this issue occurred before?": [
+        "Yes, multiple times",
+        "Yes, once before",
+        "No, first time",
+        "Ongoing issue",
+        "Unsure",
+      ],
+      "Do you need a permit for this work?": [
+        "Yes, need permit",
+        "Already have permit",
+        "Not sure if needed",
+        "No permit needed",
+        "Unsure",
+      ],
     },
-    required: [true, true, true, false, false],
+    required: [true, true, true, false, false, false, false],
   },
   landscaping: {
     questions: [
       "What type of landscaping service do you need?",
       "What is the approximate size of your yard?",
       "Do you need regular maintenance or a one-time service?",
+      "What is the current condition of your landscape?",
       "Are there any specific features you want to include?",
+      "Do you need irrigation or drainage work?",
       "When would you like the work to be completed?",
     ],
     options: {
       "What type of landscaping service do you need?": [
         "Lawn maintenance",
-        "Garden design",
-        "Tree service",
-        "Hardscaping",
-        "Irrigation",
-        "Full landscaping",
+        "Garden design/planting",
+        "Tree service/trimming",
+        "Hardscaping (patio, walkway)",
+        "Irrigation system",
+        "Landscape cleanup",
+        "Full landscape redesign",
+        "Unsure",
       ],
       "What is the approximate size of your yard?": [
         "Small (under 1,000 sq ft)",
         "Medium (1,000-5,000 sq ft)",
         "Large (5,000-10,000 sq ft)",
         "Very large (10,000+ sq ft)",
+        "Unsure",
       ],
       "Do you need regular maintenance or a one-time service?": [
-        "Regular maintenance",
-        "One-time service",
+        "Weekly maintenance",
+        "Bi-weekly maintenance",
+        "Monthly maintenance",
         "Seasonal service",
-        "Project-based",
+        "One-time project",
+        "Unsure",
+      ],
+      "What is the current condition of your landscape?": [
+        "Well-maintained",
+        "Needs some work",
+        "Overgrown/neglected",
+        "Blank slate/new construction",
+        "Unsure",
       ],
       "Are there any specific features you want to include?": [
-        "Flower beds",
+        "Flower beds/Garden",
         "Water features",
         "Patio/Deck",
         "Fencing",
-        "Lighting",
-        "None",
+        "Outdoor lighting",
+        "Fire pit/Outdoor kitchen",
+        "None/Unsure",
       ],
-      "When would you like the work to be completed?": ["ASAP", "Within 2 weeks", "Within a month", "Flexible timing"],
+      "Do you need irrigation or drainage work?": [
+        "New irrigation system",
+        "Repair existing irrigation",
+        "Drainage solutions",
+        "Both irrigation and drainage",
+        "No irrigation needed",
+        "Unsure",
+      ],
+      "When would you like the work to be completed?": [
+        "ASAP",
+        "Within 2 weeks",
+        "Within a month",
+        "This season",
+        "Flexible timing",
+        "Unsure",
+      ],
     },
-    required: [true, true, true, false, false],
+    required: [true, true, true, false, false, false, false],
   },
   flooring: {
     questions: [
@@ -844,7 +1468,10 @@ const serviceSpecificQuestions: ServiceSpecificQuestions = {
       "What is the approximate square footage?",
       "What type of flooring material are you interested in?",
       "Is this for a residential or commercial property?",
+      "What rooms need flooring work?",
       "Do you need removal of existing flooring?",
+      "What is the subfloor condition?",
+      "When do you need the work completed?",
     ],
     options: {
       "What type of flooring project do you need?": [
@@ -852,26 +1479,62 @@ const serviceSpecificQuestions: ServiceSpecificQuestions = {
         "Replacement",
         "Repair",
         "Refinishing",
-        "Cleaning",
+        "Cleaning/Maintenance",
+        "Unsure",
       ],
       "What is the approximate square footage?": [
         "Under 500 sq ft",
         "500-1,000 sq ft",
         "1,000-2,000 sq ft",
-        "Over 2,000 sq ft",
+        "2,000-3,000 sq ft",
+        "Over 3,000 sq ft",
+        "Unsure",
       ],
       "What type of flooring material are you interested in?": [
         "Hardwood",
         "Laminate",
         "Vinyl/LVP",
-        "Tile",
+        "Tile (ceramic/porcelain)",
         "Carpet",
-        "Not sure",
+        "Bamboo",
+        "Cork",
+        "Need recommendations",
+        "Unsure",
       ],
-      "Is this for a residential or commercial property?": ["Residential", "Commercial", "Industrial"],
-      "Do you need removal of existing flooring?": ["Yes", "No", "Not sure"],
+      "Is this for a residential or commercial property?": ["Residential", "Commercial", "Industrial", "Unsure"],
+      "What rooms need flooring work?": [
+        "Single room",
+        "Multiple rooms (2-3)",
+        "Multiple rooms (4+)",
+        "Entire home/building",
+        "Basement",
+        "Unsure",
+      ],
+      "Do you need removal of existing flooring?": [
+        "Yes, carpet removal",
+        "Yes, tile removal",
+        "Yes, hardwood removal",
+        "Yes, other flooring",
+        "No removal needed",
+        "Unsure",
+      ],
+      "What is the subfloor condition?": [
+        "Good condition",
+        "Needs minor repair",
+        "Needs major repair",
+        "Unknown/Need assessment",
+        "Unsure",
+      ],
+      "When do you need the work completed?": [
+        "ASAP",
+        "Within 2 weeks",
+        "Within a month",
+        "Within 2 months",
+        "Flexible",
+        "Unsure",
+      ],
     },
-    required: [true, true, true, false, false],
+    required: [true, true, true, false, false, false, false, false],
   },
   roofing: {
     questions: [
@@ -880,862 +1543,684 @@ const serviceSpecificQuestions: ServiceSpecificQuestions = {
       "What type of roofing material do you have or want?",
       "How old is your current roof?",
       "Have you noticed any leaks or damage?",
+      "Do you need emergency services?",
+      "What is your timeline for this project?",
     ],
     options: {
       "What type of roofing service do you need?": [
-        "Repair",
+        "Minor repair",
+        "Major repair",
         "Full replacement",
-        "Inspection",
+        "Inspection only",
         "Maintenance",
         "New installation",
+        "Emergency leak repair",
+        "Unsure",
       ],
       "What is the approximate size of your roof?": [
         "Small (under 1,000 sq ft)",
         "Medium (1,000-2,000 sq ft)",
         "Large (2,000-3,000 sq ft)",
         "Very large (3,000+ sq ft)",
+        "Unsure",
       ],
       "What type of roofing material do you have or want?": [
         "Asphalt shingles",
-        "Metal",
-        "Tile",
+        "Metal roofing",
+        "Tile (clay/concrete)",
         "Flat/TPO",
-        "Wood shake",
-        "Not sure",
+        "Wood shake/shingle",
+        "Slate",
+        "Need recommendations",
+        "Unsure",
       ],
-      "How old is your current roof?": ["Less than 5 years", "5-15 years", "15-25 years", "Over 25 years", "Not sure"],
+      "How old is your current roof?": [
+        "Less than 5 years",
+        "5-10 years",
+        "10-15 years",
+        "15-20 years",
+        "Over 20 years",
+        "Don't know",
+        "Unsure",
+      ],
       "Have you noticed any leaks or damage?": [
         "Yes, active leaks",
-        "Yes, visible damage",
+        "Yes, visible exterior damage",
+        "Yes, interior water damage",
+        "Minor issues",
         "No visible issues",
+        "Unsure",
+      ],
+      "Do you need emergency services?": [
+        "Yes, emergency leak",
+        "Yes, storm damage",
+        "No, can wait",
         "Not sure",
+        "Unsure",
+      ],
+      "What is your timeline for this project?": [
+        "Emergency (ASAP)",
+        "Within a week",
+        "Within a month",
+        "Within 3 months",
+        "Flexible/Planning ahead",
+        "Unsure",
       ],
     },
-    required: [true, true, false, true, false],
+    required: [true, true, false, true, false, false, false],
   },
 }
 
-// Initial AI model state - no changes here
-const initialAIModel: AIModelState = {
-  reasoningTrace: [],
-  confidenceThreshold: 0.7,
-  explorationFactor: 0.2,
-  lastUserIntent: null,
-  userModel: {
-    categories: new Map(),
-    budget: {
-      sensitivity: 5,
-      range: null,
-      flexibility: 5,
+const questionSkipLogic: {
+  [serviceType: string]: {
+    [question: string]: {
+      [answer: string]: Set<string>
+    }
+  }
+} = {
+  painting: {
+    "Do you have a color scheme in mind?": {
+      "Yes, I know exact colors": new Set(["Do you need help with color selection?"]),
     },
-    quality: {
-      importance: 7,
-      minimumRating: null,
-      certificationRequired: false,
-    },
-    timing: {
-      urgency: 5,
-      specificDate: null,
-      flexibility: 5,
-    },
-    requirements: {
-      explicit: [],
-      implicit: new Map(),
-      dealBreakers: [],
-    },
-    history: {
-      viewedServices: [],
-      interactionCount: 0,
-      satisfactionTrend: [],
-      refinementIterations: 0,
+    "What is the current wall condition?": {
+      "Good condition": new Set(["Do walls need repair before painting?"]),
     },
   },
+  plumbing: {
+    "Is there active water leakage?": {
+      "No active leak": new Set(["Do you need emergency shutoff assistance?"]),
+      "Water shut off": new Set(["Do you need emergency shutoff assistance?"]),
+    },
+  },
+}
+
+interface AIModelState {
+  conversationContext: {
+    stage: "initial" | "understanding" | "service-specific" | "recommending" | "refining" | "finalizing"
+    currentServiceType: string | null
+    serviceSpecificAnswers: Map<string, string>
+    currentServiceQuestion: number
+  }
+}
+
+const initialAIModel: AIModelState = {
   conversationContext: {
     stage: "initial",
-    depth: 0,
-    lastRecommendations: [],
-    explanationProvided: false,
-    comparisonMode: false,
     currentServiceType: null,
     serviceSpecificAnswers: new Map(),
     currentServiceQuestion: 0,
   },
-  enhancedReasoning: {
-    contextualMemory: {
-      shortTerm: new Map(),
-      longTerm: longTermMemoryData, // Preserve long-term memory
-      conversationFlow: [],
-    },
-    reasoningCapabilities: {
-      chainOfThought: true,
-      selfCritique: true,
-      uncertaintyHandling: 0.8,
-      explorationFactor: 0.3,
-    },
-    adaptivePersonalization: {
-      learningRate: 0.2,
-      preferenceWeights: new Map(),
-      confidenceThresholds: new Map([
-        ["category", 0.7],
-        ["budget", 0.6],
-        ["quality", 0.65],
-        ["timing", 0.6],
-      ]),
-    },
-    proactiveCapabilities: {
-      suggestionThreshold: 0.75,
-      anticipationFactors: ["budget_constraints", "quality_expectations", "time_sensitivity", "specific_requirements"],
-      interventionLevel: "medium",
-    },
-  },
 }
 
+const initialMessages: Message[] = [
+  {
+    id: "welcome",
+    type: "ai",
+    content: "Hi! I'm LevL AI. Please select one of the above categories that you need help with!",
+    timestamp: new Date(),
+  },
+]
+
+const MessageItem = memo(
+  ({
+    message,
+    onOptionSelect,
+    router,
+  }: {
+    message: Message
+    onOptionSelect: (option: string) => void
+    router: ReturnType<typeof useRouter>
+  }) => {
+    const handleOptionClick = useCallback(
+      (option: string) => {
+        onOptionSelect(option)
+      },
+      [onOptionSelect],
+    )
+
+    if (message.type === "user") {
+      return (
+        <motion.div
+          className="flex justify-end"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          layout={false}
+        >
+          <div className="relative bg-gradient-to-br from-lavender-200/95 via-lavender-300/90 to-lavender-200/90 dark:from-lavender-950/95 dark:via-lavender-950/90 dark:to-lavender-950/90 backdrop-blur-sm rounded-2xl px-5 py-3 max-w-[80%] shadow-[0_14px_20px_-3px_rgba(79,70,229,0.3),0_6px_10px_-4px_rgba(79,70,229,0.2),0_-2px_8px_0px_rgba(255,255,255,0.15)] dark:shadow-[0_10px_15px_-3px_rgba(79,70,229,0.3),0_4px_6px_-4px_rgba(0,0,0,0.4),0_-2px_6px_0px_rgba(79,70,229,0.1)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-800/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 translate-y-[-2px] hover:translate-y-[-4px] transition-all duration-300 transform">
+            <p className="text-sm text-gray-800 dark:text-gray-100 relative z-10">{message.content}</p>
+            <div className="text-[10px] text-black dark:text-white text-right mt-1 relative z-10">
+              {new Date(message.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+            </div>
+          </div>
+        </motion.div>
+      )
+    }
+
+    if (message.type === "ai") {
+      return (
+        <motion.div
+          className="flex"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          layout={false}
+        >
+          <div className="relative bg-gradient-to-br from-white/95 via-white/90 to-lavender-50/90 dark:from-gray-800/95 dark:via-gray-800/90 dark:to-lavender-950/90 backdrop-blur-sm rounded-2xl px-5 py-3 max-w-[80%] shadow-[0_14px_20px_-3px_rgba(79,70,229,0.3),0_6px_10px_-4px_rgba(79,70,229,0.2),0_-2px_8px_0px_rgba(255,255,255,0.15)] dark:shadow-[0_10px_15px_-3px_rgba(79,70,229,0.3),0_4px_6px_-4px_rgba(0,0,0,0.4),0_-2px_6px_0px_rgba(79,70,229,0.1)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 translate-y-[-4px] transition-all duration-300 transform">
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-lavender-500/8 via-purple-500/8 to-violet-500/8 dark:from-lavender-500/15 dark:via-purple-500/15 dark:to-violet-500/15 opacity-80"></div>
+            <div className="absolute inset-x-0 bottom-0 h-1/2 rounded-b-2xl bg-gradient-to-t from-black/5 to-transparent dark:from-white/5"></div>
+
+            <p className="text-sm relative z-10">{message.content}</p>
+
+            {message.options && (
+              <div className="mt-4 relative z-10">
+                {/* Check if any options have visual guides */}
+                {message.options.some(opt => optionVisualGuides[opt]) ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {message.options.map((option, index) => (
+                      <motion.button
+                        key={`${message.id}-${option}-${index}`}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: index * 0.05, duration: 0.2 }}
+                        className="flex flex-col items-center p-2 bg-white/90 dark:bg-gray-800/90 hover:bg-lavender-100/90 dark:hover:bg-lavender-900/30 rounded-xl text-xs font-medium transition-all duration-200 border border-lavender-200/70 dark:border-lavender-700/50 hover:border-lavender-400 dark:hover:border-lavender-500/70 backdrop-blur-sm hover:shadow-lg hover:scale-[1.02]"
+                        onClick={() => handleOptionClick(option)}
+                      >
+                        <OptionVisualPreview option={option} />
+                        <span className="text-center leading-tight mt-1">{option}</span>
+                      </motion.button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {message.options.map((option, index) => (
+                      <motion.button
+                        key={`${message.id}-${option}-${index}`}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: index * 0.05, duration: 0.2 }}
+                        className="px-3 py-1.5 bg-white/90 dark:bg-gray-800/90 hover:bg-lavender-100/90 dark:hover:bg-lavender-900/30 rounded-full text-xs font-medium transition-all duration-200 border border-lavender-200/70 dark:border-lavender-700/50 hover:border-lavender-300 dark:hover:border-lavender-600/70 backdrop-blur-sm hover:shadow-md"
+                        onClick={() => handleOptionClick(option)}
+                      >
+                        {option}
+                      </motion.button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+            {message.services && (
+              <div className="mt-5 space-y-4 relative z-10">
+                {message.services.map((service, index) => (
+                  <motion.div
+                    key={service.provider.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1, duration: 0.3 }}
+                  >
+                    <ProviderCard
+                      provider={service.provider}
+                      onSelect={(providerId) => router.push(`/services/${service.id}`)}
+                      onViewServices={(providerId) => router.push(`/services/${service.id}`)}
+                      onContact={(providerId) => router.push(`/messages?provider=${providerId}`)}
+                      matchScore={service.matchScore}
+                    />
+                  </motion.div>
+                ))}
+              </div>
+            )}
+            <div className="text-[10px] text-black dark:text-white mt-1 relative z-10">
+              {new Date(message.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+            </div>
+          </div>
+        </motion.div>
+      )
+    }
+
+    if (message.type === "loading") {
+      return (
+        <motion.div
+          className="flex"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.15 }}
+          layout={false}
+        >
+          <div className="flex items-center p-4 rounded-2xl bg-gradient-to-br from-white/95 via-white/90 to-lavender-50/90 dark:from-gray-800/95 dark:via-gray-800/90 dark:to-lavender-950/90 backdrop-blur-sm shadow-[0_20px_30px_-5px_rgba(79,70,229,0.4),0_10px_15px_-5px_rgba(79,70,229,0.3),0_-3px_10px_0px_rgba(255,255,255,0.2),inset_0_1px_2px_0px_rgba(255,255,255,0.5)] dark:shadow-[0_20px_30px_-5px_rgba(79,70,229,0.5),0_10px_15px_-5px_rgba(0,0,0,0.6),0_-3px_10px_0px_rgba(79,70,229,0.3),inset_0_1px_2px_0px_rgba(79,70,229,0.2)] border-t border-l border-r border-lavender-200/80 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/50 border-b-2 border-b-lavender-300 dark:border-b-2 dark:border-b-lavender-600 transform translate-y-[-6px] hover:translate-y-[-8px] transition-all duration-300">
+            <LevlLogo className="h-14 w-14 mr-3 drop-shadow-[0_4px_8px_rgba(79,70,229,0.3)] dark:drop-shadow-[0_4px_8px_rgba(79,70,229,0.5)]" />
+            <div className="flex space-x-2 ml-1">
+              <motion.div
+                className="h-2.5 w-2.5 rounded-full bg-gradient-to-br from-lavender-400 to-lavender-600 shadow-[0_2px_8px_rgba(139,92,246,0.6)] dark:shadow-[0_2px_8px_rgba(139,92,246,0.8)]"
+                animate={{
+                  scale: [0.6, 1.2, 0.6],
+                  opacity: [0.5, 1, 0.5],
+                }}
+                transition={{
+                  duration: 1.2,
+                  repeat: Number.POSITIVE_INFINITY,
+                  ease: "easeInOut",
+                }}
+              />
+              <motion.div
+                className="h-2.5 w-2.5 rounded-full bg-gradient-to-br from-lavender-400 to-lavender-600 shadow-[0_2px_8px_rgba(139,92,246,0.6)] dark:shadow-[0_2px_8px_rgba(139,92,246,0.8)]"
+                animate={{
+                  scale: [0.6, 1.2, 0.6],
+                  opacity: [0.5, 1, 0.5],
+                }}
+                transition={{
+                  duration: 1.2,
+                  repeat: Number.POSITIVE_INFINITY,
+                  ease: "easeInOut",
+                  delay: 0.2,
+                }}
+              />
+              <motion.div
+                className="h-2.5 w-2.5 rounded-full bg-gradient-to-br from-lavender-400 to-lavender-600 shadow-[0_2px_8px_rgba(139,92,246,0.6)] dark:shadow-[0_2px_8px_rgba(139,92,246,0.8)]"
+                animate={{
+                  scale: [0.6, 1.2, 0.6],
+                  opacity: [0.5, 1, 0.5],
+                }}
+                transition={{
+                  duration: 1.2,
+                  repeat: Number.POSITIVE_INFINITY,
+                  ease: "easeInOut",
+                  delay: 0.4,
+                }}
+              />
+            </div>
+          </div>
+        </motion.div>
+      )
+    }
+
+    return null
+  },
+)
+
+MessageItem.displayName = "MessageItem"
+
 export function AIServiceMatchmaker() {
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-  const [selectedSkills, setSelectedSkills] = useState<string[]>([])
-  const [userInput, setUserInput] = useState("")
   const [messages, setMessages] = useState<Message[]>(initialMessages)
   const [inputValue, setInputValue] = useState("")
   const [isTyping, setIsTyping] = useState(false)
-  const [showMatchmaker, setShowMatchmaker] = useState(true) // Changed to true to show by default
-  const [matchedServices, setMatchedServices] = useState<Service[]>([])
-  const [currentQuestion, setCurrentQuestion] = useState(0)
   const [conversationStage, setConversationStage] = useState<
     "initial" | "understanding" | "service-specific" | "recommending" | "refining" | "finalizing"
   >("initial")
-
-  // Add these state variables
-  const [isFocused, setIsFocused] = useState(false)
-  const [isRecording, setIsRecording] = useState(false)
   const [showPortal, setShowPortal] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
-
-  // Enhanced state for sophisticated matching
-  const [userContextHistory, setUserContextHistory] = useState<
-    Array<{
-      query: string
-      timestamp: Date
-      intent?: string
-      entities?: string[]
-      sentiment?: "positive" | "negative" | "neutral"
-    }>
-  >([])
-
-  // Advanced preference tracking with confidence scores
-  const [enhancedPreferences, setEnhancedPreferences] = useState<{
-    categoryPreferences: Map<string, number> // category -> confidence score (0-1)
-    budgetSensitivity: number // 0-10 scale
-    qualityPreference: number // 0-10 scale
-    timeUrgency: number // 0-10 scale
-    explicitRequirements: string[]
-    implicitPreferences: Map<string, number> // feature -> importance score
-    negativePreferences: string[] // things user explicitly doesn't want
-    conversationContext: {
-      lastMentionedService?: number
-      comparisonMode: boolean
-      refinementIteration: number
-      satisfactionScore: number // 0-10 scale
-    }
-  }>({
-    categoryPreferences: new Map(),
-    budgetSensitivity: 5,
-    qualityPreference: 7,
-    timeUrgency: 5,
-    explicitRequirements: [],
-    implicitPreferences: new Map(),
-    negativePreferences: [],
-    conversationContext: {
-      comparisonMode: false,
-      refinementIteration: 0,
-      satisfactionScore: 5,
-    },
-  })
-
-  // Reasoning trace for explainable AI
-  const [reasoningTrace, setReasoningTrace] = useState<
-    Array<{
-      step: string
-      reasoning: string
-      conclusion: string
-      confidence: number
-    }>
-  >([])
-
-  // Replace the existing state declarations with this enhanced AI model
-  const [aiModel, setAIModel] = useState<AIModelState>(initialAIModel)
-
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const chatContainerRef = useRef<HTMLDivElement>(null)
-  const router = useRouter()
-
-  // Questions for understanding user needs
-  const questions = [
-    "What's your budget range for this service?",
-    "When do you need this service completed?",
-    "How important is provider experience to you?",
-    "Do you have any specific requirements or preferences?",
-  ]
-
-  // Replace the existing scrollToBottom function with this enhanced version
-  const scrollToBottom = () => {
-    // Auto-scrolling functionality removed to allow only user-initiated scrolling
-    // This is intentionally empty
-  }
-
-  // Replace the useEffect for scrolling with this enhanced version
-  const isInitialMount = useRef(true)
-  useEffect(() => {
-    // We only want to scroll to top on initial component mount, not when messages update
-    // Using a ref to track if it's the initial load
-
-    if (isInitialMount.current) {
-      window.scrollTo(0, 0)
-      isInitialMount.current = false
-    }
-
-    // No auto-scrolling on message updates as per user request
-  }, [])
-
-  // Simulate AI typing
-  const simulateTyping = useCallback((callback: () => void, delay = 1500) => {
-    setIsTyping(true)
-    const typingMessage: Message = {
-      id: `typing-${Date.now()}`,
-      type: "loading",
-      content: "", // Empty content since we're using the logo
-      timestamp: new Date(),
-    }
-    setMessages((prev) => [...prev, typingMessage])
-
-    setTimeout(() => {
-      setMessages((prev) => prev.filter((msg) => msg.id !== typingMessage.id))
-      setIsTyping(false)
-      callback()
-      // Removed any scrollToBottom calls here
-    }, delay)
-  }, [])
-
-  // Handle user input submission
-  const handleSubmit = (e?: React.FormEvent) => {
-    e?.preventDefault()
-    if (inputValue.trim() === "" && !e) return
-
-    const userMessage: Message = {
-      id: `user-${Date.now()}`,
-      type: "user",
-      content: inputValue || (e as any).target.innerText,
-      timestamp: new Date(),
-    }
-
-    setMessages((prev) => [...prev, userMessage])
-    setInputValue("")
-
-    // Process user input
-    processUserInput(userMessage.content)
-  }
-
-  // Handle option selection
-  const handleOptionSelect = (option: string) => {
-    const userMessage: Message = {
-      id: `user-${Date.now()}`,
-      type: "user",
-      content: option,
-      timestamp: new Date(),
-    }
-
-    setMessages((prev) => [...prev, userMessage])
-    processUserInput(option)
-  }
-
-  const [userContext, setUserContext] = useState<Array<{ query: string; timestamp: Date }>>([])
   const [detectedPreferences, setDetectedPreferences] = useState<{
     category: string | null
-    budget: string | null
     timeframe: string | null
-    experienceImportance: string | null
-    hasSpecificRequirements: boolean
-    specificRequirements: string | null
   }>({
     category: null,
-    budget: null,
     timeframe: null,
-    experienceImportance: null,
-    hasSpecificRequirements: false,
-    specificRequirements: null,
   })
 
-  // Process user input with proper option handling
-  const processUserInput = (input: string) => {
-    const intent = detectUserIntent(input)
-
-    // Handle initial option selection
-    if (
-      messages.length <= 2 &&
-      ["TV Mounting", "Furniture Assembly", "Painting", "Plumbing Repair", "Moving Help", "Home Cleaning"].includes(
-        input,
-      )
-    ) {
-      // User selected a service category
-      simulateTyping(() => {
-        const followUpMessage: Message = {
-          id: `ai-${Date.now()}`,
-          type: "ai",
-          content: `Great choice! Tell me more about your ${input.toLowerCase()} needs. What's your budget range?`,
-          timestamp: new Date(),
-          options: ["Under $100", "$100-$300", "$300-$500", "Over $500", "I'm flexible"],
-        }
-        setMessages((prev) => [...prev, followUpMessage])
-      }, 1500)
-      return
-    }
-
-    // Handle budget selection
-    if (["Under $100", "$100-$300", "$300-$500", "Over $500", "I'm flexible"].includes(input)) {
-      simulateTyping(() => {
-        const timingMessage: Message = {
-          id: `ai-${Date.now()}`,
-          type: "ai",
-          content: "Perfect! When do you need this service completed?",
-          timestamp: new Date(),
-          options: ["ASAP", "This week", "Within 2 weeks", "I'm flexible with timing"],
-        }
-        setMessages((prev) => [...prev, timingMessage])
-      }, 1500)
-      return
-    }
-
-    // Handle timing selection and show service recommendations
-    if (["ASAP", "This week", "Within 2 weeks", "I'm flexible with timing"].includes(input)) {
-      simulateTyping(() => {
-        // Filter services based on user preferences (you can enhance this logic)
-        const recommendedServices = services.slice(0, 3) // Get top 3 services
-
-        const recommendationMessage: Message = {
-          id: `ai-${Date.now()}`,
-          type: "ai",
-          content: "Based on your preferences, here are the top service providers I recommend:",
-          timestamp: new Date(),
-          services: recommendedServices,
-        }
-        setMessages((prev) => [...prev, recommendationMessage])
-      }, 1500)
-      return
-    }
-
-    // Handle general text input
-    simulateTyping(() => {
-      const aiMessage: Message = {
-        id: `ai-${Date.now()}`,
-        type: "ai",
-        content:
-          "I understand you're looking for help. Let me ask a few questions to find the perfect service provider for you. What type of service do you need?",
-        timestamp: new Date(),
-        options: ["TV Mounting", "Furniture Assembly", "Painting", "Plumbing Repair", "Moving Help", "Home Cleaning"],
-      }
-      setMessages((prev) => [...prev, aiMessage])
-    }, 1500)
-  }
-
-  // Ask initial questions
-  const askInitialQuestions = () => {
-    simulateTyping(() => {
-      const aiMessage: Message = {
-        id: `ai-${Date.now()}`,
-        type: "ai",
-        content: questions[currentQuestion],
-        timestamp: new Date(),
-      }
-
-      setMessages((prev) => [...prev, aiMessage])
-    }, 1500)
-  }
-
-  // Process answers to initial questions
-  const processInitialAnswers = (input: string) => {
-    // Update detected preferences
-    setDetectedPreferences((prev) => ({
-      ...prev,
-      budget: prev.budget || (questions[currentQuestion].includes("budget") ? input : null),
-      timeframe: prev.timeframe || (questions[currentQuestion].includes("time") ? input : null),
-      experienceImportance:
-        prev.experienceImportance || (questions[currentQuestion].includes("experience") ? input : null),
-      hasSpecificRequirements:
-        prev.hasSpecificRequirements || (questions[currentQuestion].includes("requirements") ? true : false),
-      specificRequirements:
-        prev.specificRequirements || (questions[currentQuestion].includes("requirements") ? input : null),
-    }))
-
-    // Move to next question or service-specific questions
-    if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion((prev) => prev + 1)
-      askInitialQuestions()
-    } else {
-      // Move to service-specific questions
-      setConversationStage("service-specific")
-      setAIModel((prev) => ({
-        ...prev,
-        conversationContext: { ...prev.conversationContext, stage: "service-specific" },
-      }))
-      askServiceSpecificQuestion()
-    }
-  }
-
-  // Ask service-specific questions
-  const askServiceSpecificQuestion = () => {
-    if (!aiModel.conversationContext.currentServiceType) {
-      console.error("No service type selected")
-      return
-    }
-
-    const serviceType = aiModel.conversationContext.currentServiceType
-    const questionIndex = aiModel.conversationContext.currentServiceQuestion
-    const questions = serviceSpecificQuestions[serviceType].questions
-
-    if (questionIndex < questions.length) {
-      simulateTyping(() => {
-        const aiMessage: Message = {
-          id: `ai-${Date.now()}`,
-          type: "ai",
-          content: questions[questionIndex],
-          timestamp: new Date(),
-          options: serviceSpecificQuestions[serviceType].options[questions[questionIndex]],
-        }
-
-        setMessages((prev) => [...prev, aiMessage])
-      }, 1500)
-    } else {
-      // Move to recommending stage
-      setConversationStage("recommending")
-      setAIModel((prev) => ({
-        ...prev,
-        conversationContext: { ...prev.conversationContext, stage: "recommending" },
-      }))
-      generateRecommendations()
-    }
-  }
-
-  // Process service-specific answers
-  const processServiceSpecificAnswers = (input: string) => {
-    if (!aiModel.conversationContext.currentServiceType) {
-      console.error("No service type selected")
-      return
-    }
-
-    const serviceType = aiModel.conversationContext.currentServiceType
-    const questionIndex = aiModel.conversationContext.currentServiceQuestion
-    const questions = serviceSpecificQuestions[serviceType].questions
-
-    // Update service-specific answers
-    setAIModel((prev) => {
-      const updatedAnswers = new Map(prev.conversationContext.serviceSpecificAnswers)
-      updatedAnswers.set(questions[questionIndex], input)
-
-      return {
-        ...prev,
-        conversationContext: {
-          ...prev.conversationContext,
-          serviceSpecificAnswers: updatedAnswers,
-        },
-      }
-    })
-
-    // Move to next question or recommending stage
-    if (questionIndex < serviceSpecificQuestions[serviceType].questions.length - 1) {
-      setAIModel((prev) => ({
-        ...prev,
-        conversationContext: {
-          ...prev.conversationContext,
-          currentServiceQuestion: prev.conversationContext.currentServiceQuestion + 1,
-        },
-      }))
-      askServiceSpecificQuestion()
-    } else {
-      // Move to recommending stage
-      setConversationStage("recommending")
-      setAIModel((prev) => ({
-        ...prev,
-        conversationContext: { ...prev.conversationContext, stage: "recommending" },
-      }))
-      generateRecommendations()
-    }
-  }
-
-  // Generate recommendations
-  const generateRecommendations = () => {
-    simulateTyping(() => {
-      // Filter services based on user preferences
-      const filteredServices = services.filter((service) => {
-        if (aiModel.userModel.categories.size > 0) {
-          const categoryConfidence = aiModel.userModel.categories.get(service.category) || 0
-          if (categoryConfidence < aiModel.confidenceThreshold) {
-            return false
-          }
-        }
-        return true
-      })
-
-      // Sort services by match score
-      const sortedServices = filteredServices.sort((a, b) => b.matchScore - a.matchScore)
-
-      // Select top 3 services
-      const topServices = sortedServices.slice(0, 3)
-
-      const aiMessage: Message = {
-        id: `ai-${Date.now()}`,
-        type: "ai",
-        content: "Based on your preferences, here are some top recommendations:",
-        timestamp: new Date(),
-        services: topServices,
-      }
-
-      setMessages((prev) => [...prev, aiMessage])
-    }, 1500)
-  }
-
-  // Refine recommendations
-  const refineRecommendations = (input: string) => {
-    simulateTyping(() => {
-      const aiMessage: Message = {
-        id: `ai-${Date.now()}`,
-        type: "ai",
-        content: "Thank you for your feedback. I'm refining the recommendations based on your input.",
-        timestamp: new Date(),
-      }
-
-      setMessages((prev) => [...prev, aiMessage])
-
-      // Generate new recommendations based on feedback
-      generateRecommendations()
-    }, 1500)
-  }
-
-  // Finalize recommendations
-  const finalizeRecommendations = (input: string) => {
-    simulateTyping(() => {
-      const aiMessage: Message = {
-        id: `ai-${Date.now()}`,
-        type: "ai",
-        content: "Here are the final recommendations. I hope you find them helpful!",
-        timestamp: new Date(),
-      }
-
-      setMessages((prev) => [...prev, aiMessage])
-    }, 1500)
-  }
-
-  // End conversation
-  const endConversation = (input: string) => {
-    simulateTyping(() => {
-      const aiMessage: Message = {
-        id: `ai-${Date.now()}`,
-        type: "ai",
-        content: "Thank you for using our service. Have a great day!",
-        timestamp: new Date(),
-      }
-
-      setMessages((prev) => [...prev, aiMessage])
-    }, 1500)
-  }
-
+  const inputRef = useRef<HTMLInputElement>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const chatContainerRef = useRef<HTMLDivElement>(null)
   const categoriesRef = useRef<HTMLDivElement>(null)
+  const router = useRouter()
+  const isMountedRef = useRef(true)
 
-  // Handle category card click
-  const handleCategoryClick = (serviceType: string) => {
-    // Reset conversation first
-    setMessages([])
-    setInputValue("")
-    setIsTyping(false)
-    setMatchedServices([])
-    setCurrentQuestion(0)
-    setConversationStage("initial")
-    setDetectedPreferences({
-      category: null,
-      budget: null,
-      timeframe: null,
-      experienceImportance: null,
-      hasSpecificRequirements: false,
-      specificRequirements: null,
-    })
-    setAIModel((prev) => ({
-      ...initialAIModel,
-      conversationContext: { ...initialAIModel.conversationContext, currentServiceType: serviceType },
-    }))
+  const [aiModel, setAIModel] = useState<AIModelState>(initialAIModel)
 
-    // Simple response for category selection
-    simulateTyping(() => {
-      const aiMessage: Message = {
-        id: `ai-${Date.now()}`,
-        type: "ai",
-        content: `Great choice! I'll help you find the best ${
-          serviceCategoryMap[serviceType] || serviceType
-        } services.`,
-        timestamp: new Date(),
-      }
-
-      setMessages((prev) => [...prev, aiMessage])
-      processUserInput("")
-    }, 1000)
-  }
-
-  // Handle horizontal scrolling for categories
-  const scrollCategories = (direction: "left" | "right") => {
-    if (categoriesRef.current) {
-      const container = categoriesRef.current
-      const scrollAmount = container.clientWidth * 0.75 // Scroll 75% of the visible width
-      const currentScroll = container.scrollLeft
-
-      container.scrollTo({
-        left: direction === "left" ? Math.max(0, currentScroll - scrollAmount) : currentScroll + scrollAmount,
-        behavior: "smooth",
-      })
-    }
-  }
-
-  // Add keyboard navigation for categories
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") {
-        scrollCategories("left")
-      } else if (e.key === "ArrowRight") {
-        scrollCategories("right")
-      }
-    }
-
-    window.addEventListener("keydown", handleKeyDown)
+    isMountedRef.current = true
     return () => {
-      window.removeEventListener("keydown", handleKeyDown)
+      isMountedRef.current = false
     }
   }, [])
 
-  // Add this after the scrollCategories function
-  useEffect(() => {
-    const container = categoriesRef.current
-    if (!container) return
+  const addMessage = useCallback((message: Message) => {
+    if (!isMountedRef.current) return
+    setMessages((prev) => [...prev, message])
+  }, [])
 
-    let isDown = false
-    let startX: number
-    let scrollLeft: number
+  const generateRecommendations = useCallback(() => {
+    const scoredServices = services.map((service) => {
+      let score = service.matchScore
+      const factors: string[] = []
 
-    const handleMouseDown = (e: MouseEvent) => {
-      isDown = true
-      container.classList.add("cursor-grabbing")
-      startX = e.pageX - container.offsetLeft
-      scrollLeft = container.scrollLeft
-    }
-
-    const handleMouseLeave = () => {
-      isDown = false
-      container.classList.remove("cursor-grabbing")
-    }
-
-    const handleMouseUp = () => {
-      isDown = false
-      container.classList.remove("cursor-grabbing")
-    }
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isDown) return
-      e.preventDefault()
-      const x = e.pageX - container.offsetLeft
-      const walk = (x - startX) * 2 // Scroll speed multiplier
-      container.scrollLeft = scrollLeft - walk
-    }
-
-    // Touch events for mobile with improved handling
-    const handleTouchStart = (e: TouchEvent) => {
-      if (e.touches.length === 1) {
-        isDown = true
-        startX = e.touches[0].pageX - container.offsetLeft
-        scrollLeft = container.scrollLeft
+      if (detectedPreferences.timeframe === "ASAP") {
+        if (service.provider.responseTime.includes("< 1 hour")) {
+          score += 20
+          factors.push("fastest response")
+        } else if (service.provider.responseTime.includes("< 2 hour")) {
+          score += 10
+          factors.push("quick response")
+        }
       }
+
+      if (service.provider.rating >= 4.8) {
+        score += 10
+        factors.push("highly rated")
+      }
+
+      if (service.provider.verified) {
+        score += 5
+        factors.push("verified")
+      }
+
+      if (service.provider.completionRate >= 95) {
+        score += 8
+        factors.push("reliable completion")
+      }
+
+      if (aiModel.conversationContext.currentServiceType) {
+        const serviceTypeMap: { [key: string]: string } = {
+          tvMounting: "Mounting",
+          furniture: "Assembly",
+          painting: "Painting",
+          plumbing: "Plumbing",
+          moving: "Moving",
+          cleaning: "Cleaning",
+          electrical: "Electrical",
+          landscaping: "Landscaping",
+          flooring: "Flooring",
+          roofing: "Roofing",
+        }
+        const expectedCategory = serviceTypeMap[aiModel.conversationContext.currentServiceType]
+        if (service.category === expectedCategory) {
+          score += 25
+          factors.push("perfect category match")
+        }
+      }
+
+      return {
+        ...service,
+        finalScore: score,
+        matchReasons: factors,
+      }
+    })
+
+    scoredServices.sort((a, b) => b.finalScore - a.finalScore)
+    const topServices = scoredServices.slice(0, 3)
+
+    let explanation = "Based on your detailed requirements"
+    if (detectedPreferences.timeframe) {
+      explanation = `Based on your ${detectedPreferences.timeframe} timeframe`
     }
 
-    const handleTouchMove = (e: TouchEvent) => {
-      if (!isDown || e.touches.length !== 1) return
-      const x = e.touches[0].pageX - container.offsetLeft
-      const walk = (x - startX) * 2
-      container.scrollLeft = scrollLeft - walk
+    setIsTyping(true)
+    const loadingMessage: Message = {
+      id: `loading-${Date.now()}`,
+      type: "loading",
+      content: "",
+      timestamp: new Date(),
+    }
+    setMessages((prev) => [...prev, loadingMessage])
 
-      // Prevent page scrolling when scrolling the categories on mobile devices
-      e.preventDefault()
+    setTimeout(() => {
+      setMessages((prev) => prev.filter((msg) => msg.id !== loadingMessage.id))
+      setIsTyping(false)
+
+      const recommendationMessage: Message = {
+        id: `ai-${Date.now()}`,
+        type: "ai",
+        content: `${explanation}, here are my top recommendations:`,
+        timestamp: new Date(),
+        services: topServices.map((s) => ({
+          ...s,
+          matchScore: Math.round(s.finalScore),
+        })),
+      }
+
+      setMessages((prev) => [...prev, recommendationMessage])
+
+      setTimeout(() => {
+        const helpfulContext = topServices[0]
+        const followUp: Message = {
+          id: `ai-${Date.now()}`,
+          type: "ai",
+          content: `My top pick is ${helpfulContext.provider.name} because of their ${helpfulContext.matchReasons.join(", ")}. Would you like me to explain more, or are you ready to book?`,
+          timestamp: new Date(),
+          options: ["Explain your choices", "Show more options", "Compare these three", "Book with top choice"],
+        }
+        setMessages((prev) => [...prev, followUp])
+      }, 600)
+    }, 1000)
+  }, [detectedPreferences, aiModel.conversationContext])
+
+  const getNextQuestionIndex = useCallback(
+    (serviceType: string, currentIndex: number, currentAnswer: string, currentQuestion: string): number => {
+      const questions = serviceSpecificQuestions[serviceType].questions
+      const questionsToSkip = questionSkipLogic[serviceType]?.[currentQuestion]?.[currentAnswer] || new Set()
+
+      let nextIndex = currentIndex + 1
+      while (nextIndex < questions.length && questionsToSkip.has(questions[nextIndex])) {
+        nextIndex++
+      }
+
+      return nextIndex
+    },
+    [],
+  )
+
+  const handleOptionSelect = useCallback(
+    (option: string) => {
+      if (!isMountedRef.current) return
+
+      const userMessage: Message = {
+        id: `user-${Date.now()}`,
+        type: "user",
+        content: option,
+        timestamp: new Date(),
+      }
+
+      setMessages((prev) => [...prev, userMessage])
+
+      if (conversationStage === "service-specific") {
+        const serviceType = aiModel.conversationContext.currentServiceType
+        if (!serviceType) return
+
+        const questionIndex = aiModel.conversationContext.currentServiceQuestion
+        const questions = serviceSpecificQuestions[serviceType].questions
+        const currentQuestion = questions[questionIndex]
+        const nextQuestionIndex = getNextQuestionIndex(serviceType, questionIndex, option, currentQuestion)
+
+        const updatedAnswers = new Map(aiModel.conversationContext.serviceSpecificAnswers)
+        updatedAnswers.set(currentQuestion, option)
+
+        setAIModel((prev) => ({
+          ...prev,
+          conversationContext: {
+            ...prev.conversationContext,
+            serviceSpecificAnswers: updatedAnswers,
+            currentServiceQuestion: nextQuestionIndex,
+          },
+        }))
+
+        if (nextQuestionIndex < questions.length) {
+          const nextQuestion = questions[nextQuestionIndex]
+          const options = serviceSpecificQuestions[serviceType].options[nextQuestion]
+
+          setIsTyping(true)
+          const loadingId = `loading-${Date.now()}`
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: loadingId,
+              type: "loading",
+              content: "",
+              timestamp: new Date(),
+            },
+          ])
+
+          setTimeout(() => {
+            if (!isMountedRef.current) return
+            setMessages((prev) => {
+              const filtered = prev.filter((msg) => msg.id !== loadingId)
+              return [
+                ...filtered,
+                {
+                  id: `ai-${Date.now()}`,
+                  type: "ai",
+                  content: nextQuestion,
+                  timestamp: new Date(),
+                  options: options,
+                },
+              ]
+            })
+            setIsTyping(false)
+          }, 800)
+        } else {
+          setConversationStage("recommending")
+          setTimeout(() => {
+            if (isMountedRef.current) generateRecommendations()
+          }, 500)
+        }
+        return
+      }
+
+      if (["ASAP", "This week", "Within 2 weeks", "I'm flexible with timing", "Unsure"].includes(option)) {
+        setDetectedPreferences((prev) => ({ ...prev, timeframe: option }))
+        setConversationStage("service-specific")
+
+        const serviceType = aiModel.conversationContext.currentServiceType
+        if (!serviceType) return
+
+        const questions = serviceSpecificQuestions[serviceType].questions
+        const currentQuestion = questions[0]
+        const options = serviceSpecificQuestions[serviceType].options[currentQuestion]
+
+        setIsTyping(true)
+        const loadingId = `loading-${Date.now()}`
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: loadingId,
+            type: "loading",
+            content: "",
+            timestamp: new Date(),
+          },
+        ])
+
+        setTimeout(() => {
+          if (!isMountedRef.current) return
+          setMessages((prev) => {
+            const filtered = prev.filter((msg) => msg.id !== loadingId)
+            return [
+              ...filtered,
+              {
+                id: `ai-intro-${Date.now()}`,
+                type: "ai",
+                content: "Great! Now let me ask you some specific questions to match you with the perfect provider.",
+                timestamp: new Date(),
+              },
+            ]
+          })
+
+          setTimeout(() => {
+            if (!isMountedRef.current) return
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: `ai-question-${Date.now()}`,
+                type: "ai",
+                content: currentQuestion,
+                timestamp: new Date(),
+                options: options,
+              },
+            ])
+            setIsTyping(false)
+          }, 400)
+        }, 800)
+        return
+      }
+    },
+    [conversationStage, generateRecommendations, aiModel.conversationContext, getNextQuestionIndex],
+  )
+
+  const handleSubmit = useCallback(
+    (e?: React.FormEvent) => {
+      e?.preventDefault()
+      if (inputValue.trim() === "" && !e) return
+
+      const userMessage: Message = {
+        id: `user-${Date.now()}`,
+        type: "user",
+        content: inputValue,
+        timestamp: new Date(),
+      }
+
+      addMessage(userMessage)
+      setInputValue("")
+    },
+    [inputValue, addMessage],
+  )
+
+  const handleCategoryClick = useCallback((serviceType: string) => {
+    if (!isMountedRef.current) return
+
+    setInputValue("")
+    setIsTyping(false)
+    setConversationStage("initial")
+    setDetectedPreferences({ category: null, timeframe: null })
+    setAIModel({
+      conversationContext: {
+        stage: "initial",
+        currentServiceType: serviceType,
+        serviceSpecificAnswers: new Map(),
+        currentServiceQuestion: 0,
+      },
+    })
+
+    const categoryNames: { [key: string]: string } = {
+      tvMounting: "TV Mounting",
+      furniture: "Furniture Assembly",
+      painting: "Painting",
+      plumbing: "Plumbing",
+      moving: "Moving",
+      cleaning: "Cleaning",
+      electrical: "Electrical",
+      landscaping: "Landscaping",
+      flooring: "Flooring",
+      roofing: "Roofing",
     }
 
-    container.addEventListener("mousedown", handleMouseDown)
-    container.addEventListener("mouseleave", handleMouseLeave)
-    container.addEventListener("mouseup", handleMouseUp)
-    container.addEventListener("mousemove", handleMouseMove)
+    const loadingId = `loading-${Date.now()}`
+    setMessages([
+      {
+        id: loadingId,
+        type: "loading",
+        content: "",
+        timestamp: new Date(),
+      },
+    ])
+    setIsTyping(true)
 
-    container.addEventListener("touchstart", handleTouchStart, { passive: false })
-    container.addEventListener("touchend", handleMouseUp)
-    container.addEventListener("touchcancel", handleMouseLeave)
-    container.addEventListener("touchmove", handleTouchMove)
+    setTimeout(() => {
+      if (!isMountedRef.current) return
+      setMessages([
+        {
+          id: `ai-${Date.now()}`,
+          type: "ai",
+          content: `Great! I'll help you find the best ${categoryNames[serviceType] || serviceType} service. When would you like this service completed?`,
+          timestamp: new Date(),
+          options: ["ASAP", "This week", "Within 2 weeks", "I'm flexible with timing", "Unsure"],
+        },
+      ])
+      setIsTyping(false)
+    }, 800)
+  }, [])
 
-    return () => {
-      container.removeEventListener("mousedown", handleMouseDown)
-      container.removeEventListener("mouseleave", handleMouseLeave)
-      container.removeEventListener("mouseup", handleMouseUp)
-      container.removeEventListener("mousemove", handleMouseMove)
+  const categories = useMemo(
+    () => [
+      { icon: Tv, name: "Mounting", serviceType: "tvMounting" },
+      { icon: Briefcase, name: "Moving", serviceType: "moving" },
+      { icon: Spray, name: "Painting", serviceType: "painting" },
+      { icon: Home, name: "Assembly", serviceType: "furniture" },
+      { icon: Scissors, name: "Cleaning", serviceType: "cleaning" },
+      { icon: Zap, name: "Electrical", serviceType: "electrical" },
+      { icon: Droplet, name: "Plumbing", serviceType: "plumbing" },
+      { icon: Leaf, name: "Landscaping", serviceType: "landscaping" },
+      { icon: Construction, name: "Flooring", serviceType: "flooring" },
+      { icon: HardHat, name: "Roofing", serviceType: "roofing" },
+    ],
+    [],
+  )
 
-      container.removeEventListener("touchstart", handleTouchStart)
-      container.removeEventListener("touchend", handleMouseUp)
-      container.removeEventListener("touchcancel", handleMouseLeave)
-      container.removeEventListener("touchmove", handleTouchMove)
-    }
-  }, [categoriesRef.current])
-
-  const renderEnhancedServiceCard = (service: Service) => {
-    return (
-      <motion.div
-        key={service.id}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="group relative"
-      >
-        <div
-          className="relative overflow-hidden rounded-xl border border-lavender-200/40 dark:border-lavender-800/30 bg-white dark:bg-gray-900 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
-          onClick={() => router.push(`/services/${service.id}`)}
-        >
-          {/* Subtle gradient background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-lavender-50/50 via-white to-white dark:from-lavender-900/20 dark:via-gray-900 dark:to-gray-900 opacity-80"></div>
-
-          {/* Refined grid pattern overlay */}
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9ImN1cnJlbnRDb2xvciIgZmlsbC1vcGFjaXR5PSIwLjAyIj48cGF0aCBkPSJNMCAwaDQwdjQwSDB6TTAgMGg0MHY0MEgwek0wIDBoNDB2NDBIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] bg-[length:30px_30px] dark:bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9ImN1cnJlbnRDb2xvciIgZmlsbC1vcGFjaXR5PSIwLjAzIj48cGF0aCBkPSJNMCAwaDQwdjQwSDB6TTAgMGg0MHY0MEgwek0wIDBoNDB2NDBIMHoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-10 group-hover:opacity-30 transition-opacity duration-300"></div>
-
-          {/* Match score badge */}
-          {service.matchScore && (
-            <div className="absolute top-4 right-4 z-10">
-              <div className="flex items-center bg-lavender-600/90 text-white text-xs font-medium px-2.5 py-1 rounded-full shadow-sm">
-                <motion.div
-                  initial={{ rotate: 0 }}
-                  animate={{ rotate: [0, 10, -10, 0] }}
-                  transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, repeatDelay: 3 }}
-                >
-                  <svg className="w-3 h-3 mr-1" viewBox="0 0 24 24" fill="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </motion.div>
-                <span>{service.matchScore}% Match</span>
-              </div>
-            </div>
-          )}
-
-          <div className="relative p-5">
-            <div className="flex gap-4">
-              {/* Service image */}
-              <div className="relative h-20 w-20 rounded-lg overflow-hidden flex-shrink-0">
-                <div className="absolute inset-0 bg-lavender-100 dark:bg-lavender-900/30"></div>
-                <img
-                  src={service.image || "/placeholder.svg"}
-                  alt={service.title}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              </div>
-
-              {/* Service info */}
-              <div className="flex-1">
-                <h3 className="font-semibold text-lg text-gray-900 dark:text-white group-hover:text-lavender-700 dark:group-hover:text-lavender-400 transition-colors duration-300">
-                  {service.title}
-                </h3>
-
-                <div className="flex items-center mt-1 text-sm">
-                  <span className="text-lavender-700 dark:text-lavender-400 font-medium">{service.price}</span>
-                  <span className="mx-2 text-gray-400">•</span>
-                  <span className="text-gray-600 dark:text-gray-400">{service.timeEstimate}</span>
-                </div>
-
-                <div className="flex items-center mt-1.5">
-                  <div className="flex items-center">
-                    <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
-                    <span className="ml-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                      {service.provider.rating}
-                    </span>
-                    <span className="ml-0.5 text-xs text-gray-500 dark:text-gray-400">
-                      ({service.provider.reviews})
-                    </span>
-                  </div>
-
-                  {service.provider.verified && (
-                    <div className="ml-3 flex items-center text-xs font-medium text-lavender-700 dark:text-lavender-400">
-                      <svg className="w-3.5 h-3.5 mr-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      Verified
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Service description */}
-            <p className="mt-3 text-sm text-gray-600 dark:text-gray-400 line-clamp-2 group-hover:line-clamp-none transition-all duration-300">
-              {service.description}
-            </p>
-
-            {/* Service tags */}
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {service.tags.slice(0, 3).map((tag, i) => (
-                <motion.span
-                  key={i}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.2 + i * 0.1 }}
-                  className="inline-block px-2 py-0.5 text-xs font-medium bg-lavender-100/80 dark:bg-lavender-900/30 text-lavender-800 dark:text-lavender-300 rounded-full"
-                >
-                  {tag}
-                </motion.span>
-              ))}
-            </div>
-
-            {/* Provider info */}
-            <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
-              <div className="flex items-center">
-                <div className="relative h-6 w-6 rounded-full overflow-hidden border border-lavender-200 dark:border-lavender-800">
-                  <img
-                    src={service.provider.avatar || "/placeholder.svg"}
-                    alt={service.provider.name}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-                <span className="ml-2 text-xs font-medium text-gray-700 dark:text-gray-300">
-                  {service.provider.name}
-                </span>
-              </div>
-
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="text-xs font-medium text-lavender-700 dark:text-lavender-400 hover:text-lavender-800 dark:hover:text-lavender-300 transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  router.push(`/messages?provider=${service.provider.id}`)
-                }}
-              >
-                Contact
-              </motion.button>
-            </div>
-
-            {/* Animated accent line */}
-            <motion.div
-              className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-lavender-500 to-purple-500"
-              initial={{ width: "0%" }}
-              whileHover={{ width: "100%" }}
-              transition={{ duration: 0.3 }}
-            />
-          </div>
-        </div>
-      </motion.div>
-    )
-  }
-
-  // Add this function for voice recording toggle
-  const toggleRecording = () => {
-    setIsRecording(!isRecording)
-    // In a real implementation, this would start/stop voice recording
-  }
-
-  // Add this useEffect
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus()
@@ -1744,14 +2229,9 @@ export function AIServiceMatchmaker() {
 
   return (
     <section className="w-full pb-8 md:pb-12 relative overflow-hidden order-first z-20 -mt-8">
-      {/* Enhanced background elements */}
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/80 via-white/90 to-violet-50/80 dark:from-gray-900/90 dark:via-gray-900/95 dark:to-indigo-950/80 z-0" />
 
-      {/* Enhanced grid pattern background */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5MDkwOTAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6bTAtMTJ2NmgxOHYtNkgzNnptMCAxMnY2aDE4di02SDM2ek0yNCAzNHY2aDZ2LTZoLTZ6bTAtMzB2OmgxOHYtNkgyNHptMCAxMnY2aDE4di02SDM0ek0xMiAzNHY2aDZ2LTZoLTZ6bTAtMzB2OmgxOHYtNkgxMnptMCAxMnY2aDE4di02SDEyek0wIDM0djZoMTJ2LTZIMHptMC0zMHY2aDEydi02SDB6bTAgMTJ2OmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHptMCAxMnY2aDE4di02SDB6Ii8+PC9nPjwvZz48L3N2Zz4=')] bg-[size:30px_30px] z-0 opacity-30" />
-
       <div className="w-full relative z-10 overflow-x-hidden px-0 mx-0">
-        {/* AI Matchmaker Interface */}
         <motion.div
           className="w-full mx-0 px-0"
           initial={{ opacity: 0, y: 20 }}
@@ -1759,17 +2239,11 @@ export function AIServiceMatchmaker() {
           transition={{ duration: 0.5 }}
         >
           <div className="w-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border border-gray-200/50 dark:border-gray-800/50 overflow-hidden">
-            {/* Enhanced background gradient with animated pattern */}
-            <div className="absolute inset-0 bg-gradient-to-r from-violet-500/20 via-indigo-600/15 to-purple-600/20 opacity-90"></div>
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzMjI2NTkiIGZpbGwtb3BhY2l0eT0iMC4wNCI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDMvZGQiPjxnIGZpbGw9IiMzMjI2NTkiIGZpbGwtb3BhY2l0eT0iMC4wNCI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMC0zMHY6aDE4di02SDM2em0wIDEydjZoMTh2LTZIMzZ6bTAtMTJ2NmgxOHYtNkgzNnptMCAxMnY2aDE4di02SDM2ek0yNCAzNHY2aDZ2LTZoLTZ6bTAtMzB2OmgxOHYtNkgyNHptMCAxMnY2aDE4di02SDM0ek0xMiAzNHY2aDZ2LTZoLTZ6bTAtMzB2OmgxOHYtNkgxMnptMCAxMnY2aDE4di02SDEyek0wIDM0djZoMTJ2LTZIMHptMC0zMHY2aDEydi02SDB6bTAgMTJ2OmgxOHYtNkgwem0wIDEydjZoMTh2LTZIMHptMCAxMnY2aDE4di02SDB6Ii8+PC9nPjwvZz48L3N2Zz4=')] animate-[pulse_15s_ease-in-out_infinite] opacity-70"></div>
-
-            {/* Enhanced header content - simplified with icon in top left */}
             <div className="relative flex items-center justify-between p-5 bg-white dark:bg-gray-900 backdrop-blur-sm mb-0 mt-8">
               <div className="flex items-center">
                 <LevlLogo className="h-16 w-16 transition-all shadow-[0_4px_8px_rgba(0,0,0,0.1),0_2px_4px_rgba(0,0,0,0.1)] dark:shadow-[0_4px_8px_rgba(79,70,229,0.2),0_2px_4px_rgba(79,70,229,0.1)]" />
               </div>
               <div className="flex items-center gap-3">
-                {/* Portal Button */}
                 <Dialog open={showPortal} onOpenChange={setShowPortal}>
                   <DialogTrigger asChild>
                     <Button
@@ -1812,7 +2286,6 @@ export function AIServiceMatchmaker() {
               </div>
             </div>
 
-            {/* Category cards section */}
             <div className="border-b border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-r from-gray-50/80 via-white/80 to-gray-50/80 dark:from-gray-900/80 dark:via-gray-900/90 dark:to-gray-900/80 mb-0 pb-0">
               <div className="relative w-full overflow-hidden">
                 <div
@@ -1825,25 +2298,13 @@ export function AIServiceMatchmaker() {
                     scrollBehavior: "smooth",
                   }}
                 >
-                  {/* Add this CSS rule to hide the scrollbar */}
                   <style jsx>{`
-        div::-webkit-scrollbar {
-          display: none;
-        }
-      `}</style>
+                    div::-webkit-scrollbar {
+                      display: none;
+                    }
+                  `}</style>
                   <div className="flex space-x-4 snap-x snap-mandatory px-4 md:px-8 -ml-2 md:-ml-4 mr-4 md:mr-8">
-                    {[
-                      { icon: Tv, name: "Mounting", serviceType: "tvMounting" },
-                      { icon: Briefcase, name: "Moving", serviceType: "moving" },
-                      { icon: Spray, name: "Painting", serviceType: "painting" },
-                      { icon: Home, name: "Assembly", serviceType: "furniture" },
-                      { icon: Scissors, name: "Cleaning", serviceType: "cleaning" },
-                      { icon: Zap, name: "Electrical", serviceType: "electrical" },
-                      { icon: Droplet, name: "Plumbing", serviceType: "plumbing" },
-                      { icon: Leaf, name: "Landscaping", serviceType: "landscaping" },
-                      { icon: Construction, name: "Flooring", serviceType: "flooring" },
-                      { icon: HardHat, name: "Roofing", serviceType: "roofing" },
-                    ].map((category, index) => (
+                    {categories.map((category, index) => (
                       <EnhancedCategoryCard
                         key={index}
                         icon={category.icon}
@@ -1860,8 +2321,7 @@ hover:shadow-[0_18px_25px_-5px_rgba(79,70,229,0.4),0_10px_15px_-5px_rgba(79,70,2
 dark:hover:shadow-[0_15px_20px_-3px_rgba(79,70,229,0.4),0_8px_12px_-4px_rgba(0,0,0,0.5),0_-2px_8px_0px_rgba(79,70,229,0.2)] 
 border-t border-l border-r border-indigo-100/70 dark:border-t dark:border-l dark:border-r dark:border-indigo-700/40 
 border-b-2 border-b-indigo-200/80 dark:border-b-2 dark:border-b-indigo-800/80 
-translate-y-[-4px] hover:translate-y-[-8px] 
-after:content-[''] after:absolute after:bottom-[-15px] after:left-[5%] after:right-[5%] after:h-[15px] after:bg-indigo-500/20 dark:after:bg-indigo-500/30 after:blur-xl after:rounded-full"
+translate-y-[-4px] hover:translate-y-[-8px]"
                         onClick={() => handleCategoryClick(category.serviceType)}
                       />
                     ))}
@@ -1870,7 +2330,6 @@ after:content-[''] after:absolute after:bottom-[-15px] after:left-[5%] after:rig
               </div>
             </div>
 
-            {/* Chat messages - Enhanced UI */}
             <div
               id="chat-container"
               ref={chatContainerRef}
@@ -1880,11 +2339,6 @@ after:content-[''] after:absolute after:bottom-[-15px] after:left-[5%] after:rig
                 scrollbarColor: "rgba(79, 70, 229, 0.2) transparent",
               }}
             >
-              {/* Decorative elements */}
-              <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-indigo-100/20 to-transparent dark:from-indigo-900/10 pointer-events-none" />
-              <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-indigo-100/20 to-transparent dark:from-indigo-900/10 pointer-events-none" />
-
-              {/* Custom scrollbar styling */}
               <style jsx>{`
                 div::-webkit-scrollbar {
                   width: 6px;
@@ -1897,120 +2351,22 @@ after:content-[''] after:absolute after:bottom-[-15px] after:left-[5%] after:rig
                 div::-webkit-scrollbar-thumb:hover {
                   background: rgba(79, 70, 229, 0.4);
                 }
-                div::-webkit-scrollbar-track {
-                  background: transparent;
-                }
               `}</style>
               <div className="space-y-6 w-full">
-                {messages.map((message, index) => (
-                  <motion.div
-                    key={message.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 0.1 }}
-                  >
-                    {message.type === "user" && (
-                      <div className="flex justify-end">
-                        <div className="relative bg-gradient-to-br from-lavender-200/95 via-lavender-300/90 to-lavender-200/90 dark:from-lavender-950/95 dark:via-lavender-950/90 dark:to-lavender-950/90 backdrop-blur-sm rounded-2xl px-5 py-3 max-w-[80%] shadow-[0_14px_20px_-3px_rgba(79,70,229,0.3),0_6px_10px_-4px_rgba(79,70,229,0.2),0_-2px_8px_0px_rgba(255,255,255,0.15)] dark:shadow-[0_10px_15px_-3px_rgba(79,70,229,0.3),0_4px_6px_-4px_rgba(0,0,0,0.4),0_-2px_6px_0px_rgba(79,70,229,0.1)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-800/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 translate-y-[-2px] hover:translate-y-[-4px] transition-all duration-300 transform">
-                          <p className="text-sm text-gray-800 dark:text-gray-100 relative z-10">{message.content}</p>
-                          <div className="text-[10px] text-black dark:text-white text-right mt-1 relative z-10">
-                            {new Date(message.timestamp).toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {message.type === "ai" && (
-                      <div className="flex">
-                        <div className="relative bg-gradient-to-br from-white/95 via-white/90 to-lavender-50/90 dark:from-gray-800/95 dark:via-gray-800/90 dark:to-lavender-950/90 backdrop-blur-sm rounded-2xl px-5 py-3 max-w-[80%] shadow-[0_14px_20px_-3px_rgba(79,70,229,0.3),0_6px_10px_-4px_rgba(79,70,229,0.2),0_-2px_8px_0px_rgba(255,255,255,0.15)] dark:shadow-[0_10px_15px_-3px_rgba(79,70,229,0.3),0_4px_6px_-4px_rgba(0,0,0,0.4),0_-2px_6px_0px_rgba(79,70,229,0.1)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 translate-y-[-4px] transition-all duration-300 transform">
-                          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-lavender-500/8 via-purple-500/8 to-violet-500/8 dark:from-lavender-500/15 dark:via-purple-500/15 dark:to-violet-500/15 opacity-80"></div>
-                          <div className="absolute inset-x-0 bottom-0 h-1/2 rounded-b-2xl bg-gradient-to-t from-black/5 to-transparent dark:from-white/5"></div>
-
-                          <p className="text-sm relative z-10">{message.content}</p>
-
-                          {message.options && (
-                            <div className="mt-4 flex flex-wrap gap-2 relative z-10">
-                              {message.options.map((option) => (
-                                <button
-                                  key={option}
-                                  className="px-3 py-1.5 bg-white/90 dark:bg-gray-800/90 hover:bg-lavender-100/90 dark:hover:bg-lavender-900/30 rounded-full text-xs font-medium transition-all duration-200 border border-lavender-200/70 dark:border-lavender-700/50 hover:border-lavender-300 dark:hover:border-lavender-600/70 backdrop-blur-sm hover:shadow-md"
-                                  onClick={() => handleOptionSelect(option)}
-                                >
-                                  {option}
-                                </button>
-                              ))}
-                            </div>
-                          )}
-                          {message.services && (
-                            <div className="mt-5 space-y-4 relative z-10">
-                              {message.services.map((service) => (
-                                <ProviderCard
-                                  key={service.provider.id}
-                                  provider={service.provider}
-                                  onSelect={(providerId) => router.push(`/services/${service.id}`)}
-                                  onViewServices={(providerId) => router.push(`/services/${service.id}`)}
-                                  onContact={(providerId) => router.push(`/messages?provider=${providerId}`)}
-                                  matchScore={service.matchScore}
-                                />
-                              ))}
-                            </div>
-                          )}
-                          <div className="text-[10px] text-black dark:text-white mt-1 relative z-10">
-                            {new Date(message.timestamp).toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* loading message type */}
-                    {message.type === "loading" && (
-                      <div className="flex">
-                        <div className="flex items-center">
-                          <LevlLogo className="h-12 w-12 mr-2" />
-                          <div className="flex space-x-1.5 ml-1">
-                            <motion.div
-                              className="h-1 w-1 bg-primary rounded-full"
-                              animate={{ scale: [0.5, 1, 0.5] }}
-                              transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
-                            />
-                            <motion.div
-                              className="h-1 w-1 bg-primary rounded-full"
-                              animate={{ scale: [0.5, 1, 0.5] }}
-                              transition={{
-                                duration: 1.5,
-                                repeat: Number.POSITIVE_INFINITY,
-                                ease: "easeInOut",
-                                delay: 0.2,
-                              }}
-                            />
-                            <motion.div
-                              className="h-1 w-1 bg-primary rounded-full"
-                              animate={{ scale: [0.5, 1, 0.5] }}
-                              transition={{
-                                duration: 1.5,
-                                repeat: Number.POSITIVE_INFINITY,
-                                ease: "easeInOut",
-                                delay: 0.4,
-                              }}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </motion.div>
-                ))}
-                {/* Messages end ref for scrolling */}
+                <AnimatePresence mode="popLayout" initial={false}>
+                  {messages.map((message) => (
+                    <MessageItem
+                      key={message.id}
+                      message={message}
+                      onOptionSelect={handleOptionSelect}
+                      router={router}
+                    />
+                  ))}
+                </AnimatePresence>
                 <div ref={messagesEndRef} />
               </div>
             </div>
 
-            {/* Input area - Enhanced UI with Levl styling directly integrated */}
             <motion.div
               className="absolute bottom-0 left-0 right-0 z-10 p-4 
 bg-gradient-to-b from-transparent via-gray-50/90 to-white/95
@@ -2021,22 +2377,19 @@ backdrop-blur-sm transition-all duration-200"
               transition={{ delay: 0.2, duration: 0.4 }}
             >
               <form onSubmit={handleSubmit} className="flex items-center gap-2 max-w-4xl mx-auto">
-                <div className="relative flex-1 border-none" style={{ borderBottom: "none" }}>
+                <div className="relative flex-1 border-none">
                   <Input
                     ref={inputRef}
                     type="text"
                     placeholder={isTyping ? "AI is thinking..." : "Type your message..."}
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setIsFocused(false)}
                     disabled={isTyping}
                     className="pl-4 pr-12 py-6 bg-white/80 dark:bg-gray-800/80 border-0
       focus:ring-0 focus:outline-none focus:border-0
       rounded-full shadow-[0_4px_12px_rgba(79,70,229,0.15)] hover:shadow-[0_6px_16px_rgba(79,70,229,0.2)]
       dark:shadow-[0_4px_12px_rgba(79,70,229,0.2)] dark:hover:shadow-[0_6px_16px_rgba(79,70,229,0.25)]
       transform hover:-translate-y-1 transition-all duration-300"
-                    style={{ borderBottom: "none" }}
                   />
 
                   {inputValue && (
@@ -2070,18 +2423,4 @@ backdrop-blur-sm transition-all duration-200"
       </div>
     </section>
   )
-}
-
-// Initialize long-term memory outside the component
-const serviceCategoryMap: { [key: string]: string } = {
-  tvMounting: "Mounting",
-  plumbing: "Plumbing",
-  painting: "Painting",
-  furniture: "Assembly",
-  moving: "Moving",
-  cleaning: "Cleaning",
-  electrical: "Electrical",
-  landscaping: "Landscaping",
-  flooring: "Flooring",
-  roofing: "Roofing",
 }
