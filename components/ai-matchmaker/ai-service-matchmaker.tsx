@@ -215,28 +215,50 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
     if (option === "Drywall/Sheetrock") {
       return (
         <div className="relative w-full h-full overflow-hidden">
-          {/* Drywall texture - smooth with subtle paper texture */}
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-100 via-white to-gray-50">
-            {/* Subtle texture dots */}
-            <div className="absolute inset-0 opacity-30" style={{ 
-              backgroundImage: `radial-gradient(circle at 30% 20%, rgba(200,200,200,0.3) 0.5px, transparent 0.5px),
-                               radial-gradient(circle at 70% 60%, rgba(180,180,180,0.2) 0.5px, transparent 0.5px),
-                               radial-gradient(circle at 50% 80%, rgba(190,190,190,0.25) 0.5px, transparent 0.5px)`,
-              backgroundSize: '8px 8px'
+          {/* Drywall/Sheetrock - orange peel texture typical of modern homes */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#f5f5f0] via-[#eeede8] to-[#e8e7e2]">
+            {/* Orange peel bumpy texture - characteristic of drywall */}
+            <div className="absolute inset-0" style={{ 
+              backgroundImage: `
+                radial-gradient(ellipse 2px 1.5px at 15% 20%, rgba(220,218,210,0.7) 0%, transparent 100%),
+                radial-gradient(ellipse 1.5px 2px at 35% 15%, rgba(215,213,205,0.6) 0%, transparent 100%),
+                radial-gradient(ellipse 2px 1.5px at 55% 25%, rgba(225,223,215,0.65) 0%, transparent 100%),
+                radial-gradient(ellipse 1.5px 2px at 75% 18%, rgba(218,216,208,0.7) 0%, transparent 100%),
+                radial-gradient(ellipse 2px 2px at 25% 45%, rgba(222,220,212,0.6) 0%, transparent 100%),
+                radial-gradient(ellipse 1.5px 1.5px at 45% 40%, rgba(220,218,210,0.65) 0%, transparent 100%),
+                radial-gradient(ellipse 2px 1.5px at 65% 48%, rgba(217,215,207,0.7) 0%, transparent 100%),
+                radial-gradient(ellipse 1.5px 2px at 85% 42%, rgba(223,221,213,0.6) 0%, transparent 100%),
+                radial-gradient(ellipse 2px 1.5px at 20% 70%, rgba(219,217,209,0.65) 0%, transparent 100%),
+                radial-gradient(ellipse 1.5px 2px at 40% 65%, rgba(221,219,211,0.7) 0%, transparent 100%),
+                radial-gradient(ellipse 2px 2px at 60% 72%, rgba(216,214,206,0.6) 0%, transparent 100%),
+                radial-gradient(ellipse 1.5px 1.5px at 80% 68%, rgba(224,222,214,0.65) 0%, transparent 100%),
+                radial-gradient(ellipse 2px 1.5px at 30% 90%, rgba(218,216,208,0.7) 0%, transparent 100%),
+                radial-gradient(ellipse 1.5px 2px at 70% 85%, rgba(220,218,210,0.6) 0%, transparent 100%)
+              `,
+              backgroundSize: '100% 100%'
             }} />
-            {/* Joint line */}
-            <div className="absolute top-0 bottom-0 left-1/2 w-[1px] bg-gray-200/50" />
-            {/* Screw dimples */}
+            {/* Taped seam line - vertical joint compound */}
+            <div className="absolute top-0 bottom-0 left-1/2 w-[3px] -translate-x-1/2">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#e0dfd8]/40 to-transparent" />
+            </div>
+            {/* Screw dimples filled with joint compound */}
             <motion.div 
-              className="absolute top-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-gray-200"
-              animate={{ opacity: [0.3, 0.6, 0.3] }}
+              className="absolute top-3 left-1/2 -translate-x-1/2 w-[3px] h-[3px] rounded-full bg-[#e5e4dd] shadow-[inset_0_0.5px_1px_rgba(0,0,0,0.1)]"
+              animate={{ boxShadow: ["inset 0 0.5px 1px rgba(0,0,0,0.1)", "inset 0 0.5px 1px rgba(0,0,0,0.15)", "inset 0 0.5px 1px rgba(0,0,0,0.1)"] }}
               transition={{ duration: 2, repeat: Infinity }}
             />
             <motion.div 
-              className="absolute bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-gray-200"
-              animate={{ opacity: [0.3, 0.6, 0.3] }}
-              transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 w-[3px] h-[3px] rounded-full bg-[#e5e4dd] shadow-[inset_0_0.5px_1px_rgba(0,0,0,0.1)]"
+              animate={{ boxShadow: ["inset 0 0.5px 1px rgba(0,0,0,0.1)", "inset 0 0.5px 1px rgba(0,0,0,0.15)", "inset 0 0.5px 1px rgba(0,0,0,0.1)"] }}
+              transition={{ duration: 2, repeat: Infinity, delay: 0.3 }}
             />
+            <motion.div 
+              className="absolute bottom-3 left-1/2 -translate-x-1/2 w-[3px] h-[3px] rounded-full bg-[#e5e4dd] shadow-[inset_0_0.5px_1px_rgba(0,0,0,0.1)]"
+              animate={{ boxShadow: ["inset 0 0.5px 1px rgba(0,0,0,0.1)", "inset 0 0.5px 1px rgba(0,0,0,0.15)", "inset 0 0.5px 1px rgba(0,0,0,0.1)"] }}
+              transition={{ duration: 2, repeat: Infinity, delay: 0.6 }}
+            />
+            {/* Subtle light/shadow for depth */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-black/5" />
           </div>
         </div>
       )
@@ -260,34 +282,53 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
     if (option === "Concrete") {
       return (
         <div className="relative w-full h-full overflow-hidden">
-          {/* Concrete texture base */}
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-400 via-gray-500 to-gray-600">
-            {/* Aggregate texture using CSS patterns */}
-            <div className="absolute inset-0 opacity-40" style={{ 
-              backgroundImage: `radial-gradient(circle at 25% 25%, rgba(120,120,120,0.5) 1px, transparent 1px),
-                               radial-gradient(circle at 75% 30%, rgba(100,100,100,0.4) 1.5px, transparent 1.5px),
-                               radial-gradient(circle at 50% 70%, rgba(140,140,140,0.4) 1px, transparent 1px),
-                               radial-gradient(circle at 20% 80%, rgba(110,110,110,0.5) 1px, transparent 1px),
-                               radial-gradient(circle at 80% 75%, rgba(130,130,130,0.4) 1.5px, transparent 1.5px)`,
-              backgroundSize: '12px 12px'
+          {/* Poured concrete wall - raw industrial look */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#8a8a88] via-[#7d7d7b] to-[#737371]">
+            {/* Exposed aggregate - visible sand and small pebbles */}
+            <div className="absolute inset-0" style={{ 
+              backgroundImage: `
+                radial-gradient(ellipse 3px 2px at 12% 15%, rgba(95,90,85,0.8) 0%, transparent 100%),
+                radial-gradient(ellipse 2px 3px at 28% 22%, rgba(110,105,100,0.7) 0%, transparent 100%),
+                radial-gradient(ellipse 2.5px 2px at 45% 18%, rgba(85,80,75,0.75) 0%, transparent 100%),
+                radial-gradient(ellipse 2px 2.5px at 65% 25%, rgba(100,95,90,0.7) 0%, transparent 100%),
+                radial-gradient(ellipse 3px 2px at 82% 20%, rgba(90,85,80,0.8) 0%, transparent 100%),
+                radial-gradient(ellipse 2px 2px at 18% 42%, rgba(105,100,95,0.7) 0%, transparent 100%),
+                radial-gradient(ellipse 2.5px 3px at 38% 48%, rgba(80,75,70,0.8) 0%, transparent 100%),
+                radial-gradient(ellipse 2px 2px at 55% 45%, rgba(115,110,105,0.65) 0%, transparent 100%),
+                radial-gradient(ellipse 3px 2.5px at 72% 52%, rgba(88,83,78,0.75) 0%, transparent 100%),
+                radial-gradient(ellipse 2px 2px at 88% 48%, rgba(98,93,88,0.7) 0%, transparent 100%),
+                radial-gradient(ellipse 2.5px 2px at 22% 72%, rgba(92,87,82,0.8) 0%, transparent 100%),
+                radial-gradient(ellipse 2px 2.5px at 42% 78%, rgba(108,103,98,0.7) 0%, transparent 100%),
+                radial-gradient(ellipse 2px 2px at 58% 75%, rgba(82,77,72,0.75) 0%, transparent 100%),
+                radial-gradient(ellipse 3px 2px at 78% 82%, rgba(102,97,92,0.7) 0%, transparent 100%)
+              `,
+              backgroundSize: '100% 100%'
             }} />
-            {/* Small pebble marks */}
-            {[0,1,2,3,4,5,6,7].map((i) => (
-              <motion.div
-                key={i}
-                className="absolute rounded-full bg-gray-500/60"
-                style={{
-                  width: `${2 + (i % 2)}px`,
-                  height: `${2 + (i % 2)}px`,
-                  left: `${10 + (i * 11) % 80}%`,
-                  top: `${15 + (i * 13) % 70}%`,
-                }}
-                animate={{ opacity: [0.3, 0.5, 0.3] }}
-                transition={{ duration: 2.5, repeat: Infinity, delay: i * 0.2 }}
-              />
-            ))}
-            {/* Surface variation */}
-            <div className="absolute inset-0 bg-gradient-to-t from-gray-600/20 to-transparent" />
+            {/* Form tie holes - characteristic of poured concrete */}
+            <motion.div 
+              className="absolute top-[25%] left-[20%] w-[4px] h-[4px] rounded-full bg-[#5a5855] shadow-[inset_1px_1px_2px_rgba(0,0,0,0.4)]"
+              animate={{ boxShadow: ["inset 1px 1px 2px rgba(0,0,0,0.4)", "inset 1px 1px 3px rgba(0,0,0,0.5)", "inset 1px 1px 2px rgba(0,0,0,0.4)"] }}
+              transition={{ duration: 3, repeat: Infinity }}
+            />
+            <motion.div 
+              className="absolute top-[25%] right-[20%] w-[4px] h-[4px] rounded-full bg-[#5a5855] shadow-[inset_1px_1px_2px_rgba(0,0,0,0.4)]"
+              animate={{ boxShadow: ["inset 1px 1px 2px rgba(0,0,0,0.4)", "inset 1px 1px 3px rgba(0,0,0,0.5)", "inset 1px 1px 2px rgba(0,0,0,0.4)"] }}
+              transition={{ duration: 3, repeat: Infinity, delay: 0.5 }}
+            />
+            <motion.div 
+              className="absolute top-[75%] left-[20%] w-[4px] h-[4px] rounded-full bg-[#5a5855] shadow-[inset_1px_1px_2px_rgba(0,0,0,0.4)]"
+              animate={{ boxShadow: ["inset 1px 1px 2px rgba(0,0,0,0.4)", "inset 1px 1px 3px rgba(0,0,0,0.5)", "inset 1px 1px 2px rgba(0,0,0,0.4)"] }}
+              transition={{ duration: 3, repeat: Infinity, delay: 1 }}
+            />
+            <motion.div 
+              className="absolute top-[75%] right-[20%] w-[4px] h-[4px] rounded-full bg-[#5a5855] shadow-[inset_1px_1px_2px_rgba(0,0,0,0.4)]"
+              animate={{ boxShadow: ["inset 1px 1px 2px rgba(0,0,0,0.4)", "inset 1px 1px 3px rgba(0,0,0,0.5)", "inset 1px 1px 2px rgba(0,0,0,0.4)"] }}
+              transition={{ duration: 3, repeat: Infinity, delay: 1.5 }}
+            />
+            {/* Horizontal form line from pour */}
+            <div className="absolute top-1/2 left-0 right-0 h-[1px] bg-[#6a6a68]/50" />
+            {/* Surface weathering/variation */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/10" />
           </div>
         </div>
       )
@@ -295,30 +336,62 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
     if (option === "Plaster") {
       return (
         <div className="relative w-full h-full overflow-hidden">
-          {/* Plaster wall texture - smooth with slight imperfections */}
-          <div className="absolute inset-0 bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100">
-            {/* Plaster texture - subtle bumpy surface */}
-            <div className="absolute inset-0 opacity-40" style={{ 
-              backgroundImage: `radial-gradient(ellipse at 20% 30%, rgba(200,180,150,0.4) 1px, transparent 1px),
-                               radial-gradient(ellipse at 60% 20%, rgba(190,170,140,0.3) 1.5px, transparent 1.5px),
-                               radial-gradient(ellipse at 40% 60%, rgba(210,190,160,0.35) 1px, transparent 1px),
-                               radial-gradient(ellipse at 80% 70%, rgba(195,175,145,0.4) 1px, transparent 1px),
-                               radial-gradient(ellipse at 30% 80%, rgba(185,165,135,0.3) 1px, transparent 1px)`,
-              backgroundSize: '10px 10px'
+          {/* Old plaster wall - characteristic of pre-1950s homes */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#f0ebe0] via-[#e8e2d5] to-[#dfd8ca]">
+            {/* Plaster texture - hand-troweled swirl marks */}
+            <div className="absolute inset-0" style={{ 
+              backgroundImage: `
+                radial-gradient(ellipse 8px 3px at 15% 20%, rgba(210,200,180,0.3) 0%, transparent 100%),
+                radial-gradient(ellipse 6px 4px at 40% 15%, rgba(200,190,170,0.25) 0%, transparent 100%),
+                radial-gradient(ellipse 7px 3px at 70% 25%, rgba(215,205,185,0.3) 0%, transparent 100%),
+                radial-gradient(ellipse 5px 4px at 25% 45%, rgba(205,195,175,0.25) 0%, transparent 100%),
+                radial-gradient(ellipse 8px 3px at 55% 50%, rgba(195,185,165,0.3) 0%, transparent 100%),
+                radial-gradient(ellipse 6px 4px at 80% 48%, rgba(210,200,180,0.25) 0%, transparent 100%),
+                radial-gradient(ellipse 7px 3px at 20% 75%, rgba(200,190,170,0.3) 0%, transparent 100%),
+                radial-gradient(ellipse 5px 4px at 50% 80%, rgba(215,205,185,0.25) 0%, transparent 100%),
+                radial-gradient(ellipse 8px 3px at 75% 72%, rgba(195,185,165,0.3) 0%, transparent 100%)
+              `,
+              backgroundSize: '100% 100%'
             }} />
-            {/* Subtle crack lines typical of old plaster */}
-            <motion.div 
-              className="absolute top-3 left-2 w-4 h-[0.5px] bg-amber-200/40 rotate-12"
-              animate={{ opacity: [0.2, 0.4, 0.2] }}
-              transition={{ duration: 3, repeat: Infinity }}
-            />
-            <motion.div 
-              className="absolute bottom-4 right-3 w-3 h-[0.5px] bg-amber-200/40 -rotate-6"
-              animate={{ opacity: [0.2, 0.4, 0.2] }}
-              transition={{ duration: 3, repeat: Infinity, delay: 1 }}
-            />
-            {/* Surface variation */}
-            <div className="absolute inset-0 bg-gradient-to-br from-transparent via-orange-100/20 to-amber-100/30" />
+            {/* Hairline cracks - spider web pattern typical of old plaster */}
+            <svg className="absolute inset-0 w-full h-full opacity-30" viewBox="0 0 60 60" preserveAspectRatio="none">
+              <motion.path 
+                d="M 8 5 Q 12 8, 15 12 Q 18 15, 22 14" 
+                stroke="#b5a890" 
+                strokeWidth="0.3" 
+                fill="none"
+                animate={{ opacity: [0.3, 0.5, 0.3] }}
+                transition={{ duration: 4, repeat: Infinity }}
+              />
+              <motion.path 
+                d="M 15 12 Q 16 16, 14 20" 
+                stroke="#b5a890" 
+                strokeWidth="0.25" 
+                fill="none"
+                animate={{ opacity: [0.25, 0.45, 0.25] }}
+                transition={{ duration: 4, repeat: Infinity, delay: 0.5 }}
+              />
+              <motion.path 
+                d="M 45 42 Q 48 45, 52 48 Q 54 51, 55 55" 
+                stroke="#b5a890" 
+                strokeWidth="0.3" 
+                fill="none"
+                animate={{ opacity: [0.3, 0.5, 0.3] }}
+                transition={{ duration: 4, repeat: Infinity, delay: 1 }}
+              />
+              <motion.path 
+                d="M 52 48 Q 50 50, 48 53" 
+                stroke="#b5a890" 
+                strokeWidth="0.25" 
+                fill="none"
+                animate={{ opacity: [0.25, 0.45, 0.25] }}
+                transition={{ duration: 4, repeat: Infinity, delay: 1.5 }}
+              />
+            </svg>
+            {/* Subtle color variation from age/paint layers */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#d8d0c2]/30 via-transparent to-[#f5f0e5]/20" />
+            {/* Slight surface undulation shadow */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/5" />
           </div>
         </div>
       )
@@ -326,36 +399,70 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
     if (option === "Stone") {
       return (
         <div className="relative w-full h-full overflow-hidden">
-          {/* Natural stone wall texture */}
-          <div className="absolute inset-0 bg-gradient-to-br from-stone-300 via-stone-400 to-stone-500">
-            {/* Stone shapes using CSS borders */}
-            <div className="absolute inset-1 grid grid-cols-2 grid-rows-2 gap-[2px]">
-              <motion.div 
-                className="bg-gradient-to-br from-stone-300 to-stone-500 rounded-[2px] border-[0.5px] border-stone-600/30"
-                animate={{ opacity: [0.85, 1, 0.85] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              />
-              <motion.div 
-                className="bg-gradient-to-br from-stone-400 to-stone-500 rounded-[2px] border-[0.5px] border-stone-600/30"
-                animate={{ opacity: [0.9, 1, 0.9] }}
-                transition={{ duration: 2.2, repeat: Infinity, delay: 0.3 }}
-              />
-              <motion.div 
-                className="bg-gradient-to-br from-stone-350 to-stone-450 rounded-[2px] border-[0.5px] border-stone-600/30"
-                animate={{ opacity: [0.88, 1, 0.88] }}
-                transition={{ duration: 1.8, repeat: Infinity, delay: 0.6 }}
-              />
-              <motion.div 
-                className="bg-gradient-to-br from-stone-300 to-stone-400 rounded-[2px] border-[0.5px] border-stone-600/30"
-                animate={{ opacity: [0.82, 1, 0.82] }}
-                transition={{ duration: 2.5, repeat: Infinity, delay: 0.9 }}
-              />
-            </div>
-            {/* Mortar lines */}
-            <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute top-1/2 left-1 right-1 h-[2px] bg-stone-600/20" />
-              <div className="absolute top-1 bottom-1 left-1/2 w-[2px] bg-stone-600/20" />
-            </div>
+          {/* Fieldstone/natural stone wall - irregular shapes with mortar */}
+          <div className="absolute inset-0 bg-[#9a9590]">
+            {/* Mortar background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-[#a8a39d] via-[#9a958f] to-[#8c8781]" />
+            
+            {/* Individual fieldstones - irregular shapes */}
+            {/* Top left large stone */}
+            <motion.div 
+              className="absolute top-[3px] left-[3px] w-[45%] h-[42%] rounded-[4px_2px_6px_3px]"
+              style={{
+                background: 'linear-gradient(135deg, #b5ad9f 0%, #9a928a 40%, #7d766e 100%)',
+                boxShadow: 'inset 2px 2px 4px rgba(255,255,255,0.15), inset -1px -1px 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.3)'
+              }}
+              animate={{ boxShadow: ["inset 2px 2px 4px rgba(255,255,255,0.15), inset -1px -1px 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.3)", "inset 2px 2px 5px rgba(255,255,255,0.2), inset -1px -1px 3px rgba(0,0,0,0.25), 0 1px 2px rgba(0,0,0,0.3)", "inset 2px 2px 4px rgba(255,255,255,0.15), inset -1px -1px 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.3)"] }}
+              transition={{ duration: 3, repeat: Infinity }}
+            />
+            
+            {/* Top right stone */}
+            <motion.div 
+              className="absolute top-[4px] right-[3px] w-[48%] h-[38%] rounded-[2px_5px_3px_6px]"
+              style={{
+                background: 'linear-gradient(145deg, #c4bbb0 0%, #a8a095 35%, #8a8278 100%)',
+                boxShadow: 'inset 2px 2px 4px rgba(255,255,255,0.12), inset -1px -1px 3px rgba(0,0,0,0.18), 0 1px 2px rgba(0,0,0,0.25)'
+              }}
+              animate={{ boxShadow: ["inset 2px 2px 4px rgba(255,255,255,0.12), inset -1px -1px 3px rgba(0,0,0,0.18), 0 1px 2px rgba(0,0,0,0.25)", "inset 2px 2px 5px rgba(255,255,255,0.17), inset -1px -1px 3px rgba(0,0,0,0.22), 0 1px 2px rgba(0,0,0,0.25)", "inset 2px 2px 4px rgba(255,255,255,0.12), inset -1px -1px 3px rgba(0,0,0,0.18), 0 1px 2px rgba(0,0,0,0.25)"] }}
+              transition={{ duration: 3.2, repeat: Infinity, delay: 0.4 }}
+            />
+            
+            {/* Bottom left stone */}
+            <motion.div 
+              className="absolute bottom-[3px] left-[3px] w-[42%] h-[48%] rounded-[5px_3px_2px_4px]"
+              style={{
+                background: 'linear-gradient(160deg, #bab2a5 0%, #9e968a 45%, #827b70 100%)',
+                boxShadow: 'inset 2px 2px 4px rgba(255,255,255,0.14), inset -1px -1px 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.28)'
+              }}
+              animate={{ boxShadow: ["inset 2px 2px 4px rgba(255,255,255,0.14), inset -1px -1px 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.28)", "inset 2px 2px 5px rgba(255,255,255,0.19), inset -1px -1px 3px rgba(0,0,0,0.24), 0 1px 2px rgba(0,0,0,0.28)", "inset 2px 2px 4px rgba(255,255,255,0.14), inset -1px -1px 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.28)"] }}
+              transition={{ duration: 2.8, repeat: Infinity, delay: 0.8 }}
+            />
+            
+            {/* Bottom right stone */}
+            <motion.div 
+              className="absolute bottom-[4px] right-[3px] w-[50%] h-[45%] rounded-[3px_6px_4px_2px]"
+              style={{
+                background: 'linear-gradient(125deg, #afa799 0%, #958d82 50%, #79726a 100%)',
+                boxShadow: 'inset 2px 2px 4px rgba(255,255,255,0.13), inset -1px -1px 3px rgba(0,0,0,0.19), 0 1px 2px rgba(0,0,0,0.26)'
+              }}
+              animate={{ boxShadow: ["inset 2px 2px 4px rgba(255,255,255,0.13), inset -1px -1px 3px rgba(0,0,0,0.19), 0 1px 2px rgba(0,0,0,0.26)", "inset 2px 2px 5px rgba(255,255,255,0.18), inset -1px -1px 3px rgba(0,0,0,0.23), 0 1px 2px rgba(0,0,0,0.26)", "inset 2px 2px 4px rgba(255,255,255,0.13), inset -1px -1px 3px rgba(0,0,0,0.19), 0 1px 2px rgba(0,0,0,0.26)"] }}
+              transition={{ duration: 3.5, repeat: Infinity, delay: 1.2 }}
+            />
+            
+            {/* Small accent stone in middle gap */}
+            <div 
+              className="absolute top-[44%] left-[46%] w-[12%] h-[14%] rounded-[2px]"
+              style={{
+                background: 'linear-gradient(140deg, #a9a196 0%, #8a837a 100%)',
+                boxShadow: 'inset 1px 1px 2px rgba(255,255,255,0.1), 0 1px 1px rgba(0,0,0,0.2)'
+              }}
+            />
+            
+            {/* Mortar texture in gaps */}
+            <div className="absolute inset-0 pointer-events-none" style={{
+              backgroundImage: `radial-gradient(circle at 48% 50%, rgba(120,115,108,0.4) 1px, transparent 1px)`,
+              backgroundSize: '4px 4px'
+            }} />
           </div>
         </div>
       )
