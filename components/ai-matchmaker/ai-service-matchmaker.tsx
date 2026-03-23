@@ -76,20 +76,15 @@ const optionVisualGuides: Record<string, {
     description: "Very solid, needs hammer drill and concrete anchors",
     bgColor: "bg-gradient-to-br from-stone-100 to-stone-200",
   },
-  "Wood/Plaster": {
+  "Plaster": {
     type: "animation",
     description: "Older homes, may need special anchoring",
-    bgColor: "bg-gradient-to-br from-amber-100 to-orange-200",
+    bgColor: "bg-gradient-to-br from-amber-50 to-cream-100",
   },
   "Stone": {
     type: "animation",
     description: "Natural stone, requires careful drilling",
     bgColor: "bg-gradient-to-br from-zinc-200 to-zinc-300",
-  },
-  "Metal studs": {
-    type: "animation",
-    description: "Thinner than wood, needs toggle bolts",
-    bgColor: "bg-gradient-to-br from-slate-200 to-slate-300",
   },
   // Cable management
   "Yes, hide all cables in wall": {
@@ -239,14 +234,35 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
     }
     if (option === "Concrete") {
       return (
-        <div className="relative w-full h-full flex items-center justify-center">
+        <div className="relative w-full h-full overflow-hidden">
+          {/* Concrete wall texture */}
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-400 via-gray-450 to-gray-500">
+            {/* Aggregate speckles */}
+            <div className="absolute inset-0" style={{
+              backgroundImage: `radial-gradient(circle at 15% 25%, rgba(120,120,120,0.4) 1px, transparent 1px),
+                               radial-gradient(circle at 45% 15%, rgba(100,100,100,0.3) 1.5px, transparent 1.5px),
+                               radial-gradient(circle at 75% 35%, rgba(140,140,140,0.35) 1px, transparent 1px),
+                               radial-gradient(circle at 25% 65%, rgba(110,110,110,0.4) 1px, transparent 1px),
+                               radial-gradient(circle at 85% 75%, rgba(130,130,130,0.3) 1px, transparent 1px),
+                               radial-gradient(circle at 55% 85%, rgba(105,105,105,0.35) 1.5px, transparent 1.5px)`,
+              backgroundSize: '12px 12px'
+            }} />
+            {/* Surface imperfections */}
+            <div className="absolute inset-0 opacity-20" style={{
+              backgroundImage: `linear-gradient(45deg, transparent 40%, rgba(0,0,0,0.1) 50%, transparent 60%),
+                               linear-gradient(-45deg, transparent 40%, rgba(255,255,255,0.05) 50%, transparent 60%)`,
+              backgroundSize: '8px 8px'
+            }} />
+            {/* Subtle form lines */}
+            <div className="absolute top-[30%] left-0 right-0 h-[1px] bg-gray-500/20" />
+            <div className="absolute top-[70%] left-0 right-0 h-[1px] bg-gray-500/20" />
+          </div>
+          {/* Subtle shimmer */}
           <motion.div 
-            className="w-10 h-10 bg-gradient-to-br from-gray-400 to-gray-500 rounded-sm"
-            animate={{ boxShadow: ["inset 0 0 10px rgba(0,0,0,0.2)", "inset 0 0 5px rgba(0,0,0,0.1)", "inset 0 0 10px rgba(0,0,0,0.2)"] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            <div className="w-full h-full flex items-center justify-center text-[8px] text-gray-600 font-bold">SOLID</div>
-          </motion.div>
+            className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent"
+            animate={{ opacity: [0.1, 0.2, 0.1] }}
+            transition={{ duration: 3, repeat: Infinity }}
+          />
         </div>
       )
     }
@@ -613,9 +629,8 @@ const serviceSpecificQuestions: ServiceSpecificQuestions = {
         "Drywall/Sheetrock",
         "Brick",
         "Concrete",
-        "Wood/Plaster",
+        "Plaster",
         "Stone",
-        "Metal studs",
         "Unsure",
       ],
       "Do you already have a wall mount, or do you need one included?": [
