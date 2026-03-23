@@ -3197,7 +3197,7 @@ translate-y-[-4px] hover:translate-y-[-8px]"
                 }
               `}</style>
               <div className="space-y-6 w-full" style={{ transform: "translateZ(0)", backfaceVisibility: "hidden" }}>
-                <AnimatePresence mode="popLayout" initial={false}>
+                <AnimatePresence mode="sync" initial={false}>
                   {messages.map((message) => (
                     <MessageItem
                       key={message.id}
