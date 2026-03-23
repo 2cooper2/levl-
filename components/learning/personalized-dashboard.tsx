@@ -210,7 +210,7 @@ export function PersonalizedDashboard() {
           ))}
         </div>
 
-        {/* Subtle noise texture using CSS pattern */}
+        {/* Subtle noise texture using CSS */}
         <div 
           className="absolute inset-0 opacity-[0.015] mix-blend-overlay pointer-events-none"
           style={{

@@ -31,960 +31,354 @@ import { Layout } from "lucide-react"
 import { LevlPortal } from "@/components/levl-portal"
 import Image from "next/image"
 
-// Visual guides for technical options - LevL themed animated previews
-const optionVisualGuides: Set<string> = new Set([
+// Visual guides for technical options - shows animated previews inline
+const optionVisualGuides: Record<string, { 
+  type: "animation" | "image"
+  description: string
+  animationFrames?: string[] // CSS animation keyframes description
+  bgColor?: string
+  icon?: React.ReactNode
+}> = {
   // Mount types
-  "Fixed (flat against wall)",
-  "Tilting (angle adjustment)",
-  "Full-motion/Articulating (swivel and tilt)",
-  "Ceiling mount",
+  "Fixed (flat against wall)": {
+    type: "animation",
+    description: "TV sits flat against wall, no movement",
+    bgColor: "bg-gradient-to-br from-slate-100 to-slate-200",
+  },
+  "Tilting (angle adjustment)": {
+    type: "animation", 
+    description: "TV can tilt up/down to reduce glare",
+    bgColor: "bg-gradient-to-br from-blue-100 to-blue-200",
+  },
+  "Full-motion/Articulating (swivel and tilt)": {
+    type: "animation",
+    description: "TV extends out and swivels in any direction",
+    bgColor: "bg-gradient-to-br from-purple-100 to-purple-200",
+  },
+  "Ceiling mount": {
+    type: "animation",
+    description: "TV hangs down from ceiling",
+    bgColor: "bg-gradient-to-br from-amber-100 to-amber-200",
+  },
   // Wall types
-  "Drywall/Sheetrock",
-  "Brick",
-  "Concrete",
-  "Wood/Plaster",
-  "Stone",
-  "Metal studs",
+  "Drywall/Sheetrock": {
+    type: "animation",
+    description: "Standard interior wall, needs studs or anchors",
+    bgColor: "bg-gradient-to-br from-gray-100 to-gray-200",
+  },
+  "Brick": {
+    type: "animation",
+    description: "Solid brick requires masonry drill bits",
+    bgColor: "bg-gradient-to-br from-red-100 to-red-200",
+  },
+  "Concrete": {
+    type: "animation",
+    description: "Very solid, needs hammer drill and concrete anchors",
+    bgColor: "bg-gradient-to-br from-stone-100 to-stone-200",
+  },
+  "Wood/Plaster": {
+    type: "animation",
+    description: "Older homes, may need special anchoring",
+    bgColor: "bg-gradient-to-br from-amber-100 to-orange-200",
+  },
+  "Stone": {
+    type: "animation",
+    description: "Natural stone, requires careful drilling",
+    bgColor: "bg-gradient-to-br from-zinc-200 to-zinc-300",
+  },
+  "Metal studs": {
+    type: "animation",
+    description: "Thinner than wood, needs toggle bolts",
+    bgColor: "bg-gradient-to-br from-slate-200 to-slate-300",
+  },
   // Cable management
-  "Yes, hide all cables in wall",
-  "Yes, use cable covers",
-  "No, cables visible is fine",
+  "Yes, hide all cables in wall": {
+    type: "animation",
+    description: "Cables routed through wall, completely hidden",
+    bgColor: "bg-gradient-to-br from-green-100 to-green-200",
+  },
+  "Yes, use cable covers": {
+    type: "animation",
+    description: "Cables covered with paintable plastic channels",
+    bgColor: "bg-gradient-to-br from-teal-100 to-teal-200",
+  },
+  "No, cables visible is fine": {
+    type: "animation",
+    description: "Cables hang freely from TV to outlet",
+    bgColor: "bg-gradient-to-br from-gray-100 to-gray-150",
+  },
   // Plumbing issues
-  "Clogged drain",
-  "Leaky pipe/faucet",
-  "Water heater issue",
-  "Toilet problem",
+  "Clogged drain": {
+    type: "animation",
+    description: "Water draining slowly or not at all",
+    bgColor: "bg-gradient-to-br from-blue-100 to-cyan-200",
+  },
+  "Leaky pipe/faucet": {
+    type: "animation",
+    description: "Water dripping from pipes or faucet",
+    bgColor: "bg-gradient-to-br from-sky-100 to-sky-200",
+  },
+  "Water heater issue": {
+    type: "animation",
+    description: "No hot water or temperature problems",
+    bgColor: "bg-gradient-to-br from-orange-100 to-red-200",
+  },
+  "Toilet problem": {
+    type: "animation",
+    description: "Running, clogged, or not flushing properly",
+    bgColor: "bg-gradient-to-br from-indigo-100 to-indigo-200",
+  },
   // Paint finishes
-  "Textured finish",
-  "Faux finish",
-  "High-gloss/specialty coating",
-])
+  "Textured finish": {
+    type: "animation",
+    description: "Adds depth and pattern to walls",
+    bgColor: "bg-gradient-to-br from-amber-100 to-yellow-200",
+  },
+  "Faux finish": {
+    type: "animation",
+    description: "Mimics marble, wood, or other materials",
+    bgColor: "bg-gradient-to-br from-rose-100 to-pink-200",
+  },
+  "High-gloss/specialty coating": {
+    type: "animation",
+    description: "Shiny, reflective surface finish",
+    bgColor: "bg-gradient-to-br from-violet-100 to-purple-200",
+  },
+}
 
-// Highly detailed animated visual preview component with LevL styling
+// Animated visual preview component
 const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { option: string }) {
-  if (!optionVisualGuides.has(option)) return null
+  const guide = optionVisualGuides[option]
+  if (!guide) return null
 
+  // Different animations based on option type
   const getAnimation = () => {
-    // ============ MOUNT TYPES ============
+    // Mount type animations
     if (option === "Fixed (flat against wall)") {
       return (
-        <div className="relative w-full h-full bg-gradient-to-b from-lavender-100 to-lavender-200 overflow-hidden">
-          {/* Room background with floor */}
-          <div className="absolute bottom-0 left-0 right-0 h-3 bg-gradient-to-t from-amber-200 to-amber-100" />
-          {/* Wall texture */}
-          <div className="absolute inset-0 opacity-30" style={{ backgroundImage: "repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(139,92,246,0.1) 2px, rgba(139,92,246,0.1) 4px)" }} />
-          {/* Wall mount bracket */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-            <div className="w-1 h-4 bg-gradient-to-b from-gray-400 to-gray-500 rounded-sm mx-auto shadow-sm" />
-            {/* TV - sleek modern design */}
-            <div className="relative -mt-0.5">
-              <div className="w-14 h-9 bg-gradient-to-br from-gray-800 via-gray-900 to-black rounded-sm shadow-lg border border-gray-700">
-                {/* Screen reflection */}
-                <div className="absolute inset-0.5 bg-gradient-to-br from-lavender-400/20 via-transparent to-transparent rounded-sm" />
-                {/* Screen content shimmer */}
-                <motion.div 
-                  className="absolute inset-1 rounded-sm overflow-hidden"
-                  style={{ background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #8b5cf6 100%)" }}
-                >
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                    animate={{ x: [-60, 60] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                  />
-                </motion.div>
-              </div>
-              {/* TV stand indicator */}
-              <div className="w-4 h-0.5 bg-gray-600 mx-auto mt-0.5 rounded-full" />
-            </div>
-          </div>
-          {/* Static indicator arrows */}
-          <div className="absolute top-2 right-2 flex flex-col items-center">
-            <div className="w-0.5 h-2 bg-lavender-400/50 rounded-full" />
-            <div className="w-1.5 h-1.5 border-l border-b border-lavender-400/50 rotate-[-45deg] -mt-0.5" />
-          </div>
+        <div className="relative w-full h-full flex items-center justify-center">
+          <div className="w-8 h-12 bg-gray-300 rounded-sm absolute left-1/2 -translate-x-1/2" /> {/* Wall */}
+          <motion.div 
+            className="w-6 h-4 bg-gray-800 rounded-sm border border-gray-600 absolute"
+            style={{ left: "50%", x: "-50%" }}
+          /> {/* TV flat */}
         </div>
       )
     }
-    
     if (option === "Tilting (angle adjustment)") {
       return (
-        <div className="relative w-full h-full bg-gradient-to-b from-lavender-100 to-lavender-200 overflow-hidden">
-          <div className="absolute bottom-0 left-0 right-0 h-3 bg-gradient-to-t from-amber-200 to-amber-100" />
-          <div className="absolute inset-0 opacity-30" style={{ backgroundImage: "repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(139,92,246,0.1) 2px, rgba(139,92,246,0.1) 4px)" }} />
-          {/* Tilt mount bracket with hinge */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-            <div className="w-2 h-3 bg-gradient-to-b from-gray-400 to-gray-500 rounded-sm mx-auto shadow-sm" />
-            <div className="w-3 h-1 bg-gray-500 rounded-full mx-auto -mt-0.5 shadow-inner" /> {/* Hinge */}
-            <motion.div 
-              className="relative origin-top"
-              animate={{ rotateX: [0, 20, 0, -15, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <div className="w-14 h-9 bg-gradient-to-br from-gray-800 via-gray-900 to-black rounded-sm shadow-lg border border-gray-700 -mt-1">
-                <div className="absolute inset-0.5 bg-gradient-to-br from-lavender-400/20 via-transparent to-transparent rounded-sm" />
-                <motion.div 
-                  className="absolute inset-1 rounded-sm overflow-hidden"
-                  style={{ background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #8b5cf6 100%)" }}
-                >
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                    animate={{ x: [-60, 60] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                  />
-                </motion.div>
-              </div>
-            </motion.div>
-          </div>
-          {/* Tilt motion indicator */}
+        <div className="relative w-full h-full flex items-center justify-center">
+          <div className="w-8 h-12 bg-gray-300 rounded-sm absolute left-1/2 -translate-x-1/2" />
           <motion.div 
-            className="absolute top-3 right-2"
-            animate={{ rotate: [0, 15, 0, -10, 0] }}
-            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-          >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-              <path d="M12 4v16M12 4l-4 4M12 4l4 4M12 20l-4-4M12 20l4-4" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
-          </motion.div>
+            className="w-6 h-4 bg-gray-800 rounded-sm border border-gray-600 absolute origin-top"
+            style={{ left: "50%", x: "-50%" }}
+            animate={{ rotateX: [0, 15, 0, -10, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          />
         </div>
       )
     }
-    
     if (option === "Full-motion/Articulating (swivel and tilt)") {
       return (
-        <div className="relative w-full h-full bg-gradient-to-b from-lavender-100 to-lavender-200 overflow-hidden">
-          <div className="absolute bottom-0 left-0 right-0 h-3 bg-gradient-to-t from-amber-200 to-amber-100" />
-          {/* Wall on left side */}
-          <div className="absolute left-0 top-0 bottom-3 w-3 bg-gradient-to-r from-lavender-300 to-lavender-200 shadow-inner" />
-          {/* Articulating arm system */}
+        <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
+          <div className="w-3 h-12 bg-gray-300 rounded-sm absolute left-2" />
           <motion.div 
-            className="absolute top-1/2 left-3 -translate-y-1/2 flex items-center"
+            className="absolute left-4 flex items-center"
             animate={{ 
-              x: [0, 12, 12, 0],
+              x: [0, 8, 8, 0],
+              rotateY: [0, 0, 25, 0],
             }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
           >
-            {/* Wall plate */}
-            <div className="w-2 h-6 bg-gradient-to-r from-gray-500 to-gray-400 rounded-sm shadow-md" />
-            {/* First arm segment */}
-            <motion.div 
-              className="flex items-center origin-left"
-              animate={{ rotate: [0, 0, -20, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <div className="w-6 h-1.5 bg-gradient-to-r from-gray-500 to-gray-400 rounded-full shadow-sm -ml-0.5" />
-              {/* Joint */}
-              <div className="w-2 h-2 bg-gray-500 rounded-full shadow-inner -ml-0.5" />
-              {/* Second arm segment */}
-              <motion.div 
-                className="flex items-center origin-left"
-                animate={{ rotate: [0, 0, 15, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              >
-                <div className="w-5 h-1.5 bg-gradient-to-r from-gray-400 to-gray-500 rounded-full shadow-sm -ml-0.5" />
-                {/* TV */}
-                <motion.div
-                  className="origin-left"
-                  animate={{ rotateY: [0, 0, -25, 0] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                >
-                  <div className="w-12 h-8 bg-gradient-to-br from-gray-800 via-gray-900 to-black rounded-sm shadow-lg border border-gray-700 ml-0.5">
-                    <div className="absolute inset-0.5 bg-gradient-to-br from-lavender-400/20 via-transparent to-transparent rounded-sm" />
-                    <div className="absolute inset-1 rounded-sm bg-gradient-to-br from-lavender-500 to-indigo-500">
-                      <motion.div
-                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                        animate={{ x: [-50, 50] }}
-                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                      />
-                    </div>
-                  </div>
-                </motion.div>
-              </motion.div>
-            </motion.div>
+            <div className="w-4 h-0.5 bg-gray-500" /> {/* Arm */}
+            <div className="w-6 h-4 bg-gray-800 rounded-sm border border-gray-600" />
           </motion.div>
-          {/* Motion arrows */}
-          <motion.svg 
-            className="absolute top-2 right-1" 
-            width="14" height="14" 
-            viewBox="0 0 24 24"
-            animate={{ rotate: [0, 360] }}
-            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-          >
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z" fill="none" stroke="#8b5cf6" strokeWidth="1"/>
-            <path d="M12 8l4 4-4 4" fill="none" stroke="#8b5cf6" strokeWidth="1.5" strokeLinecap="round"/>
-          </motion.svg>
         </div>
       )
     }
-    
     if (option === "Ceiling mount") {
       return (
-        <div className="relative w-full h-full bg-gradient-to-b from-gray-200 to-lavender-100 overflow-hidden">
-          {/* Ceiling with texture */}
-          <div className="absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-gray-300 to-gray-200 shadow-md">
-            <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(0,0,0,0.05) 3px, rgba(0,0,0,0.05) 6px)" }} />
-          </div>
-          {/* Floor */}
-          <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-t from-amber-300 to-amber-200" />
-          {/* Ceiling mount assembly */}
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 flex flex-col items-center">
-            {/* Ceiling plate */}
-            <div className="w-4 h-1.5 bg-gradient-to-b from-gray-400 to-gray-500 rounded-b-sm shadow-md" />
-            {/* Adjustable pole */}
-            <motion.div
-              className="flex flex-col items-center"
-              animate={{ y: [0, 3, 0] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <div className="w-1.5 h-8 bg-gradient-to-b from-gray-500 via-gray-400 to-gray-500 rounded-full shadow-inner" />
-              {/* Swivel joint */}
-              <div className="w-3 h-2 bg-gradient-to-b from-gray-500 to-gray-600 rounded-full -mt-0.5 shadow-md" />
-              {/* TV */}
-              <motion.div
-                animate={{ rotateY: [0, 10, 0, -10, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              >
-                <div className="w-14 h-9 bg-gradient-to-br from-gray-800 via-gray-900 to-black rounded-sm shadow-xl border border-gray-700 -mt-0.5">
-                  <div className="absolute inset-0.5 bg-gradient-to-br from-lavender-400/20 via-transparent to-transparent rounded-sm" />
-                  <div className="absolute inset-1 rounded-sm bg-gradient-to-br from-lavender-500 to-indigo-500">
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                      animate={{ x: [-60, 60] }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                    />
-                  </div>
-                </div>
-              </motion.div>
-            </motion.div>
-          </div>
+        <div className="relative w-full h-full flex flex-col items-center">
+          <div className="w-full h-2 bg-gray-300" /> {/* Ceiling */}
+          <motion.div 
+            className="flex flex-col items-center"
+            animate={{ y: [0, 2, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <div className="w-0.5 h-3 bg-gray-500" /> {/* Pole */}
+            <div className="w-6 h-4 bg-gray-800 rounded-sm border border-gray-600" />
+          </motion.div>
         </div>
       )
     }
-
-    // ============ WALL TYPES ============
+    // Wall type animations
     if (option === "Drywall/Sheetrock") {
       return (
-        <div className="relative w-full h-full overflow-hidden">
-          {/* Drywall cross-section view */}
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-white">
-            {/* Paper facing texture */}
-            <div className="absolute inset-0 opacity-40" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h20v20H0z' fill='%23f5f5f5'/%3E%3Cpath d='M0 10h20M10 0v20' stroke='%23e5e5e5' stroke-width='0.5'/%3E%3C/svg%3E\")" }} />
+        <div className="relative w-full h-full flex items-center justify-center">
+          <div className="w-10 h-10 bg-white border-2 border-gray-300 rounded-sm flex items-center justify-center">
+            <div className="w-6 h-6 border border-dashed border-gray-400 rounded-sm" />
           </div>
-          {/* Exposed gypsum core */}
-          <motion.div 
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-lg overflow-hidden shadow-inner border-2 border-gray-200"
-            animate={{ scale: [1, 1.02, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-white to-gray-100" />
-            {/* Gypsum texture */}
-            <div className="absolute inset-0 opacity-30">
-              {[...Array(12)].map((_, i) => (
-                <div 
-                  key={i}
-                  className="absolute w-1 h-1 rounded-full bg-gray-300"
-                  style={{ 
-                    left: `${(i % 4) * 25 + 10}%`, 
-                    top: `${Math.floor(i / 4) * 30 + 15}%`,
-                  }}
-                />
-              ))}
-            </div>
-            {/* Paper layers on sides */}
-            <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-r from-amber-100 to-gray-100" />
-            <div className="absolute inset-y-0 right-0 w-1 bg-gradient-to-l from-amber-100 to-gray-100" />
-          </motion.div>
-          {/* Stud indicator behind */}
-          <motion.div 
-            className="absolute left-2 top-2 bottom-2 w-2 rounded-sm bg-gradient-to-r from-amber-600 to-amber-500 shadow-md"
-            animate={{ opacity: [0.3, 0.6, 0.3] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          />
-          {/* Lavender accent corner */}
-          <div className="absolute top-0 right-0 w-4 h-4 bg-gradient-to-br from-lavender-300/50 to-transparent" />
         </div>
       )
     }
-    
     if (option === "Brick") {
       return (
-        <div className="relative w-full h-full overflow-hidden bg-gradient-to-br from-red-100 to-red-50">
-          {/* Brick pattern - realistic with mortar */}
-          <div className="absolute inset-0 p-0.5">
-            {[0, 1, 2, 3].map((row) => (
-              <div key={row} className="flex gap-[2px] mb-[2px]" style={{ marginLeft: row % 2 === 1 ? "-8px" : "0" }}>
-                {[0, 1, 2, 3].map((col) => (
-                  <motion.div
-                    key={col}
-                    className="h-3 rounded-[1px] shadow-sm"
-                    style={{
-                      width: "16px",
-                      background: `linear-gradient(135deg, 
-                        ${["#c9553d", "#b84a35", "#d45a42", "#bf5240"][Math.floor(Math.random() * 4)]} 0%, 
-                        ${["#a34332", "#8f3a2a", "#b84a35", "#9e4030"][Math.floor(Math.random() * 4)]} 100%)`,
-                    }}
-                    animate={{ 
-                      boxShadow: [
-                        "inset 1px 1px 2px rgba(255,255,255,0.2), inset -1px -1px 2px rgba(0,0,0,0.1)",
-                        "inset 1px 1px 3px rgba(255,255,255,0.3), inset -1px -1px 2px rgba(0,0,0,0.15)",
-                        "inset 1px 1px 2px rgba(255,255,255,0.2), inset -1px -1px 2px rgba(0,0,0,0.1)",
-                      ]
-                    }}
-                    transition={{ duration: 2, repeat: Infinity, delay: (row + col) * 0.1 }}
-                  />
-                ))}
-              </div>
-            ))}
-          </div>
-          {/* Mortar visible in gaps */}
-          <div className="absolute inset-0 pointer-events-none opacity-60" style={{ background: "linear-gradient(to bottom, #d1d5db 0%, #9ca3af 100%)" }}>
-            <div className="absolute inset-0" style={{ 
-              maskImage: "repeating-linear-gradient(0deg, black 0px, black 2px, transparent 2px, transparent 14px), repeating-linear-gradient(90deg, black 0px, black 2px, transparent 2px, transparent 18px)",
-              WebkitMaskImage: "repeating-linear-gradient(0deg, black 0px, black 2px, transparent 2px, transparent 14px), repeating-linear-gradient(90deg, black 0px, black 2px, transparent 2px, transparent 18px)"
-            }} />
-          </div>
-          {/* Lavender highlight */}
-          <div className="absolute bottom-0 right-0 w-6 h-6 bg-gradient-to-tl from-lavender-400/30 to-transparent rounded-tl-full" />
-        </div>
-      )
-    }
-    
-    if (option === "Concrete") {
-      return (
-        <div className="relative w-full h-full overflow-hidden">
-          {/* Concrete texture base */}
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-400 via-gray-500 to-gray-600">
-            {/* Aggregate texture - using dots pattern instead of filter */}
-            <div className="absolute inset-0 opacity-30" style={{ 
-              backgroundImage: `radial-gradient(circle at 20% 30%, rgba(180,180,180,0.4) 1px, transparent 1px),
-                               radial-gradient(circle at 60% 20%, rgba(160,160,160,0.3) 1.5px, transparent 1.5px),
-                               radial-gradient(circle at 80% 70%, rgba(170,170,170,0.35) 1px, transparent 1px),
-                               radial-gradient(circle at 40% 80%, rgba(150,150,150,0.4) 2px, transparent 2px),
-                               radial-gradient(circle at 10% 60%, rgba(190,190,190,0.3) 1px, transparent 1px)`,
-              backgroundSize: '20px 20px'
-            }} />
-            {/* Pebbles/aggregate */}
-            {[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19].map((i) => (
-              <motion.div
+        <div className="relative w-full h-full flex items-center justify-center">
+          <div className="grid grid-cols-3 gap-0.5 p-1">
+            {[...Array(6)].map((_, i) => (
+              <motion.div 
                 key={i}
-                className="absolute rounded-full bg-gray-400/60"
-                style={{
-                  width: `${2 + (i % 3)}px`,
-                  height: `${2 + (i % 3)}px`,
-                  left: `${(i * 17) % 90}%`,
-                  top: `${(i * 23) % 90}%`,
-                }}
-                animate={{ opacity: [0.4, 0.7, 0.4] }}
-                transition={{ duration: 2, repeat: Infinity, delay: i * 0.1 }}
+                className="w-3 h-2 bg-red-400 rounded-[1px]"
+                animate={{ opacity: [0.7, 1, 0.7] }}
+                transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.1 }}
               />
             ))}
           </div>
-          {/* Surface imperfections */}
-          <motion.div 
-            className="absolute top-3 left-4 w-6 h-0.5 bg-gray-700/30 rounded-full"
-            animate={{ opacity: [0.3, 0.5, 0.3] }}
-            transition={{ duration: 3, repeat: Infinity }}
-          />
-          <motion.div 
-            className="absolute bottom-4 right-3 w-4 h-0.5 bg-gray-700/20 rounded-full rotate-45"
-            animate={{ opacity: [0.2, 0.4, 0.2] }}
-            transition={{ duration: 2.5, repeat: Infinity, delay: 0.5 }}
-          />
-          {/* Lavender overlay accent */}
-          <div className="absolute inset-0 bg-gradient-to-br from-lavender-400/10 to-transparent" />
         </div>
       )
     }
-    
-    if (option === "Wood/Plaster") {
+    if (option === "Concrete") {
       return (
-        <div className="relative w-full h-full overflow-hidden">
-          {/* Split view - wood on left, plaster on right */}
-          <div className="absolute inset-0 flex">
-            {/* Wood grain side */}
-            <div className="w-1/2 h-full bg-gradient-to-b from-amber-600 to-amber-700 relative overflow-hidden">
-              {/* Wood grain lines */}
-              {[...Array(8)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  className="absolute h-full w-[2px] rounded-full"
-                  style={{
-                    left: `${i * 14 + 5}%`,
-                    background: `linear-gradient(to bottom, rgba(120,53,15,${0.2 + Math.random() * 0.3}) 0%, rgba(180,83,9,${0.1 + Math.random() * 0.2}) 50%, rgba(120,53,15,${0.2 + Math.random() * 0.3}) 100%)`,
-                  }}
-                  animate={{ opacity: [0.4, 0.7, 0.4] }}
-                  transition={{ duration: 3, repeat: Infinity, delay: i * 0.2 }}
-                />
-              ))}
-              {/* Knot */}
-              <div className="absolute top-4 left-3 w-2 h-3 rounded-full bg-amber-900/50 shadow-inner" />
-            </div>
-            {/* Plaster side */}
-            <div className="w-1/2 h-full bg-gradient-to-br from-gray-100 to-gray-200 relative">
-              {/* Plaster texture */}
-              <div className="absolute inset-0 opacity-30">
-                {[...Array(15)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="absolute bg-gray-400/30"
-                    style={{
-                      width: `${Math.random() * 4 + 1}px`,
-                      height: `${Math.random() * 4 + 1}px`,
-                      left: `${Math.random() * 100}%`,
-                      top: `${Math.random() * 100}%`,
-                      borderRadius: "50%",
-                    }}
-                  />
-                ))}
-              </div>
-              {/* Crack lines (old plaster characteristic) */}
-              <motion.svg 
-                className="absolute inset-0 w-full h-full" 
-                viewBox="0 0 30 60"
-                animate={{ opacity: [0.2, 0.4, 0.2] }}
-                transition={{ duration: 3, repeat: Infinity }}
-              >
-                <path d="M5 10 Q 10 20, 8 30 Q 12 40, 10 50" stroke="#9ca3af" strokeWidth="0.3" fill="none"/>
-              </motion.svg>
-            </div>
-          </div>
-          {/* Divider line */}
-          <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-lavender-400/50" />
+        <div className="relative w-full h-full flex items-center justify-center">
+          <motion.div 
+            className="w-10 h-10 bg-gradient-to-br from-gray-400 to-gray-500 rounded-sm"
+            animate={{ boxShadow: ["inset 0 0 10px rgba(0,0,0,0.2)", "inset 0 0 5px rgba(0,0,0,0.1)", "inset 0 0 10px rgba(0,0,0,0.2)"] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <div className="w-full h-full flex items-center justify-center text-[8px] text-gray-600 font-bold">SOLID</div>
+          </motion.div>
         </div>
       )
     }
-    
-    if (option === "Stone") {
+    // Cable management animations
+    if (option === "Yes, hide all cables in wall") {
       return (
-        <div className="relative w-full h-full overflow-hidden bg-gradient-to-br from-stone-300 to-stone-400">
-          {/* Natural stone pattern using CSS shapes */}
-          <div className="absolute inset-0">
-            {/* Stone 1 - top left */}
-            <motion.div 
-              className="absolute top-1 left-1 w-7 h-6 rounded-[40%_60%_50%_50%] bg-gradient-to-br from-stone-400 to-stone-500 border border-stone-500/50"
-              animate={{ opacity: [0.8, 1, 0.8] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            />
-            {/* Stone 2 - top right */}
-            <motion.div 
-              className="absolute top-1 right-1 w-6 h-7 rounded-[50%_40%_60%_50%] bg-gradient-to-br from-stone-300 to-stone-400 border border-stone-500/50"
-              animate={{ opacity: [0.9, 1, 0.9] }}
-              transition={{ duration: 2.5, repeat: Infinity, delay: 0.3 }}
-            />
-            {/* Stone 3 - bottom left */}
-            <motion.div 
-              className="absolute bottom-1 left-1 w-6 h-6 rounded-[60%_40%_50%_50%] bg-gradient-to-br from-amber-200/50 to-stone-400 border border-stone-500/50"
-              animate={{ opacity: [0.85, 1, 0.85] }}
-              transition={{ duration: 2.2, repeat: Infinity, delay: 0.6 }}
-            />
-            {/* Stone 4 - bottom right */}
-            <motion.div 
-              className="absolute bottom-1 right-1 w-7 h-6 rounded-[40%_50%_40%_60%] bg-gradient-to-br from-stone-350 to-stone-500 border border-stone-500/50"
-              animate={{ opacity: [0.88, 1, 0.88] }}
-              transition={{ duration: 1.8, repeat: Infinity, delay: 0.9 }}
-            />
-            {/* Center stone */}
-            <motion.div 
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-[50%_50%_40%_60%] bg-gradient-to-br from-stone-300 to-stone-500 border border-stone-600/40"
-              animate={{ opacity: [0.9, 1, 0.9] }}
-              transition={{ duration: 2, repeat: Infinity, delay: 0.4 }}
-            />
-          </div>
-          {/* Mortar lines */}
-          <div className="absolute inset-0 opacity-40">
-            <div className="absolute top-[45%] left-0 right-0 h-[2px] bg-stone-500/30" />
-            <div className="absolute top-0 bottom-0 left-[45%] w-[2px] bg-stone-500/30" />
-          </div>
-          {/* Lavender shimmer */}
+        <div className="relative w-full h-full flex items-center justify-center">
+          <div className="w-3 h-12 bg-gray-200 absolute left-3 rounded-sm" /> {/* Wall */}
+          <div className="w-5 h-3 bg-gray-700 absolute top-2 left-4 rounded-sm" /> {/* TV */}
           <motion.div 
-            className="absolute inset-0 bg-gradient-to-br from-lavender-400/20 to-transparent"
-            animate={{ opacity: [0.1, 0.3, 0.1] }}
-            transition={{ duration: 3, repeat: Infinity }}
+            className="absolute left-4 top-5 w-0.5 h-0 bg-green-500"
+            animate={{ height: [0, 6, 6], opacity: [1, 1, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          />
+          <div className="w-2 h-2 bg-gray-400 absolute bottom-2 left-4 rounded-sm" /> {/* Outlet */}
+        </div>
+      )
+    }
+    if (option === "Yes, use cable covers") {
+      return (
+        <div className="relative w-full h-full flex items-center justify-center">
+          <div className="w-3 h-12 bg-gray-200 absolute left-3 rounded-sm" />
+          <div className="w-5 h-3 bg-gray-700 absolute top-2 left-4 rounded-sm" />
+          <motion.div 
+            className="absolute left-5 top-5 w-1 rounded-sm bg-white border border-gray-300"
+            animate={{ height: [0, 7] }}
+            transition={{ duration: 1, repeat: Infinity, repeatDelay: 1 }}
+          />
+          <div className="w-2 h-2 bg-gray-400 absolute bottom-2 left-4 rounded-sm" />
+        </div>
+      )
+    }
+    if (option === "No, cables visible is fine") {
+      return (
+        <div className="relative w-full h-full flex items-center justify-center">
+          <div className="w-3 h-12 bg-gray-200 absolute left-3 rounded-sm" />
+          <div className="w-5 h-3 bg-gray-700 absolute top-2 left-4 rounded-sm" />
+          <motion.svg 
+            className="absolute left-5 top-5" 
+            width="8" height="10" 
+            viewBox="0 0 8 10"
+            animate={{ pathLength: [0, 1] }}
+          >
+            <motion.path 
+              d="M1 0 Q 4 5, 2 10" 
+              stroke="#333" 
+              strokeWidth="0.5" 
+              fill="none"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 1, repeat: Infinity, repeatDelay: 0.5 }}
+            />
+          </motion.svg>
+          <div className="w-2 h-2 bg-gray-400 absolute bottom-2 left-4 rounded-sm" />
+        </div>
+      )
+    }
+    // Plumbing animations
+    if (option === "Clogged drain") {
+      return (
+        <div className="relative w-full h-full flex items-center justify-center">
+          <div className="w-6 h-2 bg-gray-300 rounded-t-full" /> {/* Sink */}
+          <div className="absolute top-4 w-2 h-4 bg-gray-400 rounded-b-sm" /> {/* Pipe */}
+          <motion.div 
+            className="absolute top-3 w-4 h-1 bg-blue-400 rounded-full"
+            animate={{ y: [0, 1, 0], opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 1, repeat: Infinity }}
+          />
+          <motion.div 
+            className="absolute top-5 w-1.5 h-1.5 bg-amber-600 rounded-full"
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ duration: 0.5, repeat: Infinity }}
           />
         </div>
       )
     }
-    
-    if (option === "Metal studs") {
+    if (option === "Leaky pipe/faucet") {
       return (
-        <div className="relative w-full h-full overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200">
-          {/* Metal C-channel studs */}
+        <div className="relative w-full h-full flex flex-col items-center justify-center">
+          <div className="w-3 h-2 bg-gray-400 rounded-t-sm" /> {/* Faucet */}
+          <div className="w-1 h-3 bg-gray-400" /> {/* Spout */}
           {[0, 1, 2].map((i) => (
             <motion.div
               key={i}
-              className="absolute top-1 bottom-1 w-3 flex flex-col"
-              style={{ left: `${i * 35 + 10}%` }}
+              className="absolute w-1 h-1 bg-blue-400 rounded-full"
+              style={{ top: "60%" }}
               animate={{ 
-                boxShadow: [
-                  "0 0 3px rgba(148,163,184,0.5)",
-                  "0 0 6px rgba(148,163,184,0.8)",
-                  "0 0 3px rgba(148,163,184,0.5)",
-                ]
-              }}
-              transition={{ duration: 2, repeat: Infinity, delay: i * 0.3 }}
-            >
-              {/* C-channel shape */}
-              <div className="h-full bg-gradient-to-r from-slate-400 via-slate-300 to-slate-400 rounded-sm relative">
-                {/* Lip on left */}
-                <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-slate-500 rounded-l-sm" />
-                {/* Lip on right */}
-                <div className="absolute right-0 top-0 bottom-0 w-0.5 bg-slate-500 rounded-r-sm" />
-                {/* Punch-outs (holes) */}
-                {[0, 1, 2].map((j) => (
-                  <div
-                    key={j}
-                    className="absolute left-1/2 -translate-x-1/2 w-1.5 h-1 rounded-sm bg-slate-200"
-                    style={{ top: `${j * 35 + 15}%` }}
-                  />
-                ))}
-                {/* Metallic reflection */}
-                <motion.div 
-                  className="absolute inset-0 bg-gradient-to-b from-white/40 via-transparent to-transparent rounded-sm"
-                  animate={{ opacity: [0.3, 0.6, 0.3] }}
-                  transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.2 }}
-                />
-              </div>
-            </motion.div>
-          ))}
-          {/* Lavender glow */}
-          <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-lavender-300/30 to-transparent" />
-        </div>
-      )
-    }
-
-    // ============ CABLE MANAGEMENT ============
-    if (option === "Yes, hide all cables in wall") {
-      return (
-        <div className="relative w-full h-full overflow-hidden bg-gradient-to-b from-lavender-100 to-lavender-50">
-          {/* Wall with cutout */}
-          <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-lavender-200 to-lavender-100">
-            {/* In-wall cable path (hidden) */}
-            <motion.div 
-              className="absolute left-1/2 -translate-x-1/2 top-6 w-1 rounded-full bg-lavender-300/50"
-              animate={{ height: [0, 26, 26], opacity: [0, 0.5, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            />
-          </div>
-          {/* TV mounted on wall */}
-          <div className="absolute top-2 left-4 w-12 h-8 bg-gradient-to-br from-gray-800 to-gray-900 rounded-sm shadow-lg border border-gray-700">
-            <div className="absolute inset-1 rounded-sm bg-gradient-to-br from-lavender-500 to-indigo-500">
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                animate={{ x: [-50, 50] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-              />
-            </div>
-          </div>
-          {/* Low voltage plate behind TV */}
-          <div className="absolute top-8 left-6 w-2 h-2 bg-white rounded-sm border border-gray-300 shadow-inner" />
-          {/* Power outlet at bottom */}
-          <div className="absolute bottom-2 left-5 w-3 h-4 bg-white rounded-sm border border-gray-300 shadow-md">
-            <div className="flex flex-col items-center justify-center h-full gap-0.5">
-              <div className="w-1 h-0.5 bg-gray-800 rounded-full" />
-              <div className="w-1 h-0.5 bg-gray-800 rounded-full" />
-            </div>
-          </div>
-          {/* Checkmark indicator */}
-          <motion.div 
-            className="absolute top-1 right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center"
-            animate={{ scale: [1, 1.1, 1] }}
-            transition={{ duration: 1, repeat: Infinity }}
-          >
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
-              <path d="M5 12l5 5L20 7" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </motion.div>
-        </div>
-      )
-    }
-    
-    if (option === "Yes, use cable covers") {
-      return (
-        <div className="relative w-full h-full overflow-hidden bg-gradient-to-b from-lavender-100 to-lavender-50">
-          {/* Wall */}
-          <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-lavender-200 to-lavender-100" />
-          {/* TV */}
-          <div className="absolute top-2 left-4 w-12 h-8 bg-gradient-to-br from-gray-800 to-gray-900 rounded-sm shadow-lg border border-gray-700">
-            <div className="absolute inset-1 rounded-sm bg-gradient-to-br from-lavender-500 to-indigo-500">
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                animate={{ x: [-50, 50] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-              />
-            </div>
-          </div>
-          {/* Cable cover channel */}
-          <motion.div 
-            className="absolute left-6 top-10 w-2 bg-white rounded-sm shadow-md border border-gray-200"
-            initial={{ height: 0 }}
-            animate={{ height: 24 }}
-            transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 1 }}
-          >
-            {/* Channel ridges */}
-            <div className="absolute inset-x-0 top-1 h-px bg-gray-200" />
-            <div className="absolute inset-x-0 top-3 h-px bg-gray-200" />
-            <div className="absolute inset-x-0 top-5 h-px bg-gray-200" />
-          </motion.div>
-          {/* Cable inside cover (visible moving) */}
-          <motion.div 
-            className="absolute left-[26px] top-10 w-0.5 bg-gray-800 rounded-full"
-            initial={{ height: 0 }}
-            animate={{ height: 22 }}
-            transition={{ duration: 1.2, repeat: Infinity, repeatDelay: 1.3, delay: 0.3 }}
-          />
-          {/* Outlet */}
-          <div className="absolute bottom-2 left-5 w-3 h-4 bg-white rounded-sm border border-gray-300 shadow-md">
-            <div className="flex flex-col items-center justify-center h-full gap-0.5">
-              <div className="w-1 h-0.5 bg-gray-800 rounded-full" />
-              <div className="w-1 h-0.5 bg-gray-800 rounded-full" />
-            </div>
-          </div>
-        </div>
-      )
-    }
-    
-    if (option === "No, cables visible is fine") {
-      return (
-        <div className="relative w-full h-full overflow-hidden bg-gradient-to-b from-lavender-100 to-lavender-50">
-          {/* Wall */}
-          <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-lavender-200 to-lavender-100" />
-          {/* TV */}
-          <div className="absolute top-2 left-4 w-12 h-8 bg-gradient-to-br from-gray-800 to-gray-900 rounded-sm shadow-lg border border-gray-700">
-            <div className="absolute inset-1 rounded-sm bg-gradient-to-br from-lavender-500 to-indigo-500">
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                animate={{ x: [-50, 50] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-              />
-            </div>
-          </div>
-          {/* Visible hanging cables */}
-          <motion.svg 
-            className="absolute left-7 top-9" 
-            width="20" 
-            height="30" 
-            viewBox="0 0 20 30"
-          >
-            {/* Multiple cables hanging */}
-            <motion.path 
-              d="M2 0 Q 0 8, 3 15 Q 6 22, 2 28" 
-              stroke="#1f2937" 
-              strokeWidth="1.5" 
-              fill="none"
-              strokeLinecap="round"
-              animate={{ d: ["M2 0 Q 0 8, 3 15 Q 6 22, 2 28", "M2 0 Q 4 8, 1 15 Q -2 22, 2 28", "M2 0 Q 0 8, 3 15 Q 6 22, 2 28"] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-            />
-            <motion.path 
-              d="M6 0 Q 8 10, 5 18 Q 2 26, 6 28" 
-              stroke="#374151" 
-              strokeWidth="1" 
-              fill="none"
-              strokeLinecap="round"
-              animate={{ d: ["M6 0 Q 8 10, 5 18 Q 2 26, 6 28", "M6 0 Q 4 10, 7 18 Q 10 26, 6 28", "M6 0 Q 8 10, 5 18 Q 2 26, 6 28"] }}
-              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-            />
-          </motion.svg>
-          {/* Outlet */}
-          <div className="absolute bottom-2 left-5 w-3 h-4 bg-white rounded-sm border border-gray-300 shadow-md">
-            <div className="flex flex-col items-center justify-center h-full gap-0.5">
-              <div className="w-1 h-0.5 bg-gray-800 rounded-full" />
-              <div className="w-1 h-0.5 bg-gray-800 rounded-full" />
-            </div>
-          </div>
-        </div>
-      )
-    }
-
-    // ============ PLUMBING ISSUES ============
-    if (option === "Clogged drain") {
-      return (
-        <div className="relative w-full h-full overflow-hidden bg-gradient-to-b from-slate-100 to-slate-200">
-          {/* Sink basin */}
-          <div className="absolute top-2 left-1/2 -translate-x-1/2 w-14 h-8 bg-white rounded-b-lg shadow-inner border border-gray-200">
-            {/* Accumulated water */}
-            <motion.div 
-              className="absolute bottom-0 left-1 right-1 rounded-b-lg bg-gradient-to-t from-blue-400/60 to-blue-300/40"
-              animate={{ height: [4, 10, 4] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            />
-            {/* Water surface shimmer */}
-            <motion.div 
-              className="absolute bottom-0 left-1 right-1 h-1 bg-gradient-to-r from-transparent via-white/40 to-transparent rounded-full"
-              animate={{ opacity: [0.3, 0.6, 0.3], y: [0, -2, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-            />
-          </div>
-          {/* Drain hole */}
-          <div className="absolute top-9 left-1/2 -translate-x-1/2 w-3 h-3 bg-gray-700 rounded-full shadow-inner">
-            <div className="absolute inset-0.5 bg-gray-800 rounded-full" />
-          </div>
-          {/* Pipe below */}
-          <div className="absolute top-11 left-1/2 -translate-x-1/2 w-4 h-10 bg-gradient-to-b from-gray-400 to-gray-500 rounded-b-lg">
-            {/* Clog blockage */}
-            <motion.div 
-              className="absolute top-2 left-0.5 right-0.5 h-3 bg-gradient-to-b from-amber-600 to-amber-700 rounded-sm"
-              animate={{ scale: [1, 1.1, 1], opacity: [0.8, 1, 0.8] }}
-              transition={{ duration: 1, repeat: Infinity }}
-            />
-          </div>
-          {/* Warning indicator */}
-          <motion.div 
-            className="absolute top-1 right-1 text-amber-500"
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ duration: 0.5, repeat: Infinity }}
-          >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2L2 22h20L12 2zm0 4l7.5 14h-15L12 6zm-1 5v4h2v-4h-2zm0 6v2h2v-2h-2z"/>
-            </svg>
-          </motion.div>
-        </div>
-      )
-    }
-    
-    if (option === "Leaky pipe/faucet") {
-      return (
-        <div className="relative w-full h-full overflow-hidden bg-gradient-to-b from-slate-100 to-slate-200">
-          {/* Faucet */}
-          <div className="absolute top-2 left-1/2 -translate-x-1/2">
-            {/* Faucet body */}
-            <div className="w-6 h-4 bg-gradient-to-b from-gray-300 to-gray-400 rounded-t-lg relative">
-              {/* Chrome shine */}
-              <div className="absolute inset-0 bg-gradient-to-br from-white/50 via-transparent to-transparent rounded-t-lg" />
-              {/* Handle */}
-              <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-2 bg-gradient-to-b from-gray-400 to-gray-500 rounded-t-md" />
-            </div>
-            {/* Spout */}
-            <div className="w-2 h-6 bg-gradient-to-r from-gray-400 via-gray-300 to-gray-400 mx-auto rounded-b-lg relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-white/30 via-transparent to-transparent rounded-b-lg" />
-            </div>
-          </div>
-          {/* Water drops falling */}
-          {[0, 1, 2, 3].map((i) => (
-            <motion.div
-              key={i}
-              className="absolute left-1/2 -translate-x-1/2"
-              style={{ top: "40%" }}
-              initial={{ y: 0, opacity: 1, scale: 1 }}
-              animate={{ 
-                y: [0, 25],
-                opacity: [1, 0.8, 0],
-                scale: [1, 1.2, 0.8],
+                y: [0, 8, 16],
+                opacity: [1, 0.7, 0],
+                scale: [1, 0.8, 0.5]
               }}
               transition={{ 
-                duration: 0.7, 
+                duration: 0.8, 
                 repeat: Infinity, 
-                delay: i * 0.25,
+                delay: i * 0.3,
                 ease: "easeIn"
               }}
-            >
-              <div className="w-2 h-2.5 bg-gradient-to-b from-blue-300 to-blue-500 rounded-full shadow-sm">
-                <div className="absolute top-0 left-0.5 w-1 h-1 bg-white/50 rounded-full" />
-              </div>
-            </motion.div>
+            />
           ))}
-          {/* Puddle at bottom */}
-          <motion.div 
-            className="absolute bottom-2 left-1/2 -translate-x-1/2 h-2 bg-gradient-to-t from-blue-400/50 to-blue-300/30 rounded-full"
-            animate={{ width: [20, 28, 20] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          />
         </div>
       )
     }
-    
     if (option === "Water heater issue") {
       return (
-        <div className="relative w-full h-full overflow-hidden bg-gradient-to-b from-slate-100 to-slate-200">
-          {/* Water heater tank */}
-          <div className="absolute top-2 left-1/2 -translate-x-1/2 w-12 h-16 bg-gradient-to-b from-gray-200 via-white to-gray-200 rounded-lg shadow-md border border-gray-300">
-            {/* Tank body details */}
-            <div className="absolute top-1 left-1 right-1 h-3 bg-gray-300/50 rounded-t-md" />
-            {/* Pipes on top */}
-            <div className="absolute -top-2 left-2 w-1.5 h-3 bg-gradient-to-b from-gray-400 to-gray-500 rounded-t-sm" />
-            <div className="absolute -top-2 right-2 w-1.5 h-3 bg-gradient-to-b from-gray-400 to-gray-500 rounded-t-sm" />
-            {/* Temperature gauge */}
-            <div className="absolute top-5 left-1/2 -translate-x-1/2 w-6 h-6 bg-white rounded-full border-2 border-gray-300 shadow-inner">
-              <motion.div 
-                className="absolute top-1/2 left-1/2 w-3 h-0.5 origin-left rounded-full"
-                style={{ background: "linear-gradient(90deg, #ef4444 0%, #f97316 50%, #3b82f6 100%)" }}
-                animate={{ rotate: [-30, 30, -30] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              />
-              {/* Gauge markings */}
-              <div className="absolute top-0.5 left-1/2 -translate-x-1/2 w-0.5 h-1 bg-gray-400" />
-              <div className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-0.5 h-1 bg-gray-400" />
-            </div>
-            {/* Heating indicator */}
+        <div className="relative w-full h-full flex items-center justify-center">
+          <div className="w-6 h-10 bg-gray-300 rounded-sm border border-gray-400 flex flex-col items-center justify-center">
             <motion.div 
-              className="absolute bottom-2 left-1/2 -translate-x-1/2 w-8 h-1.5 rounded-full"
-              animate={{ 
-                backgroundColor: ["#3b82f6", "#f97316", "#ef4444", "#f97316", "#3b82f6"],
-                boxShadow: ["0 0 4px #3b82f6", "0 0 8px #f97316", "0 0 12px #ef4444", "0 0 8px #f97316", "0 0 4px #3b82f6"]
-              }}
-              transition={{ duration: 3, repeat: Infinity }}
-            />
-          </div>
-        </div>
-      )
-    }
-    
-    if (option === "Toilet problem") {
-      return (
-        <div className="relative w-full h-full overflow-hidden bg-gradient-to-b from-slate-100 to-slate-200">
-          {/* Toilet side view */}
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2">
-            {/* Tank */}
-            <div className="w-8 h-10 bg-gradient-to-b from-white to-gray-100 rounded-t-lg border border-gray-200 shadow-md relative -mb-1">
-              {/* Tank lid */}
-              <div className="absolute -top-1 left-0 right-0 h-2 bg-gradient-to-b from-gray-200 to-white rounded-t-lg" />
-              {/* Flush handle */}
-              <div className="absolute top-3 -left-1 w-2 h-1 bg-gray-400 rounded-full" />
-              {/* Water in tank */}
-              <motion.div 
-                className="absolute bottom-1 left-1 right-1 bg-gradient-to-t from-blue-400/50 to-blue-300/30 rounded-b"
-                animate={{ height: [16, 8, 16] }}
-                transition={{ duration: 3, repeat: Infinity }}
-              />
-              {/* Running water indicator */}
-              <motion.div 
-                className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1"
-                animate={{ opacity: [0, 1, 0] }}
-                transition={{ duration: 0.5, repeat: Infinity }}
-              >
-                <div className="w-full h-2 bg-blue-400/60 rounded-full" />
-              </motion.div>
-            </div>
-            {/* Bowl */}
-            <div className="w-10 h-6 bg-gradient-to-b from-white to-gray-100 rounded-b-[50%] border border-gray-200 shadow-md mx-auto" />
-          </div>
-          {/* Problem indicator */}
-          <motion.div 
-            className="absolute top-1 right-1"
-            animate={{ rotate: [0, 10, -10, 0] }}
-            transition={{ duration: 0.5, repeat: Infinity }}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M12 8v4M12 16h.01"/>
-            </svg>
-          </motion.div>
-        </div>
-      )
-    }
-
-    // ============ PAINT FINISHES ============
-    if (option === "Textured finish") {
-      return (
-        <div className="relative w-full h-full overflow-hidden">
-          {/* Textured wall surface */}
-          <div className="absolute inset-0 bg-gradient-to-br from-lavender-100 to-lavender-200">
-            {/* Knockdown/orange peel texture */}
-            <svg className="absolute inset-0 w-full h-full" viewBox="0 0 60 60">
-              {[...Array(25)].map((_, i) => (
-                <motion.ellipse
-                  key={i}
-                  cx={5 + (i % 5) * 12}
-                  cy={5 + Math.floor(i / 5) * 12}
-                  rx={3 + Math.random() * 2}
-                  ry={2 + Math.random() * 2}
-                  fill={`rgba(139, 92, 246, ${0.1 + Math.random() * 0.15})`}
-                  animate={{ 
-                    opacity: [0.3, 0.6, 0.3],
-                    scale: [1, 1.05, 1]
-                  }}
-                  transition={{ duration: 2, repeat: Infinity, delay: i * 0.05 }}
-                />
-              ))}
-            </svg>
-            {/* Light reflection showing texture depth */}
-            <motion.div 
-              className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-transparent"
-              animate={{ opacity: [0.2, 0.4, 0.2] }}
-              transition={{ duration: 3, repeat: Infinity }}
-            />
-          </div>
-        </div>
-      )
-    }
-    
-    if (option === "Faux finish") {
-      return (
-        <div className="relative w-full h-full overflow-hidden">
-          {/* Marble faux finish */}
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-100 via-lavender-50 to-gray-200">
-            {/* Marble veins */}
-            <svg className="absolute inset-0 w-full h-full" viewBox="0 0 60 60">
-              <motion.path
-                d="M0 20 Q 15 15, 30 25 Q 45 35, 60 20"
-                stroke="rgba(139, 92, 246, 0.3)"
-                strokeWidth="1"
-                fill="none"
-                animate={{ opacity: [0.3, 0.5, 0.3] }}
-                transition={{ duration: 3, repeat: Infinity }}
-              />
-              <motion.path
-                d="M0 40 Q 20 50, 40 35 Q 55 25, 60 45"
-                stroke="rgba(107, 114, 128, 0.2)"
-                strokeWidth="0.5"
-                fill="none"
-                animate={{ opacity: [0.2, 0.4, 0.2] }}
-                transition={{ duration: 2.5, repeat: Infinity, delay: 0.5 }}
-              />
-              <motion.path
-                d="M10 0 Q 25 20, 15 40 Q 5 55, 20 60"
-                stroke="rgba(139, 92, 246, 0.2)"
-                strokeWidth="0.8"
-                fill="none"
-                animate={{ opacity: [0.25, 0.45, 0.25] }}
-                transition={{ duration: 2.8, repeat: Infinity, delay: 1 }}
-              />
-            </svg>
-            {/* Shimmer effect */}
-            <motion.div 
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-              animate={{ x: [-60, 60] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-            />
-          </div>
-        </div>
-      )
-    }
-    
-    if (option === "High-gloss/specialty coating") {
-      return (
-        <div className="relative w-full h-full overflow-hidden">
-          {/* High gloss surface */}
-          <div className="absolute inset-0 bg-gradient-to-br from-lavender-400 via-lavender-500 to-indigo-500">
-            {/* Mirror-like reflection */}
-            <motion.div 
-              className="absolute inset-0"
-              animate={{ 
-                background: [
-                  "linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 50%, rgba(255,255,255,0.1) 100%)",
-                  "linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%, rgba(255,255,255,0.3) 100%)",
-                  "linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 50%, rgba(255,255,255,0.1) 100%)",
-                ]
-              }}
+              className="w-4 h-1 rounded-full"
+              animate={{ backgroundColor: ["#60a5fa", "#f97316", "#60a5fa"] }}
               transition={{ duration: 2, repeat: Infinity }}
             />
-            {/* Bright shine streak */}
             <motion.div 
-              className="absolute top-0 w-8 h-full bg-gradient-to-r from-transparent via-white/50 to-transparent -skew-x-12"
-              animate={{ left: ["-20%", "120%"] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", repeatDelay: 1 }}
-            />
-            {/* Secondary reflection */}
-            <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-white/20 to-transparent" />
+              className="text-[6px] mt-1 font-bold"
+              animate={{ color: ["#3b82f6", "#ea580c", "#3b82f6"] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              TEMP
+            </motion.div>
           </div>
         </div>
       )
     }
-
-    return null
+    // Default fallback - show description text
+    return (
+      <div className="w-full h-full flex items-center justify-center p-1">
+        <span className="text-[7px] text-gray-600 text-center leading-tight">{guide.description}</span>
+      </div>
+    )
   }
 
   return (
-    <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-lavender-50 to-white shadow-lg border border-lavender-200/50 overflow-hidden mb-2">
+    <div className={`w-12 h-12 rounded-lg ${guide.bgColor} flex items-center justify-center overflow-hidden shadow-inner mb-1`}>
       {getAnimation()}
     </div>
   )
