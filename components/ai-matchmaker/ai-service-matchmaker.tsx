@@ -456,60 +456,44 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
     if (option === "Stone") {
       return (
         <div className="relative w-full h-full overflow-hidden bg-gradient-to-br from-stone-300 to-stone-400">
-          {/* Natural stone pattern */}
-          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 60 60">
-            {/* Irregular stone shapes */}
-            <motion.path 
-              d="M5 5 Q 15 3, 25 8 Q 30 15, 28 25 Q 20 28, 10 22 Q 3 15, 5 5Z" 
-              fill="url(#stone1)" 
-              stroke="#78716c" 
-              strokeWidth="0.5"
+          {/* Natural stone pattern using CSS shapes */}
+          <div className="absolute inset-0">
+            {/* Stone 1 - top left */}
+            <motion.div 
+              className="absolute top-1 left-1 w-7 h-6 rounded-[40%_60%_50%_50%] bg-gradient-to-br from-stone-400 to-stone-500 border border-stone-500/50"
               animate={{ opacity: [0.8, 1, 0.8] }}
               transition={{ duration: 2, repeat: Infinity }}
             />
-            <motion.path 
-              d="M30 5 Q 45 3, 55 10 Q 58 20, 52 28 Q 42 32, 32 25 Q 28 15, 30 5Z" 
-              fill="url(#stone2)" 
-              stroke="#78716c" 
-              strokeWidth="0.5"
+            {/* Stone 2 - top right */}
+            <motion.div 
+              className="absolute top-1 right-1 w-6 h-7 rounded-[50%_40%_60%_50%] bg-gradient-to-br from-stone-300 to-stone-400 border border-stone-500/50"
               animate={{ opacity: [0.9, 1, 0.9] }}
               transition={{ duration: 2.5, repeat: Infinity, delay: 0.3 }}
             />
-            <motion.path 
-              d="M8 32 Q 20 30, 28 38 Q 25 48, 18 55 Q 5 52, 3 42 Q 5 35, 8 32Z" 
-              fill="url(#stone3)" 
-              stroke="#78716c" 
-              strokeWidth="0.5"
+            {/* Stone 3 - bottom left */}
+            <motion.div 
+              className="absolute bottom-1 left-1 w-6 h-6 rounded-[60%_40%_50%_50%] bg-gradient-to-br from-amber-200/50 to-stone-400 border border-stone-500/50"
               animate={{ opacity: [0.85, 1, 0.85] }}
               transition={{ duration: 2.2, repeat: Infinity, delay: 0.6 }}
             />
-            <motion.path 
-              d="M35 35 Q 50 32, 57 42 Q 55 52, 45 57 Q 33 55, 30 45 Q 32 38, 35 35Z" 
-              fill="url(#stone4)" 
-              stroke="#78716c" 
-              strokeWidth="0.5"
+            {/* Stone 4 - bottom right */}
+            <motion.div 
+              className="absolute bottom-1 right-1 w-7 h-6 rounded-[40%_50%_40%_60%] bg-gradient-to-br from-stone-350 to-stone-500 border border-stone-500/50"
               animate={{ opacity: [0.88, 1, 0.88] }}
               transition={{ duration: 1.8, repeat: Infinity, delay: 0.9 }}
             />
-            <defs>
-              <linearGradient id="stone1" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#a8a29e"/>
-                <stop offset="100%" stopColor="#78716c"/>
-              </linearGradient>
-              <linearGradient id="stone2" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#d6d3d1"/>
-                <stop offset="100%" stopColor="#a8a29e"/>
-              </linearGradient>
-              <linearGradient id="stone3" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#c4b5a3"/>
-                <stop offset="100%" stopColor="#8c8279"/>
-              </linearGradient>
-              <linearGradient id="stone4" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#b5a99a"/>
-                <stop offset="100%" stopColor="#9c9488"/>
-              </linearGradient>
-            </defs>
-          </svg>
+            {/* Center stone */}
+            <motion.div 
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-[50%_50%_40%_60%] bg-gradient-to-br from-stone-300 to-stone-500 border border-stone-600/40"
+              animate={{ opacity: [0.9, 1, 0.9] }}
+              transition={{ duration: 2, repeat: Infinity, delay: 0.4 }}
+            />
+          </div>
+          {/* Mortar lines */}
+          <div className="absolute inset-0 opacity-40">
+            <div className="absolute top-[45%] left-0 right-0 h-[2px] bg-stone-500/30" />
+            <div className="absolute top-0 bottom-0 left-[45%] w-[2px] bg-stone-500/30" />
+          </div>
           {/* Lavender shimmer */}
           <motion.div 
             className="absolute inset-0 bg-gradient-to-br from-lavender-400/20 to-transparent"
