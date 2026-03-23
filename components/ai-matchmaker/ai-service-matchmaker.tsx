@@ -195,7 +195,9 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
             style={{
               background: 'linear-gradient(180deg, #0a0a0a 0%, #000000 100%)',
               borderRadius: '4px',
-              boxShadow: '0 8px 25px rgba(0,0,0,0.35)'
+              boxShadow: '0 8px 25px rgba(0,0,0,0.35)',
+              willChange: 'transform',
+              backfaceVisibility: 'hidden'
             }}
             animate={{ scale: [1, 1.02, 1] }}
             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
@@ -205,22 +207,19 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
               background: 'linear-gradient(135deg, #1a2a4a 0%, #0f1829 100%)'
             }}>
               {/* Animated screen content - movie scene */}
-              <motion.div 
-                className="absolute inset-0"
-                animate={{ 
-                  background: [
-                    'linear-gradient(135deg, #1a2a4a 0%, #2a1a3a 100%)',
-                    'linear-gradient(135deg, #2a3a2a 0%, #1a2a4a 100%)',
-                    'linear-gradient(135deg, #3a2a1a 0%, #1a3a4a 100%)',
-                    'linear-gradient(135deg, #1a2a4a 0%, #2a1a3a 100%)'
-                  ]
-                }}
-                transition={{ duration: 8, repeat: Infinity }}
-              />
+              <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, #1a2a4a 0%, #2a1a3a 100%)' }}>
+                <motion.div 
+                  className="absolute inset-0"
+                  style={{ background: 'linear-gradient(135deg, #2a3a2a 0%, #1a2a4a 100%)', willChange: 'opacity', backfaceVisibility: 'hidden' }}
+                  animate={{ opacity: [0, 1, 0] }}
+                  transition={{ duration: 8, repeat: Infinity }}
+                />
+              </div>
               {/* Play button overlay */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <motion.div 
                   className="w-[18%] h-[28%] rounded-full bg-white/20 flex items-center justify-center"
+                  style={{ willChange: 'transform, opacity', backfaceVisibility: 'hidden' }}
                   animate={{ scale: [1, 1.1, 1], opacity: [0.6, 0.9, 0.6] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 >
@@ -261,7 +260,9 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
             style={{
               background: 'linear-gradient(135deg, #8b6914 0%, #6b4f0f 30%, #4a3608 100%)',
               borderRadius: '2px',
-              boxShadow: '0 8px 20px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.2)'
+              boxShadow: '0 8px 20px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.2)',
+              willChange: 'transform',
+              backfaceVisibility: 'hidden'
             }}
             animate={{ rotateZ: [-0.5, 0.5, -0.5] }}
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
@@ -278,19 +279,19 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
                 {/* Abstract art - color blocks */}
                 <motion.div 
                   className="absolute top-[10%] left-[10%] w-[40%] h-[35%] rounded-sm"
-                  style={{ background: '#c44536' }}
+                  style={{ background: '#c44536', willChange: 'opacity', backfaceVisibility: 'hidden' }}
                   animate={{ opacity: [0.9, 1, 0.9] }}
                   transition={{ duration: 3, repeat: Infinity }}
                 />
                 <motion.div 
                   className="absolute bottom-[15%] right-[10%] w-[50%] h-[40%] rounded-sm"
-                  style={{ background: '#1e6091' }}
+                  style={{ background: '#1e6091', willChange: 'opacity', backfaceVisibility: 'hidden' }}
                   animate={{ opacity: [1, 0.85, 1] }}
                   transition={{ duration: 4, repeat: Infinity, delay: 0.5 }}
                 />
                 <motion.div 
                   className="absolute top-[30%] right-[25%] w-[25%] h-[25%] rounded-full"
-                  style={{ background: '#e9c46a' }}
+                  style={{ background: '#e9c46a', willChange: 'transform', backfaceVisibility: 'hidden' }}
                   animate={{ scale: [1, 1.05, 1] }}
                   transition={{ duration: 3.5, repeat: Infinity }}
                 />
@@ -325,7 +326,9 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
             style={{
               background: 'linear-gradient(180deg, #8b7355 0%, #6d5a45 100%)',
               borderRadius: '2px',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.25)'
+              boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
+              willChange: 'transform',
+              backfaceVisibility: 'hidden'
             }}
             animate={{ y: [0, -2, 0] }}
             transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
@@ -336,7 +339,7 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
             }} />
             <motion.div 
               className="absolute -top-[100%] left-[35%] w-[12%] h-[100%] rounded-t-full"
-              style={{ background: 'linear-gradient(180deg, #c4a35a 0%, #a08040 100%)' }}
+              style={{ background: 'linear-gradient(180deg, #c4a35a 0%, #a08040 100%)', willChange: 'transform', backfaceVisibility: 'hidden' }}
               animate={{ rotateZ: [-2, 2, -2] }}
               transition={{ duration: 3, repeat: Infinity }}
             />
@@ -351,7 +354,9 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
             style={{
               background: 'linear-gradient(180deg, #8b7355 0%, #6d5a45 100%)',
               borderRadius: '2px',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.25)'
+              boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
+              willChange: 'transform',
+              backfaceVisibility: 'hidden'
             }}
             animate={{ y: [0, -2, 0] }}
             transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
@@ -364,7 +369,7 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
             </div>
             <motion.div 
               className="absolute -top-[90%] right-[15%] w-[18%] h-[90%] rounded-full"
-              style={{ background: 'linear-gradient(180deg, #ddd 0%, #bbb 100%)' }}
+              style={{ background: 'linear-gradient(180deg, #ddd 0%, #bbb 100%)', willChange: 'transform', backfaceVisibility: 'hidden' }}
               animate={{ scale: [1, 1.03, 1] }}
               transition={{ duration: 4, repeat: Infinity }}
             />
@@ -376,14 +381,16 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
             style={{
               background: 'linear-gradient(180deg, #8b7355 0%, #6d5a45 100%)',
               borderRadius: '2px',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.25)'
+              boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
+              willChange: 'transform',
+              backfaceVisibility: 'hidden'
             }}
             animate={{ y: [0, -2, 0] }}
             transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.6 }}
           >
             <motion.div 
               className="absolute -top-[70%] left-[40%] w-[20%] h-[70%] rounded-sm"
-              style={{ background: 'linear-gradient(135deg, #4a7c59 0%, #2d5a3d 100%)' }}
+              style={{ background: 'linear-gradient(135deg, #4a7c59 0%, #2d5a3d 100%)', willChange: 'transform', backfaceVisibility: 'hidden' }}
               animate={{ rotateZ: [-1, 1, -1] }}
               transition={{ duration: 3.5, repeat: Infinity }}
             />
@@ -422,7 +429,9 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
               <motion.div 
                 className="absolute inset-0"
                 style={{
-                  background: 'linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.4) 50%, transparent 70%)'
+                  background: 'linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.4) 50%, transparent 70%)',
+                  willChange: 'transform',
+                  backfaceVisibility: 'hidden'
                 }}
                 animate={{ 
                   x: ['-100%', '200%'],
@@ -438,7 +447,9 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
               <motion.div 
                 className="absolute top-[10%] right-[20%] w-[15%] h-[10%] rounded-full"
                 style={{
-                  background: 'radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%)'
+                  background: 'radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%)',
+                  willChange: 'transform, opacity',
+                  backfaceVisibility: 'hidden'
                 }}
                 animate={{ opacity: [0.6, 1, 0.6], scale: [1, 1.1, 1] }}
                 transition={{ duration: 2.5, repeat: Infinity }}
@@ -474,17 +485,13 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
           </div>
           
           {/* TV mounted flat - ultra thin bezel modern TV */}
-          <motion.div 
+          <div 
             className="absolute left-1/2 top-[45%] -translate-x-1/2 -translate-y-1/2 w-[82%] h-[58%]"
             style={{
               background: 'linear-gradient(180deg, #0a0a0a 0%, #000000 100%)',
               borderRadius: '3px',
               boxShadow: '0 4px 20px rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.25)'
             }}
-            animate={{ 
-              boxShadow: ['0 4px 20px rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.25)', '0 4px 22px rgba(0,0,0,0.4), 0 2px 10px rgba(0,0,0,0.3)', '0 4px 20px rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.25)']
-            }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
           >
             {/* Ultra-thin bezel frame */}
             <div className="absolute inset-[2px] rounded-[2px]" style={{
@@ -506,7 +513,9 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
                 <motion.div 
                   className="absolute inset-0"
                   style={{
-                    background: 'linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.02) 50%, transparent 70%)'
+                    background: 'linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.02) 50%, transparent 70%)',
+                    willChange: 'opacity',
+                    backfaceVisibility: 'hidden'
                   }}
                   animate={{ opacity: [0.3, 0.6, 0.3] }}
                   transition={{ duration: 5, repeat: Infinity }}
@@ -518,12 +527,12 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
             <div className="absolute bottom-[4%] left-1/2 -translate-x-1/2 w-[12%] h-[5%] flex items-center justify-center">
               <motion.div 
                 className="w-[30%] h-[50%] rounded-full"
-                style={{ background: 'radial-gradient(circle, #00dd00 0%, #00aa00 100%)', boxShadow: '0 0 4px #00cc00' }}
+                style={{ background: 'radial-gradient(circle, #00dd00 0%, #00aa00 100%)', boxShadow: '0 0 4px #00cc00', willChange: 'opacity', backfaceVisibility: 'hidden' }}
                 animate={{ opacity: [1, 0.5, 1] }}
                 transition={{ duration: 2.5, repeat: Infinity }}
               />
             </div>
-          </motion.div>
+          </div>
           
           {/* Shadow on wall behind TV showing it's flush */}
           <div className="absolute left-1/2 top-[45%] -translate-x-1/2 -translate-y-1/2 w-[85%] h-[62%] -z-10 rounded-[4px]" style={{
@@ -554,6 +563,7 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
           {/* TV with tilting bracket - close to wall, side profile view */}
           <motion.div 
             className="absolute left-[12%] top-[25%] origin-left"
+            style={{ willChange: 'transform', backfaceVisibility: 'hidden' }}
             animate={{ rotateZ: [0, -15, 0, 10, 0] }}
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
           >
@@ -612,6 +622,7 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
           <div className="absolute right-[15%] top-[40%]">
             <motion.svg 
               width="20" height="30" viewBox="0 0 20 30"
+              style={{ willChange: 'opacity', backfaceVisibility: 'hidden' }}
               animate={{ opacity: [0.3, 0.6, 0.3] }}
               transition={{ duration: 2.5, repeat: Infinity }}
             >
@@ -656,6 +667,7 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
           {/* Full articulating arm system - all connected */}
           <motion.div 
             className="absolute left-[16%] top-[36%] origin-left"
+            style={{ willChange: 'transform', backfaceVisibility: 'hidden' }}
             animate={{ rotateZ: [0, 15, 15, 0] }}
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
           >
@@ -1510,18 +1522,25 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
       return (
         <div className="relative w-full h-full flex items-center justify-center">
           <div className="w-6 h-10 bg-gray-300 rounded-sm border border-gray-400 flex flex-col items-center justify-center">
-            <motion.div 
-              className="w-4 h-1 rounded-full"
-              animate={{ backgroundColor: ["#60a5fa", "#f97316", "#60a5fa"] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            />
-            <motion.div 
-              className="text-[6px] mt-1 font-bold"
-              animate={{ color: ["#3b82f6", "#ea580c", "#3b82f6"] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              TEMP
-            </motion.div>
+            <div className="relative w-4 h-1 rounded-full bg-[#60a5fa]">
+              <motion.div 
+                className="absolute inset-0 rounded-full bg-[#f97316]"
+                style={{ willChange: 'opacity', backfaceVisibility: 'hidden' }}
+                animate={{ opacity: [0, 1, 0] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+            </div>
+            <div className="relative text-[6px] mt-1 font-bold text-[#3b82f6]">
+              <span>TEMP</span>
+              <motion.span 
+                className="absolute inset-0 text-[#ea580c]"
+                style={{ willChange: 'opacity', backfaceVisibility: 'hidden' }}
+                animate={{ opacity: [0, 1, 0] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                TEMP
+              </motion.span>
+            </div>
           </div>
         </div>
       )
@@ -1535,7 +1554,7 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
   }
 
   return (
-    <div className="w-full aspect-[5/4] rounded-lg overflow-hidden shadow-inner">
+    <div className="w-full aspect-[5/4] rounded-lg overflow-hidden shadow-inner" style={{ willChange: 'transform', backfaceVisibility: 'hidden', transform: 'translateZ(0)' }}>
       {getAnimation()}
     </div>
   )
@@ -2523,6 +2542,7 @@ const MessageItem = memo(
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
           layout={false}
+          style={{ willChange: 'transform, opacity', backfaceVisibility: 'hidden' }}
         >
           <div className="relative bg-gradient-to-br from-lavender-200/95 via-lavender-300/90 to-lavender-200/90 dark:from-lavender-950/95 dark:via-lavender-950/90 dark:to-lavender-950/90 backdrop-blur-sm rounded-2xl px-5 py-3 max-w-[80%] shadow-[0_14px_20px_-3px_rgba(79,70,229,0.3),0_6px_10px_-4px_rgba(79,70,229,0.2),0_-2px_8px_0px_rgba(255,255,255,0.15)] dark:shadow-[0_10px_15px_-3px_rgba(79,70,229,0.3),0_4px_6px_-4px_rgba(0,0,0,0.4),0_-2px_6px_0px_rgba(79,70,229,0.1)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-800/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 translate-y-[-2px] hover:translate-y-[-4px] transition-all duration-300 transform">
             <p className="text-sm text-gray-800 dark:text-gray-100 relative z-10">{message.content}</p>
@@ -2542,6 +2562,7 @@ const MessageItem = memo(
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
           layout={false}
+          style={{ willChange: 'transform, opacity', backfaceVisibility: 'hidden' }}
         >
           <div className="relative bg-gradient-to-br from-white/95 via-white/90 to-lavender-50/90 dark:from-gray-800/95 dark:via-gray-800/90 dark:to-lavender-950/90 backdrop-blur-sm rounded-2xl px-5 py-3 max-w-[80%] shadow-[0_14px_20px_-3px_rgba(79,70,229,0.3),0_6px_10px_-4px_rgba(79,70,229,0.2),0_-2px_8px_0px_rgba(255,255,255,0.15)] dark:shadow-[0_10px_15px_-3px_rgba(79,70,229,0.3),0_4px_6px_-4px_rgba(0,0,0,0.4),0_-2px_6px_0px_rgba(79,70,229,0.1)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 translate-y-[-4px] transition-all duration-300 transform">
             <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-lavender-500/8 via-purple-500/8 to-violet-500/8 dark:from-lavender-500/15 dark:via-purple-500/15 dark:to-violet-500/15 opacity-80"></div>
@@ -2564,6 +2585,7 @@ const MessageItem = memo(
                 transition={{ delay: index * 0.05, duration: 0.2 }}
                 className={`flex flex-col items-center overflow-hidden bg-white/90 dark:bg-gray-800/90 hover:bg-lavender-100/90 dark:hover:bg-lavender-900/30 rounded-xl text-xs font-medium transition-all duration-200 border border-lavender-200/70 dark:border-lavender-700/50 hover:border-lavender-400 dark:hover:border-lavender-500/70 backdrop-blur-sm hover:shadow-lg hover:scale-[1.02] ${!hasVisualGuide ? 'justify-center min-h-[80px]' : ''}`}
                 onClick={() => handleOptionClick(option)}
+                style={{ willChange: 'transform, opacity', backfaceVisibility: 'hidden' }}
                 >
                 <OptionVisualPreview option={option} />
                 <span className={`text-center leading-tight px-2 py-1.5 w-full ${hasVisualGuide ? 'bg-white/80 dark:bg-gray-800/80' : ''}`}>{option}</span>
@@ -2581,6 +2603,7 @@ const MessageItem = memo(
                         transition={{ delay: index * 0.05, duration: 0.2 }}
                         className="px-3 py-1.5 bg-white/90 dark:bg-gray-800/90 hover:bg-lavender-100/90 dark:hover:bg-lavender-900/30 rounded-full text-xs font-medium transition-all duration-200 border border-lavender-200/70 dark:border-lavender-700/50 hover:border-lavender-300 dark:hover:border-lavender-600/70 backdrop-blur-sm hover:shadow-md"
                         onClick={() => handleOptionClick(option)}
+                        style={{ willChange: 'transform, opacity', backfaceVisibility: 'hidden' }}
                       >
                         {option}
                       </motion.button>
@@ -2597,6 +2620,7 @@ const MessageItem = memo(
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1, duration: 0.3 }}
+                    style={{ willChange: 'transform, opacity', backfaceVisibility: 'hidden' }}
                   >
                     <ProviderCard
                       provider={service.provider}
@@ -2626,6 +2650,7 @@ const MessageItem = memo(
           exit={{ opacity: 0 }}
           transition={{ duration: 0.15 }}
           layout={false}
+          style={{ willChange: 'opacity', backfaceVisibility: 'hidden' }}
         >
           <div className="flex items-center p-4 rounded-2xl bg-gradient-to-br from-white/95 via-white/90 to-lavender-50/90 dark:from-gray-800/95 dark:via-gray-800/90 dark:to-lavender-950/90 backdrop-blur-sm shadow-[0_20px_30px_-5px_rgba(79,70,229,0.4),0_10px_15px_-5px_rgba(79,70,229,0.3),0_-3px_10px_0px_rgba(255,255,255,0.2),inset_0_1px_2px_0px_rgba(255,255,255,0.5)] dark:shadow-[0_20px_30px_-5px_rgba(79,70,229,0.5),0_10px_15px_-5px_rgba(0,0,0,0.6),0_-3px_10px_0px_rgba(79,70,229,0.3),inset_0_1px_2px_0px_rgba(79,70,229,0.2)] border-t border-l border-r border-lavender-200/80 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/50 border-b-2 border-b-lavender-300 dark:border-b-2 dark:border-b-lavender-600 transform translate-y-[-6px] hover:translate-y-[-8px] transition-all duration-300">
             <LevlLogo className="h-14 w-14 mr-3 drop-shadow-[0_4px_8px_rgba(79,70,229,0.3)] dark:drop-shadow-[0_4px_8px_rgba(79,70,229,0.5)]" />
@@ -2641,6 +2666,7 @@ const MessageItem = memo(
                   repeat: Number.POSITIVE_INFINITY,
                   ease: "easeInOut",
                 }}
+                style={{ willChange: 'transform, opacity', backfaceVisibility: 'hidden' }}
               />
               <motion.div
                 className="h-2.5 w-2.5 rounded-full bg-gradient-to-br from-lavender-400 to-lavender-600 shadow-[0_2px_8px_rgba(139,92,246,0.6)] dark:shadow-[0_2px_8px_rgba(139,92,246,0.8)]"
@@ -2654,6 +2680,7 @@ const MessageItem = memo(
                   ease: "easeInOut",
                   delay: 0.2,
                 }}
+                style={{ willChange: 'transform, opacity', backfaceVisibility: 'hidden' }}
               />
               <motion.div
                 className="h-2.5 w-2.5 rounded-full bg-gradient-to-br from-lavender-400 to-lavender-600 shadow-[0_2px_8px_rgba(139,92,246,0.6)] dark:shadow-[0_2px_8px_rgba(139,92,246,0.8)]"
@@ -2667,6 +2694,7 @@ const MessageItem = memo(
                   ease: "easeInOut",
                   delay: 0.4,
                 }}
+                style={{ willChange: 'transform, opacity', backfaceVisibility: 'hidden' }}
               />
             </div>
           </div>
