@@ -539,121 +539,87 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
     if (option === "Tilting (angle adjustment)") {
       return (
         <div className="relative w-full h-full overflow-hidden">
-          {/* Side profile view - room cross section */}
+          {/* Front view - looking at wall with TV */}
           <div className="absolute inset-0" style={{
-            background: 'linear-gradient(90deg, #e8e5e0 0%, #f0ede8 50%, #f5f2ed 100%)'
-          }} />
-          
-          {/* Wall on left side - side view */}
-          <div className="absolute left-0 top-0 bottom-0 w-[18%]" style={{
-            background: 'linear-gradient(90deg, #d5d2cd 0%, #e0ddd8 100%)',
-            boxShadow: '2px 0 8px rgba(0,0,0,0.1)'
+            background: 'linear-gradient(180deg, #f5f2ed 0%, #e8e4dd 40%, #ddd9d2 100%)'
           }}>
             {/* Wall texture */}
             <div className="absolute inset-0" style={{
-              backgroundImage: `radial-gradient(circle at 50% 30%, rgba(0,0,0,0.03) 1px, transparent 1px)`,
-              backgroundSize: '8px 8px'
+              backgroundImage: `radial-gradient(circle at 20% 30%, rgba(0,0,0,0.02) 1px, transparent 1px)`,
+              backgroundSize: '12px 12px'
             }} />
           </div>
           
-          {/* Wall plate mounted on wall - side view */}
-          <div className="absolute left-[14%] top-[30%] w-[8%] h-[22%]" style={{
-            background: 'linear-gradient(90deg, #3a3a3a 0%, #4a4a4a 50%, #3a3a3a 100%)',
+          {/* Tilting bracket - low profile, close to wall */}
+          <div className="absolute left-1/2 top-[28%] -translate-x-1/2 w-[50%] h-[8%]" style={{
+            background: 'linear-gradient(180deg, #4a4a4a 0%, #333333 50%, #252525 100%)',
             borderRadius: '2px',
-            boxShadow: '2px 2px 6px rgba(0,0,0,0.3)'
+            boxShadow: '0 2px 6px rgba(0,0,0,0.35)'
           }}>
-            {/* Mounting bolt visible from side */}
-            <div className="absolute top-[20%] left-[20%] w-[60%] h-[15%] rounded-sm" style={{
-              background: 'linear-gradient(90deg, #666 0%, #888 50%, #666 100%)'
+            {/* Tilt hinge mechanism visible at bottom */}
+            <div className="absolute bottom-0 left-[15%] w-[12%] h-[60%] rounded-b-full" style={{
+              background: 'linear-gradient(180deg, #555 0%, #333 100%)'
             }} />
-            <div className="absolute bottom-[20%] left-[20%] w-[60%] h-[15%] rounded-sm" style={{
-              background: 'linear-gradient(90deg, #666 0%, #888 50%, #666 100%)'
+            <div className="absolute bottom-0 right-[15%] w-[12%] h-[60%] rounded-b-full" style={{
+              background: 'linear-gradient(180deg, #555 0%, #333 100%)'
             }} />
           </div>
           
-          {/* Tilt bracket arm - connected from wall plate */}
+          {/* TV with tilt animation - close to wall, tilts forward/back */}
           <motion.div 
-            className="absolute left-[20%] top-[35%] origin-left"
-            animate={{ rotateZ: [5, -12, 5] }}
-            transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute left-1/2 top-[50%] -translate-x-1/2 -translate-y-1/2 w-[80%] h-[55%] origin-top"
+            style={{
+              background: 'linear-gradient(180deg, #0a0a0a 0%, #000000 100%)',
+              borderRadius: '3px'
+            }}
+            animate={{ 
+              rotateX: [0, -12, 0, 8, 0],
+              y: [0, 3, 0, -2, 0],
+              boxShadow: ['0 4px 15px rgba(0,0,0,0.3)', '0 10px 25px rgba(0,0,0,0.4)', '0 4px 15px rgba(0,0,0,0.3)', '0 2px 10px rgba(0,0,0,0.25)', '0 4px 15px rgba(0,0,0,0.3)']
+            }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
           >
-            {/* Main tilt arm - horizontal bar from wall */}
-            <div className="w-[35px] h-[10px] rounded-[2px]" style={{
-              background: 'linear-gradient(180deg, #5a5a5a 0%, #3d3d3d 50%, #2d2d2d 100%)',
-              boxShadow: '0 3px 6px rgba(0,0,0,0.3)'
+            {/* Bezel */}
+            <div className="absolute inset-[2px] rounded-[2px]" style={{
+              background: 'linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%)'
             }}>
-              {/* Pivot joint at wall end */}
-              <div className="absolute left-[-4px] top-1/2 -translate-y-1/2 w-[10px] h-[14px] rounded-full" style={{
-                background: 'radial-gradient(circle at 40% 40%, #777 0%, #444 100%)',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
-              }} />
-            </div>
-            
-            {/* TV bracket plate at end of arm */}
-            <div className="absolute left-[32px] top-[-8px] w-[8px] h-[26px] rounded-[2px]" style={{
-              background: 'linear-gradient(90deg, #4a4a4a 0%, #5a5a5a 50%, #4a4a4a 100%)',
-              boxShadow: '1px 2px 4px rgba(0,0,0,0.25)'
-            }} />
-            
-            {/* TV - side profile (thin edge view) */}
-            <div className="absolute left-[38px] top-[-18px] w-[5px] h-[45px] rounded-[1px]" style={{
-              background: 'linear-gradient(90deg, #1a1a1a 0%, #2a2a2a 30%, #0a0a0a 100%)',
-              boxShadow: '3px 4px 12px rgba(0,0,0,0.4)'
-            }}>
-              {/* TV edge detail */}
-              <div className="absolute inset-y-[5%] left-0 w-[60%] rounded-l-[1px]" style={{
-                background: 'linear-gradient(90deg, #0d0d0d 0%, #1a1a1a 100%)'
-              }} />
-            </div>
-            
-            {/* TV front face hint - angled away */}
-            <motion.div 
-              className="absolute left-[40px] top-[-16px] w-[50px] h-[42px] rounded-[2px] origin-left"
-              style={{
-                background: 'linear-gradient(135deg, #0a0a0a 0%, #151515 50%, #0a0a0a 100%)',
-                transform: 'perspective(100px) rotateY(-75deg)',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.3)'
-              }}
-            >
-              {/* Screen glimpse */}
-              <div className="absolute inset-[6%] rounded-[1px]" style={{
-                background: 'linear-gradient(135deg, #1a2540 0%, #101828 100%)'
+              {/* Screen */}
+              <div className="absolute inset-[3px] rounded-[1px] overflow-hidden" style={{
+                background: 'linear-gradient(135deg, #1a2a4a 0%, #0f1829 100%)'
               }}>
-                <motion.div 
-                  className="absolute inset-0"
-                  animate={{ opacity: [0.3, 0.5, 0.3] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  style={{ background: 'radial-gradient(ellipse at 50% 50%, rgba(100,150,200,0.15) 0%, transparent 70%)' }}
-                />
+                {/* Movie content */}
+                <div className="absolute inset-[8%] rounded-sm" style={{
+                  background: 'linear-gradient(180deg, rgba(200,150,100,0.1) 0%, rgba(100,150,200,0.12) 100%)'
+                }} />
+                {/* Cinematic letterbox bars */}
+                <div className="absolute top-0 left-0 right-0 h-[10%] bg-black/70" />
+                <div className="absolute bottom-0 left-0 right-0 h-[10%] bg-black/70" />
               </div>
-            </motion.div>
+            </div>
+            
+            {/* LED indicator */}
+            <motion.div 
+              className="absolute bottom-[4%] left-1/2 -translate-x-1/2 w-[2px] h-[2px] rounded-full"
+              style={{ background: '#00dd00', boxShadow: '0 0 4px #00cc00' }}
+              animate={{ opacity: [1, 0.4, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
           </motion.div>
           
-          {/* Tilt angle arc indicator */}
-          <div className="absolute left-[22%] top-[58%]">
+          {/* Tilt indicator arrows */}
+          <div className="absolute right-[8%] top-[50%] -translate-y-1/2">
             <motion.svg 
-              width="40" height="30" viewBox="0 0 40 30"
+              width="14" height="24" viewBox="0 0 14 24"
               animate={{ opacity: [0.3, 0.6, 0.3] }}
               transition={{ duration: 2, repeat: Infinity }}
             >
-              <path d="M5 25 Q20 5, 35 20" fill="none" stroke="#666" strokeWidth="1.5" strokeDasharray="3,2" />
-              <polygon points="33,18 38,22 34,24" fill="#666" />
-              <polygon points="7,23 2,27 6,28" fill="#666" />
+              <path d="M7 2 L12 8 L9 8 L9 16 L12 16 L7 22 L2 16 L5 16 L5 8 L2 8 Z" fill="#666" opacity="0.5" />
             </motion.svg>
           </div>
           
-          {/* Floor with wood grain */}
-          <div className="absolute bottom-0 left-0 right-0 h-[15%]" style={{
-            background: 'linear-gradient(180deg, #c4a882 0%, #a08060 100%)'
-          }}>
-            <div className="absolute inset-0" style={{
-              backgroundImage: 'repeating-linear-gradient(90deg, transparent 0px, transparent 15px, rgba(80,60,40,0.1) 15px, rgba(80,60,40,0.1) 16px)'
-            }} />
-          </div>
-          
-          {/* Viewing person silhouette hint */}
-          <div className="absolute right-[15%] bottom-[15%] w-[12%] h-[35%] rounded-t-full" style={{
-            background: 'linear-gradient(180deg, rgba(100,90,80,0.15) 0%, rgba(80,70,60,0.1) 100%)'
+          {/* Floor */}
+          <div className="absolute bottom-0 left-0 right-0 h-[10%]" style={{
+            background: 'linear-gradient(180deg, transparent 0%, rgba(139,119,101,0.12) 100%)'
           }} />
         </div>
       )
@@ -741,36 +707,39 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
               }} />
               
               {/* TV - side profile (thin edge) */}
-              <div className="absolute left-[30px] top-[-20px] w-[4px] h-[48px] rounded-[1px]" style={{
+              <div className="absolute left-[30px] top-[-15px] w-[4px] h-[38px] rounded-[1px]" style={{
                 background: 'linear-gradient(90deg, #1a1a1a 0%, #2d2d2d 40%, #1a1a1a 100%)',
-                boxShadow: '4px 5px 15px rgba(0,0,0,0.4)'
+                boxShadow: '3px 4px 12px rgba(0,0,0,0.4)'
               }} />
               
-              {/* TV front face - angled perspective */}
-              <motion.div 
-                className="absolute left-[32px] top-[-18px] w-[55px] h-[45px] rounded-[2px] origin-left"
+              {/* TV front face - proper rectangle TV shape */}
+              <div 
+                className="absolute left-[32px] top-[-14px] w-[48px] h-[36px] rounded-[2px]"
                 style={{
-                  background: 'linear-gradient(135deg, #0a0a0a 0%, #181818 50%, #0a0a0a 100%)',
-                  transform: 'perspective(80px) rotateY(-70deg)',
-                  boxShadow: '-2px 4px 12px rgba(0,0,0,0.3)'
+                  background: 'linear-gradient(180deg, #0a0a0a 0%, #000000 100%)',
+                  boxShadow: '4px 4px 15px rgba(0,0,0,0.4)',
+                  transform: 'perspective(120px) rotateY(-25deg)'
                 }}
               >
-                {/* Screen with content */}
-                <div className="absolute inset-[5%] rounded-[1px] overflow-hidden" style={{
-                  background: 'linear-gradient(135deg, #1a3525 0%, #102818 100%)'
+                {/* Screen bezel */}
+                <div className="absolute inset-[2px] rounded-[1px]" style={{
+                  background: 'linear-gradient(180deg, #151515 0%, #0a0a0a 100%)'
                 }}>
-                  {/* Sports content */}
-                  <div className="absolute inset-[10%]" style={{
-                    background: 'radial-gradient(ellipse at 50% 50%, rgba(80,160,80,0.2) 0%, transparent 70%)'
-                  }} />
-                  <motion.div 
-                    className="absolute inset-0"
-                    animate={{ opacity: [0.4, 0.6, 0.4] }}
-                    transition={{ duration: 2.5, repeat: Infinity }}
-                    style={{ background: 'radial-gradient(ellipse at 40% 40%, rgba(255,255,255,0.05) 0%, transparent 50%)' }}
-                  />
+                  {/* Screen with sports content */}
+                  <div className="absolute inset-[2px] rounded-[1px] overflow-hidden" style={{
+                    background: 'linear-gradient(135deg, #1a3020 0%, #0f2015 100%)'
+                  }}>
+                    {/* Green field */}
+                    <div className="absolute inset-[10%]" style={{
+                      background: 'radial-gradient(ellipse at 50% 50%, rgba(60,140,60,0.25) 0%, transparent 70%)'
+                    }} />
+                    {/* Score overlay */}
+                    <div className="absolute top-[8%] left-[8%] w-[30%] h-[12%] rounded-sm bg-black/50" />
+                  </div>
                 </div>
-              </motion.div>
+                {/* LED */}
+                <div className="absolute bottom-[4%] left-1/2 -translate-x-1/2 w-[2px] h-[2px] rounded-full bg-green-500" style={{ boxShadow: '0 0 3px #00cc00' }} />
+              </div>
             </motion.div>
           </motion.div>
           
