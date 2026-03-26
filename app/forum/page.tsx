@@ -7,10 +7,10 @@ export const metadata = {
 
 export default function ForumPage() {
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Community Forum</h1>
-        <p className="text-gray-600">
+    <div className="container mx-auto px-2 md:px-4 py-4 md:py-8 max-w-6xl">
+      <div className="mb-4 md:mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold mb-1 md:mb-2">Community Forum</h1>
+        <p className="text-sm md:text-base text-gray-600">
           Join the conversation, ask questions, and share your knowledge with the LEVL community.
         </p>
       </div>
