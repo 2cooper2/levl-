@@ -176,6 +176,72 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
   // Different animations based on option type
   const getAnimation = () => {
     // Item type animations - what to mount
+    // General "Unsure" with tape measure for size-related questions
+    if (option === "Unsure") {
+      return (
+        <div className="relative w-full h-full overflow-hidden flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
+          {/* Wall background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-100 to-slate-200" />
+          
+          {/* TV/Item frame outline */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[75%] h-[60%] border-4 border-dashed border-gray-400 rounded-lg bg-black/5" />
+          
+          {/* Animated tape measure going diagonally */}
+          <motion.div
+            className="absolute"
+            animate={{
+              x: ['-100%', '120%'],
+              y: ['-80%', '100%'],
+            }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", repeatDelay: 1 }}
+            style={{
+              width: '8px',
+              height: '8px',
+              left: '10%',
+              top: '10%',
+            }}
+          >
+            {/* Tape measure line */}
+            <svg width="400" height="400" viewBox="0 0 400 400" className="absolute" style={{ left: '-50px', top: '-50px' }}>
+              <defs>
+                <linearGradient id="tapeMeasure2" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#ef4444" />
+                  <stop offset="50%" stopColor="#f87171" />
+                  <stop offset="100%" stopColor="#fca5a5" />
+                </linearGradient>
+              </defs>
+              {/* Tape measure line */}
+              <line x1="0" y1="0" x2="500" y2="500" stroke="url(#tapeMeasure2)" strokeWidth="6" strokeLinecap="round" />
+              {/* Tick marks */}
+              <line x1="0" y1="0" x2="20" y2="20" stroke="#dc2626" strokeWidth="3" />
+              <line x1="50" y1="50" x2="60" y2="60" stroke="#991b1b" strokeWidth="2" />
+              <line x1="100" y1="100" x2="108" y2="108" stroke="#991b1b" strokeWidth="2" />
+              <line x1="150" y1="150" x2="160" y2="160" stroke="#991b1b" strokeWidth="2" />
+              <line x1="200" y1="200" x2="215" y2="215" stroke="#dc2626" strokeWidth="3" />
+              <line x1="250" y1="250" x2="260" y2="260" stroke="#991b1b" strokeWidth="2" />
+              <line x1="300" y1="300" x2="308" y2="308" stroke="#991b1b" strokeWidth="2" />
+              <line x1="350" y1="350" x2="360" y2="360" stroke="#991b1b" strokeWidth="2" />
+              <line x1="400" y1="400" x2="415" y2="415" stroke="#dc2626" strokeWidth="3" />
+            </svg>
+            {/* Tape measure head - red end */}
+            <motion.div
+              className="absolute w-4 h-4 bg-red-600 rounded-full shadow-lg"
+              style={{ left: '-8px', top: '-8px' }}
+              animate={{ scale: [1, 1.3, 1] }}
+              transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 2.8 }}
+            />
+          </motion.div>
+          
+          {/* Size reference text */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-center">
+            <p className="text-sm font-semibold text-gray-700">Diagonal corner to corner</p>
+            <p className="text-xs text-gray-500">Measure diagonally to find the size</p>
+          </div>
+        </div>
+      )
+    }
+    
+    // TV/Monitor animation
     if (option === "TV/Monitor") {
       return (
         <div className="relative w-full h-full overflow-hidden flex items-center justify-center">
