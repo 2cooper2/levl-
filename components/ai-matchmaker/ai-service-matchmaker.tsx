@@ -2282,6 +2282,14 @@ const questionSkipLogic: {
     }
   }
 } = {
+  tvMounting: {
+    "What would you like to mount?": {
+      "Art/Picture Frame": new Set(["What size is your TV?", "What type of mount would you prefer?"]),
+      "Floating Shelves": new Set(["What size is your TV?", "What type of mount would you prefer?", "Will you have a soundbar or other accessories to mount/attach with the TV?", "Do you need help with any additional setup (streaming devices, gaming consoles, etc.)?"]),
+      "Mirror": new Set(["What size is your TV?", "What type of mount would you prefer?", "Will you have a soundbar or other accessories to mount/attach with the TV?", "Do you need help with any additional setup (streaming devices, gaming consoles, etc.)?"]),
+      "Other": new Set(["What size is your TV?", "What type of mount would you prefer?", "Will you have a soundbar or other accessories to mount/attach with the TV?", "Do you need help with any additional setup (streaming devices, gaming consoles, etc.)?"]),
+    },
+  },
   painting: {
     "Do you have a color scheme in mind?": {
       "Yes, I know exact colors": new Set(["Do you need help with color selection?"]),
@@ -2422,65 +2430,83 @@ const MessageItem = memo(
                 {/* Tape measure animation for TV size question */}
                 {message.content === "What size is your TV?" && (
                   <motion.div 
-                    className="mt-4 relative w-full h-32 overflow-hidden rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 border border-lavender-200/70"
+                    className="mt-4 relative w-full h-40 overflow-hidden rounded-xl border border-lavender-200/70"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3, duration: 0.3 }}
+                    style={{ 
+                      background: 'linear-gradient(180deg, #f5f2ed 0%, #e8e4dd 40%, #ddd9d2 100%)',
+                      transform: 'translateZ(0)',
+                      backfaceVisibility: 'hidden'
+                    }}
                   >
-                    {/* TV frame outline */}
-                    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[70%] border-3 border-dashed border-gray-400 rounded-lg bg-black/5" />
-                    
-                    {/* Animated tape measure going diagonally from top-left to bottom-right */}
-                    <motion.div
-                      className="absolute"
-                      style={{ left: '20%', top: '15%' }}
+                    {/* Modern flatscreen TV - same style as TV/Monitor option */}
+                    <div 
+                      className="absolute left-1/2 top-[45%] -translate-x-1/2 -translate-y-1/2 w-[65%] h-[60%]"
+                      style={{
+                        background: 'linear-gradient(180deg, #0a0a0a 0%, #000000 100%)',
+                        borderRadius: '4px',
+                        boxShadow: '0 8px 25px rgba(0,0,0,0.35)'
+                      }}
                     >
-                      <svg width="200" height="120" viewBox="0 0 200 120" className="overflow-visible">
+                      {/* Screen with content */}
+                      <div className="absolute inset-[4%] rounded-[2px] overflow-hidden" style={{
+                        background: 'linear-gradient(135deg, #1a2a4a 0%, #0f1829 100%)'
+                      }}>
+                        {/* Screen gradient */}
+                        <div className="absolute inset-0" style={{
+                          background: 'linear-gradient(135deg, #1a2a4a 0%, #2a1a3a 100%)'
+                        }} />
+                      </div>
+                      
+                      {/* Animated diagonal tape measure line from top-left to bottom-right */}
+                      <svg className="absolute inset-0 w-full h-full" style={{ transform: 'translateZ(0)' }}>
                         <defs>
-                          <linearGradient id="tapeMeasureGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <linearGradient id="tapeDiagonal" x1="0%" y1="0%" x2="100%" y2="100%">
                             <stop offset="0%" stopColor="#fbbf24" />
                             <stop offset="100%" stopColor="#f59e0b" />
                           </linearGradient>
                         </defs>
-                        {/* Tape measure body */}
+                        {/* Diagonal tape measure line */}
+                        <motion.line 
+                          x1="8%" y1="8%" x2="92%" y2="92%" 
+                          stroke="url(#tapeDiagonal)" 
+                          strokeWidth="4" 
+                          strokeLinecap="round"
+                          initial={{ pathLength: 0 }}
+                          animate={{ pathLength: [0, 1, 1, 0] }}
+                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", times: [0, 0.4, 0.6, 1] }}
+                        />
+                        {/* Tick marks along diagonal */}
                         <motion.g
-                          animate={{ x: [0, 60, 0] }}
-                          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: [0, 1, 1, 0] }}
+                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", times: [0, 0.4, 0.6, 1] }}
                         >
-                          {/* Tape line */}
-                          <rect x="0" y="45" width="140" height="10" rx="2" fill="url(#tapeMeasureGrad)" />
-                          {/* Tick marks on tape */}
-                          <line x1="20" y1="45" x2="20" y2="55" stroke="#92400e" strokeWidth="1.5" />
-                          <line x1="40" y1="45" x2="40" y2="55" stroke="#92400e" strokeWidth="1.5" />
-                          <line x1="60" y1="45" x2="60" y2="55" stroke="#92400e" strokeWidth="2" />
-                          <line x1="80" y1="45" x2="80" y2="55" stroke="#92400e" strokeWidth="1.5" />
-                          <line x1="100" y1="45" x2="100" y2="55" stroke="#92400e" strokeWidth="1.5" />
-                          <line x1="120" y1="45" x2="120" y2="55" stroke="#92400e" strokeWidth="2" />
-                          {/* Tape measure end hook */}
-                          <rect x="135" y="40" width="8" height="20" rx="1" fill="#dc2626" />
+                          <line x1="20%" y1="18%" x2="22%" y2="22%" stroke="#92400e" strokeWidth="2" />
+                          <line x1="35%" y1="33%" x2="37%" y2="37%" stroke="#92400e" strokeWidth="2" />
+                          <line x1="50%" y1="48%" x2="52%" y2="52%" stroke="#dc2626" strokeWidth="3" />
+                          <line x1="65%" y1="63%" x2="67%" y2="67%" stroke="#92400e" strokeWidth="2" />
+                          <line x1="80%" y1="78%" x2="82%" y2="82%" stroke="#92400e" strokeWidth="2" />
                         </motion.g>
-                        {/* Tape measure housing */}
-                        <rect x="-5" y="35" width="25" height="30" rx="4" fill="#374151" />
-                        <circle cx="7" cy="50" r="8" fill="#1f2937" />
-                        <circle cx="7" cy="50" r="4" fill="#4b5563" />
                       </svg>
-                    </motion.div>
-                    
-                    {/* Diagonal arrow indicator */}
-                    <motion.div 
-                      className="absolute"
-                      style={{ right: '15%', bottom: '20%' }}
-                      animate={{ scale: [1, 1.1, 1], opacity: [0.7, 1, 0.7] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                    >
-                      <svg width="40" height="40" viewBox="0 0 40 40">
-                        <path d="M5 35 L35 5 M35 5 L35 15 M35 5 L25 5" stroke="#7c3aed" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </motion.div>
+                      
+                      {/* Corner markers */}
+                      <motion.div 
+                        className="absolute top-1 left-1 w-3 h-3 border-t-2 border-l-2 border-red-500"
+                        animate={{ opacity: [0.5, 1, 0.5] }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                      />
+                      <motion.div 
+                        className="absolute bottom-1 right-1 w-3 h-3 border-b-2 border-r-2 border-red-500"
+                        animate={{ opacity: [0.5, 1, 0.5] }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                      />
+                    </div>
                     
                     {/* Help text */}
                     <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-center">
-                      <p className="text-xs font-medium text-gray-600">Measure diagonally corner to corner</p>
+                      <p className="text-xs font-medium text-gray-600">Measure diagonally from corner to corner</p>
                     </div>
                   </motion.div>
                 )}
@@ -2523,6 +2549,7 @@ const MessageItem = memo(
           exit={{ opacity: 0 }}
           transition={{ duration: 0.15 }}
           layout={false}
+          style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden', willChange: 'opacity' }}
         >
           <div className="flex items-center p-4 rounded-2xl bg-gradient-to-br from-white/95 via-white/90 to-lavender-50/90 dark:from-gray-800/95 dark:via-gray-800/90 dark:to-lavender-950/90 backdrop-blur-sm shadow-[0_20px_30px_-5px_rgba(79,70,229,0.4),0_10px_15px_-5px_rgba(79,70,229,0.3),0_-3px_10px_0px_rgba(255,255,255,0.2),inset_0_1px_2px_0px_rgba(255,255,255,0.5)] dark:shadow-[0_20px_30px_-5px_rgba(79,70,229,0.5),0_10px_15px_-5px_rgba(0,0,0,0.6),0_-3px_10px_0px_rgba(79,70,229,0.3),inset_0_1px_2px_0px_rgba(79,70,229,0.2)] border-t border-l border-r border-lavender-200/80 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/50 border-b-2 border-b-lavender-300 dark:border-b-2 dark:border-b-lavender-600 transform translate-y-[-6px] hover:translate-y-[-8px] transition-all duration-300">
             <LevlLogo className="h-14 w-14 mr-3 drop-shadow-[0_4px_8px_rgba(79,70,229,0.3)] dark:drop-shadow-[0_4px_8px_rgba(79,70,229,0.5)]" />
