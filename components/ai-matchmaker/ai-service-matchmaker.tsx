@@ -174,8 +174,8 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
   if (!guide) return null
 
   // Different animations based on option type
+  const getAnimation = () => {
     // Item type animations - what to mount
-    
     // TV/Monitor animation
     if (option === "TV/Monitor") {
       return (
@@ -2419,70 +2419,68 @@ const MessageItem = memo(
                   </div>
                 )}
                 
-                {/* Tape measure visual guide for TV size question */}
+                {/* Tape measure animation for TV size question */}
                 {message.content === "What size is your TV?" && (
                   <motion.div 
-                    className="mt-4 rounded-xl overflow-hidden border border-lavender-200/70 dark:border-lavender-700/50 bg-gradient-to-br from-slate-50 to-slate-100"
+                    className="mt-4 relative w-full h-32 overflow-hidden rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 border border-lavender-200/70"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3, duration: 0.3 }}
-                    style={{ height: '140px' }}
                   >
-                    <div className="relative w-full h-full overflow-hidden flex items-center justify-center">
-                      {/* Wall background */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-slate-100 to-slate-200" />
-                      
-                      {/* TV frame outline */}
-                      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[75%] h-[60%] border-4 border-dashed border-gray-400 rounded-lg bg-black/5" />
-                      
-                      {/* Animated tape measure going diagonally */}
-                      <motion.div
-                        className="absolute"
-                        animate={{
-                          x: ['-80%', '80%'],
-                          y: ['-60%', '60%'],
-                        }}
-                        transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", repeatDelay: 0.8 }}
-                        style={{
-                          width: '8px',
-                          height: '8px',
-                          left: '15%',
-                          top: '20%',
-                        }}
-                      >
-                        {/* Tape measure line */}
-                        <svg width="300" height="300" viewBox="0 0 300 300" className="absolute" style={{ left: '-30px', top: '-30px' }}>
-                          <defs>
-                            <linearGradient id="tapeMeasureTV" x1="0%" y1="0%" x2="100%" y2="100%">
-                              <stop offset="0%" stopColor="#fbbf24" />
-                              <stop offset="50%" stopColor="#f59e0b" />
-                              <stop offset="100%" stopColor="#d97706" />
-                            </linearGradient>
-                          </defs>
-                          {/* Tape measure line */}
-                          <line x1="0" y1="0" x2="350" y2="350" stroke="url(#tapeMeasureTV)" strokeWidth="8" strokeLinecap="round" />
-                          {/* Tick marks */}
-                          <line x1="0" y1="0" x2="15" y2="15" stroke="#b45309" strokeWidth="3" />
-                          <line x1="40" y1="40" x2="50" y2="50" stroke="#92400e" strokeWidth="2" />
-                          <line x1="80" y1="80" x2="88" y2="88" stroke="#92400e" strokeWidth="2" />
-                          <line x1="120" y1="120" x2="132" y2="132" stroke="#b45309" strokeWidth="3" />
-                          <line x1="160" y1="160" x2="168" y2="168" stroke="#92400e" strokeWidth="2" />
-                          <line x1="200" y1="200" x2="208" y2="208" stroke="#92400e" strokeWidth="2" />
-                          <line x1="240" y1="240" x2="255" y2="255" stroke="#b45309" strokeWidth="3" />
-                        </svg>
-                        {/* Tape measure head - yellow end */}
-                        <motion.div
-                          className="absolute w-4 h-4 bg-amber-500 rounded-sm shadow-lg border-2 border-amber-600"
-                          style={{ left: '-8px', top: '-8px' }}
-                          animate={{ scale: [1, 1.2, 1] }}
-                          transition={{ duration: 0.4, repeat: Infinity, repeatDelay: 2.4 }}
-                        />
-                      </motion.div>
-                      
-                      {/* Size reference text */}
-                      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-center bg-white/80 dark:bg-gray-800/80 px-3 py-1 rounded-full">
-                        <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">Measure diagonally corner to corner</p>
-                      </div>
+                    {/* TV frame outline */}
+                    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[70%] border-3 border-dashed border-gray-400 rounded-lg bg-black/5" />
+                    
+                    {/* Animated tape measure going diagonally from top-left to bottom-right */}
+                    <motion.div
+                      className="absolute"
+                      style={{ left: '20%', top: '15%' }}
+                    >
+                      <svg width="200" height="120" viewBox="0 0 200 120" className="overflow-visible">
+                        <defs>
+                          <linearGradient id="tapeMeasureGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stopColor="#fbbf24" />
+                            <stop offset="100%" stopColor="#f59e0b" />
+                          </linearGradient>
+                        </defs>
+                        {/* Tape measure body */}
+                        <motion.g
+                          animate={{ x: [0, 60, 0] }}
+                          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                        >
+                          {/* Tape line */}
+                          <rect x="0" y="45" width="140" height="10" rx="2" fill="url(#tapeMeasureGrad)" />
+                          {/* Tick marks on tape */}
+                          <line x1="20" y1="45" x2="20" y2="55" stroke="#92400e" strokeWidth="1.5" />
+                          <line x1="40" y1="45" x2="40" y2="55" stroke="#92400e" strokeWidth="1.5" />
+                          <line x1="60" y1="45" x2="60" y2="55" stroke="#92400e" strokeWidth="2" />
+                          <line x1="80" y1="45" x2="80" y2="55" stroke="#92400e" strokeWidth="1.5" />
+                          <line x1="100" y1="45" x2="100" y2="55" stroke="#92400e" strokeWidth="1.5" />
+                          <line x1="120" y1="45" x2="120" y2="55" stroke="#92400e" strokeWidth="2" />
+                          {/* Tape measure end hook */}
+                          <rect x="135" y="40" width="8" height="20" rx="1" fill="#dc2626" />
+                        </motion.g>
+                        {/* Tape measure housing */}
+                        <rect x="-5" y="35" width="25" height="30" rx="4" fill="#374151" />
+                        <circle cx="7" cy="50" r="8" fill="#1f2937" />
+                        <circle cx="7" cy="50" r="4" fill="#4b5563" />
+                      </svg>
+                    </motion.div>
+                    
+                    {/* Diagonal arrow indicator */}
+                    <motion.div 
+                      className="absolute"
+                      style={{ right: '15%', bottom: '20%' }}
+                      animate={{ scale: [1, 1.1, 1], opacity: [0.7, 1, 0.7] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    >
+                      <svg width="40" height="40" viewBox="0 0 40 40">
+                        <path d="M5 35 L35 5 M35 5 L35 15 M35 5 L25 5" stroke="#7c3aed" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </motion.div>
+                    
+                    {/* Help text */}
+                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-center">
+                      <p className="text-xs font-medium text-gray-600">Measure diagonally corner to corner</p>
                     </div>
                   </motion.div>
                 )}
