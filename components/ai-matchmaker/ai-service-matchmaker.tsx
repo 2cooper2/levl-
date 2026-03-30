@@ -537,56 +537,74 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
             background: 'linear-gradient(180deg, #f5f2ed 0%, #e8e4dd 100%)'
           }} />
           
-          {/* Wall - side view */}
-          <div className="absolute left-[15%] top-0 bottom-0 w-[8%]" style={{
-            background: 'linear-gradient(90deg, #d4cfc5 0%, #e8e4dd 100%)'
+          {/* Wall - side view on left */}
+          <div className="absolute left-[10%] top-0 bottom-0 w-[12%]" style={{
+            background: 'linear-gradient(90deg, #d4cfc5 0%, #e8e4dd 100%)',
+            boxShadow: '2px 0 8px rgba(0,0,0,0.1)'
           }} />
           
           {/* Wall mount bracket plate on wall */}
-          <div className="absolute left-[20%] top-[30%] w-[6%] h-[25%]" style={{
+          <div className="absolute left-[19%] top-[28%] w-[8%] h-[30%]" style={{
             background: 'linear-gradient(90deg, #4a4a4a 0%, #5a5a5a 100%)',
-            borderRadius: '2px',
-            boxShadow: '2px 0 4px rgba(0,0,0,0.2)'
-          }} />
+            borderRadius: '3px',
+            boxShadow: '3px 0 6px rgba(0,0,0,0.25)'
+          }}>
+            {/* Mounting screws */}
+            <div className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[5px] h-[5px] rounded-full bg-gray-600" />
+            <div className="absolute top-[45%] left-1/2 -translate-x-1/2 w-[5px] h-[5px] rounded-full bg-gray-600" />
+            <div className="absolute bottom-[15%] left-1/2 -translate-x-1/2 w-[5px] h-[5px] rounded-full bg-gray-600" />
+          </div>
           
           {/* Tilting bracket arm - side profile showing tilt mechanism */}
           <motion.div 
-            className="absolute left-[24%] top-[35%] origin-left"
-            animate={{ rotateZ: [-15, 10, -15] }}
-            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute left-[25%] top-[35%] origin-left"
+            animate={{ rotateZ: [-12, 15, -12] }}
+            transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
           >
+            {/* Tilt hinge mechanism */}
+            <div className="absolute left-[-8px] top-[20px] w-[12px] h-[12px] rounded-full" style={{
+              background: 'radial-gradient(circle at 40% 40%, #666 0%, #3a3a3a 100%)',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
+            }} />
+            
             {/* Bracket arm */}
-            <div className="w-[25px] h-[6px]" style={{
+            <div className="w-[35px] h-[8px] rounded-[2px]" style={{
               background: 'linear-gradient(180deg, #555 0%, #3a3a3a 100%)',
-              borderRadius: '2px'
+              boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
             }} />
             
             {/* TV - side profile view */}
             <div 
-              className="absolute left-[22px] top-[-35px] w-[8px] h-[75px] rounded-[2px]"
+              className="absolute left-[32px] top-[-45px] w-[10px] h-[95px] rounded-[3px]"
               style={{
                 background: 'linear-gradient(90deg, #1a1a1a 0%, #0a0a0a 50%, #000 100%)',
-                boxShadow: '3px 0 8px rgba(0,0,0,0.3)'
+                boxShadow: '4px 0 12px rgba(0,0,0,0.35)'
               }}
             >
               {/* Screen edge visible from side */}
-              <div className="absolute left-0 top-[5%] bottom-[5%] w-[2px]" style={{
-                background: 'linear-gradient(180deg, #1a2a4a 0%, #0f1829 100%)'
+              <div className="absolute left-0 top-[4%] bottom-[4%] w-[3px]" style={{
+                background: 'linear-gradient(180deg, #1a2a4a 0%, #0f1829 50%, #1a2a4a 100%)'
               }} />
+              {/* Back panel details */}
+              <div className="absolute right-[1px] top-[20%] w-[2px] h-[15%] rounded-sm bg-gray-700" />
+              <div className="absolute right-[1px] bottom-[25%] w-[2px] h-[10%] rounded-sm bg-gray-700" />
             </div>
           </motion.div>
           
           {/* Tilt angle indicator arrows */}
-          <div className="absolute right-[15%] top-[40%]">
+          <div className="absolute right-[12%] top-[35%]">
             <motion.svg 
-              width="30" height="40" viewBox="0 0 30 40"
+              width="35" height="50" viewBox="0 0 35 50"
               animate={{ opacity: [0.4, 0.8, 0.4] }}
               transition={{ duration: 2, repeat: Infinity }}
             >
-              {/* Up arrow */}
-              <path d="M15 5 L20 12 L16 12 L16 18 L14 18 L14 12 L10 12 Z" fill="#666" />
-              {/* Down arrow */}
-              <path d="M15 35 L20 28 L16 28 L16 22 L14 22 L14 28 L10 28 Z" fill="#666" />
+              {/* Up arrow showing tilt up */}
+              <path d="M17 8 L24 18 L19 18 L19 23 L15 23 L15 18 L10 18 Z" fill="#666" />
+              {/* Down arrow showing tilt down */}
+              <path d="M17 42 L24 32 L19 32 L19 27 L15 27 L15 32 L10 32 Z" fill="#666" />
+              {/* Arc showing tilt range */}
+              <path d="M8 25 Q 17 15, 26 25" fill="none" stroke="#888" strokeWidth="1.5" strokeDasharray="3,2" />
+              <path d="M8 25 Q 17 35, 26 25" fill="none" stroke="#888" strokeWidth="1.5" strokeDasharray="3,2" />
             </motion.svg>
           </div>
           
@@ -600,107 +618,149 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
     if (option === "Full-motion/Articulating (swivel and tilt)") {
       return (
         <div className="relative w-full h-full overflow-hidden">
-          {/* Living room background */}
+          {/* Living room background with subtle depth */}
           <div className="absolute inset-0" style={{
             background: 'linear-gradient(180deg, #f5f2ed 0%, #e8e4dd 100%)'
-          }} />
-          
-          {/* Wall section */}
-          <div className="absolute left-0 top-0 bottom-0 w-[20%]" style={{
-            background: 'linear-gradient(90deg, #e8e4dd 0%, #f0ece5 100%)'
-          }} />
-          
-          {/* Wall mount plate - secured to wall */}
-          <div className="absolute left-[16%] top-[32%] w-[8%] h-[28%]" style={{
-            background: 'linear-gradient(90deg, #3a3a3a 0%, #4a4a4a 50%, #3a3a3a 100%)',
-            borderRadius: '3px',
-            boxShadow: '3px 2px 8px rgba(0,0,0,0.35)'
           }}>
-            {/* Mount screws */}
-            <div className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[4px] h-[4px] rounded-full bg-gray-600" />
-            <div className="absolute bottom-[15%] left-1/2 -translate-x-1/2 w-[4px] h-[4px] rounded-full bg-gray-600" />
+            <div className="absolute inset-0" style={{
+              backgroundImage: `radial-gradient(circle at 20% 30%, rgba(0,0,0,0.02) 1px, transparent 1px)`,
+              backgroundSize: '12px 12px'
+            }} />
           </div>
           
-          {/* Full articulating arm assembly with realistic motion */}
+          {/* Wall surface on left side */}
+          <div className="absolute left-0 top-0 bottom-0 w-[15%]" style={{
+            background: 'linear-gradient(90deg, #e0dcd5 0%, #ebe7e0 100%)',
+            boxShadow: '4px 0 15px rgba(0,0,0,0.08)'
+          }} />
+          
+          {/* Wall mount plate - sturdy base attached to wall */}
+          <div className="absolute left-[12%] top-[30%] w-[10%] h-[30%]" style={{
+            background: 'linear-gradient(90deg, #3d3d3d 0%, #4a4a4a 50%, #3d3d3d 100%)',
+            borderRadius: '4px',
+            boxShadow: '3px 3px 8px rgba(0,0,0,0.35)'
+          }}>
+            {/* Mounting bolt heads */}
+            <div className="absolute top-[12%] left-1/2 -translate-x-1/2 w-[8px] h-[8px] rounded-full" style={{
+              background: 'radial-gradient(circle at 30% 30%, #666 0%, #333 100%)'
+            }} />
+            <div className="absolute top-[45%] left-1/2 -translate-x-1/2 w-[8px] h-[8px] rounded-full" style={{
+              background: 'radial-gradient(circle at 30% 30%, #666 0%, #333 100%)'
+            }} />
+            <div className="absolute bottom-[12%] left-1/2 -translate-x-1/2 w-[8px] h-[8px] rounded-full" style={{
+              background: 'radial-gradient(circle at 30% 30%, #666 0%, #333 100%)'
+            }} />
+          </div>
+          
+          {/* Full motion articulating arm assembly */}
           <motion.div 
-            className="absolute left-[22%] top-[38%] origin-left"
+            className="absolute left-[20%] top-[40%] origin-left"
+            style={{ perspective: '300px' }}
             animate={{ 
-              rotateZ: [0, -10, 15, 0],
+              rotateY: [0, 45, 45, 0, -25, -25, 0],
             }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
           >
-            {/* First arm segment - main arm */}
-            <div className="relative w-[35px] h-[12px] rounded-[3px]" style={{
-              background: 'linear-gradient(180deg, #5a5a5a 0%, #404040 50%, #353535 100%)',
-              boxShadow: '0 3px 6px rgba(0,0,0,0.3)'
-            }}>
-              {/* Joint pivot point */}
-              <div className="absolute right-[-3px] top-1/2 -translate-y-1/2 w-[10px] h-[10px] rounded-full" style={{
-                background: 'radial-gradient(circle at 40% 40%, #666 0%, #3a3a3a 100%)',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.4)'
-              }} />
-            </div>
-            
-            {/* Second arm segment with TV */}
-            <motion.div 
-              className="absolute left-[38px] top-[-4px] origin-left"
-              animate={{ rotateZ: [0, 20, -15, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            >
-              {/* Second arm */}
-              <div className="w-[30px] h-[12px] rounded-[3px]" style={{
-                background: 'linear-gradient(180deg, #555555 0%, #404040 50%, #353535 100%)',
-                boxShadow: '0 3px 6px rgba(0,0,0,0.25)'
+            {/* First arm segment - main extension arm */}
+            <div className="relative">
+              <div className="w-[45px] h-[14px] rounded-[3px]" style={{
+                background: 'linear-gradient(180deg, #5a5a5a 0%, #404040 50%, #353535 100%)',
+                boxShadow: '0 3px 6px rgba(0,0,0,0.3)'
               }}>
-                {/* End pivot */}
-                <div className="absolute right-[-2px] top-1/2 -translate-y-1/2 w-[8px] h-[8px] rounded-full" style={{
-                  background: 'radial-gradient(circle at 40% 40%, #555 0%, #333 100%)'
-                }} />
+                {/* Arm detail ridges */}
+                <div className="absolute top-[3px] left-[8px] w-[4px] h-[8px] rounded-sm bg-gray-600" />
+                <div className="absolute top-[3px] left-[20px] w-[4px] h-[8px] rounded-sm bg-gray-600" />
               </div>
               
-              {/* TV bracket plate - connects to TV back */}
-              <div className="absolute left-[30px] top-[-22px] w-[6px] h-[55px] rounded-[2px]" style={{
-                background: 'linear-gradient(90deg, #4a4a4a 0%, #5a5a5a 50%, #4a4a4a 100%)',
-                boxShadow: '2px 0 4px rgba(0,0,0,0.2)'
-              }} />
+              {/* Elbow joint - pivot point */}
+              <div className="absolute left-[42px] top-[-3px] w-[20px] h-[20px] rounded-full" style={{
+                background: 'radial-gradient(circle at 40% 40%, #606060 0%, #3a3a3a 70%, #2a2a2a 100%)',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.4)'
+              }}>
+                <div className="absolute inset-[30%] rounded-full bg-gray-700" />
+              </div>
               
-              {/* TV - modern flatscreen */}
+              {/* Second arm segment with counter-rotation */}
               <motion.div 
-                className="absolute left-[34px] top-[-28px] w-[70px] h-[50px] rounded-[4px]"
-                style={{
-                  background: 'linear-gradient(180deg, #0a0a0a 0%, #000 100%)',
-                  boxShadow: '0 6px 20px rgba(0,0,0,0.4)'
-                }}
-                animate={{ rotateY: [-5, 10, -5] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute left-[55px] top-[0px] origin-left"
+                animate={{ rotateY: [0, -35, -35, 0, 20, 20, 0] }}
+                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
               >
-                {/* Screen */}
-                <div className="absolute inset-[4px] rounded-[2px]" style={{
-                  background: 'linear-gradient(135deg, #1a2a4a 0%, #0f1829 100%)'
+                <div className="w-[40px] h-[12px] rounded-[3px]" style={{
+                  background: 'linear-gradient(180deg, #555 0%, #3d3d3d 50%, #303030 100%)',
+                  boxShadow: '0 2px 5px rgba(0,0,0,0.25)'
                 }}>
-                  {/* Screen content */}
+                  <div className="absolute top-[2px] left-[10px] w-[3px] h-[8px] rounded-sm bg-gray-600" />
+                </div>
+                
+                {/* TV mounting bracket plate */}
+                <div className="absolute left-[36px] top-[-35px] w-[8px] h-[80px] rounded-[3px]" style={{
+                  background: 'linear-gradient(90deg, #454545 0%, #555 50%, #454545 100%)',
+                  boxShadow: '2px 0 5px rgba(0,0,0,0.2)'
+                }} />
+                
+                {/* TV - realistic proportions */}
+                <div 
+                  className="absolute left-[42px] top-[-40px] w-[85px] h-[55px] rounded-[4px]"
+                  style={{
+                    background: 'linear-gradient(180deg, #0d0d0d 0%, #000 100%)',
+                    boxShadow: '0 8px 20px rgba(0,0,0,0.45)'
+                  }}
+                >
+                  {/* Ultra-thin bezel */}
+                  <div className="absolute inset-[3px] rounded-[2px]" style={{
+                    background: 'linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%)'
+                  }}>
+                    {/* Screen with content */}
+                    <div className="absolute inset-[2px] rounded-[1px] overflow-hidden" style={{
+                      background: 'linear-gradient(135deg, #1a2a4a 0%, #0f1829 100%)'
+                    }}>
+                      {/* Movie scene with warm lighting */}
+                      <motion.div 
+                        className="absolute inset-0"
+                        animate={{ 
+                          background: [
+                            'linear-gradient(135deg, rgba(40,60,80,0.3) 0%, rgba(20,30,50,0.2) 100%)',
+                            'linear-gradient(135deg, rgba(60,50,40,0.3) 0%, rgba(40,30,20,0.2) 100%)',
+                            'linear-gradient(135deg, rgba(40,60,80,0.3) 0%, rgba(20,30,50,0.2) 100%)'
+                          ]
+                        }}
+                        transition={{ duration: 4, repeat: Infinity }}
+                      />
+                      {/* UI overlay hint */}
+                      <div className="absolute top-[8%] left-[5%] w-[25%] h-[12%] rounded-sm bg-white/15" />
+                    </div>
+                  </div>
+                  
+                  {/* Power indicator */}
                   <motion.div 
-                    className="absolute inset-[8%] rounded-sm"
-                    animate={{ 
-                      background: [
-                        'linear-gradient(135deg, rgba(40,80,120,0.2) 0%, rgba(30,60,90,0.15) 100%)',
-                        'linear-gradient(135deg, rgba(60,100,140,0.25) 0%, rgba(40,80,120,0.18) 100%)',
-                        'linear-gradient(135deg, rgba(40,80,120,0.2) 0%, rgba(30,60,90,0.15) 100%)'
-                      ]
-                    }}
-                    transition={{ duration: 3, repeat: Infinity }}
+                    className="absolute bottom-[4px] left-1/2 -translate-x-1/2 w-[4px] h-[4px] rounded-full"
+                    style={{ background: '#00dd00', boxShadow: '0 0 4px #00cc00' }}
+                    animate={{ opacity: [1, 0.5, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
                   />
                 </div>
-                {/* Power LED */}
-                <motion.div 
-                  className="absolute bottom-[4px] left-1/2 -translate-x-1/2 w-[3px] h-[3px] rounded-full"
-                  style={{ background: '#00ff00', boxShadow: '0 0 4px #00cc00' }}
-                  animate={{ opacity: [1, 0.5, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                />
               </motion.div>
-            </motion.div>
+            </div>
           </motion.div>
+          
+          {/* Motion range indicator */}
+          <div className="absolute right-[8%] top-[25%]">
+            <motion.svg 
+              width="45" height="45" viewBox="0 0 45 45"
+              animate={{ opacity: [0.4, 0.7, 0.4] }}
+              transition={{ duration: 2.5, repeat: Infinity }}
+            >
+              {/* Circular arc showing swivel range */}
+              <path d="M10 22 Q 22 5, 35 22" fill="none" stroke="#888" strokeWidth="2" strokeDasharray="4,2" />
+              <path d="M10 22 Q 22 40, 35 22" fill="none" stroke="#888" strokeWidth="2" strokeDasharray="4,2" />
+              {/* Arrow heads */}
+              <polygon points="33,18 38,22 33,26" fill="#666" />
+              <polygon points="12,18 7,22 12,26" fill="#666" />
+              {/* Center pivot dot */}
+              <circle cx="22" cy="22" r="4" fill="#555" />
+            </motion.svg>
+          </div>
           
           {/* Floor */}
           <div className="absolute bottom-0 left-0 right-0 h-[10%]" style={{
@@ -1192,8 +1252,8 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
             </div>
           </div>
           
-          {/* Wall outlet - positioned at bottom near floor */}
-          <div className="absolute left-1/2 bottom-[2%] -translate-x-1/2 w-[14%] h-[8%] rounded-[2px]" style={{
+          {/* Wall outlet - positioned at floor level */}
+          <div className="absolute left-1/2 bottom-[1%] -translate-x-1/2 w-[14%] h-[8%] rounded-[2px]" style={{
             background: 'linear-gradient(180deg, #f8f8f6 0%, #e8e8e4 100%)',
             boxShadow: '0 1px 3px rgba(0,0,0,0.15)'
           }}>
@@ -1238,8 +1298,8 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
             transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 1 }}
           />
           
-          {/* Wall outlet - positioned lower */}
-          <div className="absolute left-1/2 bottom-[5%] -translate-x-1/2 w-[16%] h-[10%] rounded-[2px]" style={{
+          {/* Wall outlet - positioned at floor level */}
+          <div className="absolute left-1/2 bottom-[1%] -translate-x-1/2 w-[14%] h-[8%] rounded-[2px]" style={{
             background: 'linear-gradient(180deg, #f8f8f6 0%, #e8e8e4 100%)',
             boxShadow: '0 1px 3px rgba(0,0,0,0.15)'
           }}>
@@ -1606,18 +1666,6 @@ const serviceSpecificQuestions: ServiceSpecificQuestions = {
       "Will you have a soundbar or other accessories to mount/attach with the TV?",
       "Is the mounting location near a power outlet?",
       "Do you need help with any additional setup (streaming devices, gaming consoles, etc.)?",
-      // Art/Picture Frame specific questions
-      "What size is your art/picture frame?",
-      "How many pieces do you need mounted?",
-      "Do you need help with layout/arrangement?",
-      // Floating Shelves specific questions  
-      "What size shelves do you need installed?",
-      "How many shelves do you need mounted?",
-      "What will the shelves hold (weight consideration)?",
-      // Mirror specific questions
-      "What size is your mirror?",
-      "What type of mirror is it?",
-      "Does the mirror have a frame?",
     ],
     options: {
       "What would you like to mount?": [
@@ -1636,71 +1684,6 @@ const serviceSpecificQuestions: ServiceSpecificQuestions = {
         "Over 75 inches",
         "Unsure",
       ],
-      // Art/Picture Frame options
-      "What size is your art/picture frame?": [
-        "Small (under 12 inches)",
-        "Medium (12-24 inches)",
-        "Large (24-36 inches)",
-        "Extra Large (over 36 inches)",
-        "Multiple sizes",
-        "Unsure",
-      ],
-      "How many pieces do you need mounted?": [
-        "1 piece",
-        "2-3 pieces",
-        "4-6 pieces",
-        "Gallery wall (7+ pieces)",
-        "Unsure",
-      ],
-      "Do you need help with layout/arrangement?": [
-        "Yes, help me design the layout",
-        "No, I know where I want them",
-        "Unsure",
-      ],
-      // Floating Shelves options
-      "What size shelves do you need installed?": [
-        "Small (under 24 inches)",
-        "Medium (24-36 inches)",
-        "Large (36-48 inches)",
-        "Extra Large (over 48 inches)",
-        "Mixed sizes",
-        "Unsure",
-      ],
-      "How many shelves do you need mounted?": [
-        "1 shelf",
-        "2-3 shelves",
-        "4-5 shelves",
-        "6+ shelves",
-        "Unsure",
-      ],
-      "What will the shelves hold (weight consideration)?": [
-        "Light items (decor, small plants)",
-        "Medium items (books, photos)",
-        "Heavy items (electronics, large books)",
-        "Very heavy items (records, heavy equipment)",
-        "Unsure",
-      ],
-      // Mirror options
-      "What size is your mirror?": [
-        "Small (under 24 inches)",
-        "Medium (24-36 inches)",
-        "Large (36-48 inches)",
-        "Full-length/Extra Large",
-        "Unsure",
-      ],
-      "What type of mirror is it?": [
-        "Bathroom vanity mirror",
-        "Decorative wall mirror",
-        "Full-length mirror",
-        "Gym/workout mirror",
-        "Other",
-        "Unsure",
-      ],
-      "Does the mirror have a frame?": [
-        "Yes, framed mirror",
-        "No, frameless mirror",
-        "Unsure",
-      ],
   "What type of wall do you have?": [
     "Drywall/Sheetrock",
     "Brick",
@@ -1715,7 +1698,7 @@ const serviceSpecificQuestions: ServiceSpecificQuestions = {
         "I need help choosing a mount",
         "Unsure",
       ],
-"What type of mount would you prefer?": [
+"What type of TV mount do you have/need?": [
   "Fixed (flat against wall)",
   "Tilting (angle adjustment)",
   "Full-motion/Articulating (swivel and tilt)",
@@ -2384,81 +2367,32 @@ const questionSkipLogic: {
 } = {
   tvMounting: {
     "What would you like to mount?": {
-      "TV/Monitor": new Set([
-        // Skip art, shelf, and mirror specific questions for TV
-        "What size is your art/picture frame?",
-        "How many pieces do you need mounted?",
-        "Do you need help with layout/arrangement?",
-        "What size shelves do you need installed?",
-        "How many shelves do you need mounted?",
-        "What will the shelves hold (weight consideration)?",
-        "What size is your mirror?",
-        "What type of mirror is it?",
-        "Does the mirror have a frame?",
-      ]),
       "Art/Picture Frame": new Set([
-        // Skip all TV-specific questions
         "What size is your TV?",
-        "Do you already have a wall mount, or do you need one included?",
         "What type of TV mount do you have/need?",
         "Do you need cable management (hiding cables in the wall)?",
         "Will you have a soundbar or other accessories to mount/attach with the TV?",
         "Do you need help with any additional setup (streaming devices, gaming consoles, etc.)?",
-        // Skip other item questions
-        "What size shelves do you need installed?",
-        "How many shelves do you need mounted?",
-        "What will the shelves hold (weight consideration)?",
-        "What size is your mirror?",
-        "What type of mirror is it?",
-        "Does the mirror have a frame?",
       ]),
       "Floating Shelves": new Set([
-        // Skip all TV-specific questions
         "What size is your TV?",
-        "Do you already have a wall mount, or do you need one included?",
         "What type of TV mount do you have/need?",
         "Do you need cable management (hiding cables in the wall)?",
         "Will you have a soundbar or other accessories to mount/attach with the TV?",
         "Do you need help with any additional setup (streaming devices, gaming consoles, etc.)?",
-        // Skip other item questions
-        "What size is your art/picture frame?",
-        "How many pieces do you need mounted?",
-        "Do you need help with layout/arrangement?",
-        "What size is your mirror?",
-        "What type of mirror is it?",
-        "Does the mirror have a frame?",
       ]),
       "Mirror": new Set([
-        // Skip all TV-specific questions
         "What size is your TV?",
-        "Do you already have a wall mount, or do you need one included?",
         "What type of TV mount do you have/need?",
         "Do you need cable management (hiding cables in the wall)?",
         "Will you have a soundbar or other accessories to mount/attach with the TV?",
         "Do you need help with any additional setup (streaming devices, gaming consoles, etc.)?",
-        // Skip other item questions
-        "What size is your art/picture frame?",
-        "How many pieces do you need mounted?",
-        "Do you need help with layout/arrangement?",
-        "What size shelves do you need installed?",
-        "How many shelves do you need mounted?",
-        "What will the shelves hold (weight consideration)?",
       ]),
       "Other": new Set([
-        // Skip all item-specific questions
         "What size is your TV?",
         "What type of TV mount do you have/need?",
         "Will you have a soundbar or other accessories to mount/attach with the TV?",
         "Do you need help with any additional setup (streaming devices, gaming consoles, etc.)?",
-        "What size is your art/picture frame?",
-        "How many pieces do you need mounted?",
-        "Do you need help with layout/arrangement?",
-        "What size shelves do you need installed?",
-        "How many shelves do you need mounted?",
-        "What will the shelves hold (weight consideration)?",
-        "What size is your mirror?",
-        "What type of mirror is it?",
-        "Does the mirror have a frame?",
       ]),
     },
   },
@@ -2602,7 +2536,7 @@ const MessageItem = memo(
                 {/* Tape measure animation for TV size question */}
                 {message.content === "What size is your TV?" && (
                   <motion.div 
-                    className="mt-4 relative w-full h-48 overflow-hidden rounded-xl border border-lavender-200/70"
+                    className="mt-4 relative w-full h-64 overflow-hidden rounded-xl border border-lavender-200/70"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3, duration: 0.3 }}
@@ -2612,19 +2546,19 @@ const MessageItem = memo(
                       backfaceVisibility: 'hidden'
                     }}
                   >
-                    {/* Modern flatscreen TV - more square proportions */}
+                    {/* Modern flatscreen TV - larger and square proportions */}
                     <div 
-                      className="absolute left-1/2 top-[42%] -translate-x-1/2 -translate-y-1/2"
+                      className="absolute left-1/2 top-[45%] -translate-x-1/2 -translate-y-1/2"
                       style={{
-                        width: '140px',
-                        height: '100px',
+                        width: '180px',
+                        height: '180px',
                         background: 'linear-gradient(180deg, #1a1a1a 0%, #000000 100%)',
-                        borderRadius: '6px',
-                        boxShadow: '0 8px 25px rgba(0,0,0,0.35)'
+                        borderRadius: '8px',
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.4)'
                       }}
                     >
                       {/* Screen bezel */}
-                      <div className="absolute inset-[6px] rounded-[3px] overflow-hidden" style={{
+                      <div className="absolute inset-[8px] rounded-[4px] overflow-hidden" style={{
                         background: 'linear-gradient(135deg, #1a2a4a 0%, #0f1829 100%)'
                       }} />
                       
@@ -2640,7 +2574,7 @@ const MessageItem = memo(
                         <motion.line 
                           x1="2%" y1="2%" x2="98%" y2="98%" 
                           stroke="url(#tapeDiagonal)" 
-                          strokeWidth="4" 
+                          strokeWidth="5" 
                           strokeLinecap="round"
                           initial={{ pathLength: 0 }}
                           animate={{ pathLength: [0, 1, 1, 0] }}
@@ -2652,28 +2586,30 @@ const MessageItem = memo(
                           animate={{ opacity: [0, 1, 1, 0] }}
                           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", times: [0, 0.4, 0.6, 1] }}
                         >
-                          <line x1="25%" y1="23%" x2="27%" y2="27%" stroke="#92400e" strokeWidth="2" />
-                          <line x1="50%" y1="48%" x2="52%" y2="52%" stroke="#dc2626" strokeWidth="3" />
-                          <line x1="75%" y1="73%" x2="77%" y2="77%" stroke="#92400e" strokeWidth="2" />
+                          <line x1="25%" y1="23%" x2="27%" y2="27%" stroke="#92400e" strokeWidth="2.5" />
+                          <line x1="50%" y1="48%" x2="52%" y2="52%" stroke="#dc2626" strokeWidth="3.5" />
+                          <line x1="75%" y1="73%" x2="77%" y2="77%" stroke="#92400e" strokeWidth="2.5" />
                         </motion.g>
                       </svg>
                       
                       {/* Corner markers - exactly in corners */}
                       <motion.div 
-                        className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-red-500"
+                        className="absolute top-0 left-0 w-5 h-5 border-t-3 border-l-3 border-red-500"
+                        style={{ borderTopWidth: '3px', borderLeftWidth: '3px' }}
                         animate={{ opacity: [0.5, 1, 0.5] }}
                         transition={{ duration: 1.5, repeat: Infinity }}
                       />
                       <motion.div 
-                        className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-red-500"
+                        className="absolute bottom-0 right-0 w-5 h-5 border-b-3 border-r-3 border-red-500"
+                        style={{ borderBottomWidth: '3px', borderRightWidth: '3px' }}
                         animate={{ opacity: [0.5, 1, 0.5] }}
                         transition={{ duration: 1.5, repeat: Infinity }}
                       />
                     </div>
                     
                     {/* Help text */}
-                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-center">
-                      <p className="text-xs font-medium text-gray-600">Measure diagonally from corner to corner</p>
+                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 text-center">
+                      <p className="text-sm font-medium text-gray-600">Measure diagonally from corner to corner</p>
                     </div>
                   </motion.div>
                 )}
