@@ -3113,14 +3113,11 @@ export function AIServiceMatchmaker() {
               <div className="flex items-center gap-3">
                 <Dialog open={showPortal} onOpenChange={setShowPortal}>
                   <DialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-lavender-400 opacity-100 bg-transparent"
+                    <button
+                      className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-lavender-400"
                     >
-                      <Layout className="mr-2 h-4 w-4" />
                       Portal
-                    </Button>
+                    </button>
                   </DialogTrigger>
                   <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0">
                     <DialogHeader className="sr-only">
