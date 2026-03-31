@@ -34,7 +34,7 @@ export function AIMatchmakerHeader() {
             <Button
               variant="outline"
               size="sm"
-              className="bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-sm"
+              className="bg-white/10 border-transparent text-white hover:bg-white/20 backdrop-blur-sm"
             >
               <Layout className="mr-2 h-4 w-4" />
               Portal
