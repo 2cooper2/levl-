@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { LevlLogo } from "@/components/levl-logo"
-import { User, MessageCircle, Layout } from "lucide-react"
+import { User, MessageCircle } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { LevlPortal } from "@/components/levl-portal"
 
@@ -34,9 +34,8 @@ export function AIMatchmakerHeader() {
             <Button
               variant="ghost"
               size="sm"
-              className="bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm border-0"
+              className="text-white hover:bg-transparent hover:text-white/80"
             >
-              <Layout className="mr-2 h-4 w-4" />
               Portal
             </Button>
           </DialogTrigger>
