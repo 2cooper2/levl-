@@ -32,9 +32,9 @@ export function AIMatchmakerHeader() {
         <Dialog open={showPortal} onOpenChange={setShowPortal}>
           <DialogTrigger asChild>
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
-              className="bg-white/10 border-transparent text-white hover:bg-white/20 backdrop-blur-sm"
+              className="bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm border-0"
             >
               <Layout className="mr-2 h-4 w-4" />
               Portal
