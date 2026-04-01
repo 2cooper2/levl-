@@ -190,9 +190,9 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
             }} />
           </div>
           
-          {/* Modern flatscreen TV - centered */}
+          {/* Modern flatscreen TV - centered and wider */}
           <motion.div 
-            className="relative w-[70%] h-[55%]"
+            className="relative w-[85%] h-[55%]"
             style={{
               background: 'linear-gradient(180deg, #0a0a0a 0%, #000000 100%)',
               borderRadius: '4px',
@@ -2738,6 +2738,17 @@ export function AIServiceMatchmaker() {
       isMountedRef.current = false
     }
   }, [])
+
+  // Auto-scroll to bottom when new messages are added
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      // Small delay to ensure DOM has updated
+      const timeout = setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+      }, 100)
+      return () => clearTimeout(timeout)
+    }
+  }, [messages])
 
   const addMessage = useCallback((message: Message) => {
     if (!isMountedRef.current) return

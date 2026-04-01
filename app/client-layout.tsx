@@ -16,9 +16,15 @@ export function ClientRootLayout({
 }) {
   const pathname = usePathname()
 
-  // Reset scroll position when navigating to new pages
+  // Reset scroll position immediately on mount and when navigating
   useEffect(() => {
-    window.scrollTo(0, 0)
+    // Immediate scroll to top
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+    // Also force scroll after a brief delay to handle any async content loading
+    const timeout = setTimeout(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+    }, 0)
+    return () => clearTimeout(timeout)
   }, [pathname])
 
   // Register service worker for offline capabilities
