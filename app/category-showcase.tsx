@@ -1,0 +1,59 @@
+"use client"
+
+import { useState } from "react"
+import { Code2, Palette, LineChart, Megaphone, Camera, Wrench, Sofa, Globe, GraduationCap, Music } from "lucide-react"
+import { EnhancedCategoryCard } from "@/components/enhanced-category-card"
+import { CategoryScrollContainer } from "@/components/category-scroll-container"
+
+export default function CategoryShowcase() {
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+
+  const categories = [
+    { name: "Programming", icon: Code2, count: 120, featured: true },
+    { name: "Design", icon: Palette, count: 85, featured: false },
+    { name: "Business", icon: LineChart, count: 74, featured: true },
+    { name: "Marketing", icon: Megaphone, count: 63, featured: false },
+    { name: "Photography", icon: Camera, count: 42, featured: false },
+    { name: "Home Services", icon: Sofa, count: 38, featured: true },
+    { name: "Technology", icon: Globe, count: 56, featured: false },
+    { name: "Education", icon: GraduationCap, count: 47, featured: false },
+    { name: "Music", icon: Music, count: 31, featured: false },
+    { name: "Repairs", icon: Wrench, count: 29, featured: false },
+  ]
+
+  const handleCategoryClick = (categoryName: string) => {
+    setSelectedCategory(categoryName)
+    // You could add navigation or filtering logic here
+    console.log(`Selected category: ${categoryName}`)
+  }
+
+  return (
+    <section className="py-12 px-4 md:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-10">
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl">
+            Explore Categories
+          </h2>
+          <p className="mt-4 text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            Discover services across various categories tailored to your needs
+          </p>
+        </div>
+
+        <CategoryScrollContainer>
+          {categories.map((category, index) => (
+            <div key={category.name} className="snap-start flex-shrink-0 w-[280px] md:w-[320px] px-3">
+              <EnhancedCategoryCard
+                icon={category.icon}
+                name={category.name}
+                count={category.count}
+                index={index}
+                featured={category.featured}
+                onClick={() => handleCategoryClick(category.name)}
+              />
+            </div>
+          ))}
+        </CategoryScrollContainer>
+      </div>
+    </section>
+  )
+}
