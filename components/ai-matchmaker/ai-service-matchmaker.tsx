@@ -190,9 +190,9 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
             }} />
           </div>
           
-          {/* Modern flatscreen TV - centered and wider */}
+          {/* Modern flatscreen TV - centered and wider (16:9 aspect ratio) */}
           <motion.div 
-            className="relative w-[85%] h-[55%]"
+            className="relative w-[92%] h-[52%]"
             style={{
               background: 'linear-gradient(180deg, #0a0a0a 0%, #000000 100%)',
               borderRadius: '4px',
@@ -699,46 +699,58 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
                   boxShadow: '2px 0 5px rgba(0,0,0,0.2)'
                 }} />
                 
-                {/* TV - realistic proportions */}
+                {/* TV - realistic 16:9 proportions with modern thin bezel design */}
                 <div 
-                  className="absolute left-[42px] top-[-40px] w-[85px] h-[55px] rounded-[4px]"
+                  className="absolute left-[42px] top-[-45px] w-[100px] h-[58px] rounded-[3px]"
                   style={{
-                    background: 'linear-gradient(180deg, #0d0d0d 0%, #000 100%)',
-                    boxShadow: '0 8px 20px rgba(0,0,0,0.45)'
+                    background: 'linear-gradient(180deg, #0a0a0a 0%, #000 100%)',
+                    boxShadow: '0 6px 18px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.3)'
                   }}
                 >
-                  {/* Ultra-thin bezel */}
-                  <div className="absolute inset-[3px] rounded-[2px]" style={{
-                    background: 'linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%)'
+                  {/* Ultra-thin bezel frame */}
+                  <div className="absolute inset-[2px] rounded-[2px]" style={{
+                    background: 'linear-gradient(180deg, #151515 0%, #0a0a0a 100%)'
                   }}>
-                    {/* Screen with content */}
+                    {/* Screen with realistic content */}
                     <div className="absolute inset-[2px] rounded-[1px] overflow-hidden" style={{
-                      background: 'linear-gradient(135deg, #1a2a4a 0%, #0f1829 100%)'
+                      background: 'linear-gradient(135deg, #0f1520 0%, #0a1018 100%)'
                     }}>
-                      {/* Movie scene with warm lighting */}
+                      {/* Realistic movie/content scene */}
                       <motion.div 
                         className="absolute inset-0"
                         animate={{ 
                           background: [
-                            'linear-gradient(135deg, rgba(40,60,80,0.3) 0%, rgba(20,30,50,0.2) 100%)',
-                            'linear-gradient(135deg, rgba(60,50,40,0.3) 0%, rgba(40,30,20,0.2) 100%)',
-                            'linear-gradient(135deg, rgba(40,60,80,0.3) 0%, rgba(20,30,50,0.2) 100%)'
+                            'linear-gradient(135deg, #1a2535 0%, #0f1520 50%, #15202a 100%)',
+                            'linear-gradient(135deg, #252015 0%, #1a1510 50%, #201a12 100%)',
+                            'linear-gradient(135deg, #1a2535 0%, #0f1520 50%, #15202a 100%)'
                           ]
                         }}
-                        transition={{ duration: 4, repeat: Infinity }}
+                        transition={{ duration: 5, repeat: Infinity }}
                       />
-                      {/* UI overlay hint */}
-                      <div className="absolute top-[8%] left-[5%] w-[25%] h-[12%] rounded-sm bg-white/15" />
+                      {/* Screen reflection highlight */}
+                      <div className="absolute top-0 left-0 right-0 h-[20%]" style={{
+                        background: 'linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 100%)'
+                      }} />
+                      {/* Video progress bar hint */}
+                      <div className="absolute bottom-[8%] left-[5%] right-[5%] h-[3%] rounded-full bg-white/10">
+                        <motion.div 
+                          className="h-full rounded-full bg-red-500/70"
+                          animate={{ width: ['30%', '70%', '30%'] }}
+                          transition={{ duration: 8, repeat: Infinity }}
+                        />
+                      </div>
                     </div>
                   </div>
                   
-                  {/* Power indicator */}
-                  <motion.div 
-                    className="absolute bottom-[4px] left-1/2 -translate-x-1/2 w-[4px] h-[4px] rounded-full"
-                    style={{ background: '#00dd00', boxShadow: '0 0 4px #00cc00' }}
-                    animate={{ opacity: [1, 0.5, 1] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  />
+                  {/* Center logo area at bottom */}
+                  <div className="absolute bottom-[3px] left-1/2 -translate-x-1/2 w-[15%] h-[6%] flex items-center justify-center">
+                    <motion.div 
+                      className="w-[5px] h-[5px] rounded-full"
+                      style={{ background: 'radial-gradient(circle, #00cc00 0%, #009900 100%)', boxShadow: '0 0 3px #00aa00' }}
+                      animate={{ opacity: [1, 0.4, 1] }}
+                      transition={{ duration: 2.5, repeat: Infinity }}
+                    />
+                  </div>
                 </div>
               </motion.div>
             </div>
@@ -1210,19 +1222,37 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
             background: 'linear-gradient(180deg, #f5f2ed 0%, #e8e4dd 100%)'
           }} />
           
-          {/* TV mounted on wall - higher position */}
-          <div className="absolute left-1/2 top-[8%] -translate-x-1/2 w-[70%] h-[35%]" style={{
+          {/* TV mounted on wall - realistic modern TV with thin bezel */}
+          <div className="absolute left-1/2 top-[5%] -translate-x-1/2 w-[75%] h-[42%]" style={{
             background: 'linear-gradient(180deg, #0a0a0a 0%, #000 100%)',
             borderRadius: '3px',
             boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
           }}>
-            <div className="absolute inset-[4%] rounded-[2px]" style={{
-              background: 'linear-gradient(135deg, #1a2a4a 0%, #0f1829 100%)'
-            }} />
+            {/* Thin bezel frame */}
+            <div className="absolute inset-[2px] rounded-[2px]" style={{
+              background: 'linear-gradient(180deg, #151515 0%, #0a0a0a 100%)'
+            }}>
+              {/* Screen */}
+              <div className="absolute inset-[2px] rounded-[1px]" style={{
+                background: 'linear-gradient(135deg, #0f1520 0%, #0a1018 100%)'
+              }}>
+                {/* Screen reflection */}
+                <div className="absolute top-0 left-0 right-0 h-[15%]" style={{
+                  background: 'linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 100%)'
+                }} />
+              </div>
+            </div>
+            {/* Power LED */}
+            <motion.div 
+              className="absolute bottom-[4px] left-1/2 -translate-x-1/2 w-[4px] h-[4px] rounded-full"
+              style={{ background: '#00cc00', boxShadow: '0 0 3px #00aa00' }}
+              animate={{ opacity: [1, 0.4, 1] }}
+              transition={{ duration: 2.5, repeat: Infinity }}
+            />
           </div>
           
           {/* Wall cutaway showing inside - cross section view */}
-          <div className="absolute left-[38%] top-[44%] w-[24%] h-[40%] rounded-[2px]" style={{
+          <div className="absolute left-[38%] top-[48%] w-[24%] h-[38%] rounded-[2px]" style={{
             background: 'linear-gradient(90deg, #d4c9b8 0%, #c9bea8 50%, #d4c9b8 100%)',
             boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.15), inset -2px 0 4px rgba(0,0,0,0.15)'
           }}>
@@ -1252,13 +1282,13 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
             </div>
           </div>
           
-          {/* Wall outlet - positioned at floor level */}
-          <div className="absolute left-1/2 bottom-[1%] -translate-x-1/2 w-[14%] h-[8%] rounded-[2px]" style={{
+          {/* Wall outlet - positioned lower near floor */}
+          <div className="absolute left-1/2 bottom-[3%] -translate-x-1/2 w-[12%] h-[7%] rounded-[2px]" style={{
             background: 'linear-gradient(180deg, #f8f8f6 0%, #e8e8e4 100%)',
             boxShadow: '0 1px 3px rgba(0,0,0,0.15)'
           }}>
-            <div className="absolute top-[30%] left-[25%] w-[15%] h-[20%] rounded-sm bg-[#333]" />
-            <div className="absolute top-[30%] right-[25%] w-[15%] h-[20%] rounded-sm bg-[#333]" />
+            <div className="absolute top-[30%] left-[25%] w-[15%] h-[25%] rounded-sm bg-[#333]" />
+            <div className="absolute top-[30%] right-[25%] w-[15%] h-[25%] rounded-sm bg-[#333]" />
           </div>
         </div>
       )
@@ -1271,24 +1301,42 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
             background: 'linear-gradient(180deg, #f5f2ed 0%, #e8e4dd 100%)'
           }} />
           
-          {/* TV mounted on wall - higher position */}
-          <div className="absolute left-1/2 top-[8%] -translate-x-1/2 w-[70%] h-[35%]" style={{
+          {/* TV mounted on wall - realistic modern TV with thin bezel */}
+          <div className="absolute left-1/2 top-[5%] -translate-x-1/2 w-[75%] h-[42%]" style={{
             background: 'linear-gradient(180deg, #0a0a0a 0%, #000 100%)',
             borderRadius: '3px',
             boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
           }}>
-            <div className="absolute inset-[4%] rounded-[2px]" style={{
-              background: 'linear-gradient(135deg, #1a2a4a 0%, #0f1829 100%)'
-            }} />
+            {/* Thin bezel frame */}
+            <div className="absolute inset-[2px] rounded-[2px]" style={{
+              background: 'linear-gradient(180deg, #151515 0%, #0a0a0a 100%)'
+            }}>
+              {/* Screen */}
+              <div className="absolute inset-[2px] rounded-[1px]" style={{
+                background: 'linear-gradient(135deg, #0f1520 0%, #0a1018 100%)'
+              }}>
+                {/* Screen reflection */}
+                <div className="absolute top-0 left-0 right-0 h-[15%]" style={{
+                  background: 'linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 100%)'
+                }} />
+              </div>
+            </div>
+            {/* Power LED */}
+            <motion.div 
+              className="absolute bottom-[4px] left-1/2 -translate-x-1/2 w-[4px] h-[4px] rounded-full"
+              style={{ background: '#00cc00', boxShadow: '0 0 3px #00aa00' }}
+              animate={{ opacity: [1, 0.4, 1] }}
+              transition={{ duration: 2.5, repeat: Infinity }}
+            />
           </div>
           
           {/* Cable cover channel - paintable raceway */}
           <motion.div 
-            className="absolute left-1/2 top-[44%] -translate-x-1/2 w-[8%] rounded-[2px]"
+            className="absolute left-1/2 top-[48%] -translate-x-1/2 w-[8%] rounded-[2px]"
             style={{
               background: 'linear-gradient(90deg, #e8e5e0 0%, #f5f2ed 30%, #f8f6f2 50%, #f5f2ed 70%, #e8e5e0 100%)',
               boxShadow: '1px 1px 3px rgba(0,0,0,0.1), -1px 0 2px rgba(255,255,255,0.5)',
-              height: '42%',
+              height: '38%',
               transformOrigin: 'bottom',
               willChange: 'transform',
               backfaceVisibility: 'hidden'
@@ -1298,13 +1346,13 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
             transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 1 }}
           />
           
-          {/* Wall outlet - positioned at floor level */}
-          <div className="absolute left-1/2 bottom-[1%] -translate-x-1/2 w-[14%] h-[8%] rounded-[2px]" style={{
+          {/* Wall outlet - positioned lower near floor */}
+          <div className="absolute left-1/2 bottom-[3%] -translate-x-1/2 w-[12%] h-[7%] rounded-[2px]" style={{
             background: 'linear-gradient(180deg, #f8f8f6 0%, #e8e8e4 100%)',
             boxShadow: '0 1px 3px rgba(0,0,0,0.15)'
           }}>
-            <div className="absolute top-[30%] left-[25%] w-[15%] h-[20%] rounded-sm bg-[#333]" />
-            <div className="absolute top-[30%] right-[25%] w-[15%] h-[20%] rounded-sm bg-[#333]" />
+            <div className="absolute top-[30%] left-[25%] w-[15%] h-[25%] rounded-sm bg-[#333]" />
+            <div className="absolute top-[30%] right-[25%] w-[15%] h-[25%] rounded-sm bg-[#333]" />
           </div>
         </div>
       )
@@ -1317,22 +1365,40 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
             background: 'linear-gradient(180deg, #f5f2ed 0%, #e8e4dd 100%)'
           }} />
           
-          {/* TV mounted on wall - higher position */}
-          <div className="absolute left-1/2 top-[8%] -translate-x-1/2 w-[70%] h-[35%]" style={{
+          {/* TV mounted on wall - realistic modern TV with thin bezel */}
+          <div className="absolute left-1/2 top-[5%] -translate-x-1/2 w-[75%] h-[42%]" style={{
             background: 'linear-gradient(180deg, #0a0a0a 0%, #000 100%)',
             borderRadius: '3px',
             boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
           }}>
-            <div className="absolute inset-[4%] rounded-[2px]" style={{
-              background: 'linear-gradient(135deg, #1a2a4a 0%, #0f1829 100%)'
-            }} />
+            {/* Thin bezel frame */}
+            <div className="absolute inset-[2px] rounded-[2px]" style={{
+              background: 'linear-gradient(180deg, #151515 0%, #0a0a0a 100%)'
+            }}>
+              {/* Screen */}
+              <div className="absolute inset-[2px] rounded-[1px]" style={{
+                background: 'linear-gradient(135deg, #0f1520 0%, #0a1018 100%)'
+              }}>
+                {/* Screen reflection */}
+                <div className="absolute top-0 left-0 right-0 h-[15%]" style={{
+                  background: 'linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 100%)'
+                }} />
+              </div>
+            </div>
+            {/* Power LED */}
+            <motion.div 
+              className="absolute bottom-[4px] left-1/2 -translate-x-1/2 w-[4px] h-[4px] rounded-full"
+              style={{ background: '#00cc00', boxShadow: '0 0 3px #00aa00' }}
+              animate={{ opacity: [1, 0.4, 1] }}
+              transition={{ duration: 2.5, repeat: Infinity }}
+            />
           </div>
           
           {/* Visible cables hanging - multiple cables */}
-          <svg className="absolute left-1/2 top-[44%] -translate-x-1/2 w-[40%] h-[42%]" viewBox="0 0 40 42" fill="none">
+          <svg className="absolute left-1/2 top-[48%] -translate-x-1/2 w-[40%] h-[38%]" viewBox="0 0 40 38" fill="none">
             {/* Power cable */}
             <motion.path 
-              d="M15 0 Q 10 12, 18 22 Q 26 32, 16 42" 
+              d="M15 0 Q 10 10, 18 19 Q 26 28, 16 38" 
               stroke="#1a1a1a" 
               strokeWidth="1.5" 
               fill="none"
@@ -1342,7 +1408,7 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
             />
             {/* HDMI cable */}
             <motion.path 
-              d="M22 0 Q 28 10, 20 20 Q 12 30, 22 42" 
+              d="M22 0 Q 28 8, 20 17 Q 12 26, 22 38" 
               stroke="#333" 
               strokeWidth="1.2" 
               fill="none"
@@ -1352,13 +1418,13 @@ const OptionVisualPreview = memo(function OptionVisualPreview({ option }: { opti
             />
           </svg>
           
-          {/* Wall outlet - positioned lower */}
-          <div className="absolute left-1/2 bottom-[5%] -translate-x-1/2 w-[16%] h-[10%] rounded-[2px]" style={{
+          {/* Wall outlet - positioned lower near floor */}
+          <div className="absolute left-1/2 bottom-[3%] -translate-x-1/2 w-[12%] h-[7%] rounded-[2px]" style={{
             background: 'linear-gradient(180deg, #f8f8f6 0%, #e8e8e4 100%)',
             boxShadow: '0 1px 3px rgba(0,0,0,0.15)'
           }}>
-            <div className="absolute top-[30%] left-[25%] w-[15%] h-[20%] rounded-sm bg-[#333]" />
-            <div className="absolute top-[30%] right-[25%] w-[15%] h-[20%] rounded-sm bg-[#333]" />
+            <div className="absolute top-[30%] left-[25%] w-[15%] h-[25%] rounded-sm bg-[#333]" />
+            <div className="absolute top-[30%] right-[25%] w-[15%] h-[25%] rounded-sm bg-[#333]" />
           </div>
         </div>
       )
@@ -2739,13 +2805,19 @@ export function AIServiceMatchmaker() {
     }
   }, [])
 
-  // Auto-scroll to bottom when new messages are added
+  // Auto-scroll to show new questions when they're added (but not on initial load)
+  const hasInitializedRef = useRef(false)
   useEffect(() => {
-    if (messagesEndRef.current) {
-      // Small delay to ensure DOM has updated
+    if (messages.length > 1 && messagesEndRef.current) {
+      // Only scroll after initial messages, so page loads at top
+      if (!hasInitializedRef.current) {
+        hasInitializedRef.current = true
+        return
+      }
+      // Delay to ensure DOM has updated with new message
       const timeout = setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
-      }, 100)
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      }, 150)
       return () => clearTimeout(timeout)
     }
   }, [messages])
@@ -3099,11 +3171,8 @@ export function AIServiceMatchmaker() {
     [],
   )
 
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus()
-    }
-  }, [])
+  // Removed auto-focus on load to prevent page scrolling to middle on initial load
+  // Users can click the input to focus when they're ready to type
 
   return (
     <section className="w-full pb-8 md:pb-12 relative overflow-hidden order-first z-20 -mt-8">
