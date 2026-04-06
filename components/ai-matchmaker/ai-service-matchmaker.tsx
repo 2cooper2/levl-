@@ -35,7 +35,7 @@ import { Option3DPreview, THREE_D_OPTIONS } from "@/components/ai-matchmaker/opt
 import dynamic from "next/dynamic"
 const TVSizeMeasure = dynamic(
   () => import("@/components/ai-matchmaker/option-3d-impl").then((m) => ({ default: m.TVSizeMeasure })),
-  { ssr: false, loading: () => <div className="w-full h-full bg-gradient-to-br from-purple-50/60 to-indigo-50/60 animate-pulse rounded-xl" /> }
+  { ssr: false }
 )
 
 
@@ -1054,7 +1054,6 @@ const MessageItem = memo(
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
           layout={false}
-          style={{ transform: 'translateZ(0)', willChange: 'transform, opacity', backfaceVisibility: 'hidden' }}
         >
           <div className="relative bg-gradient-to-br from-lavender-200/95 via-lavender-300/90 to-lavender-200/90 dark:from-lavender-950/95 dark:via-lavender-950/90 dark:to-lavender-950/90 backdrop-blur-sm rounded-2xl px-5 py-3 max-w-[80%] shadow-[0_14px_20px_-3px_rgba(79,70,229,0.3),0_6px_10px_-4px_rgba(79,70,229,0.2),0_-2px_8px_0px_rgba(255,255,255,0.15)] dark:shadow-[0_10px_15px_-3px_rgba(79,70,229,0.3),0_4px_6px_-4px_rgba(0,0,0,0.4),0_-2px_6px_0px_rgba(79,70,229,0.1)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-800/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 translate-y-[-2px] hover:translate-y-[-4px] transition-all duration-300 transform">
             <p className="text-sm text-gray-800 dark:text-gray-100 relative z-10">{message.content}</p>
@@ -1074,7 +1073,6 @@ const MessageItem = memo(
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
           layout={false}
-          style={{ transform: 'translateZ(0)', willChange: 'transform, opacity', backfaceVisibility: 'hidden' }}
         >
           <div className="relative bg-gradient-to-br from-white/95 via-white/90 to-lavender-50/90 dark:from-gray-800/95 dark:via-gray-800/90 dark:to-lavender-950/90 backdrop-blur-sm rounded-2xl px-5 py-3 max-w-[80%] shadow-[0_14px_20px_-3px_rgba(79,70,229,0.3),0_6px_10px_-4px_rgba(79,70,229,0.2),0_-2px_8px_0px_rgba(255,255,255,0.15)] dark:shadow-[0_10px_15px_-3px_rgba(79,70,229,0.3),0_4px_6px_-4px_rgba(0,0,0,0.4),0_-2px_6px_0px_rgba(79,70,229,0.1)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 translate-y-[-4px] transition-all duration-300 transform">
             <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-lavender-500/8 via-purple-500/8 to-violet-500/8 dark:from-lavender-500/15 dark:via-purple-500/15 dark:to-violet-500/15 opacity-80"></div>
@@ -1086,31 +1084,48 @@ const MessageItem = memo(
               <div className="mt-4 relative z-10">
                 {/* Check if any options have 3D previews */}
                 {message.options.some(opt => THREE_D_OPTIONS.has(opt)) ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2" style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden' }}>
+                  // No translateZ/backfaceVisibility here — those fight the Canvas WebGL layer
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {message.options.map((option, index) => {
                       const has3D = THREE_D_OPTIONS.has(option)
                       return (
                 <motion.button
-                key={`${message.id}-${option}-${index}`}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.05, duration: 0.2 }}
-                className={`flex flex-col items-center overflow-hidden bg-white/90 dark:bg-gray-800/90 hover:bg-lavender-100/90 dark:hover:bg-lavender-900/30 rounded-xl text-xs font-medium transition-all duration-200 border border-lavender-200/70 dark:border-lavender-700/50 hover:border-lavender-400 dark:hover:border-lavender-500/70 backdrop-blur-sm hover:shadow-lg ${!has3D ? 'justify-center min-h-[80px]' : ''}`}
-                onClick={() => handleOptionClick(option)}
-                style={{ transform: 'translateZ(0)', willChange: 'transform, opacity', backfaceVisibility: 'hidden' }}
+                  key={`${message.id}-${option}-${index}`}
+                  initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ delay: index * 0.05, type: "spring", stiffness: 260, damping: 20 }}
+                  className={`group relative flex flex-col items-center overflow-hidden
+                    bg-gradient-to-b from-white/95 to-white/80 dark:from-gray-800/95 dark:to-gray-900/80
+                    rounded-2xl text-xs font-semibold
+                    border border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.04)]
+                    backdrop-blur-md transition-all duration-300
+                    hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] hover:border-lavender-400/50
+                    ${!has3D ? 'justify-center min-h-[80px]' : ''}`}
+                  onClick={() => handleOptionClick(option)}
                 >
-                {has3D ? (
-                  <div className="w-full h-28 overflow-hidden rounded-t-xl">
-                    <Option3DPreview option={option} className="w-full h-full" />
+                  {/* Glass reflection overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10" />
+
+                  {has3D ? (
+                    <div className="w-full h-32 overflow-hidden relative">
+                      <Option3DPreview option={option} className="w-full h-full" />
+                    </div>
+                  ) : null}
+
+                  {/* Label strip */}
+                  <div className={`relative w-full py-2.5 px-3 text-center ${has3D ? 'bg-white/40 dark:bg-gray-900/40 backdrop-blur-md border-t border-white/10' : ''}`}>
+                    <span className="bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 bg-clip-text text-transparent">
+                      {option}
+                    </span>
                   </div>
-                ) : null}
-                <span className={`text-center leading-tight px-2 py-1.5 w-full ${has3D ? 'bg-white/80 dark:bg-gray-800/80' : ''}`}>{option}</span>
                 </motion.button>
                       )
                     })}
                   </div>
                 ) : (
-                  <div className="flex flex-wrap gap-2" style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden' }}>
+                  <div className="flex flex-wrap gap-2">
                     {message.options.map((option, index) => (
                       <motion.button
                         key={`${message.id}-${option}-${index}`}
@@ -1119,7 +1134,6 @@ const MessageItem = memo(
                         transition={{ delay: index * 0.05, duration: 0.2 }}
                         className="px-3 py-1.5 bg-white/90 dark:bg-gray-800/90 hover:bg-lavender-100/90 dark:hover:bg-lavender-900/30 rounded-full text-xs font-medium transition-all duration-200 border border-lavender-200/70 dark:border-lavender-700/50 hover:border-lavender-300 dark:hover:border-lavender-600/70 backdrop-blur-sm hover:shadow-md"
                         onClick={() => handleOptionClick(option)}
-                        style={{ transform: 'translateZ(0)', willChange: 'transform, opacity', backfaceVisibility: 'hidden' }}
                       >
                         {option}
                       </motion.button>
@@ -1134,7 +1148,6 @@ const MessageItem = memo(
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3, duration: 0.3 }}
-                    style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden' }}
                   >
                     <TVSizeMeasure />
                     <div className="absolute bottom-2 left-1/2 -translate-x-1/2 pointer-events-none">
@@ -1181,7 +1194,6 @@ const MessageItem = memo(
           exit={{ opacity: 0 }}
           transition={{ duration: 0.15 }}
           layout={false}
-          style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden', willChange: 'opacity' }}
         >
           <div className="flex items-center">
             <LevlLogo className="h-10 w-10 mr-2 drop-shadow-[0_4px_8px_rgba(79,70,229,0.3)] dark:drop-shadow-[0_4px_8px_rgba(79,70,229,0.5)]" />
@@ -1738,15 +1750,15 @@ export function AIServiceMatchmaker() {
                         count={0}
                         index={index}
                         size="small"
-                        className="w-36 h-32 my-2 mx-1 rounded-xl overflow-hidden transition-all duration-300 
-bg-gradient-to-br from-white/95 via-white/90 to-indigo-50/90 dark:from-gray-800/95 dark:via-gray-800/90 dark:to-indigo-950/90 
-backdrop-blur-sm 
-shadow-[0_14px_20px_-3px_rgba(79,70,229,0.3),0_6px_10px_-4px_rgba(79,70,229,0.2),0_-2px_8px_0px_rgba(255,255,255,0.15)] 
-dark:shadow-[0_10px_15px_-3px_rgba(79,70,229,0.3),0_4px_6px_-4px_rgba(0,0,0,0.4),0_-2px_6px_0px_rgba(79,70,229,0.1)] 
-hover:shadow-[0_18px_25px_-5px_rgba(79,70,229,0.4),0_10px_15px_-5px_rgba(79,70,229,0.3),0_-2px_10px_0px_rgba(255,255,255,0.2)] 
-dark:hover:shadow-[0_15px_20px_-3px_rgba(79,70,229,0.4),0_8px_12px_-4px_rgba(0,0,0,0.5),0_-2px_8px_0px_rgba(79,70,229,0.2)] 
-border-t border-l border-r border-indigo-100/70 dark:border-t dark:border-l dark:border-r dark:border-indigo-700/40 
-border-b-2 border-b-indigo-200/80 dark:border-b-2 dark:border-b-indigo-800/80 
+                        className="w-36 h-32 my-2 mx-1 rounded-xl overflow-hidden transition-all duration-300
+bg-gradient-to-br from-white/95 via-white/90 to-indigo-50/90 dark:from-gray-800/95 dark:via-gray-800/90 dark:to-indigo-950/90
+backdrop-blur-sm
+shadow-[0_14px_20px_-3px_rgba(79,70,229,0.3),0_6px_10px_-4px_rgba(79,70,229,0.2),0_-2px_8px_0px_rgba(255,255,255,0.15)]
+dark:shadow-[0_10px_15px_-3px_rgba(79,70,229,0.3),0_4px_6px_-4px_rgba(0,0,0,0.4),0_-2px_6px_0px_rgba(79,70,229,0.1)]
+hover:shadow-[0_18px_25px_-5px_rgba(79,70,229,0.4),0_10px_15px_-5px_rgba(79,70,229,0.3),0_-2px_10px_0px_rgba(255,255,255,0.2)]
+dark:hover:shadow-[0_15px_20px_-3px_rgba(79,70,229,0.4),0_8px_12px_-4px_rgba(0,0,0,0.5),0_-2px_8px_0px_rgba(79,70,229,0.2)]
+border-t border-l border-r border-indigo-100/70 dark:border-t dark:border-l dark:border-r dark:border-indigo-700/40
+border-b-2 border-b-indigo-200/80 dark:border-b-2 dark:border-b-indigo-800/80
 translate-y-[-4px] hover:translate-y-[-8px]"
                         onClick={() => handleCategoryClick(category.serviceType)}
                       />
@@ -1763,10 +1775,6 @@ translate-y-[-4px] hover:translate-y-[-8px]"
               style={{
                 scrollbarWidth: "thin",
                 scrollbarColor: "rgba(79, 70, 229, 0.2) transparent",
-                transform: "translateZ(0)",
-                backfaceVisibility: "hidden",
-                perspective: 1000,
-                willChange: "scroll-position",
               }}
             >
               <style jsx>{`
@@ -1782,7 +1790,7 @@ translate-y-[-4px] hover:translate-y-[-8px]"
                   background: rgba(79, 70, 229, 0.4);
                 }
               `}</style>
-              <div className="space-y-6 w-full" style={{ transform: "translateZ(0)", backfaceVisibility: "hidden" }}>
+              <div className="space-y-6 w-full">
                 <AnimatePresence mode="sync" initial={false}>
                   {messages.map((message) => (
                     <MessageItem

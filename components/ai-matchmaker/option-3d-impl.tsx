@@ -34,8 +34,11 @@ function mkGunmetal(roughness = 0.22): THREE.MeshPhysicalMaterial {
     clearcoat: 0.3, clearcoatRoughness: 0.18, envMapIntensity: 1.4,
   })
 }
-function mkBrushedSteel(): THREE.MeshStandardMaterial {
-  return new THREE.MeshStandardMaterial({ color: C.steel, metalness: 0.96, roughness: 0.28, envMapIntensity: 1.6 })
+function mkBrushedSteel(): THREE.MeshPhysicalMaterial {
+  return new THREE.MeshPhysicalMaterial({
+    color: C.steel, metalness: 0.9, roughness: 0.2,
+    clearcoat: 0.4, clearcoatRoughness: 0.12, envMapIntensity: 1.8,
+  })
 }
 function mkGold(): THREE.MeshPhysicalMaterial {
   return new THREE.MeshPhysicalMaterial({
@@ -172,12 +175,11 @@ function drawDrywallColor(ctx: CanvasRenderingContext2D, w: number, h: number) {
 }
 
 function usePBRWall(colorFn: DrawFn, bumpFn: DrawFn | null, repeat: [number, number] = [1, 1]) {
-  return useMemo(() => {
-    const color = buildTex(colorFn, 512, 512, repeat)
-    const bump  = bumpFn ? buildTex(bumpFn, 512, 512, repeat) : null
-    return { color, bump }
+  return useMemo(() => ({
+    color: buildTex(colorFn, 512, 512, repeat),
+    bump:  bumpFn ? buildTex(bumpFn, 512, 512, repeat) : null,
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }), [])
 }
 
 // ─── Shared primitives ────────────────────────────────────────────────────────
@@ -287,10 +289,10 @@ function TVPanel({ children }: { children?: React.ReactNode }) {
 function Wall({ color = "#e8e4dd", tex }: { color?: string; tex?: THREE.Texture }) {
   return (
     <mesh receiveShadow position={[0, 0.2, -0.12]}>
-      <boxGeometry args={[10, 5.0, 0.18]} />
+      <boxGeometry args={[100, 100, 0.18]} />
       {tex
-        ? <meshStandardMaterial map={tex} roughness={0.92} />
-        : <meshStandardMaterial color={color} roughness={0.92} />}
+        ? <meshPhysicalMaterial map={tex} roughness={0.8} metalness={0.0} clearcoat={0.04} clearcoatRoughness={0.5} />
+        : <meshPhysicalMaterial color={color} roughness={0.8} metalness={0.0} clearcoat={0.04} clearcoatRoughness={0.5} />}
     </mesh>
   )
 }
@@ -299,8 +301,8 @@ function Wall({ color = "#e8e4dd", tex }: { color?: string; tex?: THREE.Texture 
 function Floor({ color = "#d8d4cc" }: { color?: string }) {
   return (
     <mesh receiveShadow position={[0, -1.10, 1.0]} rotation={[-Math.PI / 2, 0, 0]}>
-      <planeGeometry args={[10, 5.0]} />
-      <meshStandardMaterial color={color} roughness={0.88} />
+      <planeGeometry args={[100, 100, 32, 32]} />
+      <meshPhysicalMaterial color={color} roughness={0.8} metalness={0.0} clearcoat={0.06} clearcoatRoughness={0.6} />
     </mesh>
   )
 }
@@ -308,14 +310,17 @@ function Floor({ color = "#d8d4cc" }: { color?: string }) {
 function Lights() {
   return (
     <>
-      <hemisphereLight args={["#ddeeff", "#f0ede6", 0.32]} />
-      <directionalLight position={[3.5, 5.5, 4.5]} intensity={1.35} castShadow
-        shadow-mapSize={[1024, 1024]} shadow-camera-near={0.1} shadow-camera-far={24}
+      <hemisphereLight args={["#cce4ff", "#f0ede6", 0.45]} />
+      {/* Key light — warm overhead, strong enough to read chrome detail */}
+      <directionalLight position={[3.5, 5.5, 4.5]} intensity={1.8} castShadow
+        shadow-mapSize={[2048, 2048]} shadow-camera-near={0.1} shadow-camera-far={24}
         shadow-camera-left={-3.5} shadow-camera-right={3.5}
         shadow-camera-top={3.5} shadow-camera-bottom={-3.5}
-        shadow-bias={-0.0008} shadow-normalBias={0.02} color="#fff6ec" />
-      <pointLight position={[-3, -1.5, 3]} intensity={0.3} color="#ffe8cc" />
-      <pointLight position={[2.5, 1, -1]} intensity={0.22} color="#c8a4ff" />
+        shadow-bias={-0.0006} shadow-normalBias={0.018} color="#fff2e8" />
+      {/* Fill light — cool rim that separates gunmetal from background */}
+      <directionalLight position={[-4, 2, 3]} intensity={0.6} color="#c8d8ff" />
+      <pointLight position={[-3, -1.5, 3]} intensity={0.5} color="#ffe8cc" />
+      <pointLight position={[2.5, 1, -1]} intensity={0.35} color="#c8a4ff" />
     </>
   )
 }
@@ -333,20 +338,20 @@ function TiltingCamRig() {
     const cycle = clock.elapsedTime % 12.5
     let x: number, z: number
     if (cycle < 4.5) {
-      x = 2.0; z = 0.55               // tight side — full hardware detail
+      x = 1.75; z = 0.48              // intimate side — full hardware detail
     } else if (cycle < 6.5) {
       const p = smoothstep((cycle - 4.5) / 2.0)
-      x = 2.0 * (1 - p); z = 0.55 + p * 1.65
+      x = 1.75 * (1 - p); z = 0.48 + p * 1.32
     } else if (cycle < 10.5) {
-      x = 0; z = 2.20                 // intimate front view
+      x = 0; z = 1.80                 // close front view — TV fills frame
     } else if (cycle < 12.5) {
       const p = smoothstep((cycle - 10.5) / 2.0)
-      x = 2.0 * p; z = 2.20 - p * 1.65
+      x = 1.75 * p; z = 1.80 - p * 1.32
     } else {
-      x = 2.0; z = 0.55
+      x = 1.75; z = 0.48
     }
-    camera.position.set(x, 0.18, z)
-    camera.lookAt(0, 0.08, 0)
+    camera.position.set(x, 0.15, z)
+    camera.lookAt(0, 0.06, 0)
   })
   return null
 }
@@ -362,19 +367,19 @@ function FullMotionCamRig() {
     const cycle = clock.elapsedTime % 12.5
     let x: number, z: number
     if (cycle < 5.0) {
-      x = 1.75; z = 0.55              // tight side — arm kinematics readable
+      x = 1.55; z = 0.48              // intimate side — IK arm kinematics fully readable
     } else if (cycle < 7.0) {
       const p = smoothstep((cycle - 5.0) / 2.0)
-      x = 1.75 * (1 - p); z = 0.55 + p * 1.65
+      x = 1.55 * (1 - p); z = 0.48 + p * 1.32
     } else if (cycle < 10.5) {
-      x = 0; z = 2.20                 // front — TV fills frame
+      x = 0; z = 1.80                 // close front — TV fills frame edge-to-edge
     } else if (cycle < 12.5) {
       const p = smoothstep((cycle - 10.5) / 2.0)
-      x = 1.75 * p; z = 2.20 - p * 1.65
+      x = 1.55 * p; z = 1.80 - p * 1.32
     } else {
-      x = 1.75; z = 0.55
+      x = 1.55; z = 0.48
     }
-    camera.position.set(x, 0.28, z)
+    camera.position.set(x, 0.22, z)
     camera.lookAt(0, 0, 0)
   })
   return null
@@ -394,7 +399,7 @@ function FixedScene() {
           {[-0.06, -0.02, 0.02, 0.06].map((y) => (
             <mesh key={y} position={[0, y, 0]}>
               <boxGeometry args={[0.062, 0.003, 0.18]} />
-              <meshStandardMaterial color="#b0b4c0" metalness={0.9} roughness={0.35} />
+              <meshPhysicalMaterial color="#b0b4c0" metalness={0.9} roughness={0.2} clearcoat={0.3} clearcoatRoughness={0.15} />
             </mesh>
           ))}
         </group>
@@ -427,8 +432,8 @@ function TiltingScene() {
     <group>
       {/* Solid wall slab for side-view depth */}
       <mesh receiveShadow position={[0, 0, -0.12]}>
-        <boxGeometry args={[10, 5.0, 0.18]} />
-        <meshStandardMaterial color="#e8e4dd" roughness={0.92} />
+        <boxGeometry args={[100, 100, 0.18]} />
+        <meshPhysicalMaterial color="#e8e4dd" roughness={0.8} metalness={0.0} clearcoat={0.04} clearcoatRoughness={0.5} />
       </mesh>
       {/* Floor */}
       <Floor color="#d4d0c8" />
@@ -580,13 +585,13 @@ function CeilingScene() {
     <group>
       {/* Ceiling slab */}
       <mesh receiveShadow position={[0, 1.30, -0.06]} rotation={[Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[4.6, 2.0]} />
-        <meshStandardMaterial color="#f0ece4" roughness={0.95} />
+        <planeGeometry args={[100, 100, 16, 16]} />
+        <meshPhysicalMaterial color="#f0ece4" roughness={0.8} metalness={0.0} clearcoat={0.05} clearcoatRoughness={0.6} />
       </mesh>
       {/* Ceiling cornice strip */}
       <mesh position={[0, 1.285, -0.01]}>
-        <boxGeometry args={[4.6, 0.028, 0.058]} />
-        <meshStandardMaterial color="#e8e4dc" roughness={0.92} />
+        <boxGeometry args={[100, 0.028, 0.058]} />
+        <meshPhysicalMaterial color="#e8e4dc" roughness={0.8} metalness={0.0} />
       </mesh>
       <Wall />
       <Floor color="#d2cec6" />
@@ -761,7 +766,12 @@ function TVSizeMeasureScene() {
   )
   const screenEmissive = useMemo(() => new THREE.Color("#0a1830"), [])
   const tapeMat = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: "#f5c518", emissive: "#b08800", emissiveIntensity: 0.45, roughness: 0.30 }), []
+    () => new THREE.MeshPhysicalMaterial({
+      color: "#f5c518", emissive: "#8a6000", emissiveIntensity: 0.25,
+      roughness: 0.12, metalness: 0.05,
+      clearcoat: 1.0, clearcoatRoughness: 0.04,
+      envMapIntensity: 1.6,
+    }), []
   )
   const tickMat = useMemo(
     () => new THREE.MeshStandardMaterial({ color: "#ffffff", roughness: 0.6, transparent: true, opacity: 0.85, depthWrite: false }), []
@@ -1113,7 +1123,7 @@ function LightFixtureScene() {
     <group>
       <Wall color="#e2dfd7" />
       <mesh receiveShadow position={[0, 1.40, -0.08]} rotation={[Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[4.6, 1.8]} /><meshStandardMaterial color="#f0ece4" roughness={0.95} />
+        <planeGeometry args={[100, 100, 16, 16]} /><meshPhysicalMaterial color="#f0ece4" roughness={0.8} metalness={0.0} clearcoat={0.05} clearcoatRoughness={0.6} />
       </mesh>
       <Floor color="#cac6be" />
       <mesh position={[0, 1.34, 0.01]} castShadow><cylinderGeometry args={[0.10, 0.095, 0.030, 20]} /><primitive object={chromeMat} /></mesh>
@@ -1150,7 +1160,7 @@ function LightFixtureScene() {
 // ─── Wall-texture scenes ──────────────────────────────────────────────────────
 
 function WallTexScene({
-  colorFn, bumpFn, roughness = 0.88, metalness = 0,
+  colorFn, bumpFn, roughness = 0.8, metalness = 0,
   bumpScale = 0.07, repeat = [1, 1] as [number, number],
 }: {
   colorFn: DrawFn; bumpFn?: DrawFn | null
@@ -1160,14 +1170,29 @@ function WallTexScene({
   const { color, bump } = usePBRWall(colorFn, bumpFn ?? null, repeat)
   return (
     <group>
-      {/* Full-coverage textured wall box — no void at any aspect ratio */}
       <mesh receiveShadow position={[0, 0.2, -0.12]}>
-        <boxGeometry args={[10, 5.0, 0.18]} />
-        <meshStandardMaterial map={color} bumpMap={bump ?? undefined} bumpScale={bumpScale} roughness={roughness} metalness={metalness} />
+        <planeGeometry args={[10, 10, 64, 64]} />
+        <meshPhysicalMaterial
+          map={color}
+          bumpMap={bump ?? undefined}
+          bumpScale={bumpScale}
+          displacementMap={bump ?? undefined}
+          displacementScale={bumpScale * 0.9}
+          roughness={roughness}
+          metalness={metalness}
+          clearcoat={0.03}
+          clearcoatRoughness={0.55}
+          envMapIntensity={0.8}
+        />
+      </mesh>
+      {/* Background fill box — catches any viewport edges beyond the plane */}
+      <mesh receiveShadow position={[0, 0.2, -0.20]}>
+        <boxGeometry args={[100, 100, 0.04]} />
+        <meshPhysicalMaterial color="#e2ddd6" roughness={0.8} metalness={0.0} />
       </mesh>
       <Floor color="#ccc8c0" />
       {/* Subtle edge trim */}
-      <mesh position={[0, 1.4, -0.02]}><boxGeometry args={[10, 0.018, 0.10]} /><meshStandardMaterial color="#1a1714" roughness={0.9} /></mesh>
+      <mesh position={[0, 1.4, -0.02]}><boxGeometry args={[100, 0.018, 0.10]} /><meshPhysicalMaterial color="#1a1714" roughness={0.8} metalness={0.1} /></mesh>
     </group>
   )
 }
@@ -1620,18 +1645,18 @@ function VisibleCablesScene() {
 type CamCfg = { pos: [number, number, number]; fov: number }
 
 const CAM = {
-  // Tight intimate framing — subject fills 65–80 % of frame
-  mount:   { pos: [0,    0.10, 2.10], fov: 48 } as CamCfg,
-  wall:    { pos: [0.20, 0.25, 1.65], fov: 54 } as CamCfg,
-  item:    { pos: [0,    0.06, 2.00], fov: 48 } as CamCfg,
-  cable:   { pos: [0,   -0.04, 2.30], fov: 50 } as CamCfg,
-  ceil:    { pos: [0.06, 0.38, 2.40], fov: 54 } as CamCfg,
-  // CamRig scenes: initial pos matches the rig's starting frame
-  fullmo:  { pos: [1.75, 0.28, 0.55], fov: 52 } as CamCfg,
-  tilt:    { pos: [2.00, 0.18, 0.55], fov: 50 } as CamCfg,
-  mirror:  { pos: [0,    0.06, 2.10], fov: 50 } as CamCfg,
-  light:   { pos: [0,    0.22, 2.20], fov: 54 } as CamCfg,
-  measure: { pos: [0,    0.04, 2.10], fov: 50 } as CamCfg,
+  // Intimate close-up — z=1.8 across the board for maximum detail
+  mount:   { pos: [0,    0.10, 1.80], fov: 44 } as CamCfg,
+  wall:    { pos: [0.10, 0.18, 1.80], fov: 46 } as CamCfg,
+  item:    { pos: [0,    0.06, 1.80], fov: 44 } as CamCfg,
+  cable:   { pos: [0,   -0.04, 1.80], fov: 46 } as CamCfg,
+  ceil:    { pos: [0.06, 0.28, 1.95], fov: 48 } as CamCfg,
+  // CamRig scenes: initial pos matches the rig's starting side-view frame
+  fullmo:  { pos: [1.55, 0.22, 0.48], fov: 50 } as CamCfg,
+  tilt:    { pos: [1.75, 0.15, 0.48], fov: 48 } as CamCfg,
+  mirror:  { pos: [0,    0.06, 1.80], fov: 46 } as CamCfg,
+  light:   { pos: [0,    0.16, 1.80], fov: 46 } as CamCfg,
+  measure: { pos: [0,    0.04, 1.80], fov: 44 } as CamCfg,
 }
 
 function resolveScene(option: string): { scene: JSX.Element; cam: CamCfg; env: string } {
@@ -1681,30 +1706,58 @@ function resolveScene(option: string): { scene: JSX.Element; cam: CamCfg; env: s
 
 // ─── Shared Canvas wrapper ────────────────────────────────────────────────────
 
-function SceneCanvas({ option, cam, env, scene }: { option: string; cam: CamCfg; env: string; scene: JSX.Element }) {
+function SceneCanvas({
+  cam, scene, thumbnail = false,
+}: {
+  cam: CamCfg; scene: JSX.Element; thumbnail?: boolean
+}) {
   return (
     <Canvas
-      shadows={{ type: THREE.PCFSoftShadowMap }}
-      dpr={[1, 1.6]}
-      gl={{ antialias: true, alpha: false, powerPreference: "default", stencil: false }}
+      shadows={!thumbnail}
+      dpr={thumbnail ? 1 : [1, 2]}
+      gl={{
+        antialias: true,
+        toneMapping: THREE.ACESFilmicToneMapping,
+        outputColorSpace: THREE.SRGBColorSpace,
+        powerPreference: "high-performance",
+      }}
       style={{ width: "100%", height: "100%" }}
-      performance={{ min: 0.5 }}
+      performance={{ min: 1, debounce: 200 }}
     >
-      {/* Sets the WebGL clear color — prevents black voids on wide aspect ratios */}
       <color attach="background" args={["#f9f8f6"]} />
-      <PerspectiveCamera makeDefault position={cam.pos} fov={cam.fov} near={0.05} far={40} />
-      <Lights />
+      <PerspectiveCamera makeDefault position={cam.pos} fov={cam.fov} near={0.05} far={200} />
+
+      {thumbnail ? (
+        <>
+          <ambientLight intensity={0.7} />
+          <directionalLight position={[3, 5, 4]} intensity={1.4} color="#fff2e8" />
+          <pointLight position={[-3, -1, 3]} intensity={0.3} color="#c8a4ff" />
+        </>
+      ) : (
+        <>
+          <ambientLight intensity={0.5} />
+          <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow
+            shadow-mapSize={[1024, 1024]} />
+          <pointLight position={[-10, -10, -10]} intensity={0.5} color="#818cf8" />
+          <Lights />
+        </>
+      )}
+
       {scene}
-      <Environment preset={env as "city" | "apartment"} />
+      <Environment preset="city" />
     </Canvas>
   )
 }
 
 // ─── Public exports ───────────────────────────────────────────────────────────
 
-export function Option3DImpl({ option }: { option: string }) {
-  const { scene, cam, env } = resolveScene(option)
-  return <SceneCanvas option={option} cam={cam} env={env} scene={scene} />
+export function Option3DImpl({
+  option, thumbnail,
+}: {
+  option: string; thumbnail?: boolean
+}) {
+  const { scene, cam } = resolveScene(option)
+  return <SceneCanvas cam={cam} scene={scene} thumbnail={thumbnail} />
 }
 
 /**
@@ -1712,6 +1765,6 @@ export function Option3DImpl({ option }: { option: string }) {
  * Drop this anywhere with a fixed height (e.g. h-56 / h-64).
  */
 export function TVSizeMeasure() {
-  const { scene, cam, env } = resolveScene("__tv_measure")
-  return <SceneCanvas option="__tv_measure" cam={cam} env={env} scene={scene} />
+  const { scene, cam } = resolveScene("__tv_measure")
+  return <SceneCanvas cam={cam} env="city" scene={scene} />
 }
