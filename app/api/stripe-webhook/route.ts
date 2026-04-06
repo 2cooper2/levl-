@@ -2,15 +2,13 @@ import { NextResponse } from "next/server"
 import Stripe from "stripe"
 import { createServerDatabaseClient } from "@/lib/database"
 
-// Initialize Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2023-10-16",
-})
-
-// Get the webhook secret from environment variables
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
-
 export async function POST(req: Request) {
+  // Initialize inside handler so env vars are available at runtime, not build time
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
+    apiVersion: "2023-10-16",
+  })
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+
   try {
     const signature = req.headers.get("stripe-signature")
 

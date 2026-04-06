@@ -5,19 +5,11 @@ import { createServerClient } from "@/lib/supabase-server"
 import { cookies } from "next/headers"
 import { randomUUID } from "crypto"
 
-// Initialize Stripe with the secret key
-let stripe: Stripe
-try {
-  const stripeSecretKey = process.env.STRIPE_SECRET_KEY
-  if (!stripeSecretKey) {
-    throw new Error("STRIPE_SECRET_KEY is not set")
-  }
-  stripe = new Stripe(stripeSecretKey, {
-    apiVersion: "2023-10-16",
-  })
-} catch (error) {
-  console.error("Failed to initialize Stripe:", error)
-  // We'll handle this in the functions that use stripe
+// Lazy Stripe getter — initializes only at runtime, never at build time
+function getStripe(): Stripe {
+  const key = process.env.STRIPE_SECRET_KEY
+  if (!key) throw new Error("STRIPE_SECRET_KEY is not set")
+  return new Stripe(key, { apiVersion: "2023-10-16" })
 }
 
 // Environment flag to enable direct payments for testing
@@ -62,7 +54,7 @@ async function getTransactionHistory(
 
 async function createConnectedAccount(userId: string, email: string): Promise<{ accountId?: string; error?: string }> {
   try {
-    const account = await stripe.accounts.create({
+    const account = await getStripe().accounts.create({
       type: "express",
       email: email,
       metadata: {
@@ -98,7 +90,7 @@ async function createConnectedAccount(userId: string, email: string): Promise<{ 
 
 async function createAccountLink(accountId: string, refreshUrl: string): Promise<{ url?: string; error?: string }> {
   try {
-    const accountLink = await stripe.accountLinks.create({
+    const accountLink = await getStripe().accountLinks.create({
       account: accountId,
       refresh_url: refreshUrl,
       return_url: refreshUrl,
@@ -193,7 +185,7 @@ async function getConnectedAccountStatus(userId: string): Promise<{
 
 async function createDashboardLink(accountId: string): Promise<{ url?: string; error?: string }> {
   try {
-    const dashboardLink = await stripe.accounts.createLoginLink(accountId)
+    const dashboardLink = await getStripe().accounts.createLoginLink(accountId)
     return { url: dashboardLink.url }
   } catch (error: any) {
     console.error("Error creating dashboard link:", error)
@@ -203,7 +195,7 @@ async function createDashboardLink(accountId: string): Promise<{ url?: string; e
 
 async function updateConnectedAccountStatus(userId: string, accountId: string): Promise<void> {
   try {
-    const account = await stripe.accounts.retrieve(accountId)
+    const account = await getStripe().accounts.retrieve(accountId)
 
     const supabase = createServerClient({ cookies })
     if (!supabase) {
@@ -351,7 +343,7 @@ async function createPaymentIntent({
     }
 
     // Create the payment intent
-    const paymentIntent = await stripe.paymentIntents.create(params)
+    const paymentIntent = await getStripe().paymentIntents.create(params)
 
     // Generate a transaction ID
     const transactionId = randomUUID()
