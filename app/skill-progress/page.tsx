@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"
+
 import { redirect } from "next/navigation"
 import { DashboardShell } from "@/components/dashboard/dashboard-shell"
 import { DashboardHeader } from "@/components/dashboard/dashboard-header"
