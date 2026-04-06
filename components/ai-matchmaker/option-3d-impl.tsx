@@ -1766,5 +1766,5 @@ export function Option3DImpl({
  */
 export function TVSizeMeasure() {
   const { scene, cam } = resolveScene("__tv_measure")
-  return <SceneCanvas cam={cam} env="city" scene={scene} />
+  return <SceneCanvas cam={cam} scene={scene} />
 }
