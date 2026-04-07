@@ -1,12 +1,12 @@
 export const dynamic = "force-dynamic"
 
 import { NextResponse } from "next/server"
-import Stripe from "stripe"
 import { createServerDatabaseClient } from "@/lib/database"
 
 export async function POST(req: Request) {
-  // Initialize inside handler so env vars are available at runtime, not build time
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
+  // Dynamic import ensures Stripe is never loaded at build time
+  const { default: Stripe } = await import("stripe")
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: "2023-10-16",
   })
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
