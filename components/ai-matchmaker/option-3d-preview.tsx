@@ -1,7 +1,7 @@
 "use client"
 
 import dynamic from "next/dynamic"
-import { memo, Suspense, useState, useEffect, Component, type ReactNode } from "react"
+import { memo, Suspense, useState, useEffect, useRef, Component, type ReactNode } from "react"
 import { motion } from "framer-motion"
 
 class WebGLErrorBoundary extends Component<{ children: ReactNode; fallback?: ReactNode }, { failed: boolean }> {
@@ -43,6 +43,9 @@ export const THREE_D_OPTIONS = new Set([
 
 // ─── Option3DPreview ─────────────────────────────────────────────────────────
 // memo() — Canvas identity is preserved across parent re-renders.
+// IntersectionObserver unmounts the WebGL canvas when off-screen to free GPU
+// resources, preventing mobile crashes after 20-30 seconds of use.
+// The card container (background + label) always stays visible — seamless.
 export const Option3DPreview = memo(function Option3DPreview({
   option,
   className,
@@ -51,32 +54,50 @@ export const Option3DPreview = memo(function Option3DPreview({
   className?: string
 }) {
   const [mounted, setMounted] = useState(false)
+  const [inView, setInView] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => { setMounted(true) }, [])
 
-  if (!mounted) return null
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { rootMargin: "120px 0px" } // preload 120px before card enters viewport
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   return (
-    <motion.div
-      className={`relative w-full h-full cursor-pointer ${className ?? ""}`}
-      whileHover="hover"
-      initial="initial"
-    >
-      <motion.div
-        variants={{
-          initial: { rotateX: 0, rotateY: 0, scale: 1 },
-          hover:   { rotateX: 5, rotateY: -8, scale: 1.05 },
-        }}
-        style={{ transformStyle: "preserve-3d", perspective: 1200 }}
-        transition={{ type: "spring", stiffness: 150, damping: 20 }}
-        className="w-full h-full"
-      >
-        <WebGLErrorBoundary>
-          <Suspense fallback={null}>
-            <Option3DImpl option={option} />
-          </Suspense>
-        </WebGLErrorBoundary>
-      </motion.div>
-    </motion.div>
+    <div ref={containerRef} className={`relative w-full h-full ${className ?? ""}`}>
+      {mounted && (
+        <motion.div
+          className="relative w-full h-full cursor-pointer"
+          whileHover="hover"
+          initial="initial"
+        >
+          <motion.div
+            variants={{
+              initial: { rotateX: 0, rotateY: 0, scale: 1 },
+              hover:   { rotateX: 5, rotateY: -8, scale: 1.05 },
+            }}
+            style={{ transformStyle: "preserve-3d", perspective: 1200 }}
+            transition={{ type: "spring", stiffness: 150, damping: 20 }}
+            className="w-full h-full"
+          >
+            {inView && (
+              <WebGLErrorBoundary>
+                <Suspense fallback={null}>
+                  <Option3DImpl option={option} />
+                </Suspense>
+              </WebGLErrorBoundary>
+            )}
+          </motion.div>
+        </motion.div>
+      )}
+    </div>
   )
 })
 
@@ -91,10 +112,25 @@ export const CategoryCard3D = memo(function CategoryCard3D({
   onClick?: () => void
 }) {
   const [mounted, setMounted] = useState(false)
+  const [inView, setInView] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => { setMounted(true) }, [])
+
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { rootMargin: "120px 0px" }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   return (
     <motion.button
+      ref={containerRef as any}
       onClick={onClick}
       initial={{ opacity: 0, y: 16, scale: 0.96 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
@@ -116,13 +152,13 @@ export const CategoryCard3D = memo(function CategoryCard3D({
                       opacity-0 group-hover:opacity-100 transition-opacity duration-200
                       pointer-events-none z-10 rounded-2xl" />
       <div className="relative w-full" style={{ height: "72%" }}>
-        {mounted ? (
+        {mounted && inView && (
           <WebGLErrorBoundary>
             <Suspense fallback={null}>
               <Option3DImpl option={option} thumbnail />
             </Suspense>
           </WebGLErrorBoundary>
-        ) : null}
+        )}
       </div>
       <div className="flex items-center justify-center w-full flex-1
                       bg-white/50 dark:bg-gray-900/50
