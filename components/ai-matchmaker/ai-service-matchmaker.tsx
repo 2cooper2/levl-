@@ -1109,7 +1109,7 @@ const MessageItem = memo(
                   <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10" />
 
                   {has3D ? (
-                    <div className="w-full h-32 overflow-hidden relative">
+                    <div className="w-full h-24 sm:h-32 overflow-hidden relative">
                       <Option3DPreview option={option} className="w-full h-full" />
                     </div>
                   ) : null}
@@ -1144,7 +1144,7 @@ const MessageItem = memo(
                 {/* 3D TV size illustration */}
                 {message.content === "What size is your TV?" && (
                   <motion.div
-                    className="mt-4 relative w-full h-64 overflow-hidden rounded-xl border border-lavender-200/70"
+                    className="mt-4 relative w-full h-44 sm:h-64 overflow-hidden rounded-xl border border-lavender-200/70"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3, duration: 0.3 }}

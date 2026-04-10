@@ -334,8 +334,10 @@ function Lights() {
  * Cycle: 4.5 s side | 2 s pan | 4 s front | 2 s return = 12.5 s
  */
 function TiltingCamRig() {
+  const startRef = useRef<number | null>(null)
   useFrame(({ camera, clock }) => {
-    const cycle = clock.elapsedTime % 12.5
+    if (startRef.current === null) startRef.current = clock.elapsedTime
+    const cycle = (clock.elapsedTime - startRef.current) % 12.5
     let x: number, z: number
     if (cycle < 4.5) {
       x = 1.75; z = 0.48              // intimate side — full hardware detail
@@ -363,8 +365,10 @@ function TiltingCamRig() {
  * Cycle: 5 s side | 2 s pan | 3.5 s front | 2 s return = 12.5 s
  */
 function FullMotionCamRig() {
+  const startRef = useRef<number | null>(null)
   useFrame(({ camera, clock }) => {
-    const cycle = clock.elapsedTime % 12.5
+    if (startRef.current === null) startRef.current = clock.elapsedTime
+    const cycle = (clock.elapsedTime - startRef.current) % 12.5
     let x: number, z: number
     if (cycle < 5.0) {
       x = 1.55; z = 0.48              // intimate side — IK arm kinematics fully readable
@@ -852,7 +856,7 @@ function TVSizeMeasureScene() {
       >
         {/* Tape body — left edge fixed at group origin, grows rightward */}
         <mesh position={[diagLen / 2, 0, 0]} castShadow>
-          <boxGeometry args={[diagLen, 0.014, 0.005]} /><primitive object={tapeMat} />
+          <boxGeometry args={[diagLen, 0.022, 0.005]} /><primitive object={tapeMat} />
         </mesh>
         {/* Tick marks at even intervals */}
         {Array.from({ length: TICKS }, (_, i) => {
@@ -860,7 +864,7 @@ function TVSizeMeasureScene() {
           const isMid = i === Math.floor(TICKS / 2)
           return (
             <mesh key={i} position={[diagLen * frac, 0, 0.005]}>
-              <boxGeometry args={[0.004, isMid ? 0.040 : 0.024, 0.003]} />
+              <boxGeometry args={[0.005, isMid ? 0.050 : 0.032, 0.003]} />
               <primitive object={tickMat} />
             </mesh>
           )

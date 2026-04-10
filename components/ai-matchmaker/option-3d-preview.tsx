@@ -1,8 +1,17 @@
 "use client"
 
 import dynamic from "next/dynamic"
-import { memo, Suspense, useState, useEffect } from "react"
+import { memo, Suspense, useState, useEffect, Component, type ReactNode } from "react"
 import { motion } from "framer-motion"
+
+class WebGLErrorBoundary extends Component<{ children: ReactNode; fallback?: ReactNode }, { failed: boolean }> {
+  state = { failed: false }
+  static getDerivedStateFromError() { return { failed: true } }
+  render() {
+    if (this.state.failed) return this.props.fallback ?? null
+    return this.props.children
+  }
+}
 
 // Dynamic import — ssr:false keeps WebGL off the server.
 // The dynamic wrapper is stable across renders (module-level singleton).
@@ -61,9 +70,11 @@ export const Option3DPreview = memo(function Option3DPreview({
         transition={{ type: "spring", stiffness: 150, damping: 20 }}
         className="w-full h-full"
       >
-        <Suspense fallback={null}>
-          <Option3DImpl option={option} />
-        </Suspense>
+        <WebGLErrorBoundary>
+          <Suspense fallback={null}>
+            <Option3DImpl option={option} />
+          </Suspense>
+        </WebGLErrorBoundary>
       </motion.div>
     </motion.div>
   )
@@ -106,9 +117,11 @@ export const CategoryCard3D = memo(function CategoryCard3D({
                       pointer-events-none z-10 rounded-2xl" />
       <div className="relative w-full" style={{ height: "72%" }}>
         {mounted ? (
-          <Suspense fallback={null}>
-            <Option3DImpl option={option} thumbnail />
-          </Suspense>
+          <WebGLErrorBoundary>
+            <Suspense fallback={null}>
+              <Option3DImpl option={option} thumbnail />
+            </Suspense>
+          </WebGLErrorBoundary>
         ) : null}
       </div>
       <div className="flex items-center justify-center w-full flex-1
