@@ -122,12 +122,10 @@ hover:translate-y-[-10px] mb-4`}
               background: "linear-gradient(135deg, rgba(167,139,250,0.72) 0%, rgba(139,92,246,0.65) 45%, rgba(109,40,217,0.55) 100%)",
             }}
           />
-          {/* Ambient glow pulse */}
-          <motion.div
+          {/* Top glow — static */}
+          <div
             className="absolute inset-0 rounded-xl pointer-events-none"
-            style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(192,132,252,0.35) 0%, transparent 65%)" }}
-            animate={{ opacity: [0.5, 0.9, 0.5] }}
-            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(192,132,252,0.28) 0%, transparent 65%)" }}
           />
 
           {/* Background image with overlay */}
@@ -200,29 +198,16 @@ hover:translate-y-[-10px] mb-4`}
             className={`${cardPadding} flex flex-col items-center justify-between text-center relative z-10 h-full ${size === "default" ? "min-h-[160px]" : ""}`}
             style={{ transform: "translateZ(15px) rotateX(2deg)" }}
           >
-            {/* Enhanced glossy icon container with 3D effect */}
-            <motion.div
-              className={`relative rounded-full bg-gradient-to-br from-white/95 to-purple-100/85 ${size === "small" ? "p-3" : "p-5"}
-  shadow-lg overflow-hidden border border-purple-300/50`}
+            {/* Icon container */}
+            <div
+              className={`relative rounded-full bg-gradient-to-br from-white/95 to-purple-100/85 ${size === "small" ? "p-3" : "p-5"} shadow-lg overflow-hidden border border-purple-300/50`}
               style={{
                 transform: "translateZ(30px)",
-                boxShadow:
-                  "0 10px 20px -3px rgba(139, 92, 246, 0.35), 0 4px 8px -4px rgba(139, 92, 246, 0.25), inset 0 1px 2px 0 rgba(255,255,255,0.95)",
+                boxShadow: "0 10px 20px -3px rgba(139, 92, 246, 0.35), 0 4px 8px -4px rgba(139, 92, 246, 0.25), inset 0 1px 2px 0 rgba(255,255,255,0.95)",
               }}
-              whileHover={{
-                scale: 1.15,
-                boxShadow: "0 0 25px 5px rgba(168, 85, 247, 0.4)",
-              }}
-              transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
-              {/* Icon top highlight - hidden on mobile */}
-              <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white via-transparent to-transparent opacity-90 hidden md:block"></div>
-
-              {/* Icon shine effect - hidden on mobile */}
-              <div className="absolute -inset-full h-20 w-20 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-100 transform -rotate-45 group-hover:translate-x-full transition-all duration-700 ease-in-out hidden md:block"></div>
-
               <Icon className={`${iconSize} text-purple-500 relative z-10`} />
-            </motion.div>
+            </div>
 
             {/* Flexible spacer */}
             <div className={`flex-grow ${size === "small" ? "my-1" : ""}`}></div>
