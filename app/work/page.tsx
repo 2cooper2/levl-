@@ -871,8 +871,9 @@ export default function WorkPage() {
             </motion.div>
 
             {/* Scheduled tasks — second on mobile */}
+            <div className="order-2 md:order-1 pr-4 md:pr-0 w-full">
             <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.55 }}
-              className="p-5 md:p-6 h-full order-2 md:order-1 md:mr-0 mr-4" style={cardStyle}>
+              className="p-5 md:p-6 h-full w-full" style={cardStyle}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold" style={{ color: "#111" }}>Scheduled jobs</h3>
               </div>
@@ -924,6 +925,7 @@ export default function WorkPage() {
                 ))}
               </div>
             </motion.div>
+            </div>
 
           </div>
         </section>
