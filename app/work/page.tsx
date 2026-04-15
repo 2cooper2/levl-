@@ -780,7 +780,7 @@ export default function WorkPage() {
     return () => window.removeEventListener("scroll", onScroll)
   }, [])
   return (
-    <div className="flex min-h-screen flex-col" style={{ margin: 0, padding: 0, overscrollBehavior: "none", WebkitOverflowScrolling: "touch" as any, overflowX: "hidden" }}>
+    <div className="flex min-h-screen flex-col" style={{ margin: 0, padding: 0, overscrollBehavior: "none", WebkitOverflowScrolling: "touch" as any }}>
 
       {/* Levl Void background */}
       <div className="fixed inset-0 -z-10 pointer-events-none"
@@ -827,7 +827,7 @@ export default function WorkPage() {
           }} />
       </header>
 
-      <main className="flex-1">
+      <main className="flex-1" style={{ width: "100%", minWidth: 0, overflowX: "hidden" }}>
 
         {/* ── Categories ── */}
         <section style={{ paddingTop: "1rem", paddingBottom: "1.5rem", overflowX: "auto", scrollbarWidth: "none" as any, msOverflowStyle: "none" as any, WebkitOverflowScrolling: "touch" as any }}>
