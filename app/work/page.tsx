@@ -862,16 +862,16 @@ export default function WorkPage() {
         </section>
 
         {/* ── Availability + Scheduled Tasks ── */}
-        <section className="px-4 pt-0 pb-14 w-full md:max-w-6xl md:mx-auto md:px-6" style={{ maxWidth: "100vw" }}>
+        <section className="px-4 pt-0 pb-14 w-full md:max-w-6xl md:mx-auto md:px-6" style={{ overflow: "hidden" }}>
           <div className="grid md:grid-cols-2 gap-6 items-stretch">
 
             {/* Availability grid — first on mobile (calendar above jobs) */}
-            <motion.div initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.55 }} className="h-full order-1 md:order-2" style={{ minWidth: 0 }}>
+            <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.55 }} className="w-full order-1 md:order-2" style={{ minWidth: 0 }}>
               <AvailabilityPreview />
             </motion.div>
 
             {/* Scheduled tasks — second on mobile */}
-            <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.55 }}
+            <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.55 }}
               className="p-5 md:p-6 h-full order-2 md:order-1" style={cardStyle}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold" style={{ color: "#111" }}>Scheduled jobs</h3>
