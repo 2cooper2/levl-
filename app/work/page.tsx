@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
+import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import {
   DollarSign, Star, Shield, Zap, Clock,
@@ -766,6 +767,13 @@ const perks = [
 
 export default function WorkPage() {
   const [scrolled, setScrolled] = useState(false)
+  const router = useRouter()
+
+  const switchToClient = useCallback(() => {
+    localStorage.setItem("levl-role", "client")
+    router.push("/")
+  }, [router])
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 2)
     window.addEventListener("scroll", onScroll)
@@ -793,10 +801,22 @@ export default function WorkPage() {
           WebkitBackdropFilter: scrolled ? "blur(28px) saturate(2.2)" : "none",
           boxShadow: scrolled ? "0 6px 24px -4px rgba(0,0,0,0.14), 0 2px 8px -2px rgba(0,0,0,0.08)" : "none",
         }}>
-        <div className="container flex h-20 items-center">
+        <div className="container flex h-20 items-center justify-between">
           <Link href="/work" className="flex items-center">
             <LevlLogo className="h-14 w-14" />
           </Link>
+          <button
+            onClick={switchToClient}
+            className="text-xs font-black px-3 py-1.5 rounded-full transition-all active:scale-95 hover:scale-105"
+            style={{
+              background: "linear-gradient(135deg,rgba(255,255,255,0.97),rgba(237,233,254,0.82))",
+              border: "1px solid rgba(167,139,250,0.45)",
+              boxShadow: "0 4px 10px -3px rgba(0,0,0,0.22), 0 -1px 3px 0 rgba(255,255,255,0.9) inset",
+              color: "#7c3aed",
+            }}
+          >
+            Client
+          </button>
         </div>
         {/* Rounded pill border at bottom — only visible when scrolled */}
         <div className="absolute bottom-0 left-[8%] right-[8%] h-px rounded-full pointer-events-none"

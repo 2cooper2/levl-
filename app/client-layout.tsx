@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import { useEffect } from "react"
@@ -15,6 +15,18 @@ export function ClientRootLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
+  const router = useRouter()
+
+  // Role-based redirect: on root, check saved role and send to correct side
+  useEffect(() => {
+    if (pathname !== "/") return
+    const role = localStorage.getItem("levl-role")
+    if (!role) {
+      router.replace("/role")
+    } else if (role === "worker") {
+      router.replace("/work")
+    }
+  }, [pathname])
 
   // Reset scroll position immediately on mount and when navigating
   useEffect(() => {
