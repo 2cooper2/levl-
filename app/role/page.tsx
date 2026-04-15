@@ -28,40 +28,68 @@ export default function RolePage() {
         }}
       />
 
-      {/* Floating "L" logo */}
+      {/* Floating logo — exact logo look, no white box */}
       <motion.div
         initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
         className="mb-16 relative"
+        style={{ width: 96, height: 96 }}
       >
-        {/* The L */}
-        <span
+        {/* Logo image — multiply blend removes white JPEG background */}
+        <img
+          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/D86926DF-2501-4C99-9452-927116E45324-oXEcNS38lLlIRweavHw5KIvvgR32ot.jpeg"
+          alt="LevL"
           style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
+            mixBlendMode: "multiply",
             display: "block",
-            fontSize: "7rem",
-            fontWeight: 900,
-            lineHeight: 1,
-            letterSpacing: "-0.04em",
-            background: "linear-gradient(145deg, #a78bfa 0%, #c084fc 60%, #a855f7 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            backgroundClip: "text",
-            filter: "drop-shadow(0 2px 8px rgba(139,92,246,0.28))",
           }}
-        >
-          L
-        </span>
+        />
+
+        {/* Lavender color overlay */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: "#c084fc", mixBlendMode: "color" }}
+        />
+
+        {/* Main wax highlight */}
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            top: "6%", left: "6%",
+            width: "60%", height: "26%",
+            background: "rgba(255,255,255,0.88)",
+            borderRadius: "50%",
+            filter: "blur(2px)",
+            transform: "rotate(-12deg)",
+          }}
+        />
+
+        {/* Secondary glint */}
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            top: "8%", left: "58%",
+            width: "22%", height: "10%",
+            background: "rgba(255,255,255,0.80)",
+            borderRadius: "50%",
+            filter: "blur(1px)",
+            transform: "rotate(-8deg)",
+          }}
+        />
 
         {/* Floating ground shadow */}
         <div
           className="absolute pointer-events-none"
           style={{
-            bottom: "-10px",
+            bottom: "-12px",
             left: "10%",
             right: "10%",
-            height: "18px",
-            background: "radial-gradient(ellipse at center, rgba(0,0,0,0.28) 0%, transparent 70%)",
+            height: "20px",
+            background: "radial-gradient(ellipse at center, rgba(0,0,0,0.30) 0%, transparent 70%)",
             filter: "blur(6px)",
           }}
         />
@@ -102,11 +130,7 @@ export default function RolePage() {
             >
               <span
                 className="text-lg font-black capitalize tracking-wide"
-                style={{
-                  background: "linear-gradient(135deg, #7c3aed, #a855f7)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}
+                style={{ color: "#111" }}
               >
                 {role}
               </span>
