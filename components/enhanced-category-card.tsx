@@ -112,11 +112,10 @@ export function EnhancedCategoryCard({
             }}
           ></div>
 
-          {/* Card background with depth — richer lavender gradient */}
+          {/* Card background — richer lavender gradient */}
           <div
             className="absolute inset-0 rounded-xl opacity-95"
             style={{
-              transform: "translateZ(-10px)",
               background: "linear-gradient(135deg, rgba(167,139,250,0.72) 0%, rgba(139,92,246,0.65) 45%, rgba(109,40,217,0.55) 100%)",
             }}
           />
