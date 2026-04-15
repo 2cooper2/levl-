@@ -1854,7 +1854,7 @@ export function AIServiceMatchmaker() {
               <div className="relative w-full">
 
                 <div
-                  className="cyc-cats-scroll overflow-x-auto py-2 pb-8 scrollbar-hide scroll-smooth mx-auto"
+                  className="cyc-cats-scroll md:overflow-x-auto py-2 pb-8 scrollbar-hide scroll-smooth mx-auto"
                   ref={categoriesRef}
                   style={{
                     scrollbarWidth: "none",
@@ -1863,7 +1863,7 @@ export function AIServiceMatchmaker() {
                     scrollBehavior: "smooth",
                   }}
                 >
-                  <div className="flex space-x-4 snap-x snap-mandatory px-4 md:px-8 -ml-2 md:-ml-4 mr-4 md:mr-8">
+                  <div className="flex flex-wrap md:flex-nowrap gap-4 md:space-x-4 md:snap-x md:snap-mandatory px-4 md:px-8 md:-ml-4 md:mr-8 justify-center md:justify-start">
                     {categories.map((category, index) => (
                       <EnhancedCategoryCard
                         key={index}
