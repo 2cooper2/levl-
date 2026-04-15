@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"
+
 import { type NextRequest, NextResponse } from "next/server"
 import { createPaymentIntent } from "@/app/actions/payment-actions"
 import { requireAuth } from "@/lib/api-auth"
