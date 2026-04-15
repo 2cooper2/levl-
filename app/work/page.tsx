@@ -862,7 +862,7 @@ export default function WorkPage() {
         </section>
 
         {/* ── Availability + Scheduled Tasks ── */}
-        <section className="px-4 pt-0 pb-14 w-full md:max-w-6xl md:mx-auto md:px-6" style={{ overflow: "hidden" }}>
+        <section className="px-4 pt-0 pb-14 w-full md:max-w-6xl md:mx-auto md:px-6">
           <div className="grid md:grid-cols-2 gap-6 items-stretch">
 
             {/* Availability grid — first on mobile (calendar above jobs) */}
