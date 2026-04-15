@@ -96,7 +96,7 @@ export default function RolePage() {
       </motion.div>
 
       {/* Role cards */}
-      <div className="flex gap-5 w-full max-w-[260px]">
+      <div className="flex gap-10 w-full max-w-[300px]">
         {(["client", "worker"] as const).map((role, i) => (
           <motion.div
             key={role}
