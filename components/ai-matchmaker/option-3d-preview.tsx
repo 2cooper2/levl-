@@ -42,9 +42,10 @@ export const THREE_D_OPTIONS = new Set([
 ])
 
 // ─── Option3DPreview ─────────────────────────────────────────────────────────
-// Canvas mounts immediately — no IntersectionObserver gate, no mounted-state
-// delay. IntersectionObserver only controls frameloop: "always" when visible,
-// "never" when off-screen (GPU freed without unmounting, so no reload flicker).
+// Two-tier visibility:
+//   canvasMounted — unmounts WebGL context when card is >500px off-screen
+//   frameActive   — pauses render loop when card is just outside viewport
+// This keeps total live WebGL contexts low enough for mobile (Safari limit ~8).
 export const Option3DPreview = memo(function Option3DPreview({
   option,
   className,
@@ -54,28 +55,37 @@ export const Option3DPreview = memo(function Option3DPreview({
   className?: string
   disableHover?: boolean
 }) {
-  // Start true: new cards always appear scrolled into view
-  const [currentlyInView, setCurrentlyInView] = useState(true)
+  // Start mounted+active: new cards always appear scrolled into view
+  const [canvasMounted, setCanvasMounted] = useState(true)
+  const [frameActive, setFrameActive] = useState(true)
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
-    const observer = new IntersectionObserver(
-      ([entry]) => setCurrentlyInView(entry.isIntersecting),
-      { rootMargin: "120px 0px" }
+
+    // Far observer — unmounts canvas entirely when >500px off-screen, freeing WebGL context
+    const farObs = new IntersectionObserver(
+      ([entry]) => setCanvasMounted(entry.isIntersecting),
+      { rootMargin: "500px 0px" }
     )
-    observer.observe(el)
-    return () => observer.disconnect()
+    // Exact observer — pauses frameloop when just outside viewport
+    const exactObs = new IntersectionObserver(
+      ([entry]) => setFrameActive(entry.isIntersecting),
+      { rootMargin: "80px 0px" }
+    )
+    farObs.observe(el)
+    exactObs.observe(el)
+    return () => { farObs.disconnect(); exactObs.disconnect() }
   }, [])
 
-  const canvas = (
+  const canvas = canvasMounted ? (
     <WebGLErrorBoundary>
       <Suspense fallback={null}>
-        <Option3DImpl option={option} frameloop={currentlyInView ? "always" : "never"} />
+        <Option3DImpl option={option} frameloop={frameActive ? "always" : "never"} />
       </Suspense>
     </WebGLErrorBoundary>
-  )
+  ) : null
 
   return (
     <div ref={containerRef} className={`relative w-full h-full ${className ?? ""}`}>

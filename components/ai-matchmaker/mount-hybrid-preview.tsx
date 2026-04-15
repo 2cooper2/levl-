@@ -96,7 +96,8 @@ export const MountHybridPreview = memo(function MountHybridPreview({
   className?: string
 }) {
   // Start true: new cards always appear scrolled into view
-  const [currentlyInView, setCurrentlyInView] = useState(true)
+  const [canvasMounted, setCanvasMounted] = useState(true)
+  const [frameActive, setFrameActive]     = useState(true)
   const [renderState, setRenderState]     = useState<RenderState>("pending")
   const [webglAlive, setWebglAlive]       = useState(true)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -106,12 +107,19 @@ export const MountHybridPreview = memo(function MountHybridPreview({
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
-    const obs = new IntersectionObserver(
-      ([entry]) => setCurrentlyInView(entry.isIntersecting),
-      { rootMargin: "120px 0px" }
+    // Far observer — unmounts canvas when >500px off-screen, freeing WebGL context
+    const farObs = new IntersectionObserver(
+      ([entry]) => setCanvasMounted(entry.isIntersecting),
+      { rootMargin: "500px 0px" }
     )
-    obs.observe(el)
-    return () => obs.disconnect()
+    // Exact observer — pauses frameloop when just outside viewport
+    const exactObs = new IntersectionObserver(
+      ([entry]) => setFrameActive(entry.isIntersecting),
+      { rootMargin: "80px 0px" }
+    )
+    farObs.observe(el)
+    exactObs.observe(el)
+    return () => { farObs.disconnect(); exactObs.disconnect() }
   }, [])
 
   // Tear down the full WebGL scene 650ms after Blender PNG confirms loaded.
@@ -137,7 +145,7 @@ export const MountHybridPreview = memo(function MountHybridPreview({
               When Blender renders are missing, this is the permanent view.
               Has emissive materials that bloom will catch (TV screen glow,
               light fixture halo, mirror specular highlights).               */}
-          {webglAlive && (
+          {webglAlive && canvasMounted && (
             <div
               className="absolute inset-0"
               style={{
@@ -147,7 +155,7 @@ export const MountHybridPreview = memo(function MountHybridPreview({
             >
               <MountWebGLBoundary>
                 <Suspense fallback={null}>
-                  <Option3DImpl option={option} frameloop={currentlyInView ? "always" : "never"} />
+                  <Option3DImpl option={option} frameloop={frameActive ? "always" : "never"} />
                 </Suspense>
               </MountWebGLBoundary>
             </div>
