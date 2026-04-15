@@ -90,7 +90,7 @@ export function EnhancedCategoryCard({
       >
         <div
           onClick={onClick}
-          className={`relative group overflow-hidden rounded-xl backdrop-blur-xl text-card-foreground transition-all duration-300 h-full
+          className={`relative group overflow-hidden rounded-xl md:backdrop-blur-xl text-card-foreground transition-all duration-300 h-full
 bg-gradient-to-br from-white/95 via-white/90 to-indigo-50/90 dark:from-gray-800/95 dark:via-gray-800/90 dark:to-indigo-950/90 ${className}
 hover:translate-y-[-10px] mb-4`}
           style={{
@@ -116,7 +116,7 @@ hover:translate-y-[-10px] mb-4`}
 
           {/* Card background with depth — richer lavender gradient */}
           <div
-            className="absolute inset-0 backdrop-blur-[8px] rounded-xl opacity-95"
+            className="absolute inset-0 rounded-xl opacity-95"
             style={{
               transform: "translateZ(-10px)",
               background: "linear-gradient(135deg, rgba(167,139,250,0.72) 0%, rgba(139,92,246,0.65) 45%, rgba(109,40,217,0.55) 100%)",
@@ -153,8 +153,6 @@ hover:translate-y-[-10px] mb-4`}
                 "linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0) 100%)",
               border: "1px solid rgba(255,255,255,0.18)",
               boxShadow: "inset 0 1px 1px 0 rgba(255,255,255,0.25)",
-              backdropFilter: "blur(4px)",
-              WebkitBackdropFilter: "blur(4px)",
             }}
           ></div>
 

@@ -16,8 +16,6 @@ import { Button } from "@/components/ui/button"
 
 const cardStyle: React.CSSProperties = {
   background: "linear-gradient(135deg, rgba(255,255,255,0.97) 0%, rgba(255,255,255,0.92) 60%, rgba(237,233,254,0.85) 100%)",
-  backdropFilter: "blur(12px)",
-  WebkitBackdropFilter: "blur(12px)",
   border: "1px solid rgba(167,139,250,0.3)",
   boxShadow: "0 20px 25px -5px rgba(0,0,0,0.18), 0 10px 10px -5px rgba(0,0,0,0.1), 0 -2px 6px 0 rgba(255,255,255,0.8) inset",
   borderRadius: "0.75rem",
@@ -774,7 +772,7 @@ export default function WorkPage() {
     return () => window.removeEventListener("scroll", onScroll)
   }, [])
   return (
-    <div className="flex min-h-screen flex-col" style={{ margin: 0, padding: 0 }}>
+    <div className="flex min-h-screen flex-col" style={{ margin: 0, padding: 0, overscrollBehavior: "none", WebkitOverflowScrolling: "touch" as any }}>
 
       {/* Levl Void background */}
       <div className="fixed inset-0 -z-10 pointer-events-none"
