@@ -866,7 +866,7 @@ export default function WorkPage() {
           <div className="grid md:grid-cols-2 gap-6 items-stretch">
 
             {/* Availability grid — first on mobile (calendar above jobs) */}
-            <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.55 }} className="w-full order-1 md:order-2 md:pr-0 pr-2" style={{ minWidth: 0 }}>
+            <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.55 }} className="w-full order-1 md:order-2 md:pr-0 pr-4" style={{ minWidth: 0 }}>
               <AvailabilityPreview />
             </motion.div>
 
