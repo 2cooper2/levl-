@@ -1795,6 +1795,18 @@ export function AIServiceMatchmaker() {
                 <LevlLogo className="h-16 w-16 transition-all shadow-[0_2px_4px_rgba(66,60,86,0.17),0_6px_16px_rgba(62,56,82,0.15),0_14px_32px_rgba(56,50,76,0.13)] dark:shadow-[0_2px_4px_rgba(0,0,0,0.38),0_6px_16px_rgba(0,0,0,0.29),0_14px_32px_rgba(0,0,0,0.20)] translate-y-[-2px]" />
               </div>
               <div className="flex items-center gap-3">
+                <button
+                  onClick={() => { localStorage.setItem("levl-role", "worker"); router.push("/work") }}
+                  className="text-xs font-black px-3 py-1.5 rounded-full transition-all active:scale-95 hover:scale-105"
+                  style={{
+                    background: "linear-gradient(135deg,rgba(255,255,255,0.97),rgba(237,233,254,0.82))",
+                    border: "1px solid rgba(167,139,250,0.45)",
+                    boxShadow: "0 4px 10px -3px rgba(0,0,0,0.22), 0 -1px 3px 0 rgba(255,255,255,0.9) inset",
+                    color: "#7c3aed",
+                  }}
+                >
+                  Worker
+                </button>
                 <Dialog open={showPortal} onOpenChange={setShowPortal}>
                   <DialogTrigger asChild>
                     <button
