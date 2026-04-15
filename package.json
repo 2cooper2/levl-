@@ -5,7 +5,7 @@
   "packageManager": "npm@10.2.4",
   "scripts": {
     "build": "next build",
-    "dev": "next dev",
+    "dev": "rm -rf .next && next dev",
     "lint": "next lint",
     "start": "next start"
   },
@@ -33,6 +33,7 @@
     "@react-email/render": "^1.2.2",
     "@react-three/drei": "^9.122.0",
     "@react-three/fiber": "^8.18.0",
+    "@react-three/postprocessing": "^3.0.4",
     "@stripe/react-stripe-js": "^4.0.1",
     "@stripe/stripe-js": "^7.9.0",
     "@supabase/auth-helpers-nextjs": "^0.10.0",
@@ -50,9 +51,9 @@
     "next": "14.2.16",
     "next-themes": "^0.4.6",
     "react": "18.0.0",
-    "react-is": "^18.0.0",
     "react-day-picker": "^9.9.0",
     "react-dom": "18.0.0",
+    "react-is": "^18.0.0",
     "recharts": "^3.1.2",
     "resend": "^6.0.3",
     "stripe": "^18.5.0",

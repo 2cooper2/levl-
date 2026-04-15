@@ -1,7 +1,6 @@
 "use client"
 import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { EnhancedButton } from "@/components/ui/enhanced-button"
 import { ArrowRight } from "lucide-react"
 import { useRouter } from "next/navigation"
 import {
@@ -25,7 +24,6 @@ import {
   Hammer,
   Paintbrush,
 } from "lucide-react"
-import { AnimatedTextDivider } from "@/components/animated-text-divider"
 import { useAuth } from "@/context/auth-context"
 import { useMobile } from "@/hooks/use-mobile"
 import { FeatureBadge } from "@/components/ui/feature-badge"
@@ -743,17 +741,9 @@ export function EnhancedHeroSection() {
 
   return (
     <>
-      <section className="w-full relative overflow-hidden bg-gradient-to-br from-white via-lavender-100/30 to-white" style={{ willChange: "auto", transform: "translateZ(0)" }}>
-        {/* Animated background elements */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white via-lavender-50 to-white/90 z-0" />
+      <section className="w-full relative">
 
-        {/* Subtle noise texture */}
-        <div className="absolute inset-0 bg-noise opacity-5 dark:opacity-10 z-0"></div>
-
-        {/* Enhanced gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-lavender-200/20 to-white/90 z-0" />
-
-        {/* Particle system - CSS only to avoid React re-render flickering */}
+{/* Particle system - CSS only to avoid React re-render flickering */}
         {particles.map((particle) => (
           <div
             key={particle.id}
@@ -770,22 +760,8 @@ export function EnhancedHeroSection() {
         ))}
 
         {/* 3D perspective container */}
-        <div className="absolute inset-0 opacity-20 pointer-events-none bg-gradient-to-br from-purple-500/20 to-primary/20"></div>
 
-        <AnimatedTextDivider firstText="Learn. Earn." secondText="Grow Your Business" className="mb-12 text-gray-800" />
-        {/* Animated background elements */}
-        <div
-          className="absolute -left-64 -top-64 h-[500px] w-[500px] rounded-full bg-primary/10 blur-3xl opacity-50
-animate-pulse"
-          style={{ animationDuration: "15s" }}
-        ></div>
-        <div
-          className="absolute -right-64 -bottom-64 h-[500px] w-[500px] rounded-full bg-purple-500/10 blur-3xl opacity-50 animate-pulse"
-          style={{ animationDuration: "20s" }}
-        ></div>
 
-        {/* Futuristic grid lines */}
-        <div className="absolute inset-0 bg-grid-pattern opacity-20 pointer-events-none"></div>
 
         <div className="container px-3 md:px-6 relative z-10">
           {/* Changed grid layout to be a flex column on all screen sizes */}
@@ -793,105 +769,14 @@ animate-pulse"
             {/* Hero content */}
 
             {/* Enhanced Skill Accelerator UI - Now below the hero content and more horizontal */}
-            <motion.div
-              className="flex items-center justify-center w-full -mt-4"
-              variants={fadeIn}
-              initial="hidden"
-              animate="visible"
-              transition={{ delay: 0.3 }}
-            >
+            <div className="flex items-center justify-center w-full -mt-4">
               <div className="relative w-full max-w-4xl mx-auto">
-                <motion.div
-                  className={`relative rounded-xl overflow-hidden bg-gradient-to-br from-lavender-50/95 via-white/90 to-lavender-100/90 backdrop-blur-md p-3 sm:p-4 md:p-6 transition-all duration-300 ${isMobile ? "simple-card" : ""}`}
+                <div
+                  className={`relative rounded-xl p-3 sm:p-4 md:p-6 bg-gradient-to-br from-white via-[#fefeff] to-[#fbf9ff] ${isMobile ? "simple-card" : ""}`}
                   style={{
-                    border: "1px solid rgba(168, 85, 247, 0.15)",
-                    boxShadow:
-                      "0 25px 60px -15px rgba(0,0,0,0.3), 0 15px 30px -5px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.05)",
-                    borderTop: "1px solid rgba(168, 85, 247, 0.2)",
-                    borderLeft: "1px solid rgba(168, 85, 247, 0.2)",
-                    borderRight: "1px solid rgba(168, 85, 247, 0.2)",
-                    borderBottom: "2px solid rgba(168, 85, 247, 0.3)",
-                    transform: "translateY(0) translateZ(0) perspective(1000px)",
-                    filter: "drop-shadow(0 30px 40px rgba(0,0,0,0.2))",
-                  }}
-                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  transition={{
-                    duration: 0.8,
-                    ease: [0.16, 1, 0.3, 1],
-                    delay: 0.4,
+                    boxShadow: "0 0 0 1px rgba(88,82,100,0.09), 0 16px 16px rgba(64,58,84,0.20), 0 28px 20px rgba(60,54,80,0.09), 0 -1px 0 rgba(255,255,255,0.88)",
                   }}
                 >
-                  {/* Decorative elements with enhanced depth */}
-                  <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-lavender-400/15 to-transparent rounded-bl-full transform transition-transform duration-700 group-hover:scale-110"></div>
-                  <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-gradient-to-tr from-lavender-500/20 to-transparent rounded-tr-full transform transition-transform duration-700 group-hover:scale-110"></div>
-                  <div
-                    className="absolute inset-0 opacity-40 transition-opacity duration-500"
-                    style={{
-                      background: "radial-gradient(circle at 30% 20%, rgba(233,213,255,0.3) 1px, transparent 1px)",
-                      backgroundSize: "24px 24px",
-                      transform: "translateZ(10px)",
-                      perspective: "1000px",
-                    }}
-                  ></div>
-
-                  {/* Additional depth elements */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-lavender-100/30 mix-blend-overlay pointer-events-none"></div>
-                  <div
-                    className="absolute inset-0 bg-gradient-to-tr from-transparent via-lavender-50/20 to-transparent pointer-events-none"
-                    style={{ transform: "translateZ(5px)" }}
-                  ></div>
-                  <div className="absolute -inset-0.5 bg-gradient-to-br from-lavender-200/20 via-transparent to-lavender-100/20 opacity-50 blur-sm pointer-events-none"></div>
-
-                  {/* Enhanced animated accent line */}
-                  <div
-                    className="absolute h-[3px] w-2/5 bg-gradient-to-r from-transparent via-lavender-400/70 to-transparent top-0 left-0 animate-shimmer"
-                    style={{ filter: "drop-shadow(0 1px 2px rgba(168, 85, 247, 0.3))" }}
-                  ></div>
-
-                  {/* Additional decorative elements */}
-                  <div className="absolute bottom-0 right-0 w-24 h-24 bg-gradient-to-tl from-lavender-300/5 to-transparent rounded-tl-full"></div>
-                  <div className="absolute top-1/2 left-0 w-12 h-24 bg-gradient-to-r from-lavender-400/5 to-transparent"></div>
-                  {/* Improved tech pattern overlay */}
-                  <div
-                    className="tech-pattern absolute inset-0 bg-[radial-gradient(circle_at_10px_10px,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none z-1 opacity-40"
-                  />
-
-                  {/* Enhanced background overlay */}
-                  <div
-                    className="absolute inset-0 bg-gradient-to-br from-purple-50/10 via-transparent to-purple-100/10 pointer-events-none"
-                  />
-
-                  {/* Circuit lines with CSS-only animations */}
-                  <div className="circuit-lines">
-                    {circuitLines.map((line, i) => (
-                      <div
-                        key={`line-${i}`}
-                        className="circuit-line"
-                        style={{
-                          top: `${line.top}%`,
-                          left: `${line.left}%`,
-                          width: `${line.width}px`,
-                          background:
-                            "linear-gradient(90deg, rgba(168, 85, 247, 0.05), rgba(168, 85, 247, 0.1), rgba(168, 85, 247, 0.05))",
-                          opacity: 0.4,
-                        }}
-                      />
-                    ))}
-                    {circuitDots.map((dot, i) => (
-                      <div
-                        key={`dot-${i}`}
-                        className="circuit-dot"
-                        style={{
-                          top: `${dot.top}%`,
-                          left: `${dot.left}%`,
-                          backgroundColor: "rgba(168, 85, 247, 0.1)",
-                          boxShadow: "0 0 5px rgba(168, 85, 247, 0.1)",
-                          opacity: 0.6,
-                        }}
-                      />
-                    ))}
-                  </div>
 
                   {/* Success message toast with improved animation */}
                   <AnimatePresence>
@@ -911,37 +796,29 @@ animate-pulse"
 
                   <div className="space-y-3 md:space-y-4 relative z-10 lg:grid lg:grid-cols-12 lg:gap-4 lg:space-y-0">
                     <div className="flex items-center justify-between lg:col-span-12">
-                      <div className="flex items-center">
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-r from-lavender-300 to-lavender-500 flex items-center justify-center mr-3 relative group">
-                          <Rocket className="h-5 w-5 text-white" />
-                          {/* Static orbital rings */}
-                          <div
-                            className="absolute inset-0 rounded-full border border-white/20"
-                            style={{ transform: "scale(1.2)", opacity: 0.7 }}
-                          />
-                          <div
-                            className="absolute inset-0 rounded-full border border-white/10"
-                            style={{ transform: "scale(1.5)", opacity: 0.5 }}
-                          />
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="h-9 w-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                          style={{
+                            background: "linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%)",
+                            boxShadow: "0 0 0 1px rgba(88,82,100,0.10), 0 4px 12px rgba(124,58,237,0.28), 0 -1px 0 rgba(255,255,255,0.20)",
+                          }}
+                        >
+                          <Rocket className="h-4 w-4 text-white" />
                         </div>
-                        <h3 className="text-xl font-bold text-gray-800">
-                          Skill Accelerator
-                          <div className="ml-2 flex flex-wrap gap-1.5">
-                            <FeatureBadge type="ai" />
-                            <FeatureBadge type="founder" />
-                            <FeatureBadge type="fees" />
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-base font-semibold text-gray-900 tracking-tight">Skill Accelerator</h3>
+                            <div className="flex gap-1">
+                              <FeatureBadge type="ai" />
+                              <FeatureBadge type="founder" />
+                              <FeatureBadge type="fees" />
+                            </div>
                           </div>
-                        </h3>
+                          <p className="text-xs text-gray-500 mt-0.5">AI-powered gig ecosystem · earn while you learn</p>
+                        </div>
                       </div>
                     </div>
-
-                    <p className="text-sm text-gray-700 lg:col-span-12">
-                      The world's first AI-powered gig ecosystem that helps you earn while you learn and grow your
-                      freelance career exponentially.
-                      <span className="inline-flex items-center ml-2 text-lavender-500">
-                        <Lightbulb className="h-3 w-3 mr-1" /> Smart matching technology
-                      </span>
-                    </p>
 
                     <div className="flex flex-wrap gap-2 md:flex-nowrap overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide lg:col-span-12">
                       {skills.map((skill, index) => (
@@ -1029,13 +906,13 @@ animate-pulse"
                         <div className="space-y-4">
                           {/* Active Skill Card - Enhanced with better UI/UX */}
                           <div
-                            className="bg-gradient-to-br from-white via-lavender-50/50 to-white backdrop-blur-sm rounded-lg p-5 border border-lavender-200/50 skill-card shadow-lg relative overflow-hidden group transition-all duration-300 hover:shadow-lavender-300/20 hover:border-lavender-300/50"
-                            style={{ borderLeft: `4px solid ${skills[activeSkill].color}` }}
+                            className="rounded-xl p-4 relative transition-all duration-300"
+                            style={{
+                              background: "linear-gradient(135deg, #ffffff 0%, #fefeff 60%, #fbf9ff 100%)",
+                              boxShadow: "0 0 0 1px rgba(88,82,100,0.08), 0 4px 12px rgba(64,58,84,0.10), 0 -1px 0 rgba(255,255,255,0.90)",
+                              borderLeft: `3px solid ${skills[activeSkill].color}`,
+                            }}
                           >
-                            {/* Animated background elements */}
-                            <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
-                            <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-purple-400/20 blur-3xl group-hover:opacity-70 transition-opacity duration-500 opacity-50"></div>
-                            <div className="absolute -left-10 -bottom-10 w-40 h-40 rounded-full bg-purple-400/20 blur-3xl group-hover:opacity-70 transition-opacity duration-500 opacity-40"></div>
 
                             <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4 relative z-10">
                               <div className="flex-1">
@@ -1152,16 +1029,14 @@ animate-pulse"
                                   color: "green-500",
                                 },
                               ].map((stat, i) => (
-                                <motion.div
+                                <div
                                   key={i}
-                                  className={`bg-white rounded-lg p-3 relative overflow-hidden hover:bg-lavender-50 transition-colors duration-200 shadow-sm border border-lavender-200/50 group/stat`}
-                                  whileHover={{ y: -2 }}
-                                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                  className="rounded-lg p-3 flex flex-col items-center text-center"
+                                  style={{
+                                    background: "linear-gradient(135deg, #ffffff 0%, #fefeff 60%, #fbf9ff 100%)",
+                                    boxShadow: "0 0 0 1px rgba(88,82,100,0.07), 0 2px 8px rgba(64,58,84,0.08), 0 -1px 0 rgba(255,255,255,0.90)",
+                                  }}
                                 >
-                                  <div
-                                    className={`absolute top-0 right-0 h-20 w-20 bg-gradient-to-br from-${stat.color}/10 to-transparent rounded-bl-full`}
-                                  ></div>
-                                  <div className="absolute -bottom-2 -left-2 h-12 w-12 bg-gradient-to-tr from-${stat.color}/5 to-transparent rounded-tr-full"></div>
                                   <div className="flex flex-col items-center text-center">
                                     <div
                                       className={`text-${stat.color} mb-1 opacity-80 group-hover/stat:opacity-100 transition-opacity`}
@@ -1176,31 +1051,29 @@ animate-pulse"
                                     </div>
                                     <div className="text-xs text-gray-500 mt-0.5">{stat.label}</div>
                                   </div>
-                                </motion.div>
+                                </div>
                               ))}
                             </div>
                           </div>
 
                           {/* Testimonial - Enhanced */}
-                          <motion.div
-                            className="bg-white rounded-lg p-4 border border-lavender-200/50 relative overflow-hidden group hover:border-lavender-300/50 transition-all duration-300 shadow-sm"
-                            whileHover={{ y: -2, boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1)" }}
+                          <div
+                            className="rounded-xl p-4 relative"
+                            style={{
+                              background: "linear-gradient(135deg, #ffffff 0%, #fefeff 60%, #fbf9ff 100%)",
+                              boxShadow: "0 0 0 1px rgba(88,82,100,0.08), 0 4px 12px rgba(64,58,84,0.10), 0 -1px 0 rgba(255,255,255,0.90)",
+                            }}
                           >
-                            {/* Quote marks */}
-                            <div className="absolute top-2 left-2 text-4xl text-purple-500/10 font-serif">"</div>
-                            <div className="absolute bottom-2 right-2 text-4xl text-purple-500/10 font-serif">"</div>
-
-                            {/* Background pattern */}
-                            <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_10px_10px,rgba(var(--primary-rgb),0.4)_1px,transparent_1px)] bg-[length:20px_20px] pointer-events-none"></div>
-
                             <div className="flex items-start gap-4">
-                              <div className="h-12 w-12 rounded-full bg-lavender-100 flex items-center justify-center text-sm font-bold text-lavender-500 shadow-inner relative">
+                              <div
+                                className="h-12 w-12 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
+                                style={{
+                                  background: "linear-gradient(135deg, #b9aee8 0%, #8a7ec8 100%)",
+                                  boxShadow: "0 0 0 1px rgba(88,82,100,0.10), 0 2px 8px rgba(100,88,160,0.20)",
+                                }}
+                              >
                                 {skills[activeSkill].testimonial.author.split(" ")[0][0]}
                                 {skills[activeSkill].testimonial.author.split(" ")[1][0]}
-                                <div
-                                  className="absolute inset-0 rounded-full border border-purple-400/30"
-                                  style={{ transform: "scale(1.05)" }}
-                                />
                               </div>
                               <div className="flex-1">
                                 <div className="flex items-center mb-2">
@@ -1209,19 +1082,19 @@ animate-pulse"
                                   </div>
                                   <div className="flex">
                                     {[...Array(5)].map((_, i) => (
-                                      <motion.div
+                                      <Star
                                         key={i}
-                                        initial={{ opacity: 0, scale: 0 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        transition={{ delay: i * 0.1, duration: 0.3 }}
-                                      >
-                                        <Star
-                                          className={`h-3.5 w-3.5 ${i < skills[activeSkill].testimonial.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
-                                        />
-                                      </motion.div>
+                                        className={`h-3.5 w-3.5 ${i < skills[activeSkill].testimonial.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
+                                      />
                                     ))}
                                   </div>
-                                  <div className="ml-2 px-1.5 py-0.5 text-xs bg-lavender-100 text-lavender-500 rounded-full">
+                                  <div
+                                    className="ml-2 px-1.5 py-0.5 text-xs font-medium text-white rounded-full"
+                                    style={{
+                                      background: "linear-gradient(135deg, #b9aee8 0%, #8a7ec8 100%)",
+                                      boxShadow: "0 0 0 1px rgba(88,82,100,0.10)",
+                                    }}
+                                  >
                                     Verified Client
                                   </div>
                                 </div>
@@ -1233,107 +1106,121 @@ animate-pulse"
                                 </div>
                               </div>
                             </div>
-                          </motion.div>
+                          </div>
 
-                          {/* Quick Actions - New section */}
+                          {/* Quick Actions */}
                           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                            <motion.button
-                              className="bg-white hover:bg-lavender-50 rounded-lg p-3 flex flex-col items-center text-center transition-colors duration-200 border border-lavender-200/50 shadow-sm"
-                              whileHover={{ y: -2 }}
-                              whileTap={{ y: 0 }}
+                            <button
+                              className="rounded-lg p-3 flex flex-col items-center text-center transition-all duration-200 hover:-translate-y-0.5"
+                              style={{
+                                background: "linear-gradient(135deg, #ffffff 0%, #fbf9ff 100%)",
+                                boxShadow: "0 0 0 1px rgba(88,82,100,0.07), 0 2px 8px rgba(64,58,84,0.08), 0 -1px 0 rgba(255,255,255,0.90)",
+                              }}
                             >
-                              <div className="h-8 w-8 rounded-full bg-lavender-100 flex items-center justify-center mb-2">
-                                <BookOpen className="h-4 w-4 text-lavender-500" />
+                              <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-lavender-300 to-lavender-500 flex items-center justify-center mb-2 shadow-sm">
+                                <BookOpen className="h-4 w-4 text-white" />
                               </div>
                               <div className="text-xs font-medium text-gray-800">Continue Learning</div>
                               <div className="text-[10px] text-gray-500 mt-1">4 lessons left</div>
-                            </motion.button>
+                            </button>
 
-                            <motion.button
-                              className="bg-white hover:bg-lavender-50 rounded-lg p-3 flex flex-col items-center text-center transition-colors duration-200 border border-lavender-200/50 shadow-sm"
-                              whileHover={{ y: -2 }}
-                              whileTap={{ y: 0 }}
+                            <button
+                              className="rounded-lg p-3 flex flex-col items-center text-center transition-all duration-200 hover:-translate-y-0.5"
+                              style={{
+                                background: "linear-gradient(135deg, #ffffff 0%, #fbf9ff 100%)",
+                                boxShadow: "0 0 0 1px rgba(88,82,100,0.07), 0 2px 8px rgba(64,58,84,0.08), 0 -1px 0 rgba(255,255,255,0.90)",
+                              }}
                             >
-                              <div className="h-8 w-8 rounded-full bg-lavender-100 flex items-center justify-center mb-2">
-                                <Layers className="h-4 w-4 text-lavender-500" />
+                              <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-lavender-300 to-lavender-500 flex items-center justify-center mb-2 shadow-sm">
+                                <Layers className="h-4 w-4 text-white" />
                               </div>
                               <div className="text-xs font-medium text-gray-800">Find Projects</div>
                               <div className="text-[10px] text-gray-500 mt-1">12 available</div>
-                            </motion.button>
+                            </button>
 
-                            <motion.button
-                              className="bg-white hover:bg-lavender-50 rounded-lg p-3 flex flex-col items-center text-center transition-colors duration-200 border border-lavender-200/50 shadow-sm"
-                              whileHover={{ y: -2 }}
-                              whileTap={{ y: 0 }}
+                            <button
+                              className="rounded-lg p-3 flex flex-col items-center text-center transition-all duration-200 hover:-translate-y-0.5"
+                              style={{
+                                background: "linear-gradient(135deg, #ffffff 0%, #fbf9ff 100%)",
+                                boxShadow: "0 0 0 1px rgba(88,82,100,0.07), 0 2px 8px rgba(64,58,84,0.08), 0 -1px 0 rgba(255,255,255,0.90)",
+                              }}
                             >
-                              <div className="h-8 w-8 rounded-full bg-lavender-100 flex items-center justify-center mb-2">
-                                <MessageSquare className="h-4 w-4 text-lavender-500" />
+                              <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-lavender-300 to-lavender-500 flex items-center justify-center mb-2 shadow-sm">
+                                <MessageSquare className="h-4 w-4 text-white" />
                               </div>
                               <div className="text-xs font-medium text-gray-800">Community</div>
                               <div className="text-[10px] text-gray-500 mt-1">3 new topics</div>
-                            </motion.button>
+                            </button>
                           </div>
                         </div>
                       )}
                     </div>
 
                     <div className="lg:col-span-4 space-y-4">
-                      <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                      <div
+                        className="rounded-xl p-4 grid grid-cols-2 gap-3"
+                        style={{
+                          background: "linear-gradient(135deg, #ffffff 0%, #fefeff 60%, #fbf9ff 100%)",
+                          boxShadow: "0 0 0 1px rgba(88,82,100,0.08), 0 4px 12px rgba(64,58,84,0.10), 0 -1px 0 rgba(255,255,255,0.90)",
+                        }}
+                      >
                         <div className="flex items-start">
-                          <div className="h-6 w-6 rounded-full bg-lavender-100 flex items-center justify-center mr-2 mt-0.5">
-                            <MessageSquare className="h-3 w-3 text-lavender-500" />
+                          <div className="h-6 w-6 rounded-md bg-gradient-to-br from-lavender-300 to-lavender-500 flex items-center justify-center mr-2 mt-0.5 shadow-sm shrink-0">
+                            <MessageSquare className="h-3 w-3 text-white" />
                           </div>
                           <div>
                             <h4 className="text-xs font-semibold text-gray-800">Forum</h4>
-                            <p className="text-xs text-gray-700">Community support</p>
+                            <p className="text-xs text-gray-500">Community support</p>
                           </div>
                         </div>
 
                         <div className="flex items-start">
-                          <div className="h-6 w-6 rounded-full bg-lavender-100 flex items-center justify-center mr-2 mt-0.5">
-                            <Users className="h-3 w-3 text-lavender-500" />
+                          <div className="h-6 w-6 rounded-md bg-gradient-to-br from-lavender-300 to-lavender-500 flex items-center justify-center mr-2 mt-0.5 shadow-sm shrink-0">
+                            <Users className="h-3 w-3 text-white" />
                           </div>
                           <div>
                             <h4 className="text-xs font-semibold text-gray-800">Mentor Network</h4>
-                            <p className="text-xs text-gray-700">Expert feedback</p>
+                            <p className="text-xs text-gray-500">Expert feedback</p>
                           </div>
                         </div>
 
                         <div className="flex items-start">
-                          <div className="h-6 w-6 rounded-full bg-lavender-100 flex items-center justify-center mr-2 mt-0.5">
-                            <Target className="h-3 w-3 text-lavender-500" />
+                          <div className="h-6 w-6 rounded-md bg-gradient-to-br from-lavender-300 to-lavender-500 flex items-center justify-center mr-2 mt-0.5 shadow-sm shrink-0">
+                            <Target className="h-3 w-3 text-white" />
                           </div>
                           <div>
                             <h4 className="text-xs font-semibold text-gray-800">Skill Projects</h4>
-                            <p className="text-xs text-gray-700">Learn while earning</p>
+                            <p className="text-xs text-gray-500">Learn while earning</p>
                           </div>
                         </div>
 
                         <div className="flex items-start">
-                          <div className="h-6 w-6 rounded-full bg-lavender-100 flex items-center justify-center mr-2 mt-0.5">
-                            <Trophy className="h-3 w-3 text-lavender-500" />
+                          <div className="h-6 w-6 rounded-md bg-gradient-to-br from-lavender-300 to-lavender-500 flex items-center justify-center mr-2 mt-0.5 shadow-sm shrink-0">
+                            <Trophy className="h-3 w-3 text-white" />
                           </div>
                           <div>
-                            <h4 className="text-xs font-semibold text-gray-800">Skill Certification</h4>
-                            <p className="text-xs text-gray-700">Verified credentials</p>
+                            <h4 className="text-xs font-semibold text-gray-800">Certification</h4>
+                            <p className="text-xs text-gray-500">Verified credentials</p>
                           </div>
                         </div>
                       </div>
 
-                      <EnhancedButton
-                        variant="gradient"
-                        size="sm"
-                        className="w-full bg-gradient-to-r from-lavender-300 to-lavender-500 hover:from-lavender-400 hover:to-lavender-600"
+                      <button
+                        className="w-full rounded-xl px-4 py-3 flex items-center justify-center text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
+                        style={{
+                          background: "linear-gradient(135deg, #b9aee8 0%, #9b8fd4 50%, #8a7ec8 100%)",
+                          boxShadow: "0 0 0 1px rgba(88,82,100,0.12), 0 4px 14px rgba(100,88,160,0.30), 0 -1px 0 rgba(255,255,255,0.20) inset",
+                        }}
                         onClick={handleHireNow}
                       >
                         <Zap className="mr-2 h-4 w-4" />
                         Accelerate Your Skills
-                      </EnhancedButton>
+                      </button>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>

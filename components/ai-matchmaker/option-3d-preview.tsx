@@ -42,37 +42,47 @@ export const THREE_D_OPTIONS = new Set([
 ])
 
 // ─── Option3DPreview ─────────────────────────────────────────────────────────
-// memo() — Canvas identity is preserved across parent re-renders.
-// IntersectionObserver unmounts the WebGL canvas when off-screen to free GPU
-// resources, preventing mobile crashes after 20-30 seconds of use.
-// The card container (background + label) always stays visible — seamless.
+// Canvas mounts immediately — no IntersectionObserver gate, no mounted-state
+// delay. IntersectionObserver only controls frameloop: "always" when visible,
+// "never" when off-screen (GPU freed without unmounting, so no reload flicker).
 export const Option3DPreview = memo(function Option3DPreview({
   option,
   className,
+  disableHover = false,
 }: {
   option: string
   className?: string
+  disableHover?: boolean
 }) {
-  const [mounted, setMounted] = useState(false)
-  const [inView, setInView] = useState(false)
+  // Start true: new cards always appear scrolled into view
+  const [currentlyInView, setCurrentlyInView] = useState(true)
   const containerRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => { setMounted(true) }, [])
 
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
     const observer = new IntersectionObserver(
-      ([entry]) => setInView(entry.isIntersecting),
-      { rootMargin: "120px 0px" } // preload 120px before card enters viewport
+      ([entry]) => setCurrentlyInView(entry.isIntersecting),
+      { rootMargin: "120px 0px" }
     )
     observer.observe(el)
     return () => observer.disconnect()
   }, [])
 
+  const canvas = (
+    <WebGLErrorBoundary>
+      <Suspense fallback={null}>
+        <Option3DImpl option={option} frameloop={currentlyInView ? "always" : "never"} />
+      </Suspense>
+    </WebGLErrorBoundary>
+  )
+
   return (
     <div ref={containerRef} className={`relative w-full h-full ${className ?? ""}`}>
-      {mounted && (
+      {disableHover ? (
+        // No Framer Motion at all — zero hover animation guaranteed
+        <div className="relative w-full h-full">{canvas}</div>
+      ) : (
         <motion.div
           className="relative w-full h-full cursor-pointer"
           whileHover="hover"
@@ -87,13 +97,7 @@ export const Option3DPreview = memo(function Option3DPreview({
             transition={{ type: "spring", stiffness: 150, damping: 20 }}
             className="w-full h-full"
           >
-            {inView && (
-              <WebGLErrorBoundary>
-                <Suspense fallback={null}>
-                  <Option3DImpl option={option} />
-                </Suspense>
-              </WebGLErrorBoundary>
-            )}
+            {canvas}
           </motion.div>
         </motion.div>
       )}
@@ -112,7 +116,7 @@ export const CategoryCard3D = memo(function CategoryCard3D({
   onClick?: () => void
 }) {
   const [mounted, setMounted] = useState(false)
-  const [inView, setInView] = useState(false)
+  const [hasBeenInView, setHasBeenInView] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => { setMounted(true) }, [])
@@ -121,7 +125,12 @@ export const CategoryCard3D = memo(function CategoryCard3D({
     const el = containerRef.current
     if (!el) return
     const observer = new IntersectionObserver(
-      ([entry]) => setInView(entry.isIntersecting),
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setHasBeenInView(true)
+          observer.disconnect()
+        }
+      },
       { rootMargin: "120px 0px" }
     )
     observer.observe(el)
@@ -152,7 +161,7 @@ export const CategoryCard3D = memo(function CategoryCard3D({
                       opacity-0 group-hover:opacity-100 transition-opacity duration-200
                       pointer-events-none z-10 rounded-2xl" />
       <div className="relative w-full" style={{ height: "72%" }}>
-        {mounted && inView && (
+        {mounted && hasBeenInView && (
           <WebGLErrorBoundary>
             <Suspense fallback={null}>
               <Option3DImpl option={option} thumbnail />

@@ -383,12 +383,12 @@
 
   html,
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background: transparent;
     /* Remove all spacing */
     min-height: 100vh;
     min-width: 100vw;
     position: relative;
-    isolation: isolate;
     margin: 0;
     padding: 0;
   }
@@ -398,19 +398,7 @@
     scroll-behavior: smooth;
   }
 
-  /* Add a subtle background color to ensure no white flashes */
-  html::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: -30;
-    background-color: hsl(var(--background));
-  }
-
-  /* Ensure all fixed elements cover the entire viewport */
+/* Ensure all fixed elements cover the entire viewport */
   .fixed {
     width: 100vw;
     min-height: 100vh;
@@ -452,7 +440,7 @@ body {
   margin: 0;
   overflow-x: hidden;
   width: 100%;
-  background-color: hsl(var(--background));
+  background-color: transparent;
 }
 
 /* Enhanced glassmorphic effect for header */

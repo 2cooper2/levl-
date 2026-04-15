@@ -18,7 +18,7 @@ import {
   Leaf,
   Layers,
   HardHat,
-  ChevronRight,
+  ChevronLeft,
 } from "lucide-react"
 import { LevlLogo } from "@/components/levl-logo"
 
@@ -28,16 +28,26 @@ import { ProviderCard } from "@/components/ai-matchmaker/provider-card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Layout } from "lucide-react"
 import { LevlPortal } from "@/components/levl-portal"
 import Image from "next/image"
 import { Option3DPreview, THREE_D_OPTIONS } from "@/components/ai-matchmaker/option-3d-preview"
+import { MountHybridPreview, isMountItem } from "@/components/ai-matchmaker/mount-hybrid-preview"
 import dynamic from "next/dynamic"
 const TVSizeMeasure = dynamic(
   () => import("@/components/ai-matchmaker/option-3d-impl").then((m) => ({ default: m.TVSizeMeasure })),
   { ssr: false }
 )
 
+
+// Tip text shown overlaid on the lavender canvas for specific wall types
+const WALL_TIPS: Record<string, string> = {
+  "Drywall/Sheetrock": "Tip: sounds hollow when you knock",
+  "Plaster": "Tip: dense feeling when knocking",
+  "Brick": "Tip: needs masonry bit + anchors",
+  "Concrete": "Tip: needs hammer drill",
+  "Stone": "Tip: needs masonry anchors",
+  "Metal studs": "Tip: use toggle bolts",
+}
 
 type ServiceProvider = {
   id: number
@@ -275,11 +285,10 @@ const serviceSpecificQuestions: ServiceSpecificQuestions = {
       ],
   "What type of wall do you have?": [
     "Drywall/Sheetrock",
+    "Plaster",
     "Brick",
     "Concrete",
-    "Plaster",
     "Stone",
-    "Metal studs",
     "Unsure",
   ],
       "Do you already have a wall mount, or do you need one included?": [
@@ -1055,11 +1064,8 @@ const MessageItem = memo(
           transition={{ duration: 0.2 }}
           layout={false}
         >
-          <div className="relative bg-gradient-to-br from-lavender-200/95 via-lavender-300/90 to-lavender-200/90 dark:from-lavender-950/95 dark:via-lavender-950/90 dark:to-lavender-950/90 backdrop-blur-sm rounded-2xl px-5 py-3 max-w-[80%] shadow-[0_14px_20px_-3px_rgba(79,70,229,0.3),0_6px_10px_-4px_rgba(79,70,229,0.2),0_-2px_8px_0px_rgba(255,255,255,0.15)] dark:shadow-[0_10px_15px_-3px_rgba(79,70,229,0.3),0_4px_6px_-4px_rgba(0,0,0,0.4),0_-2px_6px_0px_rgba(79,70,229,0.1)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-800/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 translate-y-[-2px] hover:translate-y-[-4px] transition-all duration-300 transform">
+          <div className="relative bg-gradient-to-br from-[#ede8ff] via-[#e0d8ff] to-[#d4ccff] dark:from-lavender-950 dark:via-lavender-950 dark:to-lavender-950 rounded-3xl px-5 py-3 max-w-[80%] shadow-[0_0_0_1px_rgba(88,82,100,0.10),0_16px_16px_rgba(68,62,86,0.22),0_28px_20px_rgba(64,58,82,0.10),0_-1px_0_rgba(255,255,255,0.65)] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_16px_16px_rgba(0,0,0,0.34),0_28px_20px_rgba(0,0,0,0.16),0_-1px_0_rgba(255,255,255,0.07)] translate-y-[-14px] hover:translate-y-[-20px] transition-all duration-300 transform">
             <p className="text-sm text-gray-800 dark:text-gray-100 relative z-10">{message.content}</p>
-            <div className="text-[10px] text-black dark:text-white text-right mt-1 relative z-10">
-              {new Date(message.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-            </div>
           </div>
         </motion.div>
       )
@@ -1068,15 +1074,14 @@ const MessageItem = memo(
     if (message.type === "ai") {
       return (
         <motion.div
-          className="flex"
+          className="flex flex-col items-start"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
           layout={false}
         >
-          <div className="relative bg-gradient-to-br from-white/95 via-white/90 to-lavender-50/90 dark:from-gray-800/95 dark:via-gray-800/90 dark:to-lavender-950/90 backdrop-blur-sm rounded-2xl px-5 py-3 max-w-[80%] shadow-[0_14px_20px_-3px_rgba(79,70,229,0.3),0_6px_10px_-4px_rgba(79,70,229,0.2),0_-2px_8px_0px_rgba(255,255,255,0.15)] dark:shadow-[0_10px_15px_-3px_rgba(79,70,229,0.3),0_4px_6px_-4px_rgba(0,0,0,0.4),0_-2px_6px_0px_rgba(79,70,229,0.1)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 translate-y-[-4px] transition-all duration-300 transform">
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-lavender-500/8 via-purple-500/8 to-violet-500/8 dark:from-lavender-500/15 dark:via-purple-500/15 dark:to-violet-500/15 opacity-80"></div>
-            <div className="absolute inset-x-0 bottom-0 h-1/2 rounded-b-2xl bg-gradient-to-t from-black/5 to-transparent dark:from-white/5"></div>
+          <div className={`relative bg-gradient-to-br from-white via-[#fefeff] to-[#fbf9ff] dark:from-gray-800 dark:via-gray-800 dark:to-lavender-950 rounded-3xl px-5 py-3 ${message.options?.some(o => isMountItem(o)) ? 'w-full' : 'max-w-[80%]'} shadow-[0_0_0_1px_rgba(88,82,100,0.09),0_16px_16px_rgba(64,58,84,0.20),0_28px_20px_rgba(60,54,80,0.09),0_-1px_0_rgba(255,255,255,0.88)] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.05),0_16px_16px_rgba(0,0,0,0.32),0_28px_20px_rgba(0,0,0,0.14),0_-1px_0_rgba(255,255,255,0.05)] translate-y-[-14px] transition-all duration-300 transform`}>
+            <div className="absolute inset-x-0 bottom-0 h-1/2 rounded-b-3xl bg-gradient-to-t from-black/5 to-transparent dark:from-white/5"></div>
 
             <p className="text-sm relative z-10">{message.content}</p>
 
@@ -1085,7 +1090,7 @@ const MessageItem = memo(
                 {/* Check if any options have 3D previews */}
                 {message.options.some(opt => THREE_D_OPTIONS.has(opt)) ? (
                   // No translateZ/backfaceVisibility here — those fight the Canvas WebGL layer
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 gap-3">
                     {message.options.map((option, index) => {
                       const has3D = THREE_D_OPTIONS.has(option)
                       return (
@@ -1093,32 +1098,45 @@ const MessageItem = memo(
                   key={`${message.id}-${option}-${index}`}
                   initial={{ opacity: 0, y: 20, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
                   whileTap={{ scale: 0.98 }}
                   transition={{ delay: index * 0.05, type: "spring", stiffness: 260, damping: 20 }}
                   className={`group relative flex flex-col items-center overflow-hidden
                     bg-gradient-to-b from-white/95 to-white/80 dark:from-gray-800/95 dark:to-gray-900/80
                     rounded-2xl text-xs font-semibold
-                    border border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.04)]
-                    backdrop-blur-md transition-all duration-300
-                    hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] hover:border-lavender-400/50
+                    border border-white/30
+                    shadow-[0_2px_6px_rgba(44,38,80,0.07),0_8px_24px_rgba(44,38,80,0.06),0_20px_48px_rgba(38,32,72,0.05),0_36px_72px_rgba(30,26,64,0.03),0_-1px_0_rgba(255,255,255,0.82)]
+                    dark:shadow-[0_2px_6px_rgba(0,0,0,0.24),0_8px_24px_rgba(0,0,0,0.18),0_20px_48px_rgba(0,0,0,0.12),0_36px_72px_rgba(0,0,0,0.07),0_-1px_0_rgba(255,255,255,0.05)]
+                    backdrop-blur-md
                     ${!has3D ? 'justify-center min-h-[80px]' : ''}`}
                   onClick={() => handleOptionClick(option)}
                 >
-                  {/* Glass reflection overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10" />
 
                   {has3D ? (
-                    <div className="w-full h-24 sm:h-32 overflow-hidden relative">
-                      <Option3DPreview option={option} className="w-full h-full" />
+                    <div className="w-full h-48 sm:h-52 overflow-hidden relative">
+                      {isMountItem(option) ? (
+                        // Mount items: Blender path-traced PNG + WebGL fallback
+                        <MountHybridPreview option={option} className="w-full h-full" />
+                      ) : (
+                        // All other 3D options (wall types, brackets, cables, etc.): unchanged
+                        <Option3DPreview
+                          option={option}
+                          className="w-full h-full"
+                          disableHover={!!WALL_TIPS[option]}
+                        />
+                      )}
                     </div>
                   ) : null}
 
                   {/* Label strip */}
-                  <div className={`relative w-full py-2.5 px-3 text-center ${has3D ? 'bg-white/40 dark:bg-gray-900/40 backdrop-blur-md border-t border-white/10' : ''}`}>
+                  <div className={`relative w-full px-3 text-center ${has3D ? 'bg-white/40 dark:bg-gray-900/40 backdrop-blur-md border-t border-white/10' : ''} ${WALL_TIPS[option] ? 'pt-2 pb-1.5' : 'py-2.5'}`}>
                     <span className="bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 bg-clip-text text-transparent">
                       {option}
                     </span>
+                    {WALL_TIPS[option] && (
+                      <p className="text-[9px] font-medium text-black mt-0.5">
+                        {WALL_TIPS[option]}
+                      </p>
+                    )}
                   </div>
                 </motion.button>
                       )
@@ -1132,7 +1150,7 @@ const MessageItem = memo(
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: index * 0.05, duration: 0.2 }}
-                        className="px-3 py-1.5 bg-white/90 dark:bg-gray-800/90 hover:bg-lavender-100/90 dark:hover:bg-lavender-900/30 rounded-full text-xs font-medium transition-all duration-200 border border-lavender-200/70 dark:border-lavender-700/50 hover:border-lavender-300 dark:hover:border-lavender-600/70 backdrop-blur-sm hover:shadow-md"
+                        className="px-3 py-1.5 bg-gradient-to-br from-white via-[#fefeff] to-[#fbf9ff] dark:bg-gray-800 rounded-full text-xs font-medium transition-all duration-200 shadow-[0_0_0_1px_rgba(88,82,100,0.09),0_2px_6px_rgba(44,38,80,0.07),0_6px_18px_rgba(44,38,80,0.06),0_-1px_0_rgba(255,255,255,0.78)] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.05),0_2px_6px_rgba(0,0,0,0.22),0_6px_18px_rgba(0,0,0,0.16),0_-1px_0_rgba(255,255,255,0.05)] hover:shadow-[0_0_0_1px_rgba(88,82,100,0.12),0_3px_10px_rgba(44,38,80,0.10),0_10px_28px_rgba(44,38,80,0.08),0_-1px_0_rgba(255,255,255,0.82)] hover:translate-y-[-2px]"
                         onClick={() => handleOptionClick(option)}
                       >
                         {option}
@@ -1143,17 +1161,17 @@ const MessageItem = memo(
                 
                 {/* 3D TV size illustration */}
                 {message.content === "What size is your TV?" && (
-                  <motion.div
-                    className="mt-4 relative w-full h-44 sm:h-64 overflow-hidden rounded-xl border border-lavender-200/70"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3, duration: 0.3 }}
-                  >
-                    <TVSizeMeasure />
-                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 pointer-events-none">
-                      <span className="text-xs font-medium text-gray-500 bg-white/70 rounded px-2 py-0.5">Measure corner to corner diagonally</span>
-                    </div>
-                  </motion.div>
+                  <>
+                    <motion.div
+                      className="mt-4 relative w-full h-64 sm:h-80 overflow-hidden rounded-xl border border-lavender-200/70"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3, duration: 0.3 }}
+                    >
+                      <TVSizeMeasure />
+                    </motion.div>
+                    <p className="mt-3 mb-1 text-xs font-medium text-black text-center">Measure corner to corner diagonally</p>
+                  </>
                 )}
               </div>
             )}
@@ -1177,10 +1195,22 @@ const MessageItem = memo(
                 ))}
               </div>
             )}
-            <div className="text-[10px] text-black dark:text-white mt-1 relative z-10">
-              {new Date(message.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-            </div>
           </div>
+          <span
+            className="text-[9px] font-semibold tracking-wide select-none ml-2 -mt-0.5 px-2.5 py-1 rounded-none"
+            suppressHydrationWarning
+            style={{
+              color: "rgba(85,75,110,0.80)",
+              textShadow: "0 1px 2px rgba(255,255,255,1), 0 -1px 1px rgba(0,0,0,0.22)",
+              background: "rgba(255,255,255,0.18)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              border: "1px solid rgba(255,255,255,0.70)",
+              boxShadow: "0 2px 8px rgba(80,70,120,0.08), inset 0 1px 0 rgba(255,255,255,0.90)",
+            }}
+          >
+            {new Date(message.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+          </span>
         </motion.div>
       )
     }
@@ -1196,10 +1226,10 @@ const MessageItem = memo(
           layout={false}
         >
           <div className="flex items-center">
-            <LevlLogo className="h-10 w-10 mr-2 drop-shadow-[0_4px_8px_rgba(79,70,229,0.3)] dark:drop-shadow-[0_4px_8px_rgba(79,70,229,0.5)]" />
+            <LevlLogo className="h-10 w-10 mr-2 translate-y-[-1px]" style={{ filter: "drop-shadow(0px 2px 4px rgba(66,60,86,0.17)) drop-shadow(0px 6px 16px rgba(62,56,82,0.15)) drop-shadow(0px 14px 32px rgba(56,50,76,0.13))" }} />
             <div className="flex space-x-1.5">
               <motion.div
-                className="h-2.5 w-2.5 rounded-full bg-gradient-to-br from-lavender-400 to-lavender-600 shadow-[0_2px_8px_rgba(139,92,246,0.6)] dark:shadow-[0_2px_8px_rgba(139,92,246,0.8)]"
+                className="h-2.5 w-2.5 rounded-full bg-gradient-to-br from-lavender-200/90 via-lavender-400/95 to-lavender-600/95 shadow-[0_0_0_1px_rgba(88,82,100,0.13),inset_0_2px_3px_rgba(255,255,255,0.98),inset_0_-2px_3px_rgba(66,60,86,0.32),0_2px_4px_rgba(66,60,86,0.24),0_4px_12px_rgba(62,56,82,0.20)] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08),inset_0_2px_3px_rgba(255,255,255,0.18),inset_0_-2px_3px_rgba(0,0,0,0.40),0_2px_4px_rgba(0,0,0,0.40),0_4px_12px_rgba(0,0,0,0.32)]"
                 animate={{
                   scale: [0.6, 1.2, 0.6],
                   opacity: [0.5, 1, 0.5],
@@ -1211,7 +1241,7 @@ const MessageItem = memo(
                 }}
               />
               <motion.div
-                className="h-2.5 w-2.5 rounded-full bg-gradient-to-br from-lavender-400 to-lavender-600 shadow-[0_2px_8px_rgba(139,92,246,0.6)] dark:shadow-[0_2px_8px_rgba(139,92,246,0.8)]"
+                className="h-2.5 w-2.5 rounded-full bg-gradient-to-br from-lavender-200/90 via-lavender-400/95 to-lavender-600/95 shadow-[0_0_0_1px_rgba(88,82,100,0.13),inset_0_2px_3px_rgba(255,255,255,0.98),inset_0_-2px_3px_rgba(66,60,86,0.32),0_2px_4px_rgba(66,60,86,0.24),0_4px_12px_rgba(62,56,82,0.20)] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08),inset_0_2px_3px_rgba(255,255,255,0.18),inset_0_-2px_3px_rgba(0,0,0,0.40),0_2px_4px_rgba(0,0,0,0.40),0_4px_12px_rgba(0,0,0,0.32)]"
                 animate={{
                   scale: [0.6, 1.2, 0.6],
                   opacity: [0.5, 1, 0.5],
@@ -1224,7 +1254,7 @@ const MessageItem = memo(
                 }}
               />
               <motion.div
-                className="h-2.5 w-2.5 rounded-full bg-gradient-to-br from-lavender-400 to-lavender-600 shadow-[0_2px_8px_rgba(139,92,246,0.6)] dark:shadow-[0_2px_8px_rgba(139,92,246,0.8)]"
+                className="h-2.5 w-2.5 rounded-full bg-gradient-to-br from-lavender-200/90 via-lavender-400/95 to-lavender-600/95 shadow-[0_0_0_1px_rgba(88,82,100,0.13),inset_0_2px_3px_rgba(255,255,255,0.98),inset_0_-2px_3px_rgba(66,60,86,0.32),0_2px_4px_rgba(66,60,86,0.24),0_4px_12px_rgba(62,56,82,0.20)] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08),inset_0_2px_3px_rgba(255,255,255,0.18),inset_0_-2px_3px_rgba(0,0,0,0.40),0_2px_4px_rgba(0,0,0,0.40),0_4px_12px_rgba(0,0,0,0.32)]"
                 animate={{
                   scale: [0.6, 1.2, 0.6],
                   opacity: [0.5, 1, 0.5],
@@ -1270,6 +1300,8 @@ export function AIServiceMatchmaker() {
   const categoriesRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
   const isMountedRef = useRef(true)
+  // Stable ref so MessageItem memo is never broken when handleOptionSelect deps change
+  const latestHandleOptionSelectRef = useRef<(option: string) => void>(() => {})
 
   const [aiModel, setAIModel] = useState<AIModelState>(initialAIModel)
 
@@ -1283,6 +1315,13 @@ export function AIServiceMatchmaker() {
   // Scroll to top on initial load so the page always starts at the top
   useEffect(() => {
     window.scrollTo(0, 0)
+  }, [])
+
+  // Preload the 3D module bundle immediately on mount — before user clicks anything.
+  // This ensures shader compilation starts early so cards appear without lag.
+  useEffect(() => {
+    import("@/components/ai-matchmaker/option-3d-impl").catch(() => {})
+    import("@/components/ai-matchmaker/mount-glow-canvas").catch(() => {})
   }, [])
 
   // Track whether the user has interacted (clicked a category or sent a message)
@@ -1559,6 +1598,12 @@ export function AIServiceMatchmaker() {
     },
     [conversationStage, generateRecommendations, aiModel.conversationContext, getNextQuestionIndex],
   )
+  // Always keep ref pointing to latest version — used by stableHandleOptionSelect
+  latestHandleOptionSelectRef.current = handleOptionSelect
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const stableHandleOptionSelect = useCallback((option: string) => {
+    latestHandleOptionSelectRef.current(option)
+  }, []) // empty deps — this reference never changes, so MessageItem memo holds
 
   const handleSubmit = useCallback(
     (e?: React.FormEvent) => {
@@ -1656,26 +1701,105 @@ export function AIServiceMatchmaker() {
   // Users can click the input to focus when they're ready to type
 
   return (
-    <section className="w-full pb-8 md:pb-12 relative overflow-hidden order-first z-20 -mt-8">
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/80 via-white/90 to-violet-50/80 dark:from-gray-900/90 dark:via-gray-900/95 dark:to-indigo-950/80 z-0" />
+    <section className="w-full pb-8 md:pb-12 relative order-first z-20 -mt-8">
+      {/* ─── Infinity cove / cyclorama wall ─────────────────────────────────────
+          Simulates a seamless photography studio backdrop:
+          · Bright white key-light zone at upper-centre (the "lit wall")
+          · Smooth radial falloff to a cool lavender-shadow at the lower edges
+          · Second radial at bottom mimics the cove shadow where wall meets floor
+          · Dark mode: deep studio black with a subtle purple rim                */}
+      <style jsx global>{`
+        .cyc-wall {
+          background:
+            /* top-left corner — darkest point, wall curves away from camera */
+            radial-gradient(ellipse 58% 48% at 0% 0%,
+              rgba(88,85,100,0.32) 0%, transparent 62%
+            ),
+            /* top-right corner — mirrors left */
+            radial-gradient(ellipse 58% 48% at 100% 0%,
+              rgba(88,85,100,0.32) 0%, transparent 62%
+            ),
+            /* bottom-left corner — lighter than top but still recedes */
+            radial-gradient(ellipse 42% 36% at 0% 100%,
+              rgba(88,85,100,0.28) 0%, transparent 58%
+            ),
+            /* bottom-right corner */
+            radial-gradient(ellipse 42% 36% at 100% 100%,
+              rgba(88,85,100,0.28) 0%, transparent 58%
+            ),
+            /* THE COVE — bright hotspot at lower-centre where curved floor
+               meets the back wall; this is the signature of a real infinity cove */
+            radial-gradient(ellipse 68% 58% at 50% 90%,
+              rgba(255,255,255,1.0)  0%,
+              rgba(255,255,255,0.70) 32%,
+              transparent            64%
+            ),
+            /* base backdrop — bright white centre, clear falloff to studio edge */
+            radial-gradient(ellipse 150% 130% at 50% 45%,
+              #ffffff  0%,
+              #fdfcff 35%,
+              #f5f3f9 60%,
+              #e8e6ef 80%,
+              #dddbe5 100%
+            );
+        }
+        .dark .cyc-wall {
+          background:
+            /* top corners — very dark */
+            radial-gradient(ellipse 58% 48% at 0% 0%,
+              rgba(4,3,10,0.80) 0%, transparent 60%
+            ),
+            radial-gradient(ellipse 58% 48% at 100% 0%,
+              rgba(4,3,10,0.80) 0%, transparent 60%
+            ),
+            /* bottom corners */
+            radial-gradient(ellipse 42% 36% at 0% 100%,
+              rgba(6,4,16,0.55) 0%, transparent 58%
+            ),
+            radial-gradient(ellipse 42% 36% at 100% 100%,
+              rgba(6,4,16,0.55) 0%, transparent 58%
+            ),
+            /* cove highlight — subtle purple-tinged glow at lower-centre */
+            radial-gradient(ellipse 68% 58% at 50% 90%,
+              rgba(62,48,108,0.55)  0%,
+              rgba(38,28,72,0.28)  35%,
+              transparent          64%
+            ),
+            /* base — deep studio dark */
+            radial-gradient(ellipse 150% 130% at 50% 45%,
+              #1a1826  0%,
+              #120f1e 32%,
+              #0c0a16 60%,
+              #070510 82%,
+              #04030c 100%
+            );
+        }
+        /* Scrollbar — categories strip (hide) */
+        .cyc-cats-scroll::-webkit-scrollbar { display: none; }
+        /* Scrollbar — chat area (thin lavender) */
+        .cyc-chat-scroll::-webkit-scrollbar { width: 6px; background: transparent; }
+        .cyc-chat-scroll::-webkit-scrollbar-thumb { background: rgba(79,70,229,0.2); border-radius: 10px; }
+        .cyc-chat-scroll::-webkit-scrollbar-thumb:hover { background: rgba(79,70,229,0.4); }
+      `}</style>
 
-      <div className="w-full relative z-10 overflow-x-hidden px-0 mx-0">
+      <div className="w-full relative z-10 px-0 mx-0">
         <motion.div
           className="w-full mx-0 px-0"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="w-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border border-gray-200/50 dark:border-gray-800/50 overflow-hidden">
-            <div className="relative flex items-center justify-between p-5 bg-white dark:bg-gray-900 backdrop-blur-sm mb-0 mt-8">
+          <div className="w-full">
+            <div className="relative flex items-center justify-between p-5 mb-0 mt-8">
               <div className="flex items-center">
-                <LevlLogo className="h-16 w-16 transition-all shadow-[0_4px_8px_rgba(0,0,0,0.1),0_2px_4px_rgba(0,0,0,0.1)] dark:shadow-[0_4px_8px_rgba(79,70,229,0.2),0_2px_4px_rgba(79,70,229,0.1)]" />
+                <LevlLogo className="h-16 w-16 transition-all shadow-[0_2px_4px_rgba(66,60,86,0.17),0_6px_16px_rgba(62,56,82,0.15),0_14px_32px_rgba(56,50,76,0.13)] dark:shadow-[0_2px_4px_rgba(0,0,0,0.38),0_6px_16px_rgba(0,0,0,0.29),0_14px_32px_rgba(0,0,0,0.20)] translate-y-[-2px]" />
               </div>
               <div className="flex items-center gap-3">
                 <Dialog open={showPortal} onOpenChange={setShowPortal}>
                   <DialogTrigger asChild>
                     <button
-                      className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-lavender-400"
+                      className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-black dark:text-white"
+                      style={{ textShadow: "0px 2px 4px rgba(66,60,86,0.17), 0px 5px 12px rgba(62,56,82,0.11)" }}
                     >
                       Portal
                     </button>
@@ -1692,42 +1816,43 @@ export function AIServiceMatchmaker() {
 
                 <Link
                   href="/dashboard"
-                  className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-lavender-400 opacity-100"
+                  className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-black dark:text-white"
+                  style={{ textShadow: "0px 2px 4px rgba(66,60,86,0.17), 0px 5px 12px rgba(62,56,82,0.11)" }}
                 >
                   Dashboard
                 </Link>
                 <Link
                   href="/profile"
-                  className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-lavender-400"
+                  className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-black dark:text-white"
+                  style={{ textShadow: "0px 2px 4px rgba(66,60,86,0.17), 0px 5px 12px rgba(62,56,82,0.11)" }}
                 >
                   Profile
                 </Link>
                 <Link
                   href="/forum"
-                  className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-lavender-400"
+                  className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-black dark:text-white"
+                  style={{ textShadow: "0px 2px 4px rgba(66,60,86,0.17), 0px 5px 12px rgba(62,56,82,0.11)" }}
                 >
                   Forum
                 </Link>
               </div>
             </div>
 
-            <div className="border-b border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-r from-gray-50/80 via-white/80 to-gray-50/80 dark:from-gray-900/80 dark:via-gray-900/90 dark:to-gray-900/80 mb-0 pb-0">
+            <div className="mb-0 pb-0">
               <div className="relative w-full overflow-hidden">
-                {/* Right-edge swipe indicator */}
-                <div className="absolute right-0 top-0 bottom-0 w-16 z-20 pointer-events-none"
-                  style={{ background: 'linear-gradient(to left, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.7) 50%, transparent 100%)' }}
-                />
+                {/* Right-edge feather + swipe indicator — mobile only */}
+                <div className="md:hidden absolute right-0 top-0 bottom-0 w-16 z-20 pointer-events-none bg-gradient-to-l from-[#e3e2ea]/95 via-[#e3e2ea]/50 to-transparent dark:from-[#0c0a16]/95 dark:via-[#0c0a16]/50 dark:to-transparent" />
                 <motion.div
-                  className="absolute right-2 top-1/2 -translate-y-1/2 z-30 pointer-events-none flex flex-col items-center gap-0.5"
-                  animate={{ x: [0, 5, 0] }}
+                  className="md:hidden absolute right-2 top-1/2 -translate-y-1/2 z-30 pointer-events-none flex flex-col items-center gap-0.5"
+                  animate={{ x: [0, -5, 0] }}
                   transition={{ duration: 1.3, repeat: Infinity, ease: 'easeInOut' }}
                 >
-                  <ChevronRight className="h-5 w-5 text-purple-500 drop-shadow-sm" />
-                  <span className="text-[9px] font-medium text-purple-400 tracking-wide leading-tight">swipe</span>
+                  <ChevronLeft className="h-5 w-5 text-[#c084fc] drop-shadow-sm" />
+                  <span className="text-[9px] font-medium text-[#c084fc] tracking-wide leading-tight">swipe</span>
                 </motion.div>
 
                 <div
-                  className="overflow-x-auto py-2 pb-1 scrollbar-hide scroll-smooth mx-auto bg-white"
+                  className="cyc-cats-scroll overflow-x-auto py-2 pb-1 scrollbar-hide scroll-smooth mx-auto"
                   ref={categoriesRef}
                   style={{
                     scrollbarWidth: "none",
@@ -1736,11 +1861,6 @@ export function AIServiceMatchmaker() {
                     scrollBehavior: "smooth",
                   }}
                 >
-                  <style jsx>{`
-                    div::-webkit-scrollbar {
-                      display: none;
-                    }
-                  `}</style>
                   <div className="flex space-x-4 snap-x snap-mandatory px-4 md:px-8 -ml-2 md:-ml-4 mr-4 md:mr-8">
                     {categories.map((category, index) => (
                       <EnhancedCategoryCard
@@ -1753,12 +1873,10 @@ export function AIServiceMatchmaker() {
                         className="w-36 h-32 my-2 mx-1 rounded-xl overflow-hidden transition-all duration-300
 bg-gradient-to-br from-white/95 via-white/90 to-indigo-50/90 dark:from-gray-800/95 dark:via-gray-800/90 dark:to-indigo-950/90
 backdrop-blur-sm
-shadow-[0_14px_20px_-3px_rgba(79,70,229,0.3),0_6px_10px_-4px_rgba(79,70,229,0.2),0_-2px_8px_0px_rgba(255,255,255,0.15)]
-dark:shadow-[0_10px_15px_-3px_rgba(79,70,229,0.3),0_4px_6px_-4px_rgba(0,0,0,0.4),0_-2px_6px_0px_rgba(79,70,229,0.1)]
-hover:shadow-[0_18px_25px_-5px_rgba(79,70,229,0.4),0_10px_15px_-5px_rgba(79,70,229,0.3),0_-2px_10px_0px_rgba(255,255,255,0.2)]
-dark:hover:shadow-[0_15px_20px_-3px_rgba(79,70,229,0.4),0_8px_12px_-4px_rgba(0,0,0,0.5),0_-2px_8px_0px_rgba(79,70,229,0.2)]
-border-t border-l border-r border-indigo-100/70 dark:border-t dark:border-l dark:border-r dark:border-indigo-700/40
-border-b-2 border-b-indigo-200/80 dark:border-b-2 dark:border-b-indigo-800/80
+shadow-[0_24px_80px_rgba(66,60,86,0.10),0_44px_120px_rgba(62,56,82,0.07),0_-1px_0_rgba(255,255,255,0.90)]
+dark:shadow-[0_24px_80px_rgba(0,0,0,0.40),0_44px_120px_rgba(0,0,0,0.30),0_-1px_0_rgba(255,255,255,0.07)]
+hover:shadow-[0_28px_90px_rgba(66,60,86,0.13),0_50px_140px_rgba(62,56,82,0.09),0_-1px_0_rgba(255,255,255,0.95)]
+dark:hover:shadow-[0_28px_90px_rgba(0,0,0,0.48),0_50px_140px_rgba(0,0,0,0.38),0_-1px_0_rgba(255,255,255,0.09)]
 translate-y-[-4px] hover:translate-y-[-8px]"
                         onClick={() => handleCategoryClick(category.serviceType)}
                       />
@@ -1771,32 +1889,15 @@ translate-y-[-4px] hover:translate-y-[-8px]"
             <div
               id="chat-container"
               ref={chatContainerRef}
-              className="relative overflow-y-auto p-6 pb-16 min-h-[600px] bg-white dark:bg-gray-900 backdrop-blur-sm shadow-inner border-t border-indigo-100/20 dark:border-indigo-800/20 rounded-b-lg mt-0 pt-4"
-              style={{
-                scrollbarWidth: "thin",
-                scrollbarColor: "rgba(79, 70, 229, 0.2) transparent",
-              }}
+              className="relative p-6 pt-4"
             >
-              <style jsx>{`
-                div::-webkit-scrollbar {
-                  width: 6px;
-                  background: transparent;
-                }
-                div::-webkit-scrollbar-thumb {
-                  background: rgba(79, 70, 229, 0.2);
-                  border-radius: 10px;
-                }
-                div::-webkit-scrollbar-thumb:hover {
-                  background: rgba(79, 70, 229, 0.4);
-                }
-              `}</style>
               <div className="space-y-6 w-full">
                 <AnimatePresence mode="sync" initial={false}>
                   {messages.map((message) => (
                     <MessageItem
                       key={message.id}
                       message={message}
-                      onOptionSelect={handleOptionSelect}
+                      onOptionSelect={stableHandleOptionSelect}
                       router={router}
                     />
                   ))}
@@ -1806,10 +1907,7 @@ translate-y-[-4px] hover:translate-y-[-8px]"
             </div>
 
             <motion.div
-              className="absolute bottom-0 left-0 right-0 z-10 p-4 
-bg-gradient-to-b from-transparent via-gray-50/90 to-white/95
-dark:from-transparent dark:via-gray-900/90 dark:to-gray-950/95
-backdrop-blur-sm transition-all duration-200"
+              className="relative z-10 p-4 pt-2"
               initial={{ y: 10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.4 }}
@@ -1823,10 +1921,11 @@ backdrop-blur-sm transition-all duration-200"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     disabled={isTyping}
-                    className="pl-4 pr-12 py-6 bg-white/80 dark:bg-gray-800/80 border-0
+                    className="pl-4 pr-12 py-6 bg-gradient-to-br from-white via-[#fefeff] to-[#fbf9ff] dark:bg-gray-800 border-0
       focus:ring-0 focus:outline-none focus:border-0
-      rounded-full shadow-[0_4px_12px_rgba(79,70,229,0.15)] hover:shadow-[0_6px_16px_rgba(79,70,229,0.2)]
-      dark:shadow-[0_4px_12px_rgba(79,70,229,0.2)] dark:hover:shadow-[0_6px_16px_rgba(79,70,229,0.25)]
+      rounded-full shadow-[0_0_0_1px_rgba(88,82,100,0.09),0_8px_32px_rgba(64,58,84,0.13),0_20px_56px_rgba(60,54,80,0.07),0_-1px_0_rgba(255,255,255,0.88)]
+      hover:shadow-[0_0_0_1px_rgba(88,82,100,0.13),0_10px_36px_rgba(64,58,84,0.16),0_24px_64px_rgba(60,54,80,0.09),0_-1px_0_rgba(255,255,255,0.95)]
+      dark:shadow-[0_0_0_1px_rgba(255,255,255,0.05),0_4px_12px_rgba(0,0,0,0.22),0_10px_28px_rgba(0,0,0,0.16)]
       transform hover:-translate-y-1 transition-all duration-300"
                   />
 

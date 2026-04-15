@@ -15,8 +15,10 @@ interface CategoryCardProps {
   index: number
   featured?: boolean
   className?: string
-  size?: "default" | "small" // Add size prop
-  onClick?: () => void // Add onClick prop
+  size?: "default" | "small"
+  onClick?: () => void
+  boxShadow?: string
+  translateY?: string
 }
 
 export function EnhancedCategoryCard({
@@ -25,8 +27,10 @@ export function EnhancedCategoryCard({
   index,
   featured = false,
   className = "",
-  size = "default", // Default to the original size
-  onClick, // Add onClick prop
+  size = "default",
+  onClick,
+  boxShadow,
+  translateY = "-4px",
 }: CategoryCardProps) {
   // Convert the category name to a URL-friendly slug
   const categorySlug = name.toLowerCase().replace(/\s+/g, "-")
@@ -72,7 +76,7 @@ export function EnhancedCategoryCard({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-10% 0px -10% 0px" }}
       transition={{ duration: 0.6, delay: index * 0.05, ease: "easeOut" }}
-      className="h-full pb-8" // Increased bottom padding for more shadow space
+      className={size === "small" ? "h-full pb-4" : "h-full pb-8"}
     >
       <motion.div
         ref={cardRef}
@@ -88,17 +92,14 @@ export function EnhancedCategoryCard({
           onClick={onClick}
           className={`relative group overflow-hidden rounded-xl backdrop-blur-xl text-card-foreground transition-all duration-300 h-full
 bg-gradient-to-br from-white/95 via-white/90 to-indigo-50/90 dark:from-gray-800/95 dark:via-gray-800/90 dark:to-indigo-950/90 ${className}
-translate-y-[-4px] hover:translate-y-[-10px] mb-4`} // Added mb-4 for bottom margin
+hover:translate-y-[-10px] mb-4`}
           style={{
-            transform: "translateZ(0)",
+            transform: `translateZ(0)`,
             transformStyle: "preserve-3d",
-            borderRadius: "0.75rem", // Explicit border-radius to ensure rounded corners
+            borderRadius: "0.75rem",
             transformOrigin: "center bottom",
             position: "relative",
-            // Enhanced shadow with BLACK color for depth
-            boxShadow:
-              "0 20px 25px -5px rgba(0,0,0,0.4), 0 10px 10px -5px rgba(0,0,0,0.3), 0 -2px 8px 0px rgba(255,255,255,0.2)",
-            // Glassmorphic border
+            boxShadow: boxShadow ?? "0 20px 25px -5px rgba(0,0,0,0.4), 0 10px 10px -5px rgba(0,0,0,0.3), 0 -2px 8px 0px rgba(255,255,255,0.2)",
             border: "1px solid rgba(167, 139, 250, 0.5)",
           }}
         >
@@ -106,7 +107,7 @@ translate-y-[-4px] hover:translate-y-[-10px] mb-4`} // Added mb-4 for bottom mar
           <div
             className="absolute -bottom-6 left-[10%] right-[10%] h-6 rounded-full"
             style={{
-              background: "radial-gradient(ellipse at center, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 70%)",
+                      background: "radial-gradient(ellipse at center, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 70%)",
               filter: "blur(10px)",
               transform: "translateZ(-20px) rotateX(40deg)",
               zIndex: -1,
@@ -198,7 +199,7 @@ translate-y-[-4px] hover:translate-y-[-10px] mb-4`} // Added mb-4 for bottom mar
 
           {/* Content wrapper with 3D effect */}
           <div
-            className={`${cardPadding} flex flex-col items-center justify-between text-center relative z-10 h-full min-h-[160px]`}
+            className={`${cardPadding} flex flex-col items-center justify-between text-center relative z-10 h-full ${size === "default" ? "min-h-[160px]" : ""}`}
             style={{ transform: "translateZ(15px) rotateX(2deg)" }}
           >
             {/* Enhanced glossy icon container with 3D effect */}
