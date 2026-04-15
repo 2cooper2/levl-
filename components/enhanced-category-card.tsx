@@ -90,9 +90,7 @@ export function EnhancedCategoryCard({
       >
         <div
           onClick={onClick}
-          className={`relative group overflow-hidden rounded-xl md:backdrop-blur-xl text-card-foreground transition-all duration-300 h-full
-bg-gradient-to-br from-white/95 via-white/90 to-indigo-50/90 dark:from-gray-800/95 dark:via-gray-800/90 dark:to-indigo-950/90 ${className}
-hover:translate-y-[-10px] mb-4`}
+          className={`relative group overflow-hidden rounded-xl text-card-foreground transition-all duration-300 h-full ${className} hover:translate-y-[-10px] mb-4`}
           style={{
             transform: `translateZ(0)`,
             transformStyle: "preserve-3d",
