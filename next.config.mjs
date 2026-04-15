@@ -18,8 +18,8 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      // Next.js requires unsafe-inline for its runtime scripts
-      "script-src 'self' 'unsafe-inline' https://js.stripe.com",
+      // Next.js requires unsafe-inline; Three.js/WebGL requires unsafe-eval for shader compilation
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com",
       // Framer-motion and Tailwind use inline styles
       "style-src 'self' 'unsafe-inline'",
       // Allow images from self, blob, data URIs, and any https source (user images/avatars)
