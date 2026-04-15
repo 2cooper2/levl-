@@ -3036,7 +3036,7 @@ function WallTexScene({ material }: { material: WallMaterial }) {
               normalMap={sideN}
               normalScale={new THREE.Vector2(normScale * 0.6, normScale * 0.6)}
               roughnessMap={sideR}
-              roughness={1} metalness={0}
+              roughness={1} metalness={0} envMapIntensity={0}
             />
           )}
           {/* left — not visible */}
@@ -3054,12 +3054,13 @@ function WallTexScene({ material }: { material: WallMaterial }) {
             <meshStandardMaterial attach="material-2"
               map={albedo}
               roughnessMap={maps.roughness}
-              roughness={1} metalness={0}
+              roughness={1} metalness={0} envMapIntensity={0}
             />
           )}
           {/* bottom — not visible */}
           <meshStandardMaterial attach="material-3" color={sideTint} roughness={sideRough} metalness={0} />
-          {/* FRONT — full PBR */}
+          {/* FRONT — full PBR. envMapIntensity=0: purely directionally lit,
+              not affected by HDR environment (which would wash out normal map detail) */}
           <meshStandardMaterial attach="material-4"
             map={albedo}
             displacementMap={maps.displacement}
@@ -3068,7 +3069,7 @@ function WallTexScene({ material }: { material: WallMaterial }) {
             normalMap={maps.normal}
             normalScale={new THREE.Vector2(normScale, normScale)}
             roughnessMap={maps.roughness}
-            roughness={1} metalness={0}
+            roughness={1} metalness={0} envMapIntensity={0}
           />
           {/* back — not visible */}
           <meshStandardMaterial attach="material-5" color={sideTint} roughness={sideRough} metalness={0} />
@@ -3594,9 +3595,9 @@ function resolveScene(option: string): { scene: JSX.Element; cam: CamCfg; env: s
 // ─── Shared Canvas wrapper ────────────────────────────────────────────────────
 
 function SceneCanvas({
-  cam, scene, thumbnail = false, env = "city", frameloop = "always",
+  cam, scene, thumbnail = false, env = "city", frameloop = "always", postprocess = true,
 }: {
-  cam: CamCfg; scene: JSX.Element; thumbnail?: boolean; env?: string; frameloop?: "always" | "demand" | "never"
+  cam: CamCfg; scene: JSX.Element; thumbnail?: boolean; env?: string; frameloop?: "always" | "demand" | "never"; postprocess?: boolean
 }) {
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768
 
@@ -3643,7 +3644,7 @@ function SceneCanvas({
       <Environment files={hdr} />
 
       {/* ── Post-processing (desktop only — too GPU-heavy for mobile) ── */}
-      {!thumbnail && !isMobile && (
+      {!thumbnail && !isMobile && postprocess && (
         <EffectComposer multisampling={0}>
           {/* Bloom — threshold 0.95 only catches genuinely emissive elements
               (TV screen, light bulb, mirror hot-spots, chrome speculars).
@@ -3680,17 +3681,23 @@ const STATIC_SCENES = new Set([
   "Fixed (flat against wall)",
 ])
 
+// Wall type scenes are matte/directionally lit — no emissive elements, no reflections.
+// Bloom and N8AO hurt them (wash out normals, add unwanted glow), so skip postprocessing.
+const NO_POSTPROCESS_SCENES = new Set([
+  "Drywall/Sheetrock", "Brick", "Concrete", "Plaster", "Stone", "Metal studs",
+])
+
 export function Option3DImpl({
   option, thumbnail, frameloop = "always",
 }: {
   option: string; thumbnail?: boolean; frameloop?: "always" | "demand" | "never"
 }) {
   const { scene, cam, env } = resolveScene(option)
-  // When caller says "always", downgrade to "demand" for static scenes to free GPU
   const effectiveFrameloop = frameloop === "always" && STATIC_SCENES.has(option)
     ? "demand"
     : frameloop
-  return <SceneCanvas cam={cam} scene={scene} thumbnail={thumbnail} env={env} frameloop={effectiveFrameloop} />
+  const postprocess = !NO_POSTPROCESS_SCENES.has(option)
+  return <SceneCanvas cam={cam} scene={scene} thumbnail={thumbnail} env={env} frameloop={effectiveFrameloop} postprocess={postprocess} />
 }
 
 /**
