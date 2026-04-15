@@ -1851,7 +1851,7 @@ export function AIServiceMatchmaker() {
             </div>
 
             <div className="mb-0 pb-0">
-              <div className="relative w-full overflow-hidden">
+              <div className="relative w-full">
                 {/* Right-edge feather + swipe indicator — mobile only */}
                 <div className="md:hidden absolute right-0 top-0 bottom-0 w-16 z-20 pointer-events-none bg-gradient-to-l from-[#e3e2ea]/95 via-[#e3e2ea]/50 to-transparent dark:from-[#0c0a16]/95 dark:via-[#0c0a16]/50 dark:to-transparent" />
                 <motion.div

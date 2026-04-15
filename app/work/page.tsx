@@ -830,39 +830,36 @@ export default function WorkPage() {
       <main className="flex-1">
 
         {/* ── Categories ── */}
-        <section className="pb-2" style={{ paddingTop: "0.5rem" }}>
-          <div style={{ overflowX: "auto", scrollbarWidth: "none" as any, msOverflowStyle: "none" as any, WebkitOverflowScrolling: "touch" as any, background: "transparent", paddingTop: "1rem" }}>
-            <div className="flex gap-4 px-6" style={{ width: "max-content", paddingBottom: "1rem" }}>
-              {categories.map((cat, i) => (
-                <div key={cat.name} className="relative" style={{ width: "7rem" }}>
-                  {/* Floating growth badge */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 6, scale: 0.85 }}
-                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.06 + 0.2, duration: 0.35, ease: [0.22,1,0.36,1] }}
-                    className="absolute -top-3 -right-1 z-20 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-black pointer-events-none select-none"
-                    style={cat.growth >= 0 ? {
-                      background: "linear-gradient(135deg,#22c55e,#16a34a)",
-                      color: "white",
-                      boxShadow: "0 2px 8px rgba(34,197,94,0.45), 0 1px 0 rgba(255,255,255,0.2) inset",
-                    } : {
-                      background: "linear-gradient(135deg,#ef4444,#dc2626)",
-                      color: "white",
-                      boxShadow: "0 2px 8px rgba(239,68,68,0.45), 0 1px 0 rgba(255,255,255,0.2) inset",
-                    }}
-                  >
-                    {cat.growth >= 0 ? `↑${cat.growth}%` : `↓${Math.abs(cat.growth)}%`}
-                  </motion.div>
-                  <EnhancedCategoryCard icon={cat.icon} name={cat.name} count={cat.count} index={i} size="small" className="w-28 h-32 scale-[1.04]" onClick={() => {}}
-                    boxShadow="6px 10px 8px -6px rgba(0,0,0,0.45), -6px 10px 8px -6px rgba(0,0,0,0.45), 0 28px 22px -4px rgba(0,0,0,0.16), 0 19px 12px -4px rgba(0,0,0,0.11)"
-                  />
-                </div>
-              ))}
-            </div>
+        <section style={{ paddingTop: "1rem", paddingBottom: "1.5rem", overflowX: "auto", scrollbarWidth: "none" as any, msOverflowStyle: "none" as any, WebkitOverflowScrolling: "touch" as any }}>
+          <div className="flex gap-4 px-6" style={{ width: "max-content" }}>
+            {categories.map((cat, i) => (
+              <div key={cat.name} className="relative" style={{ width: "7rem" }}>
+                {/* Floating growth badge */}
+                <motion.div
+                  initial={{ opacity: 0, y: 6, scale: 0.85 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.06 + 0.2, duration: 0.35, ease: [0.22,1,0.36,1] }}
+                  className="absolute -top-3 -right-1 z-20 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-black pointer-events-none select-none"
+                  style={cat.growth >= 0 ? {
+                    background: "linear-gradient(135deg,#22c55e,#16a34a)",
+                    color: "white",
+                    boxShadow: "0 2px 8px rgba(34,197,94,0.45), 0 1px 0 rgba(255,255,255,0.2) inset",
+                  } : {
+                    background: "linear-gradient(135deg,#ef4444,#dc2626)",
+                    color: "white",
+                    boxShadow: "0 2px 8px rgba(239,68,68,0.45), 0 1px 0 rgba(255,255,255,0.2) inset",
+                  }}
+                >
+                  {cat.growth >= 0 ? `↑${cat.growth}%` : `↓${Math.abs(cat.growth)}%`}
+                </motion.div>
+                <EnhancedCategoryCard icon={cat.icon} name={cat.name} count={cat.count} index={i} size="small" className="w-28 h-32 scale-[1.04]" onClick={() => {}}
+                  boxShadow="6px 10px 8px -6px rgba(0,0,0,0.45), -6px 10px 8px -6px rgba(0,0,0,0.45), 0 28px 22px -4px rgba(0,0,0,0.16), 0 19px 12px -4px rgba(0,0,0,0.11)"
+                />
+              </div>
+            ))}
           </div>
         </section>
-
 
         {/* ── Availability + Scheduled Tasks ── */}
         <section className="px-6 pt-0 pb-14 max-w-6xl mx-auto">
