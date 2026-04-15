@@ -3608,7 +3608,7 @@ function SceneCanvas({
     <div style={{
       width: "100%", height: "100%", position: "relative",
       ...(useTransparent ? {
-        background: "linear-gradient(150deg, #ffffff 0%, #f0ecfa 45%, #e4d5f8 100%)"
+        background: "linear-gradient(135deg, #d4b0ff 0%, #a87ae8 50%, #8855d4 100%)"
       } : {}),
     }}>
     <Canvas
