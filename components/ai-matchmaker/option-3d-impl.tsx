@@ -4,6 +4,8 @@ import { useRef, useMemo, useState, useEffect, type JSX } from "react"
 import Image from "next/image"
 import { Canvas, useFrame } from "@react-three/fiber"
 import { ContactShadows, Environment, PerspectiveCamera, RoundedBox } from "@react-three/drei"
+import { EffectComposer, Bloom, N8AO, ToneMapping, SMAA } from "@react-three/postprocessing"
+import { ToneMappingMode } from "postprocessing"
 import * as THREE from "three"
 
 // ─── Brand palette ────────────────────────────────────────────────────────────
@@ -2975,7 +2977,8 @@ function WallTexScene({ material }: { material: WallMaterial }) {
       <hemisphereLight args={["#c8c0e0", "#8070a8", 0.30]} />
       {/* Primary left rake — sharp shadows across mortar joints */}
       <directionalLight position={[-5, 3.0, 4.0]} intensity={2.60} color="#fff4ee" castShadow
-        shadow-mapSize={[512, 512]} shadow-camera-near={0.1} shadow-camera-far={20}
+        shadow-mapSize={typeof window !== "undefined" && window.innerWidth < 768 ? [512, 512] : [1024, 1024]}
+        shadow-camera-near={0.1} shadow-camera-far={20}
         shadow-camera-left={-4} shadow-camera-right={4}
         shadow-camera-top={4} shadow-camera-bottom={-4}
         shadow-bias={-0.0003} />
@@ -3596,14 +3599,22 @@ function SceneCanvas({
 }: {
   cam: CamCfg; scene: JSX.Element; thumbnail?: boolean; env?: string; frameloop?: "always" | "demand" | "never"
 }) {
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768
+
+  // HDR: 4K desktop / 2K mobile — sharper reflections on metallic materials
+  const hdr = env === "apartment"
+    ? (isMobile ? "/hdri/lebombo_2k.hdr"          : "/hdri/lebombo_4k.hdr")
+    : (isMobile ? "/hdri/potsdamer_platz_2k.hdr"   : "/hdri/potsdamer_platz_4k.hdr")
+
   return (
     <Canvas
       shadows={!thumbnail}
-      dpr={thumbnail ? 1 : [1, 2]}
+      dpr={thumbnail ? 1 : (isMobile ? [1, 1.5] : [1, 2])}
       frameloop={frameloop}
       gl={{
-        antialias: true,
-        toneMapping: THREE.ACESFilmicToneMapping,
+        // NoToneMapping — postprocessing ToneMapping effect handles it after bloom
+        antialias: !isMobile,  // SMAA handles AA on desktop; built-in on mobile
+        toneMapping: THREE.NoToneMapping,
         outputColorSpace: THREE.SRGBColorSpace,
         powerPreference: "high-performance",
       }}
@@ -3624,14 +3635,42 @@ function SceneCanvas({
         <>
           <ambientLight intensity={0.45} />
           <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={0.8} castShadow
-            shadow-mapSize={[1024, 1024]} />
+            shadow-mapSize={isMobile ? [1024, 1024] : [2048, 2048]} />
           <pointLight position={[-10, -10, -10]} intensity={0.4} color="#818cf8" />
           <Lights />
         </>
       )}
 
       {scene}
-      <Environment files={env === "apartment" ? "/hdri/lebombo_1k.hdr" : "/hdri/potsdamer_platz_1k.hdr"} />
+      <Environment files={hdr} />
+
+      {/* ── Post-processing ── */}
+      {!thumbnail && (
+        <EffectComposer multisampling={0}>
+          {/* ACES filmic tone mapping — applied after bloom so HDR values bloom correctly */}
+          <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
+          {/* Bloom — catches emissive/specular highlights, chrome, TV screens, light halos */}
+          <Bloom
+            luminanceThreshold={isMobile ? 0.45 : 0.30}
+            luminanceSmoothing={0.85}
+            intensity={isMobile ? 0.35 : 0.60}
+            radius={isMobile ? 0.60 : 0.80}
+            mipmapBlur
+          />
+          {/* N8AO — screen-space ambient occlusion (desktop only, too heavy for mobile) */}
+          {!isMobile && (
+            <N8AO
+              quality="high"
+              aoRadius={2.5}
+              intensity={1.8}
+              distanceFalloff={1.2}
+              color="black"
+            />
+          )}
+          {/* SMAA — high-quality antialiasing (desktop only) */}
+          {!isMobile && <SMAA />}
+        </EffectComposer>
+      )}
     </Canvas>
   )
 }
