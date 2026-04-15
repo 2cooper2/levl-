@@ -827,7 +827,7 @@ export default function WorkPage() {
           }} />
       </header>
 
-      <main className="flex-1" style={{ width: "100%", minWidth: 0, maxWidth: "100%", overflowX: "hidden" }}>
+      <main className="flex-1" style={{ width: "100%", minWidth: 0, maxWidth: "100%" }}>
 
         {/* ── Categories ── */}
         <section style={{ paddingTop: "1rem", paddingBottom: "1.5rem", overflowX: "auto", scrollbarWidth: "none" as any, msOverflowStyle: "none" as any, WebkitOverflowScrolling: "touch" as any }}>
