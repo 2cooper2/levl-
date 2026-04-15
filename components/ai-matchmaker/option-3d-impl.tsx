@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useMemo, useState, type JSX } from "react"
+import { useRef, useMemo, useState, useEffect, type JSX } from "react"
 import Image from "next/image"
 import { Canvas, useFrame } from "@react-three/fiber"
 import { ContactShadows, Environment, PerspectiveCamera, RoundedBox } from "@react-three/drei"
@@ -417,8 +417,20 @@ const WALL_CFG: Record<WallMaterial, WallCfg> = {
 
 function useWallPBR(material: WallMaterial) {
   const cfg = WALL_CFG[material]
+  // Halve texture size on mobile to prevent GPU memory exhaustion
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768
+  const texSize = isMobile ? Math.max(256, cfg.texSize >> 1) : cfg.texSize
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const maps = useMemo(() => cfg.builder(cfg.texSize), [material])
+  const maps = useMemo(() => cfg.builder(texSize), [material])
+  // Dispose GPU textures when this card unmounts
+  useEffect(() => {
+    return () => {
+      maps.albedo.dispose()
+      maps.displacement.dispose()
+      maps.normal.dispose()
+      maps.roughness.dispose()
+    }
+  }, [maps])
   return { maps, dispScale: cfg.dispScale, normScale: cfg.normScale, sideTint: cfg.sideTint, sideRough: cfg.sideRough }
 }
 
@@ -3621,13 +3633,23 @@ function SceneCanvas({
 
 // ─── Public exports ───────────────────────────────────────────────────────────
 
+// Static scenes have no animation — use frameloop="demand" so GPU renders once and stops
+const STATIC_SCENES = new Set([
+  "Drywall/Sheetrock", "Brick", "Concrete", "Plaster", "Stone", "Metal studs",
+  "Fixed (flat against wall)",
+])
+
 export function Option3DImpl({
   option, thumbnail, frameloop = "always",
 }: {
   option: string; thumbnail?: boolean; frameloop?: "always" | "demand" | "never"
 }) {
   const { scene, cam, env } = resolveScene(option)
-  return <SceneCanvas cam={cam} scene={scene} thumbnail={thumbnail} env={env} frameloop={frameloop} />
+  // When caller says "always", downgrade to "demand" for static scenes to free GPU
+  const effectiveFrameloop = frameloop === "always" && STATIC_SCENES.has(option)
+    ? "demand"
+    : frameloop
+  return <SceneCanvas cam={cam} scene={scene} thumbnail={thumbnail} env={env} frameloop={effectiveFrameloop} />
 }
 
 /**
