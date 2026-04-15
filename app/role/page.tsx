@@ -28,53 +28,25 @@ export default function RolePage() {
         }}
       />
 
-      {/* Floating SVG logo */}
+      {/* Logo — real image, white bg dissolved via multiply blend */}
       <motion.div
         initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
         className="mb-16 relative"
-        style={{ width: 104, height: 104 }}
+        style={{ width: 112, height: 112 }}
       >
-        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
-          <defs>
-            {/* Main body gradient — light lavender → deep purple */}
-            <linearGradient id="pg" x1="0.45" y1="0" x2="0.55" y2="1">
-              <stop offset="0%" stopColor="#ddd6fe" />
-              <stop offset="42%" stopColor="#a78bfa" />
-              <stop offset="100%" stopColor="#8b5cf6" />
-            </linearGradient>
-            {/* Chart line + dots — deeper purple */}
-            <linearGradient id="dg" x1="0" y1="1" x2="1" y2="0">
-              <stop offset="0%" stopColor="#7c3aed" />
-              <stop offset="100%" stopColor="#6d28d9" />
-            </linearGradient>
-          </defs>
-
-          {/* Vertical stem — wide italic parallelogram */}
-          <polygon points="34,12 50,12 50,64 30,70" fill="url(#pg)" />
-
-          {/* Sweep stripe 1 — top */}
-          <polygon points="43,62 49,56 30,76 24,82" fill="url(#pg)" opacity="0.88" />
-
-          {/* Sweep stripe 2 — mid */}
-          <polygon points="37,68 43,62 24,82 18,88" fill="url(#pg)" opacity="0.76" />
-
-          {/* Sweep stripe 3 — bottom */}
-          <polygon points="31,74 37,68 18,88 13,94" fill="url(#pg)" opacity="0.62" />
-
-          {/* Foot — diagonal bar going right */}
-          <polygon points="30,70 74,80 71,87 27,79" fill="url(#pg)" />
-
-          {/* Chart trend line */}
-          <line x1="46" y1="76" x2="59" y2="64" stroke="url(#dg)" strokeWidth="1.9" strokeLinecap="round" />
-          <line x1="59" y1="64" x2="74" y2="47" stroke="url(#dg)" strokeWidth="1.9" strokeLinecap="round" />
-
-          {/* Chart dots */}
-          <circle cx="46" cy="76" r="3.1" fill="url(#dg)" />
-          <circle cx="59" cy="64" r="3.1" fill="url(#dg)" />
-          <circle cx="74" cy="47" r="3.1" fill="url(#dg)" />
-        </svg>
+        <img
+          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/D86926DF-2501-4C99-9452-927116E45324-oXEcNS38lLlIRweavHw5KIvvgR32ot.jpeg"
+          alt="LevL"
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
+            display: "block",
+            mixBlendMode: "multiply",
+          }}
+        />
 
         {/* Floating ground shadow */}
         <div
@@ -84,7 +56,7 @@ export default function RolePage() {
             left: "10%",
             right: "10%",
             height: "20px",
-            background: "radial-gradient(ellipse at center, rgba(0,0,0,0.30) 0%, transparent 70%)",
+            background: "radial-gradient(ellipse at center, rgba(0,0,0,0.28) 0%, transparent 70%)",
             filter: "blur(6px)",
           }}
         />
