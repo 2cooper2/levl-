@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { LevlLogo } from "@/components/levl-logo"
 
 export default function RolePage() {
   const router = useRouter()
@@ -29,57 +28,80 @@ export default function RolePage() {
         }}
       />
 
-      {/* Logo with Levl depth */}
+      {/* Floating "L" logo */}
       <motion.div
-        initial={{ opacity: 0, y: -16 }}
+        initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-        className="mb-14 relative pb-5"
+        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        className="mb-16 relative"
       >
-        {/* Ground shadow */}
-        <div className="absolute -bottom-0 left-[8%] right-[8%] h-5 rounded-full pointer-events-none"
-          style={{ background: "radial-gradient(ellipse at center, rgba(0,0,0,0.4) 0%, transparent 70%)", filter: "blur(6px)", zIndex: 0 }} />
-        {/* Shadow wrapper */}
-        <div className="relative" style={{
-          boxShadow: "0 8px 16px -4px rgba(0,0,0,0.3), 0 4px 8px -4px rgba(0,0,0,0.18), 0 -2px 4px 0 rgba(255,255,255,0.9) inset",
-          borderRadius: "0.375rem",
-          zIndex: 1,
-        }}>
-          <LevlLogo className="h-24 w-24" />
-        </div>
+        {/* The L */}
+        <span
+          style={{
+            display: "block",
+            fontSize: "7rem",
+            fontWeight: 900,
+            lineHeight: 1,
+            letterSpacing: "-0.04em",
+            background: "linear-gradient(145deg, #a78bfa 0%, #c084fc 60%, #a855f7 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+            filter: "drop-shadow(0 2px 8px rgba(139,92,246,0.28))",
+          }}
+        >
+          L
+        </span>
+
+        {/* Floating ground shadow */}
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            bottom: "-10px",
+            left: "10%",
+            right: "10%",
+            height: "18px",
+            background: "radial-gradient(ellipse at center, rgba(0,0,0,0.28) 0%, transparent 70%)",
+            filter: "blur(6px)",
+          }}
+        />
       </motion.div>
 
       {/* Role cards */}
-      <div className="flex gap-6 w-full max-w-xs">
+      <div className="flex gap-5 w-full max-w-[260px]">
         {(["client", "worker"] as const).map((role, i) => (
           <motion.div
             key={role}
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 + 0.25, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="flex-1 relative pb-5"
+            transition={{ delay: i * 0.08 + 0.18, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+            className="flex-1 relative pb-4"
           >
             {/* Ground shadow */}
             <div
-              className="absolute -bottom-0 left-[8%] right-[8%] h-5 rounded-full pointer-events-none"
+              className="absolute -bottom-0 left-[10%] right-[10%] h-4 rounded-full pointer-events-none"
               style={{
-                background: "radial-gradient(ellipse at center, rgba(0,0,0,0.4) 0%, transparent 70%)",
-                filter: "blur(6px)",
+                background: "radial-gradient(ellipse at center, rgba(0,0,0,0.32) 0%, transparent 70%)",
+                filter: "blur(5px)",
                 zIndex: 0,
               }}
             />
             <button
               onClick={() => choose(role)}
-              className="relative w-full py-12 rounded-2xl flex flex-col items-center justify-center transition-all active:scale-95 hover:scale-[1.03]"
+              className="relative w-full py-7 rounded-2xl flex flex-col items-center justify-center transition-all active:scale-95 hover:scale-[1.03]"
               style={{
                 background: "linear-gradient(135deg, rgba(255,255,255,0.97), rgba(237,233,254,0.82))",
-                border: "1px solid rgba(167,139,250,0.45)",
-                boxShadow: "0 8px 16px -4px rgba(0,0,0,0.3), 0 4px 8px -4px rgba(0,0,0,0.18), 0 -2px 4px 0 rgba(255,255,255,0.9) inset",
+                border: "1px solid rgba(0,0,0,0.13)",
+                boxShadow: [
+                  "0 10px 22px -4px rgba(0,0,0,0.38)",
+                  "0 5px 10px -4px rgba(0,0,0,0.22)",
+                  "0 -2px 4px 0 rgba(255,255,255,0.92) inset",
+                ].join(", "),
                 zIndex: 1,
               }}
             >
               <span
-                className="text-2xl font-black capitalize tracking-wide"
+                className="text-lg font-black capitalize tracking-wide"
                 style={{
                   background: "linear-gradient(135deg, #7c3aed, #a855f7)",
                   WebkitBackgroundClip: "text",
