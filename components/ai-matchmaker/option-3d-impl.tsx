@@ -3608,7 +3608,16 @@ function SceneCanvas({
     <div style={{
       width: "100%", height: "100%", position: "relative",
       ...(useTransparent ? {
-        background: "linear-gradient(135deg, #d4b0ff 0%, #a87ae8 50%, #8855d4 100%)"
+        background: [
+          /* Soft warm pool of light under the object — implied ground plane */
+          "radial-gradient(ellipse 85% 40% at 50% 95%, rgba(232, 214, 255, 0.50) 0%, transparent 55%)",
+          /* Key-light bloom top-left — matches the scene directional light angle */
+          "radial-gradient(ellipse 60% 65% at 12% 2%, rgba(218, 192, 255, 0.42) 0%, transparent 58%)",
+          /* Deep shadow corner bottom-right — creates vignette depth */
+          "radial-gradient(ellipse 50% 50% at 92% 98%, rgba(22, 4, 68, 0.72) 0%, transparent 52%)",
+          /* Rich Levl purple base — saturated core */
+          "linear-gradient(148deg, #c4a2f0 0%, #8e4ed4 32%, #5a1eaa 62%, #36088a 100%)",
+        ].join(", "),
       } : {}),
     }}>
     <Canvas
@@ -3625,8 +3634,8 @@ function SceneCanvas({
       performance={{ min: 0.5 }}
       style={{ width: "100%", height: "100%" }}
     >
-      {/* Default bg — individual scenes override this with their own <color> */}
-      <color attach="background" args={["#f9f8f6"]} />
+      {/* Default bg — skipped for transparent (wall type) scenes so CSS gradient shows through */}
+      {!useTransparent && <color attach="background" args={["#f9f8f6"]} />}
       <PerspectiveCamera makeDefault position={cam.pos} fov={cam.fov} near={0.05} far={200} />
 
       {thumbnail ? (
