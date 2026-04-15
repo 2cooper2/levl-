@@ -3614,7 +3614,7 @@ function SceneCanvas({
       )}
 
       {scene}
-      <Environment preset={env as any} />
+      <Environment files={env === "apartment" ? "/hdri/lebombo_1k.hdr" : "/hdri/potsdamer_platz_1k.hdr"} />
     </Canvas>
   )
 }
