@@ -862,11 +862,11 @@ export default function WorkPage() {
         </section>
 
         {/* ── Availability + Scheduled Tasks ── */}
-        <section className="pl-4 pr-6 pt-0 pb-14 w-full md:max-w-6xl md:mx-auto md:px-6" style={{ overflow: "hidden" }}>
+        <section className="px-4 pt-0 pb-14 w-full md:max-w-6xl md:mx-auto md:px-6" style={{ overflow: "hidden" }}>
           <div className="grid md:grid-cols-2 gap-6 items-stretch">
 
             {/* Availability grid — first on mobile (calendar above jobs) */}
-            <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.55 }} className="w-full order-1 md:order-2" style={{ minWidth: 0 }}>
+            <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.55 }} className="w-full order-1 md:order-2 md:pr-0 pr-2" style={{ minWidth: 0 }}>
               <AvailabilityPreview />
             </motion.div>
 
