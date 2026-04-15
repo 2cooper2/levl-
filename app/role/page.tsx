@@ -53,6 +53,7 @@ export default function RolePage() {
               radial-gradient(ellipse 55% 20% at 50% 100%, rgba(255,252,248,0.38) 0%, transparent 70%),
               linear-gradient(180deg, #e6e6e6 0%, #f2f2f2 10%, #fafafa 28%, #ffffff 50%, #ffffff 100%)
             `,
+            backgroundAttachment: "fixed",
             mixBlendMode: "darken",
           }}
         />

@@ -1852,16 +1852,6 @@ export function AIServiceMatchmaker() {
 
             <div className="mb-0 pb-0">
               <div className="relative w-full">
-                {/* Right-edge feather + swipe indicator — mobile only */}
-                <div className="md:hidden absolute right-0 top-0 bottom-0 w-16 z-20 pointer-events-none bg-gradient-to-l from-[#e3e2ea]/95 via-[#e3e2ea]/50 to-transparent dark:from-[#0c0a16]/95 dark:via-[#0c0a16]/50 dark:to-transparent" />
-                <motion.div
-                  className="md:hidden absolute right-2 top-1/2 -translate-y-1/2 z-30 pointer-events-none flex flex-col items-center gap-0.5"
-                  animate={{ x: [0, -5, 0] }}
-                  transition={{ duration: 1.3, repeat: Infinity, ease: 'easeInOut' }}
-                >
-                  <ChevronLeft className="h-5 w-5 text-[#c084fc] drop-shadow-sm" />
-                  <span className="text-[9px] font-medium text-[#c084fc] tracking-wide leading-tight">swipe</span>
-                </motion.div>
 
                 <div
                   className="cyc-cats-scroll overflow-x-auto py-2 pb-8 scrollbar-hide scroll-smooth mx-auto"
