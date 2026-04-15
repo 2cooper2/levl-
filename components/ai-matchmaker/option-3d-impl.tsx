@@ -3645,13 +3645,15 @@ function SceneCanvas({
       {/* ── Post-processing (desktop only — too GPU-heavy for mobile) ── */}
       {!thumbnail && !isMobile && (
         <EffectComposer multisampling={0}>
-          {/* Bloom — threshold 0.88 only catches emissive/specular highlights,
-              not backgrounds or regular surfaces */}
+          {/* Bloom — threshold 0.95 only catches genuinely emissive elements
+              (TV screen, light bulb, mirror hot-spots, chrome speculars).
+              Near-white surfaces under strong light top out ~0.90 after ACES,
+              so 0.95 keeps them clean. */}
           <Bloom
-            luminanceThreshold={0.88}
-            luminanceSmoothing={0.75}
-            intensity={0.30}
-            radius={0.65}
+            luminanceThreshold={0.95}
+            luminanceSmoothing={0.60}
+            intensity={0.25}
+            radius={0.60}
             mipmapBlur
           />
           {/* N8AO — ambient occlusion: depth in corners, bracket crevices */}
