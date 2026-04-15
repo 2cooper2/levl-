@@ -197,7 +197,7 @@ function AvailabilityPreview() {
   const pending   = JOB_DATA.filter(j => j.month === viewMonth && j.status === "pending").reduce((s, j) => s + parseInt(j.pay.replace("$","")), 0)
 
   return (
-    <div className="p-5 md:p-6 h-full flex flex-col" style={{ ...cardStyle, boxSizing: "border-box", width: "calc(100vw - 48px)", maxWidth: "calc(100vw - 48px)" }}>
+    <div className="p-5 md:p-6 h-full flex flex-col" style={{ ...cardStyle, boxSizing: "border-box", width: "calc(100vw - 36px)", maxWidth: "calc(100vw - 36px)" }}>
 
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
@@ -875,7 +875,7 @@ export default function WorkPage() {
             {/* Scheduled tasks — second on mobile */}
             <div className="order-2 md:order-1 pr-4 md:pr-0 w-full">
             <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.55 }}
-              className="p-5 md:p-6 h-full" style={{ ...cardStyle, width: "calc(100vw - 48px)", maxWidth: "calc(100vw - 48px)" }}>
+              className="p-5 md:p-6 h-full" style={{ ...cardStyle, width: "calc(100vw - 36px)", maxWidth: "calc(100vw - 36px)" }}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold" style={{ color: "#111" }}>Scheduled jobs</h3>
               </div>
