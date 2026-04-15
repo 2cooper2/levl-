@@ -28,27 +28,25 @@ export default function RolePage() {
         }}
       />
 
-      {/* Logo — real image, white bg dissolved via multiply blend */}
+      {/* Logo */}
       <motion.div
         initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
         className="mb-16 relative"
-        style={{ width: 112, height: 112 }}
+        style={{ width: 160, height: 160 }}
       >
-        <img
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/D86926DF-2501-4C99-9452-927116E45324-oXEcNS38lLlIRweavHw5KIvvgR32ot.jpeg"
-          alt="LevL"
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "contain",
-            display: "block",
-            mixBlendMode: "multiply",
-          }}
-        />
+        {/* White container + multiply: white areas vanish into whatever's beneath,
+            purple logo pixels pass through correctly. Levl void is unaffected. */}
+        <div style={{ width: "100%", height: "100%", background: "white", mixBlendMode: "multiply" }}>
+          <img
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/D86926DF-2501-4C99-9452-927116E45324-oXEcNS38lLlIRweavHw5KIvvgR32ot.jpeg"
+            alt="LevL"
+            style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
+          />
+        </div>
 
-        {/* Floating ground shadow */}
+        {/* Floating ground shadow — sibling of blend div so it renders normally */}
         <div
           className="absolute pointer-events-none"
           style={{
