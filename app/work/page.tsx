@@ -604,10 +604,10 @@ function AvailabilityPreview() {
 
           const statCard = (content: React.ReactNode, delay = 0) => (
             <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay, duration: 0.2 }}
-              className="relative pb-4">
+              className="relative pb-4 min-w-0">
               <div className="absolute -bottom-1 left-[10%] right-[10%] h-4 rounded-full pointer-events-none"
                 style={{ background: "radial-gradient(ellipse at center,rgba(0,0,0,0.38) 0%,transparent 70%)", filter: "blur(6px)", zIndex: 0 }} />
-              <div className="relative p-3 rounded-xl" style={{
+              <div className="relative p-3 rounded-xl overflow-hidden" style={{
                 background: "linear-gradient(135deg,rgba(255,255,255,0.97),rgba(237,233,254,0.82))",
                 border: "1px solid rgba(167,139,250,0.45)",
                 boxShadow: "0 10px 20px -6px rgba(0,0,0,0.35), 0 4px 8px -4px rgba(0,0,0,0.2), 0 -2px 5px 0 rgba(255,255,255,0.9) inset",
@@ -623,14 +623,14 @@ function AvailabilityPreview() {
             </div>
           )
           const row = (l: string, r: string, rCol?: string) => (
-            <div className="flex justify-between mt-1.5">
-              <span className="text-[8px] font-bold" style={{ color: "#111" }}>{l}</span>
-              <span className="text-[8px] font-bold" style={{ color: rCol ?? "#111" }}>{r}</span>
+            <div className="flex justify-between gap-1 mt-1.5 min-w-0">
+              <span className="text-[8px] font-bold truncate" style={{ color: "#111" }}>{l}</span>
+              <span className="text-[8px] font-bold shrink-0" style={{ color: rCol ?? "#111" }}>{r}</span>
             </div>
           )
 
           return (
-            <motion.div key={d} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.15 }}>
+            <motion.div key={d} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.15 }} className="w-full min-w-0">
               <div className="flex items-center justify-between mb-2.5">
                 <p className="text-[10px] font-black tracking-widest uppercase" style={{ color: "#111" }}>{MONTHS[viewMonth]} {d}</p>
                 <p className="text-[10px] font-black tracking-widest uppercase" style={{ color: "#111" }}>Week {Math.ceil(d / 7)} of 4</p>
