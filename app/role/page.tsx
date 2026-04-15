@@ -28,13 +28,28 @@ export default function RolePage() {
         }}
       />
 
+      {/* Full-viewport darken overlay — fixed so transforms never break it.
+          darken(gradient, white_jpeg) = gradient → box disappears.
+          darken(gradient≈white, dark_element) = dark_element → buttons/logo unaffected. */}
+      <div
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          background: `
+            radial-gradient(ellipse 55% 20% at 50% 100%, rgba(255,252,248,0.38) 0%, transparent 70%),
+            linear-gradient(180deg, #e6e6e6 0%, #f2f2f2 10%, #fafafa 28%, #ffffff 50%, #ffffff 100%)
+          `,
+          mixBlendMode: "darken",
+          zIndex: 5,
+        }}
+      />
+
       {/* Logo */}
       <motion.div
         initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
         className="relative"
-        style={{ width: 170, height: 170, marginBottom: 56 }}
+        style={{ width: 170, height: 170, marginBottom: 56, zIndex: 6 }}
       >
         {/* Logo image */}
         <img
@@ -43,37 +58,35 @@ export default function RolePage() {
           style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
         />
 
-        {/* Page-background overlay with darken blend:
-            darken(page_color, white_jpeg) = page_color → white box disappears
-            darken(page_color, purple_logo) = purple_logo → logo stays visible */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: `
-              radial-gradient(ellipse 55% 20% at 50% 100%, rgba(255,252,248,0.38) 0%, transparent 70%),
-              linear-gradient(180deg, #e6e6e6 0%, #f2f2f2 10%, #fafafa 28%, #ffffff 50%, #ffffff 100%)
-            `,
-            backgroundAttachment: "fixed",
-            mixBlendMode: "darken",
-          }}
-        />
-
-        {/* Floating ground shadow */}
+        {/* Left-side depth shadow */}
         <div
           className="absolute pointer-events-none"
           style={{
-            bottom: "-14px",
-            left: "10%",
-            right: "10%",
-            height: "20px",
-            background: "radial-gradient(ellipse at center, rgba(0,0,0,0.26) 0%, transparent 70%)",
+            top: "20%",
+            bottom: "20%",
+            left: "-20px",
+            width: "22px",
+            background: "radial-gradient(ellipse at right center, rgba(0,0,0,0.13) 0%, transparent 70%)",
             filter: "blur(6px)",
+          }}
+        />
+
+        {/* Floating ground shadow — heavier */}
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            bottom: "-16px",
+            left: "5%",
+            right: "5%",
+            height: "28px",
+            background: "radial-gradient(ellipse at center, rgba(0,0,0,0.48) 0%, rgba(0,0,0,0.18) 40%, transparent 70%)",
+            filter: "blur(9px)",
           }}
         />
       </motion.div>
 
       {/* Role cards — lowered, more spread */}
-      <div className="flex gap-12 w-full max-w-[320px]" style={{ marginTop: 32 }}>
+      <div className="flex gap-12 w-full max-w-[320px]" style={{ marginTop: 32, zIndex: 6, position: "relative" }}>
         {(["client", "worker"] as const).map((role, i) => (
           <motion.div
             key={role}
