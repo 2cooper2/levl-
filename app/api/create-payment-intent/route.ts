@@ -1,7 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createPaymentIntent } from "@/app/actions/payment-actions"
+import { requireAuth } from "@/lib/api-auth"
 
 export async function POST(request: NextRequest) {
+  const { user, error: authError } = await requireAuth()
+  if (authError) return authError
+
   try {
     // Parse the request body
     let body

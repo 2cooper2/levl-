@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server"
 import { createServerDatabaseClient } from "@/lib/database"
+import { requireAuth } from "@/lib/api-auth"
 
 export async function GET(request: Request) {
+  const { error: authError } = await requireAuth()
+  if (authError) return authError
+
   const url = new URL(request.url)
   const userId = url.searchParams.get("userId")
   const categoryId = url.searchParams.get("categoryId")
