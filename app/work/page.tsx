@@ -780,7 +780,7 @@ export default function WorkPage() {
     return () => window.removeEventListener("scroll", onScroll)
   }, [])
   return (
-    <div className="flex min-h-screen flex-col" style={{ margin: 0, padding: 0, overscrollBehavior: "none", WebkitOverflowScrolling: "touch" as any, overflowX: "hidden" }}>
+    <div className="flex min-h-screen flex-col" style={{ margin: 0, padding: 0, overscrollBehavior: "none", WebkitOverflowScrolling: "touch" as any, overflowX: "clip" }}>
 
       {/* Levl Void background */}
       <div className="fixed inset-0 -z-10 pointer-events-none"
