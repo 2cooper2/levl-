@@ -830,34 +830,36 @@ export default function WorkPage() {
       <main className="flex-1">
 
         {/* ── Categories ── */}
-        <section className="px-6 pb-2 max-w-6xl mx-auto" style={{ paddingTop: "1.25rem" }}>
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
-            {categories.map((cat, i) => (
-              <div key={cat.name} className="relative">
-                {/* Floating growth badge */}
-                <motion.div
-                  initial={{ opacity: 0, y: 6, scale: 0.85 }}
-                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.06 + 0.2, duration: 0.35, ease: [0.22,1,0.36,1] }}
-                  className="absolute -top-3 -right-1 z-20 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-black pointer-events-none select-none"
-                  style={cat.growth >= 0 ? {
-                    background: "linear-gradient(135deg,#22c55e,#16a34a)",
-                    color: "white",
-                    boxShadow: "0 2px 8px rgba(34,197,94,0.45), 0 1px 0 rgba(255,255,255,0.2) inset",
-                  } : {
-                    background: "linear-gradient(135deg,#ef4444,#dc2626)",
-                    color: "white",
-                    boxShadow: "0 2px 8px rgba(239,68,68,0.45), 0 1px 0 rgba(255,255,255,0.2) inset",
-                  }}
-                >
-                  {cat.growth >= 0 ? `↑${cat.growth}%` : `↓${Math.abs(cat.growth)}%`}
-                </motion.div>
-                <EnhancedCategoryCard icon={cat.icon} name={cat.name} count={cat.count} index={i} size="small" className="w-full h-32 scale-[1.04]" onClick={() => {}}
-                  boxShadow="6px 10px 8px -6px rgba(0,0,0,0.45), -6px 10px 8px -6px rgba(0,0,0,0.45), 0 28px 22px -4px rgba(0,0,0,0.16), 0 19px 12px -4px rgba(0,0,0,0.11)"
+        <section className="pb-2" style={{ paddingTop: "1.25rem" }}>
+          <div className="overflow-x-auto" style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}>
+            <div className="flex gap-4 px-6" style={{ width: "max-content", paddingBottom: "1rem" }}>
+              {categories.map((cat, i) => (
+                <div key={cat.name} className="relative" style={{ width: "7rem" }}>
+                  {/* Floating growth badge */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 6, scale: 0.85 }}
+                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.06 + 0.2, duration: 0.35, ease: [0.22,1,0.36,1] }}
+                    className="absolute -top-3 -right-1 z-20 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-black pointer-events-none select-none"
+                    style={cat.growth >= 0 ? {
+                      background: "linear-gradient(135deg,#22c55e,#16a34a)",
+                      color: "white",
+                      boxShadow: "0 2px 8px rgba(34,197,94,0.45), 0 1px 0 rgba(255,255,255,0.2) inset",
+                    } : {
+                      background: "linear-gradient(135deg,#ef4444,#dc2626)",
+                      color: "white",
+                      boxShadow: "0 2px 8px rgba(239,68,68,0.45), 0 1px 0 rgba(255,255,255,0.2) inset",
+                    }}
+                  >
+                    {cat.growth >= 0 ? `↑${cat.growth}%` : `↓${Math.abs(cat.growth)}%`}
+                  </motion.div>
+                  <EnhancedCategoryCard icon={cat.icon} name={cat.name} count={cat.count} index={i} size="small" className="w-28 h-32 scale-[1.04]" onClick={() => {}}
+                    boxShadow="6px 10px 8px -6px rgba(0,0,0,0.45), -6px 10px 8px -6px rgba(0,0,0,0.45), 0 28px 22px -4px rgba(0,0,0,0.16), 0 19px 12px -4px rgba(0,0,0,0.11)"
                   />
-              </div>
-            ))}
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -866,9 +868,14 @@ export default function WorkPage() {
         <section className="px-6 pt-0 pb-14 max-w-6xl mx-auto">
           <div className="grid md:grid-cols-2 gap-6 items-stretch">
 
-            {/* Scheduled tasks */}
+            {/* Availability grid — first on mobile (calendar above jobs) */}
+            <motion.div initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.55 }} className="h-full order-1 md:order-2">
+              <AvailabilityPreview />
+            </motion.div>
+
+            {/* Scheduled tasks — second on mobile */}
             <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.55 }}
-              className="p-5 md:p-6 h-full" style={cardStyle}>
+              className="p-5 md:p-6 h-full order-2 md:order-1" style={cardStyle}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold" style={{ color: "#111" }}>Scheduled jobs</h3>
               </div>
@@ -921,10 +928,6 @@ export default function WorkPage() {
               </div>
             </motion.div>
 
-            {/* Availability grid */}
-            <motion.div initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.55 }} className="h-full">
-              <AvailabilityPreview />
-            </motion.div>
           </div>
         </section>
 

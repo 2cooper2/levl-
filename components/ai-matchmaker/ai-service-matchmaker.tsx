@@ -1882,14 +1882,8 @@ export function AIServiceMatchmaker() {
                         count={0}
                         index={index}
                         size="small"
-                        className="w-36 h-32 my-2 mx-1 rounded-xl overflow-hidden transition-all duration-300
-bg-gradient-to-br from-white/95 via-white/90 to-indigo-50/90 dark:from-gray-800/95 dark:via-gray-800/90 dark:to-indigo-950/90
-backdrop-blur-sm
-shadow-[0_24px_80px_rgba(66,60,86,0.10),0_44px_120px_rgba(62,56,82,0.07),0_-1px_0_rgba(255,255,255,0.90)]
-dark:shadow-[0_24px_80px_rgba(0,0,0,0.40),0_44px_120px_rgba(0,0,0,0.30),0_-1px_0_rgba(255,255,255,0.07)]
-hover:shadow-[0_28px_90px_rgba(66,60,86,0.13),0_50px_140px_rgba(62,56,82,0.09),0_-1px_0_rgba(255,255,255,0.95)]
-dark:hover:shadow-[0_28px_90px_rgba(0,0,0,0.48),0_50px_140px_rgba(0,0,0,0.38),0_-1px_0_rgba(255,255,255,0.09)]
-translate-y-[-4px] hover:translate-y-[-8px]"
+                        className="w-28 h-32 my-2 mx-1 scale-[1.04]"
+                        boxShadow="6px 10px 8px -6px rgba(0,0,0,0.45), -6px 10px 8px -6px rgba(0,0,0,0.45), 0 28px 22px -4px rgba(0,0,0,0.16), 0 19px 12px -4px rgba(0,0,0,0.11)"
                         onClick={() => handleCategoryClick(category.serviceType)}
                       />
                     ))}

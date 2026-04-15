@@ -18,7 +18,6 @@ export function LevlLogo({ className, ...props }: SVGProps<SVGSVGElement> & { cl
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        boxShadow: "0 0 0 1px rgba(88,82,100,0.10)",
         ...(props.style || {}),
       }}
       {...props}
