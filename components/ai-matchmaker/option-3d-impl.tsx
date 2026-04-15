@@ -3,7 +3,7 @@
 import { useRef, useMemo, useState, useEffect, type JSX } from "react"
 import Image from "next/image"
 import { Canvas, useFrame } from "@react-three/fiber"
-import { ContactShadows, Environment, PerspectiveCamera, RoundedBox } from "@react-three/drei"
+import { ContactShadows, Environment, GradientTexture, PerspectiveCamera, RoundedBox } from "@react-three/drei"
 import { EffectComposer, Bloom, N8AO, SMAA } from "@react-three/postprocessing"
 import * as THREE from "three"
 
@@ -2964,11 +2964,16 @@ function WallTexScene({ material }: { material: WallMaterial }) {
     <>
       <WallCamRig />
 
-      {/* ── Levl Void — darker lavender infinity cove ───────────────────── */}
-      <color attach="background" args={["#b8b2cc"]} />
+      {/* ── Card-matching gradient background — white top → soft lavender bottom */}
+      <color attach="background" args={["#f5f2ff"]} />
       <mesh>
         <sphereGeometry args={[7, 32, 18]} />
-        <meshStandardMaterial color="#b0a8c4" roughness={1} metalness={0} side={THREE.BackSide} envMapIntensity={0} />
+        <meshBasicMaterial side={THREE.BackSide}>
+          <GradientTexture
+            stops={[0, 0.55, 1]}
+            colors={["#f8f6ff", "#ede8f8", "#ddd4f4"]}
+          />
+        </meshBasicMaterial>
       </mesh>
 
       {/* ── Levl Void lighting — strong directional rake, dark ambient ───── */}
