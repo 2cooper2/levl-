@@ -827,10 +827,12 @@ export default function WorkPage() {
           }} />
       </header>
 
-      <main className="flex-1" style={{ width: "100%", minWidth: 0, overflowX: "hidden" }}>
+      <main className="flex-1" style={{ width: "100%", minWidth: 0 }}>
 
         {/* ── Categories ── */}
-        <section style={{ paddingTop: "1rem", paddingBottom: "1.5rem", overflowX: "auto", scrollbarWidth: "none" as any, msOverflowStyle: "none" as any, WebkitOverflowScrolling: "touch" as any }}>
+        {/* width:100vw + overflowX:hidden clips the scroll to viewport so it never expands the page layout */}
+        <section style={{ width: "100vw", overflowX: "hidden", paddingTop: "1rem", paddingBottom: "1.5rem" }}>
+          <div style={{ overflowX: "auto", scrollbarWidth: "none" as any, msOverflowStyle: "none" as any, WebkitOverflowScrolling: "touch" as any }}>
           <div className="flex gap-4 px-6" style={{ width: "max-content" }}>
             {categories.map((cat, i) => (
               <div key={cat.name} className="relative" style={{ width: "7rem" }}>
@@ -859,10 +861,11 @@ export default function WorkPage() {
               </div>
             ))}
           </div>
+          </div>
         </section>
 
         {/* ── Availability + Scheduled Tasks ── */}
-        <section className="px-6 pt-0 pb-14 max-w-6xl mx-auto">
+        <section className="px-6 pt-0 pb-14 w-full">
           <div className="grid md:grid-cols-2 gap-6 items-stretch">
 
             {/* Availability grid — first on mobile (calendar above jobs) */}
