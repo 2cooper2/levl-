@@ -1,9 +1,24 @@
 "use client"
 
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { EnhancedHeroSection } from "@/components/enhanced-hero-section"
 import { AIServiceMatchmaker } from "@/components/ai-matchmaker/ai-service-matchmaker"
 
 export default function Home() {
+  const router = useRouter()
+  const [ready, setReady] = useState(false)
+
+  useEffect(() => {
+    if (!sessionStorage.getItem("levl-session")) {
+      router.replace("/role")
+    } else {
+      setReady(true)
+    }
+  }, [])
+
+  if (!ready) return null
+
   return (
     <div className="flex min-h-screen flex-col" style={{ margin: 0, padding: 0 }}>
       {/* Levl Void — full-page cyclorama background */}

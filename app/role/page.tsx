@@ -29,14 +29,24 @@ export default function RolePage() {
         }}
       />
 
-      {/* Logo */}
+      {/* Logo with Levl depth */}
       <motion.div
         initial={{ opacity: 0, y: -16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-        className="mb-14"
+        className="mb-14 relative pb-5"
       >
-        <LevlLogo className="h-24 w-24" />
+        {/* Ground shadow */}
+        <div className="absolute -bottom-0 left-[8%] right-[8%] h-5 rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(ellipse at center, rgba(0,0,0,0.4) 0%, transparent 70%)", filter: "blur(6px)", zIndex: 0 }} />
+        {/* Shadow wrapper */}
+        <div className="relative" style={{
+          boxShadow: "0 8px 16px -4px rgba(0,0,0,0.3), 0 4px 8px -4px rgba(0,0,0,0.18), 0 -2px 4px 0 rgba(255,255,255,0.9) inset",
+          borderRadius: "0.375rem",
+          zIndex: 1,
+        }}>
+          <LevlLogo className="h-24 w-24" />
+        </div>
       </motion.div>
 
       {/* Role cards */}

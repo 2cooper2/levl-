@@ -1864,7 +1864,7 @@ export function AIServiceMatchmaker() {
                 </motion.div>
 
                 <div
-                  className="cyc-cats-scroll overflow-x-auto py-2 pb-1 scrollbar-hide scroll-smooth mx-auto"
+                  className="cyc-cats-scroll overflow-x-auto py-2 pb-8 scrollbar-hide scroll-smooth mx-auto"
                   ref={categoriesRef}
                   style={{
                     scrollbarWidth: "none",

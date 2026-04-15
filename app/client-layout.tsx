@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import { useEffect } from "react"
@@ -17,14 +17,6 @@ export function ClientRootLayout({
   const pathname = usePathname()
   const router = useRouter()
 
-  // Show role picker on fresh open (new session), skip on internal navigation
-  useEffect(() => {
-    if (pathname !== "/") return
-    const pickedThisSession = sessionStorage.getItem("levl-session")
-    if (!pickedThisSession) {
-      router.replace("/role")
-    }
-  }, [pathname])
 
   // Reset scroll position immediately on mount and when navigating
   useEffect(() => {
