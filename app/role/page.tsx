@@ -33,35 +33,46 @@ export default function RolePage() {
         initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-        className="mb-16 relative"
-        style={{ width: 160, height: 160 }}
+        className="relative"
+        style={{ width: 170, height: 170, marginBottom: 56 }}
       >
-        {/* White container + multiply: white areas vanish into whatever's beneath,
-            purple logo pixels pass through correctly. Levl void is unaffected. */}
-        <div style={{ width: "100%", height: "100%", background: "white", mixBlendMode: "multiply" }}>
-          <img
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/D86926DF-2501-4C99-9452-927116E45324-oXEcNS38lLlIRweavHw5KIvvgR32ot.jpeg"
-            alt="LevL"
-            style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
-          />
-        </div>
+        {/* Logo image */}
+        <img
+          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/D86926DF-2501-4C99-9452-927116E45324-oXEcNS38lLlIRweavHw5KIvvgR32ot.jpeg"
+          alt="LevL"
+          style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
+        />
 
-        {/* Floating ground shadow — sibling of blend div so it renders normally */}
+        {/* Page-background overlay with darken blend:
+            darken(page_color, white_jpeg) = page_color → white box disappears
+            darken(page_color, purple_logo) = purple_logo → logo stays visible */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: `
+              radial-gradient(ellipse 55% 20% at 50% 100%, rgba(255,252,248,0.38) 0%, transparent 70%),
+              linear-gradient(180deg, #e6e6e6 0%, #f2f2f2 10%, #fafafa 28%, #ffffff 50%, #ffffff 100%)
+            `,
+            mixBlendMode: "darken",
+          }}
+        />
+
+        {/* Floating ground shadow */}
         <div
           className="absolute pointer-events-none"
           style={{
-            bottom: "-12px",
+            bottom: "-14px",
             left: "10%",
             right: "10%",
             height: "20px",
-            background: "radial-gradient(ellipse at center, rgba(0,0,0,0.28) 0%, transparent 70%)",
+            background: "radial-gradient(ellipse at center, rgba(0,0,0,0.26) 0%, transparent 70%)",
             filter: "blur(6px)",
           }}
         />
       </motion.div>
 
-      {/* Role cards */}
-      <div className="flex gap-10 w-full max-w-[300px]">
+      {/* Role cards — lowered, more spread */}
+      <div className="flex gap-12 w-full max-w-[320px]" style={{ marginTop: 32 }}>
         {(["client", "worker"] as const).map((role, i) => (
           <motion.div
             key={role}
