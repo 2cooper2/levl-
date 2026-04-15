@@ -197,7 +197,7 @@ function AvailabilityPreview() {
   const pending   = JOB_DATA.filter(j => j.month === viewMonth && j.status === "pending").reduce((s, j) => s + parseInt(j.pay.replace("$","")), 0)
 
   return (
-    <div className="p-5 md:p-6 h-full flex flex-col w-full" style={{ ...cardStyle, boxSizing: "border-box" }}>
+    <div className="p-5 md:p-6 h-full flex flex-col w-full" style={{ ...cardStyle, boxSizing: "border-box", maxWidth: "100%" }}>
 
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
@@ -780,7 +780,7 @@ export default function WorkPage() {
     return () => window.removeEventListener("scroll", onScroll)
   }, [])
   return (
-    <div className="flex min-h-screen flex-col" style={{ margin: 0, padding: 0, overscrollBehavior: "none", WebkitOverflowScrolling: "touch" as any }}>
+    <div className="flex min-h-screen flex-col" style={{ margin: 0, padding: 0, overscrollBehavior: "none", WebkitOverflowScrolling: "touch" as any, overflowX: "hidden" }}>
 
       {/* Levl Void background */}
       <div className="fixed inset-0 -z-10 pointer-events-none"
@@ -827,7 +827,7 @@ export default function WorkPage() {
           }} />
       </header>
 
-      <main className="flex-1" style={{ width: "100%", minWidth: 0, maxWidth: "100vw" }}>
+      <main className="flex-1" style={{ width: "100%", minWidth: 0, maxWidth: "100%", overflowX: "hidden" }}>
 
         {/* ── Categories ── */}
         <section style={{ paddingTop: "1rem", paddingBottom: "1.5rem", overflowX: "auto", scrollbarWidth: "none" as any, msOverflowStyle: "none" as any, WebkitOverflowScrolling: "touch" as any }}>
