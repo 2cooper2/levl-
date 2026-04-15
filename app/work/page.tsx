@@ -748,7 +748,7 @@ function FAQ() {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 const categories = [
-  { icon: Hammer,     name: "Handyman",    count: 240, growth:  24 },
+  { icon: Hammer,     name: "Mounting",    count: 240, growth:  24 },
   { icon: Paintbrush, name: "Painting",    count: 180, growth:  -8 },
   { icon: Wrench,     name: "Plumbing",    count: 160, growth:  31 },
   { icon: Leaf,       name: "Landscaping", count: 210, growth: -11 },
