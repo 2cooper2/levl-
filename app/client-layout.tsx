@@ -17,14 +17,12 @@ export function ClientRootLayout({
   const pathname = usePathname()
   const router = useRouter()
 
-  // Role-based redirect: on root, check saved role and send to correct side
+  // Show role picker on fresh open (new session), skip on internal navigation
   useEffect(() => {
     if (pathname !== "/") return
-    const role = localStorage.getItem("levl-role")
-    if (!role) {
+    const pickedThisSession = sessionStorage.getItem("levl-session")
+    if (!pickedThisSession) {
       router.replace("/role")
-    } else if (role === "worker") {
-      router.replace("/work")
     }
   }, [pathname])
 
