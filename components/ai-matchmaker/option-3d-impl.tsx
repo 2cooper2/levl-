@@ -2954,6 +2954,11 @@ function WallTexScene({ material }: { material: WallMaterial }) {
     const t = maps.displacement.clone(); t.repeat.set(sideFaceRpt, 1); t.offset.set(0, 0); t.needsUpdate = true; return t
   }, [maps])
 
+  // Dispose cloned side textures on unmount
+  useEffect(() => {
+    return () => { sideA.dispose(); sideN.dispose(); sideR.dispose(); sideD.dispose() }
+  }, [sideA, sideN, sideR, sideD])
+
   return (
     <>
       <WallCamRig />
@@ -2970,7 +2975,7 @@ function WallTexScene({ material }: { material: WallMaterial }) {
       <hemisphereLight args={["#c8c0e0", "#8070a8", 0.30]} />
       {/* Primary left rake — sharp shadows across mortar joints */}
       <directionalLight position={[-5, 3.0, 4.0]} intensity={2.60} color="#fff4ee" castShadow
-        shadow-mapSize={[2048, 2048]} shadow-camera-near={0.1} shadow-camera-far={20}
+        shadow-mapSize={[512, 512]} shadow-camera-near={0.1} shadow-camera-far={20}
         shadow-camera-left={-4} shadow-camera-right={4}
         shadow-camera-top={4} shadow-camera-bottom={-4}
         shadow-bias={-0.0003} />
