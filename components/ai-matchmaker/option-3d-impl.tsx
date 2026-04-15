@@ -2964,17 +2964,7 @@ function WallTexScene({ material }: { material: WallMaterial }) {
     <>
       <WallCamRig />
 
-      {/* ── Card-matching gradient background — white top → soft lavender bottom */}
-      <color attach="background" args={["#f5f2ff"]} />
-      <mesh>
-        <sphereGeometry args={[7, 32, 18]} />
-        <meshBasicMaterial side={THREE.BackSide}>
-          <GradientTexture
-            stops={[0, 0.55, 1]}
-            colors={["#f8f6ff", "#ede8f8", "#ddd4f4"]}
-          />
-        </meshBasicMaterial>
-      </mesh>
+      {/* Background handled by CSS gradient on the canvas container div */}
 
       {/* ── Levl Void lighting — strong directional rake, dark ambient ───── */}
       {/* Very dark hemisphere so shadows read deep and directional */}
@@ -3611,13 +3601,23 @@ function SceneCanvas({
     ? (isMobile ? "/hdri/lebombo_2k.hdr"          : "/hdri/lebombo_4k.hdr")
     : (isMobile ? "/hdri/potsdamer_platz_2k.hdr"   : "/hdri/potsdamer_platz_4k.hdr")
 
+  // Wall type scenes use transparent canvas so CSS gradient shows through unaffected by tone mapping
+  const useTransparent = !postprocess
+
   return (
+    <div style={{
+      width: "100%", height: "100%", position: "relative",
+      ...(useTransparent ? {
+        background: "linear-gradient(150deg, #ffffff 0%, #f0ecfa 45%, #e4d5f8 100%)"
+      } : {}),
+    }}>
     <Canvas
       shadows={!thumbnail}
       dpr={thumbnail ? 1 : (isMobile ? [1, 1.5] : [1, 2])}
       frameloop={frameloop}
       gl={{
-        antialias: !isMobile,  // SMAA handles AA on desktop; built-in on mobile
+        antialias: !isMobile,
+        alpha: useTransparent,
         toneMapping: THREE.ACESFilmicToneMapping,
         outputColorSpace: THREE.SRGBColorSpace,
         powerPreference: "high-performance",
@@ -3675,6 +3675,7 @@ function SceneCanvas({
         </EffectComposer>
       )}
     </Canvas>
+    </div>
   )
 }
 
