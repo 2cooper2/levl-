@@ -830,8 +830,8 @@ export default function WorkPage() {
       <main className="flex-1">
 
         {/* ── Categories ── */}
-        <section className="pb-2" style={{ paddingTop: "1.25rem" }}>
-          <div className="overflow-x-auto" style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}>
+        <section className="pb-2" style={{ paddingTop: "0.5rem" }}>
+          <div style={{ overflowX: "auto", scrollbarWidth: "none" as any, msOverflowStyle: "none" as any, WebkitOverflowScrolling: "touch" as any, background: "transparent", paddingTop: "1rem" }}>
             <div className="flex gap-4 px-6" style={{ width: "max-content", paddingBottom: "1rem" }}>
               {categories.map((cat, i) => (
                 <div key={cat.name} className="relative" style={{ width: "7rem" }}>
