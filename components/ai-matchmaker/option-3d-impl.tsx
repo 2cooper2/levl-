@@ -411,8 +411,8 @@ interface WallCfg {
 const WALL_CFG: Record<WallMaterial, WallCfg> = {
   brick:    { builder: makeBrickMaps,   dispScale: 0.09,  normScale: 1.8, texSize: 512, sideTint: "#7a3420", sideRough: 0.92 },
   concrete: { builder: makeConcreteMap, dispScale: 0.055, normScale: 1.8, texSize: 1024, sideTint: "#787872", sideRough: 0.94 },
-  plaster:  { builder: makePlasterMaps, dispScale: 0.16,  normScale: 2.6, texSize: 512, sideTint: "#b09a84", sideRough: 0.97 },
-  stone:    { builder: makeStoneMaps,   dispScale: 0.10,  normScale: 2.0, texSize: 1024, sideTint: "#686058", sideRough: 0.95 },
+  plaster:  { builder: makePlasterMaps, dispScale: 0.28,  normScale: 4.2, texSize: 512, sideTint: "#b09a84", sideRough: 0.97 },
+  stone:    { builder: makeStoneMaps,   dispScale: 0.18,  normScale: 3.4, texSize: 1024, sideTint: "#686058", sideRough: 0.95 },
   drywall:  { builder: makeDrywallMaps, dispScale: 0.016, normScale: 0.6, texSize: 512, sideTint: "#9e9a94", sideRough: 0.96 },
 }
 
