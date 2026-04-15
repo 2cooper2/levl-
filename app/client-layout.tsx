@@ -15,8 +15,6 @@ export function ClientRootLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
-  const router = useRouter()
-
 
   // Reset scroll position immediately on mount and when navigating
   useEffect(() => {
