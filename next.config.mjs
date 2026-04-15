@@ -26,8 +26,8 @@ const securityHeaders = [
       "img-src 'self' blob: data: https:",
       // Fonts
       "font-src 'self'",
-      // API connections: Supabase (https + wss), Stripe, Resend
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://api.resend.com",
+      // API connections: Supabase (https + wss), Stripe, Resend, drei HDR assets
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://api.resend.com https://raw.githack.com",
       // Stripe payment iframe
       "frame-src https://js.stripe.com https://hooks.stripe.com",
       // Workers (Three.js / WebGL)
