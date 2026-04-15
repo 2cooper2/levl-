@@ -4,8 +4,7 @@ import { useRef, useMemo, useState, useEffect, type JSX } from "react"
 import Image from "next/image"
 import { Canvas, useFrame } from "@react-three/fiber"
 import { ContactShadows, Environment, PerspectiveCamera, RoundedBox } from "@react-three/drei"
-import { EffectComposer, Bloom, N8AO, ToneMapping, SMAA } from "@react-three/postprocessing"
-import { ToneMappingMode } from "postprocessing"
+import { EffectComposer, Bloom, N8AO, SMAA } from "@react-three/postprocessing"
 import * as THREE from "three"
 
 // ─── Brand palette ────────────────────────────────────────────────────────────
@@ -3612,9 +3611,8 @@ function SceneCanvas({
       dpr={thumbnail ? 1 : (isMobile ? [1, 1.5] : [1, 2])}
       frameloop={frameloop}
       gl={{
-        // NoToneMapping — postprocessing ToneMapping effect handles it after bloom
         antialias: !isMobile,  // SMAA handles AA on desktop; built-in on mobile
-        toneMapping: THREE.NoToneMapping,
+        toneMapping: THREE.ACESFilmicToneMapping,
         outputColorSpace: THREE.SRGBColorSpace,
         powerPreference: "high-performance",
       }}
@@ -3647,14 +3645,14 @@ function SceneCanvas({
       {/* ── Post-processing ── */}
       {!thumbnail && (
         <EffectComposer multisampling={0}>
-          {/* ACES filmic tone mapping — applied after bloom so HDR values bloom correctly */}
-          <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
-          {/* Bloom — catches emissive/specular highlights, chrome, TV screens, light halos */}
+          {/* Bloom — only catches the very brightest specular highlights and emissive elements.
+              Threshold 0.88 excludes backgrounds/surfaces, catches TV screen glow,
+              mirror hot-spots, chrome speculars, light fixture halo. */}
           <Bloom
-            luminanceThreshold={isMobile ? 0.45 : 0.30}
-            luminanceSmoothing={0.85}
-            intensity={isMobile ? 0.35 : 0.60}
-            radius={isMobile ? 0.60 : 0.80}
+            luminanceThreshold={isMobile ? 0.90 : 0.88}
+            luminanceSmoothing={0.75}
+            intensity={isMobile ? 0.20 : 0.30}
+            radius={isMobile ? 0.50 : 0.65}
             mipmapBlur
           />
           {/* N8AO — screen-space ambient occlusion (desktop only, too heavy for mobile) */}
