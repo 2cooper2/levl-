@@ -3642,31 +3642,28 @@ function SceneCanvas({
       {scene}
       <Environment files={hdr} />
 
-      {/* ── Post-processing ── */}
-      {!thumbnail && (
+      {/* ── Post-processing (desktop only — too GPU-heavy for mobile) ── */}
+      {!thumbnail && !isMobile && (
         <EffectComposer multisampling={0}>
-          {/* Bloom — only catches the very brightest specular highlights and emissive elements.
-              Threshold 0.88 excludes backgrounds/surfaces, catches TV screen glow,
-              mirror hot-spots, chrome speculars, light fixture halo. */}
+          {/* Bloom — threshold 0.88 only catches emissive/specular highlights,
+              not backgrounds or regular surfaces */}
           <Bloom
-            luminanceThreshold={isMobile ? 0.90 : 0.88}
+            luminanceThreshold={0.88}
             luminanceSmoothing={0.75}
-            intensity={isMobile ? 0.20 : 0.30}
-            radius={isMobile ? 0.50 : 0.65}
+            intensity={0.30}
+            radius={0.65}
             mipmapBlur
           />
-          {/* N8AO — screen-space ambient occlusion (desktop only, too heavy for mobile) */}
-          {!isMobile && (
-            <N8AO
-              quality="high"
-              aoRadius={2.5}
-              intensity={1.8}
-              distanceFalloff={1.2}
-              color="black"
-            />
-          )}
-          {/* SMAA — high-quality antialiasing (desktop only) */}
-          {!isMobile && <SMAA />}
+          {/* N8AO — ambient occlusion: depth in corners, bracket crevices */}
+          <N8AO
+            quality="high"
+            aoRadius={2.5}
+            intensity={1.8}
+            distanceFalloff={1.2}
+            color="black"
+          />
+          {/* SMAA — crisp antialiasing */}
+          <SMAA />
         </EffectComposer>
       )}
     </Canvas>
