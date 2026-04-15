@@ -197,7 +197,7 @@ function AvailabilityPreview() {
   const pending   = JOB_DATA.filter(j => j.month === viewMonth && j.status === "pending").reduce((s, j) => s + parseInt(j.pay.replace("$","")), 0)
 
   return (
-    <div className="p-5 md:p-6 h-full flex flex-col" style={cardStyle}>
+    <div className="p-5 md:p-6 h-full flex flex-col w-full" style={{ ...cardStyle, boxSizing: "border-box" }}>
 
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
@@ -542,7 +542,7 @@ function AvailabilityPreview() {
       })()}
 
       {/* Daily + Weekly metrics */}
-      <div className="flex-1 mt-4 flex flex-col">
+      <div className="flex-1 mt-4 flex flex-col w-full min-w-0">
         {(() => {
           const d = selectedDate ?? today.getDate()
 
@@ -636,7 +636,7 @@ function AvailabilityPreview() {
                 <p className="text-[10px] font-black tracking-widest uppercase" style={{ color: "#111" }}>Week {Math.ceil(d / 7)} of 4</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2 w-full min-w-0">
 
                 {/* Card 1 — Avg Day Earnings */}
                 {statCard(<>

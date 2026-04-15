@@ -34,7 +34,7 @@ export default function RolePage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
         className="relative"
-        style={{ width: 170, height: 170, marginBottom: 56 }}
+        style={{ width: 220, height: 220, marginBottom: 48 }}
       >
         {/* Logo image */}
         <img
