@@ -33,17 +33,21 @@ scene.render.resolution_y = 1200
 scene.render.resolution_percentage = 100
 scene.render.image_settings.file_format = 'PNG'
 scene.render.image_settings.color_mode = 'RGB'
-scene.render.film_transparent = False
+scene.render.film_transparent = False   # mirror has baked room geometry
 
 # Color management — AgX, same as floating shelves (natural shadows, warm tones)
 try:
     scene.view_settings.view_transform = 'AgX'
-    scene.view_settings.look            = 'None'
+    scene.view_settings.look            = 'AgX - Medium High Contrast'
     scene.view_settings.exposure        = 0.0
     scene.view_settings.gamma           = 1.0
 except:
-    try: scene.view_settings.view_transform = 'Filmic'
-    except: pass
+    try:
+        scene.view_settings.view_transform = 'AgX'
+        scene.view_settings.look            = 'None'
+    except:
+        try: scene.view_settings.view_transform = 'Filmic'
+        except: pass
 
 try:
     cprefs = bpy.context.preferences.addons['cycles'].preferences
@@ -364,7 +368,7 @@ frame_obj.data.materials.clear(); frame_obj.data.materials.append(mat_frame)
 # Glass is recessed 4cm behind the frame's front face.
 # From camera angle you see: frame front face → visible inner frame edge → glass.
 # This "inlay" effect is exactly how real framed mirrors and art frames look.
-GLASS_INSET = 0.012  # 1.2cm inset — subtle inlay like real mirror frame
+GLASS_INSET = 0.012  # 1.2cm inset — subtle, no visible top strip
 
 glass_crv = bpy.data.curves.new('GlassShape', type='CURVE')
 glass_crv.dimensions   = '2D'
@@ -408,7 +412,7 @@ bpy.ops.mesh.primitive_plane_add(size=1, location=(0, 0, 0))
 floor = bpy.context.active_object; floor.name = 'Floor'
 floor.scale = (7.0, 5.0, 1.0)
 bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
-floor.location = (0, -2.0, 0)   # spans y=-4.5..+0.5
+floor.location = (0, -2.0, 0)
 floor.data.materials.clear(); floor.data.materials.append(mat_floor)
 
 # ── Back wall ─────────────────────────────────────────────────────────────────
@@ -419,6 +423,8 @@ bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
 wall_back.rotation_euler = Euler((math.radians(90), 0, 0), 'XYZ')
 wall_back.location = (0, wall_y, 1.8)
 wall_back.data.materials.clear(); wall_back.data.materials.append(mat_wall)
+
+
 
 # ── Reflection scene — fills mirror glass with a realistic room reflection ────
 # These objects sit on the camera side of the mirror.
@@ -672,66 +678,80 @@ add_standing_books(sc_x + 0.22, sc_y, top, [
 
 log("Scene geometry done")
 
-# ── World: interior HDRI ambient — glass reflects actual studio/room space ─────
-# ferndale_studio_01 is an interior photography studio — warm, natural, room-like.
-# The glass (metallic=1) reflects scene geometry (walls/ceiling/floor) FIRST,
-# then HDRI fills in any rays that escape the room — no fake flat color override.
+# ── World: dual-background — camera sees lavender, GI bounces see warm grey ────
+# Identical approach to floating-shelf render — bright lavender background gives
+# high contrast so frame shadows read dark and layered against the wall.
+# GI strength 0.4 = rich bounce ambient fills penumbras with warm grey light.
 world = bpy.data.worlds.get('World') or bpy.data.worlds.new('World')
 scene.world = world; world.use_nodes = True
 wt = world.node_tree; wt.nodes.clear()
 
-out_w = wt.nodes.new('ShaderNodeOutputWorld')
-bg    = wt.nodes.new('ShaderNodeBackground')
+out_w  = wt.nodes.new('ShaderNodeOutputWorld')
+bg_gi  = wt.nodes.new('ShaderNodeBackground')
+bg_lav = wt.nodes.new('ShaderNodeBackground')
+mix_bg = wt.nodes.new('ShaderNodeMixShader')
+lpath  = wt.nodes.new('ShaderNodeLightPath')
+bg_gi.inputs['Color'].default_value    = (0.78, 0.74, 0.70, 1.0)   # warm grey GI bounce
+bg_gi.inputs['Strength'].default_value = 0.22                        # reduced so shadow lights beat ambient
+bg_lav.inputs['Color'].default_value   = (0.86, 0.82, 0.97, 1.0)   # soft lavender — camera background
+bg_lav.inputs['Strength'].default_value = 1.0
+wt.links.new(lpath.outputs['Is Camera Ray'], mix_bg.inputs['Fac'])
+wt.links.new(bg_gi.outputs['Background'],  mix_bg.inputs[1])
+wt.links.new(bg_lav.outputs['Background'], mix_bg.inputs[2])
+wt.links.new(mix_bg.outputs['Shader'], out_w.inputs['Surface'])
 
-hdri_path = os.path.join(tex_dir, 'ferndale_studio_01_2k.hdr')
-if not os.path.exists(hdri_path):
-    hdri_path = os.path.join(tex_dir, 'art_studio_2k.hdr')
-if os.path.exists(hdri_path):
-    env_img = bpy.data.images.load(hdri_path)
-    try: env_img.colorspace_settings.name = 'Linear Rec.709'
-    except: env_img.colorspace_settings.name = 'Linear'
-    env_nd = wt.nodes.new('ShaderNodeTexEnvironment')
-    # Rotate HDRI so warm light faces the mirror
-    mapp_w = wt.nodes.new('ShaderNodeMapping')
-    mapp_w.inputs['Rotation'].default_value = (0, 0, math.radians(60))
-    coord_w = wt.nodes.new('ShaderNodeTexCoord')
-    wt.links.new(coord_w.outputs['Generated'], mapp_w.inputs['Vector'])
-    wt.links.new(mapp_w.outputs['Vector'], env_nd.inputs['Vector'])
-    env_nd.image = env_img
-    wt.links.new(env_nd.outputs['Color'], bg.inputs['Color'])
-    bg.inputs['Strength'].default_value = 0.08   # very low ambient — lets dark walnut read as dark chocolate
-    log(f"HDRI loaded: {hdri_path}")
-else:
-    bg.inputs['Color'].default_value    = (0.60, 0.54, 0.46, 1.0)
-    bg.inputs['Strength'].default_value = 0.25
-
-wt.links.new(bg.outputs['Background'], out_w.inputs['Surface'])
-
-# ── Lights: 2 focused lights — aimed at MIRROR, not flooding the wall ─────────
-def add_area(loc, energy, size, color, rot_xyz):
+# ── Lights: 4-light rig — floating-shelf layered-shadow style ─────────────────
+# Large light sources (size 2.5–3.5) produce wide penumbras.
+# Two right-side lights from different heights → two overlapping left-shadow bands.
+# no_glossy=True on fill lights keeps them out of the mirror reflection.
+def add_area(loc, energy, size, color, rot_xyz, no_glossy=False):
     bpy.ops.object.light_add(type='AREA', location=loc)
     L = bpy.context.active_object
     L.data.energy = energy; L.data.size = size; L.data.color = color
     L.rotation_euler = Euler(tuple(math.radians(d) for d in rot_xyz), 'XYZ')
+    if no_glossy:
+        try: L.visible_glossy = False
+        except:
+            try: L.cycles_visibility.glossy = False
+            except: pass
 
-# Lighting: keep key strong (directional shadows), reduce fill/rim/top so
-# dark walnut frame reads dark — ambient floor was washing out all colors.
-add_area((-2.5, -2.0, 2.5), 300, 1.8, (1.00, 0.97, 0.90), (34,  0, -28))  # key — restored so reflection stays bright
-add_area(( 3.5, -3.8, 2.5), 420, 0.4, (0.90, 0.94, 1.00), ( 28,  0, -52))  # fill — pushed far back so near-floor is out of beam, aims across to back wall
-add_area(( 0.0, -0.8, 4.0),  60, 3.0, (1.00, 0.98, 0.94), (78,  0,   0))  # top
-# rim light removed — was behind the back wall (Y=2.8) causing right-side glow
+# Key: top-left — main scene warmth, boosted to compensate for lower ambient
+add_area((-2.5, -2.0, 2.5), 900, 2.5, (1.00, 0.97, 0.90), (34,  0, -28))
+# Top: overhead — even wall brightness
+add_area(( 0.0, -0.8, 4.2), 350, 3.0, (1.00, 0.98, 0.94), (78,  0,   0))
+# Left-shadow: spot light from right — focused hard-edged beam cuts through ambient
+# aimed precisely at the wall zone to the left of the mirror frame
+# Spot aimed at the FRAME (not the shadow zone) so shadow falls left of frame.
+# Aim at (0.0, 0.28, 1.0) — right of left frame edge, wall illuminated there,
+# frame left edge blocks beam → dark shadow band to its left on wall.
+bpy.ops.object.light_add(type='SPOT', location=(2.8, -2.0, 1.8))
+_sp = bpy.context.active_object
+_sp.data.energy = 2800; _sp.data.color = (0.92, 0.95, 1.00)
+_sp.data.spot_size = math.radians(55); _sp.data.spot_blend = 0.65
+try: _sp.data.shadow_soft_size = 0.10
+except:
+    try: _sp.data.radius = 0.10
+    except: pass
+_sp_target = Vector((0.0, 0.28, 1.0))
+_sp.rotation_euler = (_sp_target - Vector((2.8, -2.0, 1.8))).normalized().to_track_quat('-Z', 'Y').to_euler()
+try: _sp.visible_glossy = False
+except:
+    try: _sp.cycles_visibility.glossy = False
+    except: pass
+# Soft area fill from right — second shadow band at lower angle
+add_area(( 1.8, -3.5, 0.4), 600, 1.8, (0.93, 0.96, 1.00), (8,  0, -55), no_glossy=True)
 
 # ── Camera ─────────────────────────────────────────────────────────────────────
 cam_data = bpy.data.cameras.new('Camera')
-cam_data.lens = 45
+cam_data.lens = 65
 cam_data.clip_start = 0.01; cam_data.clip_end = 50.0
 cam_obj = bpy.data.objects.new('Camera', cam_data)
 bpy.context.collection.objects.link(cam_obj); scene.camera = cam_obj
 
-# Strong side perspective: ~22° — clearly shows frame depth + 3D thickness.
-# 45mm lens = wider FOV, full mirror top to floor visible with breathing room.
-cam_pos = Vector((-1.80, -4.50, 0.95))
-look_at = Vector(( 0.00,  0.25, 0.82))
+# 65mm on 1200x1200 square: mirror fills ~75% of frame height, good compression.
+# Square render matches the new aspect-ratio: 1/1 card container.
+cam_pos = Vector((-1.80, -5.20, 0.98))
+look_at = Vector(( 0.00,  0.25, 0.88))
 cam_obj.location = cam_pos
 cam_obj.rotation_euler = (look_at - cam_pos).to_track_quat('-Z', 'Y').to_euler()
 

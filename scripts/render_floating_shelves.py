@@ -25,12 +25,12 @@ scene.cycles.samples = 320
 scene.cycles.use_denoising = True
 try: scene.cycles.denoiser = 'OPENIMAGEDENOISE'
 except: pass
-scene.render.resolution_x = 1800
-scene.render.resolution_y = 900
+scene.render.resolution_x = 1200
+scene.render.resolution_y = 1200
 scene.render.resolution_percentage = 100
 scene.render.image_settings.file_format = 'PNG'
-scene.render.image_settings.color_mode = 'RGB'
-scene.render.film_transparent = False
+scene.render.image_settings.color_mode = 'RGBA'
+scene.render.film_transparent = True
 
 try:
     cprefs = bpy.context.preferences.addons['cycles'].preferences
@@ -48,6 +48,20 @@ out_path = os.path.join(project_dir, 'public', 'assets', 'renders', 'floating-sh
 os.makedirs(os.path.dirname(out_path), exist_ok=True)
 scene.render.filepath = out_path
 BL = bpy.app.version
+
+# AgX Medium High Contrast — richer shadows, punchier highlights
+try:
+    scene.view_settings.view_transform = 'AgX'
+    scene.view_settings.look            = 'AgX - Medium High Contrast'
+    scene.view_settings.exposure        = 0.0
+    scene.view_settings.gamma           = 1.0
+except:
+    try:
+        scene.view_settings.view_transform = 'AgX'
+        scene.view_settings.look            = 'None'
+    except:
+        try: scene.view_settings.view_transform = 'Filmic'
+        except: pass
 
 # ── World ─────────────────────────────────────────────────────────────────────
 world = bpy.data.worlds.get('World') or bpy.data.worlds.new('World')
@@ -496,10 +510,22 @@ def add_area(loc, energy, size, color, rot_xyz):
     L.data.energy = energy; L.data.size = size; L.data.color = color
     L.rotation_euler = Euler(tuple(math.radians(d) for d in rot_xyz), 'XYZ')
 
+# Key — top-left warm directional, primary shadow source
 add_area((-2.5,-2.0, 2.5), 900, 3.0, (1.0,0.97,0.90), (34,0,-28))
+# Fill — large soft right-side fill, reduces harsh shadows
 add_area(( 2.5,-1.6, 0.0), 250, 4.5, (0.90,0.94,1.0),  (6,0,38))
+# Top — overhead even fill
 add_area(( 0.0,-0.8, 4.0), 450, 3.0, (1.0,0.98,0.94),  (78,0,0))
+# Rim — back-right separation light, lifts shelf edges from background
 add_area(( 0.6, 2.8, 0.6), 320, 1.4, (0.85,0.88,1.0),  (-50,0,12))
+
+# Shadow catcher floor — grounds shelves, shows drop shadow on transparent render
+bpy.ops.mesh.primitive_plane_add(size=6, location=(0, SD*0.30, -0.40))
+sc_floor = bpy.context.active_object; sc_floor.name = 'ShadowCatcher'
+try: sc_floor.is_shadow_catcher = True
+except:
+    try: sc_floor.cycles.is_shadow_catcher = True
+    except: pass
 
 # ── Camera ─────────────────────────────────────────────────────────────────────
 cam_data = bpy.data.cameras.new('Camera')

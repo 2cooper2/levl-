@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-render_light_fixture.py — 4 pendant styles, sky lighting, transparent bg
+render_light_fixture.py — Industrial pendant: concrete cylinder cap +
+dark bronze wire-mesh cage + Edison bulb glow. Z=up. Transparent bg, AgX.
 Run: blender --background --python scripts/render_light_fixture.py
 """
 import bpy, math, os
@@ -19,12 +20,12 @@ for block in (list(bpy.data.meshes)+list(bpy.data.materials)+
 scene = bpy.context.scene
 scene.unit_settings.system = 'METRIC'
 scene.render.engine = 'CYCLES'
-scene.cycles.samples = 256
+scene.cycles.samples = 512
 scene.cycles.use_denoising = True
 try: scene.cycles.denoiser = 'OPENIMAGEDENOISE'
 except: pass
-scene.render.resolution_x = 1800
-scene.render.resolution_y = 900
+scene.render.resolution_x = 1200
+scene.render.resolution_y = 1200
 scene.render.resolution_percentage = 100
 scene.render.image_settings.file_format = 'PNG'
 scene.render.image_settings.color_mode = 'RGBA'
@@ -47,156 +48,239 @@ out_path = os.path.join(out_dir, 'light-fixture.png')
 scene.render.filepath = out_path
 BL = bpy.app.version
 
-# ── Sky world ─────────────────────────────────────────────────────────────────
-world = bpy.data.worlds.get('World') or bpy.data.worlds.new('World')
-scene.world = world
-world.use_nodes = True
-wt = world.node_tree
-wt.nodes.clear()
-out_w = wt.nodes.new('ShaderNodeOutputWorld')
-bg_w  = wt.nodes.new('ShaderNodeBackground')
-sky   = wt.nodes.new('ShaderNodeTexSky')
-coord = wt.nodes.new('ShaderNodeTexCoord')
+# AgX Medium High Contrast
 try:
-    sky.sky_type = 'NISHITA'
-    sky.sun_elevation = math.radians(44)
-    sky.sun_rotation  = math.radians(70)
-    try: sky.air_density = 1.0
-    except: pass
-    try: sky.dust_density = 0.3
-    except: pass
+    scene.view_settings.view_transform = 'AgX'
+    scene.view_settings.look            = 'AgX - Medium High Contrast'
+    scene.view_settings.exposure        = 0.0
+    scene.view_settings.gamma           = 1.0
 except:
     try:
-        sky.sky_type = 'HOSEK_WILKIE'
-        sky.sun_elevation = math.radians(44)
-        sky.turbidity = 3.0
-    except: pass
-wt.links.new(coord.outputs['Generated'], sky.inputs['Vector'])
-wt.links.new(sky.outputs['Color'], bg_w.inputs['Color'])
-bg_w.inputs['Strength'].default_value = 1.8
-wt.links.new(bg_w.outputs['Background'], out_w.inputs['Surface'])
-log("Sky world set up")
+        scene.view_settings.view_transform = 'AgX'
+        scene.view_settings.look            = 'None'
+    except:
+        try: scene.view_settings.view_transform = 'Filmic'
+        except: pass
+
+# ── World: low neutral GI ─────────────────────────────────────────────────────
+world = bpy.data.worlds.get('World') or bpy.data.worlds.new('World')
+scene.world = world; world.use_nodes = True
+wt = world.node_tree; wt.nodes.clear()
+out_w = wt.nodes.new('ShaderNodeOutputWorld')
+bg_gi = wt.nodes.new('ShaderNodeBackground')
+bg_gi.inputs['Color'].default_value    = (0.72, 0.68, 0.64, 1.0)
+bg_gi.inputs['Strength'].default_value = 0.02
+wt.links.new(bg_gi.outputs['Background'], out_w.inputs['Surface'])
+log("World set up")
 
 def node_in(bsdf, v4, v3, val):
     nm = v4 if BL >= (4,0,0) else v3
     if nm in bsdf.inputs: bsdf.inputs[nm].default_value = val
 
-def make_mat(name, *, base_color, roughness, metallic=0., clearcoat=0., cc_rough=0.10,
-             emission_color=None, emission_str=0.):
-    mat = bpy.data.materials.new(name); mat.use_nodes = True
-    n = mat.node_tree.nodes; l = mat.node_tree.links; n.clear()
-    out  = n.new('ShaderNodeOutputMaterial')
-    bsdf = n.new('ShaderNodeBsdfPrincipled')
-    l.new(bsdf.outputs['BSDF'], out.inputs['Surface'])
-    bsdf.inputs['Base Color'].default_value = (*base_color, 1.)
-    bsdf.inputs['Roughness'].default_value  = roughness
-    bsdf.inputs['Metallic'].default_value   = metallic
-    node_in(bsdf,'Coat Weight','Clearcoat', clearcoat)
-    node_in(bsdf,'Coat Roughness','Clearcoat Roughness', cc_rough)
-    if emission_color and emission_str > 0:
-        ec = 'Emission Color' if BL >= (4,0,0) else 'Emission'
-        if ec in bsdf.inputs: bsdf.inputs[ec].default_value = (*emission_color, 1.)
-        bsdf.inputs['Emission Strength'].default_value = emission_str
-    return mat
-
 def assign_mat(obj, mat):
     obj.data.materials.clear(); obj.data.materials.append(mat)
 
 # ── Materials ─────────────────────────────────────────────────────────────────
-MAT_CORD  = make_mat('Cord',  base_color=(0.05,0.04,0.04), roughness=0.90)
-MAT_BRASS = make_mat('Brass', base_color=(0.70,0.50,0.12), roughness=0.06,
-                      metallic=0.98, clearcoat=0.94, cc_rough=0.03)
-MAT_WHITE = make_mat('White', base_color=(0.92,0.90,0.86), roughness=0.22,
-                      clearcoat=0.62, cc_rough=0.16)
-MAT_WOOD  = make_mat('Wood',  base_color=(0.46,0.28,0.14), roughness=0.56,
-                      clearcoat=0.32, cc_rough=0.26)
-MAT_BULB  = make_mat('Bulb',  base_color=(1.0,0.96,0.82), roughness=0.0,
-                      emission_color=(1.0,0.85,0.55), emission_str=12.0)
 
-def cyl(r, h, loc, mat, verts=32):
-    bpy.ops.mesh.primitive_cylinder_add(radius=r, depth=h, vertices=verts, location=loc)
-    obj = bpy.context.active_object; assign_mat(obj, mat)
+def make_concrete_mat():
+    mat = bpy.data.materials.new('Concrete'); mat.use_nodes = True
+    n = mat.node_tree.nodes; l = mat.node_tree.links; n.clear()
+    out  = n.new('ShaderNodeOutputMaterial')
+    bsdf = n.new('ShaderNodeBsdfPrincipled')
+    l.new(bsdf.outputs['BSDF'], out.inputs['Surface'])
+    coord = n.new('ShaderNodeTexCoord')
+    # Coarse noise for stone/concrete aggregate
+    noise = n.new('ShaderNodeTexNoise')
+    noise.inputs['Scale'].default_value      = 160.0
+    noise.inputs['Detail'].default_value     = 14.0
+    noise.inputs['Roughness'].default_value  = 0.68
+    noise.inputs['Distortion'].default_value = 0.12
+    ramp = n.new('ShaderNodeValToRGB')
+    ramp.color_ramp.interpolation = 'LINEAR'
+    ramp.color_ramp.elements[0].position = 0.0
+    ramp.color_ramp.elements[0].color    = (0.28, 0.27, 0.26, 1.0)
+    el1 = ramp.color_ramp.elements.new(0.42)
+    el1.color = (0.46, 0.44, 0.42, 1.0)
+    ramp.color_ramp.elements[-1].position = 1.0
+    ramp.color_ramp.elements[-1].color   = (0.62, 0.60, 0.57, 1.0)
+    # Fine noise for surface grain bump
+    noise2 = n.new('ShaderNodeTexNoise')
+    noise2.inputs['Scale'].default_value     = 380.0
+    noise2.inputs['Detail'].default_value    = 10.0
+    noise2.inputs['Roughness'].default_value = 0.60
+    bump = n.new('ShaderNodeBump')
+    bump.inputs['Strength'].default_value = 0.60
+    bump.inputs['Distance'].default_value = 0.003
+    l.new(coord.outputs['Object'], noise.inputs['Vector'])
+    l.new(coord.outputs['Object'], noise2.inputs['Vector'])
+    l.new(noise.outputs['Fac'],  ramp.inputs['Fac'])
+    l.new(ramp.outputs['Color'], bsdf.inputs['Base Color'])
+    l.new(noise2.outputs['Fac'], bump.inputs['Height'])
+    l.new(bump.outputs['Normal'], bsdf.inputs['Normal'])
+    bsdf.inputs['Roughness'].default_value = 0.84
+    bsdf.inputs['Metallic'].default_value  = 0.0
+    return mat
+
+def make_cage_mat():
+    mat = bpy.data.materials.new('CageMetal'); mat.use_nodes = True
+    n = mat.node_tree.nodes; l = mat.node_tree.links; n.clear()
+    out  = n.new('ShaderNodeOutputMaterial')
+    bsdf = n.new('ShaderNodeBsdfPrincipled')
+    l.new(bsdf.outputs['BSDF'], out.inputs['Surface'])
+    bsdf.inputs['Base Color'].default_value = (0.018, 0.018, 0.020, 1.0)
+    bsdf.inputs['Roughness'].default_value  = 0.90
+    bsdf.inputs['Metallic'].default_value   = 0.0
+    for spec in ('Specular IOR Level', 'Specular'):
+        if spec in bsdf.inputs: bsdf.inputs[spec].default_value = 0.0; break
+    node_in(bsdf,'Coat Weight','Clearcoat', 0.65)
+    node_in(bsdf,'Coat Roughness','Clearcoat Roughness', 0.05)
+    return mat
+
+def make_ring_mat():
+    mat = bpy.data.materials.new('Ring'); mat.use_nodes = True
+    n = mat.node_tree.nodes; l = mat.node_tree.links; n.clear()
+    out  = n.new('ShaderNodeOutputMaterial')
+    bsdf = n.new('ShaderNodeBsdfPrincipled')
+    l.new(bsdf.outputs['BSDF'], out.inputs['Surface'])
+    bsdf.inputs['Base Color'].default_value = (0.016, 0.016, 0.018, 1.0)
+    bsdf.inputs['Roughness'].default_value  = 0.90
+    bsdf.inputs['Metallic'].default_value   = 0.0
+    for spec in ('Specular IOR Level', 'Specular'):
+        if spec in bsdf.inputs: bsdf.inputs[spec].default_value = 0.0; break
+    node_in(bsdf,'Coat Weight','Clearcoat', 0.80)
+    node_in(bsdf,'Coat Roughness','Clearcoat Roughness', 0.04)
+    return mat
+
+def make_bulb_mat():
+    mat = bpy.data.materials.new('Bulb'); mat.use_nodes = True
+    n = mat.node_tree.nodes; l = mat.node_tree.links; n.clear()
+    out  = n.new('ShaderNodeOutputMaterial')
+    bsdf = n.new('ShaderNodeBsdfPrincipled')
+    l.new(bsdf.outputs['BSDF'], out.inputs['Surface'])
+    bsdf.inputs['Base Color'].default_value = (1.0, 0.92, 0.70, 1.0)
+    bsdf.inputs['Roughness'].default_value  = 0.0
+    ec = 'Emission Color' if BL >= (4,0,0) else 'Emission'
+    if ec in bsdf.inputs: bsdf.inputs[ec].default_value = (1.0, 0.52, 0.10, 1.0)
+    bsdf.inputs['Emission Strength'].default_value = 22.0
+    return mat
+
+# Cap — deep matte black, no metallic, fully absorbs light
+def make_black_cap_mat():
+    mat = bpy.data.materials.new('Cap'); mat.use_nodes = True
+    n = mat.node_tree.nodes; l = mat.node_tree.links; n.clear()
+    out  = n.new('ShaderNodeOutputMaterial')
+    bsdf = n.new('ShaderNodeBsdfPrincipled')
+    l.new(bsdf.outputs['BSDF'], out.inputs['Surface'])
+    bsdf.inputs['Base Color'].default_value = (0.004, 0.004, 0.005, 1.0)
+    bsdf.inputs['Roughness'].default_value  = 0.40   # semi-gloss black
+    bsdf.inputs['Metallic'].default_value   = 0.0
+    # Subtle surface bump so it reads as a physical object, not a void
+    coord = n.new('ShaderNodeTexCoord')
+    noise = n.new('ShaderNodeTexNoise')
+    noise.inputs['Scale'].default_value     = 200.0
+    noise.inputs['Detail'].default_value    = 8.0
+    noise.inputs['Roughness'].default_value = 0.6
+    bump  = n.new('ShaderNodeBump')
+    bump.inputs['Strength'].default_value  = 0.30
+    bump.inputs['Distance'].default_value  = 0.002
+    l.new(coord.outputs['Object'], noise.inputs['Vector'])
+    l.new(noise.outputs['Fac'],    bump.inputs['Height'])
+    l.new(bump.outputs['Normal'],  bsdf.inputs['Normal'])
+    return mat
+
+MAT_CONCRETE = make_black_cap_mat()
+MAT_CAGE     = make_cage_mat()
+MAT_RING     = make_ring_mat()
+MAT_BULB     = make_bulb_mat()
+
+# Cord material
+MAT_CORD = bpy.data.materials.new('Cord'); MAT_CORD.use_nodes = True
+_cn = MAT_CORD.node_tree.nodes; _cn.clear()
+_co = _cn.new('ShaderNodeOutputMaterial'); _cb = _cn.new('ShaderNodeBsdfPrincipled')
+MAT_CORD.node_tree.links.new(_cb.outputs['BSDF'], _co.inputs['Surface'])
+_cb.inputs['Base Color'].default_value = (0.004, 0.004, 0.005, 1.0)
+_cb.inputs['Roughness'].default_value  = 0.38
+
+# ── Geometry — Z is UP, pendant hangs downward ────────────────────────────────
+# All cylinders: location=(x=0, y=0, z=center_height)
+TOP_Z     =  0.50   # cord top point
+CORD_LEN  =  0.36
+CAP_R     =  0.054  # concrete cap radius
+CAP_H     =  0.092  # concrete cap height
+RING_H    =  0.015
+RING_R    =  0.057
+CAGE_R    =  0.073  # cage radius
+CAGE_H    =  0.150  # cage height
+BULB_R    =  0.026
+
+CAP_Z   = TOP_Z - CORD_LEN - CAP_H/2
+RING_Z  = CAP_Z - CAP_H/2 - RING_H/2
+CAGE_Z  = RING_Z - RING_H/2 - CAGE_H/2
+BULB_Z  = CAGE_Z + 0.022   # upper portion of cage
+
+def cyl(r, h, z, mat, verts=48):
+    bpy.ops.mesh.primitive_cylinder_add(radius=r, depth=h, vertices=verts,
+                                        location=(0, 0, z))
+    obj = bpy.context.active_object
     for p in obj.data.polygons: p.use_smooth = True
+    assign_mat(obj, mat)
     return obj
 
-# ── Pendant 1: White flared cone (left) ───────────────────────────────────────
-def pendant_cone(cx, top_z, cord_len):
-    cyl(0.005, cord_len, (cx, 0, top_z-cord_len/2), MAT_CORD, 8)
-    # Brass canopy
-    cyl(0.046, 0.036, (cx, 0, top_z-cord_len), MAT_BRASS, 20)
-    # Shade — each section is a truncated cone approximated as cylinder
-    # Profile: (radius_at_bottom, delta_z_from_top)
-    st = top_z - cord_len - 0.018   # shade top z
-    segs = [(0.050, 0.052), (0.108, 0.070), (0.172, 0.160), (0.228, 0.268), (0.256, 0.360)]
-    for i in range(len(segs)-1):
-        r0,dz0 = segs[i]; r1,dz1 = segs[i+1]
-        r_avg = (r0+r1)/2; ht = dz1-dz0
-        cyl(r_avg, ht, (cx, 0, st-(dz0+dz1)/2), MAT_WHITE)
-    # Bulb glow
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.026, segments=14, ring_count=8,
-        location=(cx, 0, st-0.200))
-    assign_mat(bpy.context.active_object, MAT_BULB)
+# Cord
+cyl(0.0026, CORD_LEN, TOP_Z - CORD_LEN/2, MAT_CORD, verts=12)
 
-# ── Pendant 2: Glass globe (center-left) ──────────────────────────────────────
-def pendant_globe(cx, top_z, cord_len):
-    cyl(0.004, cord_len, (cx, 0, top_z-cord_len/2), MAT_CORD, 8)
-    # Brass neck
-    cyl(0.028, 0.044, (cx, 0, top_z-cord_len), MAT_BRASS, 18)
-    globe_z = top_z - cord_len - 0.044 - 0.104
-    # Globe — smooth sphere, glossy to show sky reflections
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.140, segments=36, ring_count=22,
-        location=(cx, 0, globe_z))
-    globe = bpy.context.active_object
-    for p in globe.data.polygons: p.use_smooth = True
-    # Slightly translucent-looking with clearcoat
-    mat_globe = make_mat('Globe', base_color=(0.90,0.94,0.90), roughness=0.02,
-                          metallic=0.0, clearcoat=0.95, cc_rough=0.01)
-    assign_mat(globe, mat_globe)
-    # Edison bulb inside
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.040, segments=12, ring_count=7,
-        location=(cx, 0, globe_z+0.010))
-    assign_mat(bpy.context.active_object, MAT_BULB)
+# Cord top cap (ceiling mount disc — slightly larger)
+cyl(0.044, 0.010, TOP_Z - 0.005, MAT_RING, verts=32)
 
-# ── Pendant 3: Brass stacked discs (center-right) ─────────────────────────────
-def pendant_brass_disc(cx, top_z, cord_len):
-    cyl(0.004, cord_len, (cx, 0, top_z-cord_len/2), MAT_CORD, 8)
-    # Stacked graduated brass discs
-    z = top_z - cord_len
-    discs = [(0.220, 0.022), (0.172, 0.020), (0.124, 0.018), (0.080, 0.016)]
-    gap = 0.003
-    for r, h in discs:
-        cyl(r, h, (cx, 0, z-h/2), MAT_BRASS)
-        z -= h + gap
-    # Center pin connecting discs
-    pin_h = (top_z - cord_len) - z
-    cyl(0.010, pin_h, (cx, 0, (top_z-cord_len+z)/2), MAT_BRASS, 12)
-    # Warm glow at bottom
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.016, segments=10, ring_count=6,
-        location=(cx, 0, z+0.010))
-    assign_mat(bpy.context.active_object, MAT_BULB)
+# Concrete cap cylinder
+cyl(CAP_R, CAP_H, CAP_Z, MAT_CONCRETE, verts=64)
 
-# ── Pendant 4: Wood dome (right) ──────────────────────────────────────────────
-def pendant_dome(cx, top_z, cord_len):
-    cyl(0.004, cord_len, (cx, 0, top_z-cord_len/2), MAT_CORD, 8)
-    # Brass canopy
-    cyl(0.040, 0.034, (cx, 0, top_z-cord_len), MAT_BRASS, 18)
-    st = top_z - cord_len - 0.017
-    segs = [(0.044, 0.000), (0.106, 0.060), (0.154, 0.130),
-            (0.175, 0.212), (0.162, 0.302), (0.122, 0.370), (0.056, 0.400)]
-    for i in range(len(segs)-1):
-        r0,dz0 = segs[i]; r1,dz1 = segs[i+1]
-        r_avg = (r0+r1)/2; ht = dz1-dz0
-        cyl(r_avg, ht, (cx, 0, st-(dz0+dz1)/2), MAT_WOOD)
-    # Bulb glow
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.022, segments=12, ring_count=7,
-        location=(cx, 0, st-0.215))
-    assign_mat(bpy.context.active_object, MAT_BULB)
+# Connector ring
+cyl(RING_R, RING_H, RING_Z, MAT_RING, verts=48)
 
-# ── Place all 4 pendants, staggered heights ────────────────────────────────────
-pendant_cone(      -0.60, 0.88, 0.26)
-pendant_globe(     -0.16, 0.88, 0.44)
-pendant_brass_disc( 0.10, 0.88, 0.18)
-pendant_dome(       0.54, 0.88, 0.30)
+# ── Cage: individual vertical rods arranged in a circle — real gaps between bars ─
+N_BARS = 24       # number of vertical rods
+BAR_R  = 0.0055   # radius of each rod → visible gap between bars
+for i in range(N_BARS):
+    angle = 2 * math.pi * i / N_BARS
+    bx = CAGE_R * math.cos(angle)
+    by = CAGE_R * math.sin(angle)
+    bpy.ops.mesh.primitive_cylinder_add(radius=BAR_R, depth=CAGE_H,
+                                        vertices=10, location=(bx, by, CAGE_Z))
+    bar = bpy.context.active_object
+    for p in bar.data.polygons: p.use_smooth = True
+    assign_mat(bar, MAT_CAGE)
+
+# Top ring cap — sharp border, bevel for depth
+bpy.ops.mesh.primitive_cylinder_add(radius=CAGE_R + 0.006, depth=0.012,
+                                    vertices=64, location=(0, 0, CAGE_Z + CAGE_H/2 - 0.006))
+top_ring = bpy.context.active_object
+bpy.context.view_layer.objects.active = top_ring
+bpy.ops.object.modifier_add(type='BEVEL')
+top_ring.modifiers[-1].width = 0.002; top_ring.modifiers[-1].segments = 3
+bpy.ops.object.modifier_apply(modifier=top_ring.modifiers[-1].name)
+for p in top_ring.data.polygons: p.use_smooth = True
+assign_mat(top_ring, MAT_RING)
+
+# Bottom ring cap
+bpy.ops.mesh.primitive_cylinder_add(radius=CAGE_R + 0.006, depth=0.012,
+                                    vertices=64, location=(0, 0, CAGE_Z - CAGE_H/2 + 0.006))
+bot_ring = bpy.context.active_object
+bpy.context.view_layer.objects.active = bot_ring
+bpy.ops.object.modifier_add(type='BEVEL')
+bot_ring.modifiers[-1].width = 0.002; bot_ring.modifiers[-1].segments = 3
+bpy.ops.object.modifier_apply(modifier=bot_ring.modifiers[-1].name)
+for p in bot_ring.data.polygons: p.use_smooth = True
+assign_mat(bot_ring, MAT_RING)
+
+# Edison bulb — elongated teardrop shape
+bpy.ops.mesh.primitive_uv_sphere_add(radius=BULB_R, segments=28, ring_count=18,
+                                     location=(0, 0, BULB_Z))
+bulb = bpy.context.active_object
+bulb.scale = (1.0, 1.0, 1.75)   # elongate vertically into teardrop
+bpy.ops.object.transform_apply(scale=True)
+for p in bulb.data.polygons: p.use_smooth = True
+assign_mat(bulb, MAT_BULB)
 
 log("Geometry done")
 
@@ -204,32 +288,33 @@ log("Geometry done")
 def add_area(loc, energy, size, color, rot_xyz):
     bpy.ops.object.light_add(type='AREA', location=loc)
     L = bpy.context.active_object
-    L.data.energy = energy; L.data.size = size; L.data.color = color
-    try: L.data.use_shadow = True
+    L.data.energy=energy; L.data.size=size; L.data.color=color
+    try: L.data.use_shadow=True
     except: pass
-    L.rotation_euler = Euler(tuple(math.radians(d) for d in rot_xyz), 'XYZ')
+    L.rotation_euler=Euler(tuple(math.radians(d) for d in rot_xyz),'XYZ')
 
-add_area((-2.6,-2.0, 2.2), 1300, 3.0, (1.0,0.97,0.90), (32,0,-28))
-add_area(( 2.6,-1.8, 0.2),  350, 4.0, (0.90,0.93,1.0),  (6,0,38))
-add_area(( 0.0,-1.5, 4.0),  600, 3.0, (1.0,0.97,0.92), (76,0,0))
-add_area(( 0.5, 2.8, 0.6),  480, 1.2, (0.85,0.88,1.0),  (-50,0,12))
+# Key: more frontal, less side — reduces harsh cylinder shadow
+# Subtle key — just catches the cap edge, NOT flooding the dark cage
+add_area((-0.8,-1.8, 1.6), 220, 0.3, (1.00,0.97,0.90), (28, 0,-12))
 
-# Warm point light — bulb warmth
-bpy.ops.object.light_add(type='POINT', location=(-0.02, -0.5, 0.35))
+# Warm point light inside cage — Edison filament glow illuminates cage from within
+bpy.ops.object.light_add(type='POINT', location=(0, 0, BULB_Z))
 pt = bpy.context.active_object
-pt.data.energy = 280; pt.data.color = (1.0,0.80,0.42)
-try: pt.data.radius = 0.35
+pt.data.energy = 220; pt.data.color = (1.0, 0.58, 0.14)  # deep amber Edison glow
+try: pt.data.radius = 0.030
 except:
-    try: pt.data.shadow_soft_size = 0.35
+    try: pt.data.shadow_soft_size = 0.030
     except: pass
 
-# ── Camera ────────────────────────────────────────────────────────────────────
+# ── Camera: slightly below fixture center, looking slightly up ────────────────
 cam_data = bpy.data.cameras.new('Camera')
-cam_data.lens = 68; cam_data.clip_start = 0.01; cam_data.clip_end = 50.
+cam_data.lens = 65; cam_data.clip_start=0.01; cam_data.clip_end=50.
 cam_obj  = bpy.data.objects.new('Camera', cam_data)
 bpy.context.collection.objects.link(cam_obj); scene.camera = cam_obj
-cam_pos  = Vector((-0.02,-3.20, 0.26))
-look_at  = Vector((-0.02,  0.0, 0.26))
+# Look at the middle of the fixture (between cap and cage)
+look_z   = (CAP_Z + CAGE_Z) / 2
+cam_pos  = Vector((0.0, -1.45, look_z - 0.04))
+look_at  = Vector((0.0,  0.00, look_z))
 cam_obj.location = cam_pos
 cam_obj.rotation_euler = (look_at - cam_pos).to_track_quat('-Z','Y').to_euler()
 

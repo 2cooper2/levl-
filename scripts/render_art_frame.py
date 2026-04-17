@@ -26,12 +26,12 @@ scene.cycles.samples = 400
 scene.cycles.use_denoising = True
 try: scene.cycles.denoiser = 'OPENIMAGEDENOISE'
 except: pass
-scene.render.resolution_x = 1800
-scene.render.resolution_y = 900
+scene.render.resolution_x = 1200
+scene.render.resolution_y = 1200
 scene.render.resolution_percentage = 100
 scene.render.image_settings.file_format = 'PNG'
-scene.render.image_settings.color_mode = 'RGB'
-scene.render.film_transparent = False
+scene.render.image_settings.color_mode = 'RGBA'
+scene.render.film_transparent = True
 
 try:
     cprefs = bpy.context.preferences.addons['cycles'].preferences
@@ -52,6 +52,20 @@ os.makedirs(tex_dir, exist_ok=True)
 os.makedirs(os.path.dirname(out_path), exist_ok=True)
 scene.render.filepath = out_path
 BL = bpy.app.version
+
+# AgX Medium High Contrast
+try:
+    scene.view_settings.view_transform = 'AgX'
+    scene.view_settings.look            = 'AgX - Medium High Contrast'
+    scene.view_settings.exposure        = 0.0
+    scene.view_settings.gamma           = 1.0
+except:
+    try:
+        scene.view_settings.view_transform = 'AgX'
+        scene.view_settings.look            = 'None'
+    except:
+        try: scene.view_settings.view_transform = 'Filmic'
+        except: pass
 
 # ── Polyhaven texture downloader ──────────────────────────────────────────────
 def dl(asset_id, res='2k'):
@@ -264,6 +278,16 @@ bb.dimensions = Vector((inner_w + FF*2.5, 0.005, inner_h + FF*2.5))
 bb.data.materials.clear(); bb.data.materials.append(mat_back)
 
 log("Frame geometry done")
+
+# Shadow catcher — wall plane behind frame, catches cast shadows
+bpy.ops.mesh.primitive_plane_add(size=5.0, location=(FX, 0.006, FZ))
+sc_wall = bpy.context.active_object
+sc_wall.rotation_euler = Euler((math.radians(90), 0, 0), 'XYZ')
+try:
+    sc_wall.is_shadow_catcher = True
+except AttributeError:
+    try: sc_wall.cycles.is_shadow_catcher = True
+    except: pass
 
 # ── Lights ─────────────────────────────────────────────────────────────────────
 def add_area(loc, energy, size, color, rot_xyz):

@@ -1,15 +1,6 @@
 "use client"
 
-import {
-  memo,
-  useState,
-  useEffect,
-  useRef,
-  Suspense,
-  Component,
-  type ReactNode,
-} from "react"
-import dynamic from "next/dynamic"
+import { memo, useState } from "react"
 
 // ─── Scope ───────────────────────────────────────────────────────────────────
 
@@ -34,25 +25,6 @@ export function isMountItem(option: string): boolean {
   return MOUNT_ITEMS.has(option)
 }
 
-// ─── WebGL error boundary ─────────────────────────────────────────────────────
-
-class MountWebGLBoundary extends Component<
-  { children: ReactNode },
-  { failed: boolean }
-> {
-  state = { failed: false }
-  static getDerivedStateFromError() { return { failed: true } }
-  render() {
-    if (this.state.failed) return null
-    return this.props.children
-  }
-}
-
-const Option3DImpl = dynamic(
-  () => import("./option-3d-impl").then(m => ({ default: m.Option3DImpl })),
-  { ssr: false }
-)
-
 // ─── MountHybridPreview ───────────────────────────────────────────────────────
 
 export const MountHybridPreview = memo(function MountHybridPreview({
@@ -62,64 +34,25 @@ export const MountHybridPreview = memo(function MountHybridPreview({
   option: string
   className?: string
 }) {
-  const [canvasMounted, setCanvasMounted] = useState(true)
-  const [frameActive, setFrameActive]     = useState(true)
-  const [imgLoaded, setImgLoaded]         = useState(false)
-  const [imgFailed, setImgFailed]         = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
-
+  const [imgLoaded, setImgLoaded] = useState(false)
   const renderSrc = MOUNT_RENDERS[option]
 
-  useEffect(() => {
-    const el = containerRef.current
-    if (!el) return
-    const isMobile = window.innerWidth < 768
-    const farMargin = isMobile ? "500px 0px" : "2500px 0px"
-    const farObs = new IntersectionObserver(
-      ([entry]) => setCanvasMounted(entry.isIntersecting),
-      { rootMargin: farMargin }
-    )
-    const exactObs = new IntersectionObserver(
-      ([entry]) => setFrameActive(entry.isIntersecting),
-      { rootMargin: "80px 0px" }
-    )
-    farObs.observe(el)
-    exactObs.observe(el)
-    return () => { farObs.disconnect(); exactObs.disconnect() }
-  }, [])
+  if (!renderSrc) return null
 
   return (
-    <div
-      ref={containerRef}
-      className={`relative w-full h-full ${className ?? ""}`}
-    >
-      {/* Layer 1: Live WebGL fallback — shows until/unless Blender PNG loads */}
-      {canvasMounted && !imgLoaded && (
-        <div className="absolute inset-0">
-          <MountWebGLBoundary>
-            <Suspense fallback={null}>
-              <Option3DImpl option={option} frameloop={frameActive ? "always" : "never"} />
-            </Suspense>
-          </MountWebGLBoundary>
-        </div>
-      )}
-
-      {/* Layer 2: Blender PNG — crossfades in when available */}
-      {renderSrc && !imgFailed && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={renderSrc}
-          alt={option}
-          className="absolute inset-0 w-full h-full pointer-events-none select-none"
-          style={{
-            objectFit: "cover",
-            opacity: imgLoaded ? 1 : 0,
-            transition: "opacity 0.55s ease",
-          }}
-          onLoad={() => setImgLoaded(true)}
-          onError={() => setImgFailed(true)}
-        />
-      )}
+    <div className={`relative w-full h-full ${className ?? ""}`}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={renderSrc}
+        alt={option}
+        className="absolute inset-0 w-full h-full pointer-events-none select-none"
+        style={{
+          objectFit: "contain",
+          opacity: imgLoaded ? 1 : 0,
+          transition: "opacity 0.55s ease",
+        }}
+        onLoad={() => setImgLoaded(true)}
+      />
     </div>
   )
 })

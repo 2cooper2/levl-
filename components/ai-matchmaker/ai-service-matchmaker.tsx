@@ -1090,7 +1090,7 @@ const MessageItem = memo(
                 {/* Check if any options have 3D previews */}
                 {message.options.some(opt => THREE_D_OPTIONS.has(opt)) ? (
                   // No translateZ/backfaceVisibility here — those fight the Canvas WebGL layer
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {message.options.map((option, index) => {
                       const has3D = THREE_D_OPTIONS.has(option)
                       return (
@@ -1112,7 +1112,7 @@ const MessageItem = memo(
                 >
 
                   {has3D ? (
-                    <div className="w-full h-48 sm:h-52 overflow-hidden relative">
+                    <div className="w-full aspect-square overflow-hidden relative">
                       {isMountItem(option) ? (
                         // Mount items: Blender path-traced PNG + WebGL fallback
                         <MountHybridPreview option={option} className="w-full h-full" />
