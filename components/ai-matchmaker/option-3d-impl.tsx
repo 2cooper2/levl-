@@ -3,7 +3,7 @@
 import { useRef, useMemo, useState, useEffect, type JSX } from "react"
 import Image from "next/image"
 import { Canvas, useFrame } from "@react-three/fiber"
-import { ContactShadows, Environment, GradientTexture, PerspectiveCamera, RoundedBox } from "@react-three/drei"
+import { ContactShadows, Environment, GradientTexture, MeshTransmissionMaterial, PerspectiveCamera, RoundedBox } from "@react-three/drei"
 import { EffectComposer, Bloom, N8AO, SMAA } from "@react-three/postprocessing"
 import * as THREE from "three"
 
@@ -200,7 +200,6 @@ function makeBrickMaps(S: number): WallMaps {
   const heightFn = (x: number, y: number) => {
     const { row, col, lx, ly, mortar } = brickInfo(x, y)
     if (mortar) return 0.06
-    // Surface micro-variation: FBM orange-peel + random chip pits
     const micro = fbm(x / S * 32, y / S * 32, 4) * 0.10
     const chip  = hash(Math.floor(lx / 3) + row * 97, Math.floor(ly / 3) + col * 137) < 0.04 ? 0.14 : 0
     return 0.76 + micro - chip
@@ -208,14 +207,12 @@ function makeBrickMaps(S: number): WallMaps {
   const colorFn = (x: number, y: number, _h: number): [number,number,number] => {
     const { row, col, lx, ly, mortar } = brickInfo(x, y)
     if (mortar) {
-      // Darker neutral grey mortar
       const mv = (118 + hash(x * 3, y * 5) * 18) | 0
       return [mv, mv - 2, mv - 3]
     }
     const ci  = Math.floor(hash(row * 127 + 3, col * 251 + 7) * 6)
     const [br, bg, bb] = PALETTE[ci]
     const j   = (hash(row * 53, col * 89) * 40 - 20) | 0
-    // Slight tonal variation from FBM (firing variation)
     const fire = (fbm(x / S * 8, y / S * 8, 3) * 20 - 10) | 0
     const ny  = ly / BH
     const shadow = ny < 0.10 ? (1 - ny / 0.10) * 0.38 : 0
@@ -228,7 +225,6 @@ function makeBrickMaps(S: number): WallMaps {
   }
   const roughFn = (x: number, y: number, _h: number) => {
     const { mortar } = brickInfo(x, y)
-    // Bricks have significant surface roughness variation — chips and grit
     return mortar ? 0.94 : 0.68 + hash(x * 5, y * 7) * 0.24
   }
   return buildPBRMaps(S, 18, heightFn, colorFn, roughFn)
@@ -240,61 +236,30 @@ function makeBrickMaps(S: number): WallMaps {
  * organic color blotches for moisture variation, fine aggregate micro-texture.
  */
 function makeConcreteMap(S: number): WallMaps {
-  // Groove half-width and tie hole radius scale with texture size
-  const GW  = Math.max(3, (S / 170) | 0)   // groove width (6px @ 1024)
-  const TR  = Math.max(12, (S / 40) | 0)   // tie hole radius (25px @ 1024)
+  const GW = Math.max(3, (S / 170) | 0)   // groove width
 
-  // Explicit seam positions — irregular spacing, not modulo
-  const VS = [0.52 * S, 0.80 * S]              // 2 vertical seams — both past side face UV range (0–0.46)
-  const HS = [S / 3, (S / 3) * 2]              // 2 horizontal seams — evenly spaced thirds
+  // Horizontal seams only — evenly spaced thirds
+  const HS = [S / 3, (S / 3) * 2]
 
-  // Distance to nearest seam line (vertical or horizontal)
-  const seamDist = (x: number, y: number) => {
-    const dx = Math.min(...VS.map(sx => Math.abs(x - sx)))
-    const dy = Math.min(...HS.map(sy => Math.abs(y - sy)))
-    return Math.min(dx, dy)
-  }
-
-  // Tie holes at every seam intersection
-  const tieDist = (x: number, y: number) => {
-    let best = 1e9
-    for (const sx of VS)
-      for (const sy of HS) {
-        const d = Math.sqrt((x - sx) ** 2 + (y - sy) ** 2)
-        if (d < best) best = d
-      }
-    return best
-  }
+  const seamDist = (y: number) => Math.min(...HS.map(sy => Math.abs(y - sy)))
 
   const heightFn = (x: number, y: number) => {
-    const sd = seamDist(x, y)
-    const td = tieDist(x, y)
-    // V-groove seam — kept shallow
+    const sd = seamDist(y)
+    // V-groove horizontal seam — shallow
     const sH = sd < GW * 3 ? smoothstep(Math.min(1, sd / GW)) * 0.97 : 1.0
-    // Circular tie hole — deep prominent depression
-    const tH = td < TR ? smoothstep(td / TR) * 0.12 : 1.0
     // Fine aggregate micro-relief on panel face
     const fine = fbm(x / S * 30, y / S * 30, 2) * 0.07
-    const face = Math.min(sH, tH)
-    return face + (face > 0.70 ? fine : 0)
+    return sH + (sH > 0.70 ? fine : 0)
   }
 
   const colorFn = (x: number, y: number, _h: number): [number, number, number] => {
-    const base = 134
-    // Dominant large blotch variation — moisture/pour tone difference across panels
-    const blotch  = (fbm(x / S * 1.1, y / S * 1.1, 5) - 0.50) * 54
-    // Moisture-stain patches — only darkens (asymmetric)
-    const moist   = Math.max(0, fbm(x / S * 2.6, y / S * 2.6, 3) - 0.54) * -38
-    // Fine aggregate noise
-    const grain   = (hash(x, y) - 0.50) * 7
-    // Seam shadow — wider dark halo than groove itself
-    const sd      = seamDist(x, y)
-    const sDk     = sd < GW * 5 ? (1 - Math.min(1, sd / (GW * 5))) * 28 : 0
-    // Tie hole shadow with subtle bright rim
-    const td      = tieDist(x, y)
-    const tDk     = td < TR + 14 ? Math.max(0, 1 - td / (TR + 14)) * 75 : 0
-    const rim     = (td > TR * 0.78 && td < TR * 1.25) ? 16 : 0
-    const v = (base + blotch + moist + grain - sDk - tDk + rim) | 0
+    const base   = 134
+    const blotch = (fbm(x / S * 1.1, y / S * 1.1, 5) - 0.50) * 54
+    const moist  = Math.max(0, fbm(x / S * 2.6, y / S * 2.6, 3) - 0.54) * -38
+    const grain  = (hash(x, y) - 0.50) * 7
+    const sd     = seamDist(y)
+    const sDk    = sd < GW * 5 ? (1 - Math.min(1, sd / (GW * 5))) * 28 : 0
+    const v = (base + blotch + moist + grain - sDk) | 0
     return [Math.max(0, Math.min(255, v)), Math.max(0, Math.min(255, v - 2)), Math.max(0, Math.min(255, v - 5))]
   }
 
@@ -348,41 +313,39 @@ function makeStoneMaps(S: number): WallMaps {
       const { d1, d2, id } = voronoi(wu, wv, SX, SY)
       const i = (y * S + x) * 3; VOR[i] = d1; VOR[i+1] = d2; VOR[i+2] = id
     }
-  // MG controls mortar width — larger = wider mortar groove
-  const MG = 0.13
+  // MG controls mortar width — larger = wider joints
+  const MG = 0.26
+  // t=0 → full mortar, t=1 → full stone — smoothstep gives anti-aliased edge
+  const edgeT = (i: number) => smoothstep(Math.min(1, ((VOR[i+1] - VOR[i]) / MG) / 0.45))
   const heightFn = (x: number, y: number) => {
-    const i    = (y * S + x) * 3
-    const edge = Math.min(1, (VOR[i+1] - VOR[i]) / MG)
-    const t    = smoothstep(smoothstep(Math.min(1, edge / 0.72)))
-    // Layered surface variation on stone faces — like plaster but less extreme
+    const i = (y * S + x) * 3
+    const t = edgeT(i)
     const large = Math.pow(fbm(x / S * 3.5, y / S * 3.5, 4), 0.72) * 0.52
     const med   = fbm(x / S * 8.0, y / S * 8.0, 3) * 0.28
     const fine  = fbm(x / S * 18,  y / S * 18,  2) * 0.12
-    // Only apply surface variation on stone face (t), not into mortar
-    const surf  = (large + med + fine) * t
-    const stoneH = 0.36 + surf
-    return t * stoneH + (1 - t) * edge * 0.18
+    const stoneH = 0.72 + (large + med + fine) * 0.22
+    // Smooth blend: mortar recessed at 0.06, stone at stoneH
+    return 0.06 * (1 - t) + stoneH * t
   }
   const colorFn = (x: number, y: number, _h: number): [number,number,number] => {
-    const i      = (y * S + x) * 3
-    const edge   = (VOR[i+1] - VOR[i]) / MG
-    const t      = smoothstep(Math.min(1, edge / 0.5))
-    if (t < 0.5) {
-      const mv = (92 + edge * 55) | 0
-      return [mv, mv - 3, mv - 7]
-    }
-    // Re-hash the id through two independent seeds to break smooth-id clustering
+    const i = (y * S + x) * 3
+    const t = edgeT(i)
+    const mv = (82 + hash(x * 3, y * 5) * 14) | 0
+    const mortarR = mv, mortarG = mv - 2, mortarB = mv - 4
     const scramble = hash(Math.floor(VOR[i+2] * 1000) * 7 + 3, Math.floor(VOR[i+2] * 1000) * 13 + 97)
     const base = 108 + scramble * 58
     const surf = fbm(x / S * 10, y / S * 10, 3) * 24
-    const v    = (base + surf) | 0
-    return [Math.min(255, v), Math.min(255, v - 9), Math.min(255, v - 16)]
+    const sv = (base + surf) | 0
+    // Smooth blend between mortar and stone color
+    const r = (mortarR + (sv       - mortarR) * t) | 0
+    const g = (mortarG + (sv - 9   - mortarG) * t) | 0
+    const b = (mortarB + (sv - 16  - mortarB) * t) | 0
+    return [Math.min(255, Math.max(0, r)), Math.min(255, Math.max(0, g)), Math.min(255, Math.max(0, b))]
   }
   const roughFn = (x: number, y: number, _h: number) => {
-    const i    = (y * S + x) * 3
-    const edge = (VOR[i+1] - VOR[i]) / MG
-    // Organic roughness variation via FBM — no grainy hash pattern
-    return edge < 0.13 ? 0.96 : 0.68 + fbm(x / S * 5, y / S * 5, 2) * 0.22
+    const i = (y * S + x) * 3
+    const t = edgeT(i)
+    return 0.94 * (1 - t) + (0.68 + fbm(x / S * 5, y / S * 5, 2) * 0.22) * t
   }
   return buildPBRMaps(S, 68, heightFn, colorFn, roughFn)
 }
@@ -412,26 +375,26 @@ const WALL_CFG: Record<WallMaterial, WallCfg> = {
   brick:    { builder: makeBrickMaps,   dispScale: 0.09,  normScale: 1.8, texSize: 512, sideTint: "#7a3420", sideRough: 0.92 },
   concrete: { builder: makeConcreteMap, dispScale: 0.055, normScale: 1.8, texSize: 1024, sideTint: "#787872", sideRough: 0.94 },
   plaster:  { builder: makePlasterMaps, dispScale: 0.28,  normScale: 4.2, texSize: 512, sideTint: "#b09a84", sideRough: 0.97 },
-  stone:    { builder: makeStoneMaps,   dispScale: 0.18,  normScale: 3.4, texSize: 1024, sideTint: "#686058", sideRough: 0.95 },
+  stone:    { builder: makeStoneMaps,   dispScale: 0.14,  normScale: 5.0, texSize: 512,  sideTint: "#686058", sideRough: 0.95 },
   drywall:  { builder: makeDrywallMaps, dispScale: 0.016, normScale: 0.6, texSize: 512, sideTint: "#9e9a94", sideRough: 0.96 },
 }
 
+// Module-level cache — survives React unmount/remount cycles (IntersectionObserver)
+const wallMapsCache = new Map<string, WallMaps>()
+
 function useWallPBR(material: WallMaterial) {
   const cfg = WALL_CFG[material]
-  // Halve texture size on mobile to prevent GPU memory exhaustion
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768
   const texSize = isMobile ? Math.max(256, cfg.texSize >> 1) : cfg.texSize
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const maps = useMemo(() => cfg.builder(texSize), [material])
-  // Dispose GPU textures when this card unmounts
-  useEffect(() => {
-    return () => {
-      maps.albedo.dispose()
-      maps.displacement.dispose()
-      maps.normal.dispose()
-      maps.roughness.dispose()
-    }
-  }, [maps])
+  const maps = useMemo(() => {
+    const key = `${material}-${texSize}`
+    const cached = wallMapsCache.get(key)
+    if (cached) return cached
+    const built = cfg.builder(texSize)
+    wallMapsCache.set(key, built)
+    return built
+  }, [material, texSize])
+  // Cached textures are never disposed — reused on every remount
   return { maps, dispScale: cfg.dispScale, normScale: cfg.normScale, sideTint: cfg.sideTint, sideRough: cfg.sideRough }
 }
 
@@ -873,50 +836,94 @@ function MountLookAtRig({ y = 0.0 }: { y?: number }) {
  * Matches the wall-type aesthetic: same #d6ccea background, same sphere cyclorama.
  */
 function MountWall() {
-  return (
-    <>
-      {/* Lavender background — matches wall type cards exactly */}
-      <color attach="background" args={["#d6ccea"]} />
-      {/* Sphere interior = seamless cyclorama — no visible wall/floor seam */}
-      <mesh>
-        <sphereGeometry args={[7, 32, 18]} />
-        <meshStandardMaterial color="#c8bedf" roughness={1} metalness={0} side={THREE.BackSide} envMapIntensity={0} />
-      </mesh>
-      {/* Backing wall — subtle lavender-tinted painted surface behind objects */}
-      <mesh receiveShadow position={[0, 0.2, -0.14]}>
-        <boxGeometry args={[100, 100, 0.10]} />
-        <meshPhysicalMaterial color="#cfc8e8" roughness={0.88} metalness={0.0} clearcoat={0.02} clearcoatRoughness={0.8} />
-      </mesh>
-    </>
-  )
+  // Background is handled by the CSS gradient on the canvas container div —
+  // same as wall-type scenes. No WebGL background fill here.
+  return null
 }
 
-/** Lavender-tinted floor to match the wall-type aesthetic */
+/** Shadow-only floor — invisible plane so ContactShadows renders but
+ *  no solid colour covers the CSS gradient background (matches wall-type cards). */
 function MountFloor() {
   return (
     <mesh receiveShadow position={[0, -1.10, 1.0]} rotation={[-Math.PI / 2, 0, 0]}>
       <planeGeometry args={[100, 100, 1, 1]} />
-      <meshPhysicalMaterial color="#c4bdd8" roughness={0.72} metalness={0.02} clearcoat={0.08} clearcoatRoughness={0.55} />
+      <shadowMaterial opacity={0.0} />
     </mesh>
   )
 }
 
-/** Lighting rig matching the wall types: left raking + top key + lavender hemisphere */
+/** Dramatic raking rig — wall-section quality for mount objects */
 function MountSceneLights() {
   return (
     <>
-      {/* Lavender hemisphere — same as wall types for consistent aesthetic */}
-      <hemisphereLight args={["#f0eaff", "#ffffff", 0.60]} />
-      {/* Left raking — shallow angle catches every displaced edge and relief detail */}
-      <directionalLight position={[-5, 2.0, 3.0]} intensity={1.70} color="#fff8f0" castShadow
+      {/* Dark hemisphere — kills flat fill, forces shadows to read deep */}
+      <hemisphereLight args={["#d8d0f0", "#b0a8c8", 0.22]} />
+      {/* Primary left rake — steep angle, catches every edge and relief like the wall section */}
+      <directionalLight position={[-5, 3.5, 4.0]} intensity={2.20} color="#fff8f0" castShadow
         shadow-mapSize={[2048, 2048]} shadow-camera-near={0.1} shadow-camera-far={20}
         shadow-camera-left={-3} shadow-camera-right={3}
         shadow-camera-top={3} shadow-camera-bottom={-3}
         shadow-bias={-0.0004} shadow-normalBias={0.012} />
-      {/* Top key — warm overhead fill */}
-      <directionalLight position={[3.2, 5.0, 3.8]} intensity={1.30} color="#fff6ec" />
-      {/* Soft lavender fill from right — prevents dead-black shadows */}
-      <pointLight position={[2.5, 0.5, 2.0]} intensity={0.25} color="#e8e0f8" />
+      {/* Right-top rim — separates object from background, picks up specular on chrome/gold */}
+      <directionalLight position={[4.5, 4.0, 2.5]} intensity={0.70} color="#e8f0ff" />
+      {/* Back-right separation — thin rim that stops objects merging with wall */}
+      <directionalLight position={[3.0, -1.0, -3.0]} intensity={0.28} color="#c8b8f0" />
+      {/* Deep lavender fill from below — same hue as wall types, keeps shadow purple not black */}
+      <pointLight position={[1.0, -1.5, 2.0]} intensity={0.30} color="#c8b0f8" />
+    </>
+  )
+}
+
+/**
+ * Three-light product photography rig for the light fixture.
+ * Mirrors professional Blender studio setup:
+ *   KEY   — large-area softbox upper-left. Creates main light+shadow gradient.
+ *   FILL  — dim cool area right side. Keeps shadow side mid-grey not black.
+ *   RIM   — blue-white behind, separates lamp from background.
+ *   BULB  — warm point inside bowl. Simulates Edison glow casting downward.
+ *
+ * customLights:true skips ALL outer Lights() so this rig is the sole source.
+ * ceramic envMapIntensity=0 so HDRI never fills the shadow side.
+ */
+function LightFixtureLights() {
+  return (
+    <>
+      {/* Dead-dark ambient — shadows must be DARK, not grey */}
+      <hemisphereLight args={["#1a1830", "#0a0814", 0.015]} />
+
+      {/* KEY — large softbox upper-left front, main form light
+          Mimics a Blender area light 1.2m × 1.2m at 3m distance.
+          High intensity creates bright specular stripe on the curved shade.  */}
+      <spotLight
+        position={[-2.8, 3.8, 3.2]}
+        angle={Math.PI / 6}
+        penumbra={0.85}
+        intensity={55}
+        color="#fff8f0"
+        castShadow
+        shadow-mapSize={[2048, 2048]}
+        shadow-bias={-0.0002}
+        shadow-normalBias={0.010}
+        shadow-camera-near={0.1}
+        shadow-camera-far={18}
+      />
+
+      {/* COUNTER-KEY — upper right, 1/5 key, keeps right side readable */}
+      <spotLight
+        position={[3.0, 2.8, 2.6]}
+        angle={Math.PI / 7}
+        penumbra={0.90}
+        intensity={11}
+        color="#f0f4ff"
+      />
+
+      {/* RIM LIGHT — strong blue-white from behind-right
+          Separates the cord, canopy, and shade rim from background.
+          This is the light that makes a pendant look like it's floating. */}
+      <directionalLight position={[1.2, 2.8, -4.0]} intensity={2.2} color="#b8ccff" />
+
+      {/* UNDER FILL — very dim warm from below, simulates floor bounce */}
+      <pointLight position={[0, -1.2, 0.5]} intensity={0.35} color="#ffcc88" distance={4} decay={2} />
     </>
   )
 }
@@ -1380,7 +1387,7 @@ function getPaintingTex(): THREE.CanvasTexture | null {
     ctx.fillStyle="rgba(6,8,18,0.80)"; ctx.beginPath(); ctx.ellipse(ex,eyeY+eyeRy*0.12,eyeRx*1.16,eyeRy*1.15,tilt,0,Math.PI*2); ctx.fill()
     ctx.fillStyle="#f0ede5"; ctx.beginPath(); ctx.ellipse(ex,eyeY,eyeRx,eyeRy,tilt,0,Math.PI*2); ctx.fill()
     const irisG = ctx.createRadialGradient(ex-eyeRx*0.20,eyeY-eyeRy*0.20,0,ex,eyeY,eyeRx*0.90)
-    irisG.addColorStop(0,"#58a8f8"); irisG.addColorStop(0.30,"#2278e8"); irisG.addColorStop(0.68,"#1450c4"); irisG.addColorStop(1,"#061038")
+    irisG.addColorStop(0,"#3a7acc"); irisG.addColorStop(0.30,"#1a5ab8"); irisG.addColorStop(0.68,"#0e3a90"); irisG.addColorStop(1,"#061038")
     ctx.fillStyle=irisG; ctx.beginPath(); ctx.ellipse(ex,eyeY,eyeRx*0.86,eyeRy*0.84,tilt,0,Math.PI*2); ctx.fill()
     for (let s=0;s<30;s++) {
       const a=(s/30)*Math.PI*2+tilt
@@ -2594,10 +2601,12 @@ function ArtFrameScene() {
     if (grp.current) grp.current.rotation.z = Math.sin(clock.elapsedTime * 0.5) * 0.010
   })
   const woodTex = useMemo(() => getWoodTex(), [])
-  const woodMat = useMemo(() => new THREE.MeshStandardMaterial({
+  const woodMat = useMemo(() => new THREE.MeshPhysicalMaterial({
     map: woodTex ?? undefined,
-    color: "#5a3418",  // tints the grain toward dark walnut
-    roughness: 0.58, metalness: 0.06,
+    color: "#5a3418",
+    roughness: 0.42, metalness: 0.04,
+    clearcoat: 0.55, clearcoatRoughness: 0.18,
+    reflectivity: 0.4,
   }), [woodTex])
   const matBoardMat = useMemo(() => new THREE.MeshStandardMaterial({ color: "#f4f1eb", roughness: 0.92 }), [])
   const goldAccent  = useMemo(() => mkGold(), [])
@@ -2660,12 +2669,13 @@ function ShelvesScene() {
     if (grp.current) grp.current.position.y = Math.sin(clock.elapsedTime * 0.5) * 0.018
   })
   const woodTex      = useMemo(() => getWoodTex(), [])
-  const shelfSideMat = useMemo(() => new THREE.MeshStandardMaterial({
+  const shelfSideMat = useMemo(() => new THREE.MeshPhysicalMaterial({
     map: woodTex ?? undefined,
     color: "#9a7240",
-    roughness: 0.55, metalness: 0.04,
+    roughness: 0.40, metalness: 0.03,
+    clearcoat: 0.45, clearcoatRoughness: 0.22,
   }), [woodTex])
-  const shelfEdgeMat = useMemo(() => new THREE.MeshStandardMaterial({ color: "#c09860", roughness: 0.38, metalness: 0.06 }), [])
+  const shelfEdgeMat = useMemo(() => new THREE.MeshPhysicalMaterial({ color: "#c09860", roughness: 0.28, metalness: 0.05, clearcoat: 0.50, clearcoatRoughness: 0.15 }), [])
   const brkMat       = useMemo(() => mkGunmetal(0.22), [])
   const goldMat      = useMemo(() => mkGold(), [])
   const shelfRelief  = useMemo(() => makeShelfReliefMaps(), [])
@@ -2789,22 +2799,30 @@ function ShelvesScene() {
 }
 
 function MirrorScene() {
-  const mirrorRef  = useRef<THREE.Mesh>(null)
-  const frameGold  = useMemo(() => mkGold(), [])
-  const frameMat   = useMemo(
-    () => new THREE.MeshPhysicalMaterial({ color: "#a8a4b0", metalness: 0.92, roughness: 0.08, clearcoat: 0.8, clearcoatRoughness: 0.06, envMapIntensity: 2.2 }), []
-  )
-  const mirrorFrameMaps = useMemo(() => makeMirrorFrameMaps(), [])
+  const mirrorRef = useRef<THREE.Mesh>(null)
+
+  // Thin dark matte-black frame — matches the reference rectangular mirror photo
+  const frameMat = useMemo(() => new THREE.MeshPhysicalMaterial({
+    color: "#1c1c20",
+    metalness: 0.35,
+    roughness: 0.55,
+    clearcoat: 0.50,
+    clearcoatRoughness: 0.20,
+    envMapIntensity: 0.8,
+  }), [])
 
   useFrame(({ clock }) => {
     if (mirrorRef.current) {
       const m = mirrorRef.current.material as THREE.MeshPhysicalMaterial
-      m.envMapIntensity = 4.2 + Math.sin(clock.elapsedTime * 0.6) * 0.40
+      m.envMapIntensity = 5.2 + Math.sin(clock.elapsedTime * 0.5) * 0.30
     }
   })
 
-  const sz = 0.94
-  const FZ = 0.049  // displaced plane z — just in front of frame bar front face (0.0475)
+  // Portrait rectangle mirror: 0.72 wide × 1.40 tall (matches reference photo proportions)
+  const MW  = 0.72   // mirror glass width
+  const MH  = 1.40   // mirror glass height
+  const FW  = 0.036  // frame bar width (thin, like reference)
+  const FD  = 0.028  // frame depth
 
   return (
     <group>
@@ -2812,109 +2830,419 @@ function MirrorScene() {
       <MountWall />
       <MountFloor />
       <MountSceneLights />
-      {/* Frame bars — solid boxes for sides/depth, displaced planes for the chiseled front face */}
-      <mesh position={[0, sz * 0.5 + 0.055, 0.02]} castShadow receiveShadow>
-        <boxGeometry args={[sz + 0.22, 0.11, 0.055]} /><primitive object={frameMat} />
+
+      {/* Frame — 4 thin dark bars forming a rectangle */}
+      {/* Top bar */}
+      <mesh position={[0, MH/2 + FW/2, 0]} castShadow receiveShadow>
+        <boxGeometry args={[MW + FW*2, FW, FD]} /><primitive object={frameMat} />
       </mesh>
-      <mesh position={[0, -(sz * 0.5 + 0.055), 0.02]} castShadow receiveShadow>
-        <boxGeometry args={[sz + 0.22, 0.11, 0.055]} /><primitive object={frameMat} />
+      {/* Bottom bar */}
+      <mesh position={[0, -(MH/2 + FW/2), 0]} castShadow receiveShadow>
+        <boxGeometry args={[MW + FW*2, FW, FD]} /><primitive object={frameMat} />
       </mesh>
-      <mesh position={[-(sz * 0.5 + 0.055), 0, 0.02]} castShadow receiveShadow>
-        <boxGeometry args={[0.11, sz, 0.055]} /><primitive object={frameMat} />
+      {/* Left bar */}
+      <mesh position={[-(MW/2 + FW/2), 0, 0]} castShadow receiveShadow>
+        <boxGeometry args={[FW, MH, FD]} /><primitive object={frameMat} />
       </mesh>
-      <mesh position={[sz * 0.5 + 0.055, 0, 0.02]} castShadow receiveShadow>
-        <boxGeometry args={[0.11, sz, 0.055]} /><primitive object={frameMat} />
+      {/* Right bar */}
+      <mesh position={[MW/2 + FW/2, 0, 0]} castShadow receiveShadow>
+        <boxGeometry args={[FW, MH, FD]} /><primitive object={frameMat} />
       </mesh>
-      {/* Displaced brushed-silver molding relief overlaid on each bar face */}
-      {mirrorFrameMaps && <>
-        <DisplacedBar pos={[-(sz*0.5+0.055), 0, FZ]} size={[0.11, sz]}       maps={mirrorFrameMaps} dispScale={0.038} normScale={5.5} metalness={0.88} clearcoat={0.9} />
-        <DisplacedBar pos={[ sz*0.5+0.055,  0, FZ]} size={[0.11, sz]}        maps={mirrorFrameMaps} dispScale={0.038} normScale={5.5} metalness={0.88} clearcoat={0.9} />
-        <DisplacedBar pos={[0,  sz*0.5+0.055, FZ]} size={[0.11, sz+0.22]}   maps={mirrorFrameMaps} dispScale={0.038} normScale={5.5} metalness={0.88} clearcoat={0.9} rotZ={Math.PI/2} />
-        <DisplacedBar pos={[0, -(sz*0.5+0.055), FZ]} size={[0.11, sz+0.22]} maps={mirrorFrameMaps} dispScale={0.038} normScale={5.5} metalness={0.88} clearcoat={0.9} rotZ={Math.PI/2} />
-      </>}
-      {/* Gold corner accents */}
-      {([[-1,-1],[1,-1],[-1,1],[1,1]] as [number,number][]).map(([cx,cy],i) => (
-        <mesh key={i} position={[cx*(sz*0.5+0.055), cy*(sz*0.5+0.055), 0.038]} castShadow>
-          <boxGeometry args={[0.11, 0.11, 0.072]} /><primitive object={frameGold} />
-        </mesh>
-      ))}
-      {/* Mirror silver backing — bright polished silver substrate */}
-      <mesh position={[0, 0, 0.028]}>
-        <boxGeometry args={[sz + 0.02, sz + 0.02, 0.010]} />
-        <meshPhysicalMaterial color="#c8ccd8" metalness={1.0} roughness={0.0} envMapIntensity={3.0} />
-      </mesh>
-      {/* Mirror glass — maximally reflective, slightly cool blue tint like real silver mirror */}
-      <mesh ref={mirrorRef} position={[0, 0, 0.042]}>
-        <boxGeometry args={[sz, sz, 0.005]} />
+
+      {/* Mirror glass — highly reflective, cool tint, shows HDRI environment as reflection */}
+      <mesh ref={mirrorRef} position={[0, 0, FD/2 - 0.002]}>
+        <planeGeometry args={[MW, MH]} />
         <meshPhysicalMaterial
-          color="#dce4f0"
+          color="#d8e8f4"
           metalness={1.0}
-          roughness={0.001}
-          envMapIntensity={4.5}
+          roughness={0.002}
+          envMapIntensity={5.5}
           clearcoat={1.0}
           clearcoatRoughness={0.0}
           ior={1.52}
         />
       </mesh>
-      {/* Hanging bracket */}
-      <mesh position={[0, sz * 0.5 + 0.11, 0.05]} castShadow>
-        <boxGeometry args={[0.12, 0.032, 0.032]} />
-        <meshPhysicalMaterial color={C.gunmetal} metalness={0.92} roughness={0.20} clearcoat={0.3} />
-      </mesh>
-      <ContactShadows frames={1} position={[0, -(sz*0.5+0.20), -0.06]} blur={2.4} opacity={0.26} scale={3} color="#20102a" />
+
+      <ContactShadows frames={1} position={[0, -(MH/2 + FW + 0.18), -0.04]} blur={2.2} opacity={0.30} scale={4} color="#20102a" />
     </group>
   )
 }
 
-function LightFixtureScene() {
-  const glowRef  = useRef<THREE.PointLight>(null)
-  const chromeMat = useMemo(() => mkChrome(0.06), [])
-  const brassMat  = useMemo(() => mkGold(), [])
+/**
+ * getCeramicTex — procedural matte ceramic glaze.
+ * Fine orange-peel FBM surface with pooled glaze darkening at low spots.
+ * Module-level singleton — generated once, never disposed.
+ */
+let _ceramicTex: { alb: THREE.DataTexture; nrm: THREE.DataTexture; rgh: THREE.DataTexture } | null = null
+function getCeramicTex() {
+  if (typeof window === "undefined") return null
+  if (_ceramicTex) return _ceramicTex
+  const S = 256
+  const aData = new Uint8Array(S * S * 4)
+  const nData = new Uint8Array(S * S * 4)
+  const rData = new Uint8Array(S * S * 4)
+  for (let y = 0; y < S; y++) {
+    for (let x = 0; x < S; x++) {
+      const u = x / S, v = y / S
+      // Fine orange-peel: high-freq FBM + micro dimples
+      const peel  = fbm(u * 38, v * 38, 3, 2.2, 0.45)
+      const dimple = fbm(u * 90, v * 90, 2, 2.0, 0.50) * 0.35
+      const h = peel * 0.65 + dimple
+      // Glaze pooling: darker, slightly saturated teal in depressions
+      const pool = 1 - smoothstep(Math.min(1, h / 0.55))  // 1 = pooled, 0 = ridge
+      // Base colour: off-white warm cream with slight warm glaze sheen
+      const r = Math.min(255, Math.round(232 - pool * 22 + peel * 14))
+      const g = Math.min(255, Math.round(226 - pool * 14 + peel * 10))
+      const b = Math.min(255, Math.round(214 - pool *  6 + peel *  8))
+      const i = (y * S + x) * 4
+      aData[i] = r; aData[i+1] = g; aData[i+2] = b; aData[i+3] = 255
+      // Normal from height gradient (Sobel)
+      const eps = 1 / S
+      const hL = fbm((u - eps) * 38, v * 38, 3, 2.2, 0.45)
+      const hR = fbm((u + eps) * 38, v * 38, 3, 2.2, 0.45)
+      const hU = fbm(u * 38, (v - eps) * 38, 3, 2.2, 0.45)
+      const hD = fbm(u * 38, (v + eps) * 38, 3, 2.2, 0.45)
+      const sc = 4.0
+      const nx = (hR - hL) * sc, ny = (hD - hU) * sc
+      const nl = Math.sqrt(nx * nx + ny * ny + 1)
+      nData[i]   = Math.round((-nx / nl * 0.5 + 0.5) * 255)
+      nData[i+1] = Math.round((-ny / nl * 0.5 + 0.5) * 255)
+      nData[i+2] = 255; nData[i+3] = 255
+      // Roughness: ridges slightly smoother (glaze coats high spots), pools a bit rougher
+      const rv = Math.round((0.18 + pool * 0.12 - peel * 0.04) * 255)
+      rData[i] = rv; rData[i+1] = rv; rData[i+2] = rv; rData[i+3] = 255
+    }
+  }
+  const alb = new THREE.DataTexture(aData, S, S, THREE.RGBAFormat)
+  const nrm = new THREE.DataTexture(nData, S, S, THREE.RGBAFormat)
+  const rgh = new THREE.DataTexture(rData, S, S, THREE.RGBAFormat)
+  alb.colorSpace = THREE.SRGBColorSpace
+  ;[alb, nrm, rgh].forEach(t => { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.needsUpdate = true })
+  _ceramicTex = { alb, nrm, rgh }
+  return _ceramicTex
+}
 
+// ─── LightFixtureScene geometry helpers ───────────────────────────────────────
+
+/**
+ * Ceramic pendant shade — classic bell silhouette.
+ * Wide open top that necks inward to a tight socket collar,
+ * creating the characteristic "coolie hat" profile seen on quality pendants.
+ */
+function makeBowlProfile(): THREE.Vector2[] {
+  const pts: THREE.Vector2[] = []
+  const steps = 72
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps
+    let r: number
+    if (t < 0.12) {
+      // Tight neck at socket — 4.2cm → 3.8cm
+      r = 0.042 - (t / 0.12) * 0.004
+    } else if (t < 0.30) {
+      // Quick shoulder flare out
+      const s = (t - 0.12) / 0.18
+      const ease = s * s * (3 - 2 * s)
+      r = 0.038 + ease * 0.080
+    } else {
+      // Long elegant flare to wide rim — 11.8cm radius at bottom
+      const s = (t - 0.30) / 0.70
+      const ease = Math.pow(s, 0.7)
+      r = 0.118 + ease * 0.160
+    }
+    const y = -t * 0.320
+    pts.push(new THREE.Vector2(r, y))
+  }
+  return pts
+}
+
+/**
+ * Brass canopy dome — ceiling mounting plate.
+ */
+function makeCanopyProfile(): THREE.Vector2[] {
+  const pts: THREE.Vector2[] = []
+  const steps = 24
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps
+    const angle = (Math.PI / 2) * t
+    const r = Math.sin(angle) * 0.095
+    const y = Math.cos(angle) * 0.032 - 0.032
+    pts.push(new THREE.Vector2(r, y))
+  }
+  return pts
+}
+
+/**
+ * Edison A-style teardrop bulb profile — wider equator, narrowing neck.
+ * More recognisable than a perfect sphere.
+ */
+function makeBulbProfile(): THREE.Vector2[] {
+  const pts: THREE.Vector2[] = []
+  const steps = 48
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps           // 0 = bottom of bulb, 1 = neck top
+    let r: number
+    if (t < 0.55) {
+      // Bottom sphere — full round
+      const angle = Math.PI * (t / 0.55)
+      r = Math.sin(angle) * 0.058
+    } else {
+      // Neck taper
+      const s = (t - 0.55) / 0.45
+      r = 0.058 * (1 - s * s) * 0.62
+    }
+    const y = t * 0.130 - 0.060
+    pts.push(new THREE.Vector2(Math.max(r, 0.001), y))
+  }
+  return pts
+}
+
+/**
+ * Spiral filament coil — the defining feature of an Edison bulb.
+ * 5 turns, 3.2cm diameter, emissive orange-white.
+ * Built as a CatmullRomCurve3 sampled into a TubeGeometry.
+ */
+function makeFilamentCurve(): THREE.CatmullRomCurve3 {
+  const pts: THREE.Vector3[] = []
+  const turns = 5
+  const ppt   = 28        // points per turn — smooth coil
+  const total = turns * ppt
+  const R     = 0.016     // coil radius
+  const H     = 0.052     // total height span
+  for (let i = 0; i <= total; i++) {
+    const t     = i / total
+    const angle = t * Math.PI * 2 * turns
+    const y     = (t - 0.5) * H
+    pts.push(new THREE.Vector3(Math.cos(angle) * R, y, Math.sin(angle) * R))
+  }
+  return new THREE.CatmullRomCurve3(pts)
+}
+
+
+function LightFixtureScene() {
+  const glowRef    = useRef<THREE.PointLight>(null)
+  const innerGlow  = useRef<THREE.PointLight>(null)
+
+  // ── Metals ────────────────────────────────────────────────────────────────
+  const brassMat  = useMemo(() => mkGold(), [])
+  const socketMat = useMemo(() => new THREE.MeshPhysicalMaterial({
+    color: "#9a7010", metalness: 0.98, roughness: 0.08,
+    clearcoat: 1.0, clearcoatRoughness: 0.04, envMapIntensity: 3.2,
+  }), [])
+
+  // ── Ceramic shade — matte white with subtle warm tint ─────────────────────
+  // envMapIntensity 0 mandatory — HDRI would wash out the shadow gradient.
+  const ceramicMat = useMemo(() => {
+    const tex = getCeramicTex()
+    return new THREE.MeshPhysicalMaterial({
+      color: "#e8e0d2",
+      roughness: 0.22,
+      metalness: 0.0,
+      clearcoat: 0.70,
+      clearcoatRoughness: 0.08,
+      envMapIntensity: 0.0,
+      ...(tex ? {
+        map:          tex.alb,
+        normalMap:    tex.nrm,
+        normalScale:  new THREE.Vector2(1.4, 1.4),
+        roughnessMap: tex.rgh,
+      } : {}),
+    })
+  }, [])
+
+  // ── Interior gold — real lamp shades are gold/brass inside ────────────────
+  // This is the defining visual of any quality pendant: deep glowing gold
+  // visible when looking up into the shade, reflecting the bulb warmth.
+  const interiorMat = useMemo(() => new THREE.MeshStandardMaterial({
+    color: "#c07010",
+    emissive: "#ff8800",
+    emissiveIntensity: 1.20,
+    metalness: 0.45,
+    roughness: 0.25,
+    side: THREE.BackSide,
+    envMapIntensity: 1.4,
+  }), [])
+
+  // ── Cord — dark twisted textile ────────────────────────────────────────────
+  const cordMat = useMemo(() => new THREE.MeshStandardMaterial({
+    color: "#1a1210", roughness: 0.92, metalness: 0.0,
+  }), [])
+
+  // ── Edison bulb glass — real FBO transmission ──────────────────────────────
+  // Slight warm amber tint, chromatic aberration makes it look like real glass.
+
+  // ── Filament material — blindingly bright orange-white ────────────────────
+  // emissiveIntensity 6+ so bloom catches it through the glass
+  const filamentMat = useMemo(() => new THREE.MeshStandardMaterial({
+    color: "#ffffff",
+    emissive: "#ffcc44",
+    emissiveIntensity: 8.0,
+    roughness: 0.0,
+    metalness: 0.0,
+  }), [])
+
+  // ── Precompute geometries ─────────────────────────────────────────────────
+  const bowlGeo     = useMemo(() => {
+    const geo = new THREE.LatheGeometry(makeBowlProfile(), 128)
+    geo.computeVertexNormals()
+    return geo
+  }, [])
+  const canopyGeo   = useMemo(() => new THREE.LatheGeometry(makeCanopyProfile(), 64), [])
+  const bulbGeo     = useMemo(() => {
+    const geo = new THREE.LatheGeometry(makeBulbProfile(), 64)
+    geo.computeVertexNormals()
+    return geo
+  }, [])
+  const filamentGeo = useMemo(() => {
+    const curve = makeFilamentCurve()
+    return new THREE.TubeGeometry(curve, 200, 0.0018, 6, false)
+  }, [])
+
+  // ── Braided cord strands — two counter-wound helices ──────────────────────
+  // Built as TubeGeometry so they look like actual braided textile, not spheres.
+  const strandGeos = useMemo(() => {
+    const CORD = 0.548   // matches CORD_LEN = 1.18 - 0.60 - 0.032
+    return [0, 1].map(si => {
+      const pts: THREE.Vector3[] = []
+      const n = 80
+      for (let i = 0; i <= n; i++) {
+        const t = i / n
+        const angle = t * Math.PI * 2 * 10 + si * Math.PI  // 10 twists, offset by π
+        const r = 0.0038
+        pts.push(new THREE.Vector3(Math.cos(angle) * r, -t * CORD, Math.sin(angle) * r))
+      }
+      const curve = new THREE.CatmullRomCurve3(pts)
+      return new THREE.TubeGeometry(curve, 120, 0.0022, 5, false)
+    })
+  }, [])
+
+  // ── Flickering bulb — subtle organic flutter ──────────────────────────────
   useFrame(({ clock }) => {
     const t = clock.elapsedTime
-    const flicker = 0.92 + Math.sin(t * 11.3) * 0.02 + Math.sin(t * 7.1) * 0.015
-    if (glowRef.current) glowRef.current.intensity = 2.8 * flicker
+    const f = 0.94 + Math.sin(t * 11.7) * 0.030 + Math.sin(t * 7.3) * 0.018
+              + Math.sin(t * 23.1) * 0.008
+    if (glowRef.current)   glowRef.current.intensity   = 2.8 * f
+    if (innerGlow.current) innerGlow.current.intensity = 4.2 * f
   })
+
+  // ── Positions ─────────────────────────────────────────────────────────────
+  const CEIL_Y   =  1.18
+  const NECK_Y   =  0.60
+  const BOWL_Y   =  NECK_Y
+  const BULB_Y   =  NECK_Y - 0.075   // bulb hangs from socket inside bowl opening
+  const RIM_Y    =  NECK_Y - 0.320
+  const CORD_LEN =  CEIL_Y - NECK_Y - 0.032
 
   return (
     <group>
       <MountLookAtRig y={0.72} />
       <MountWall />
-      <MountSceneLights />
-      {/* Ceiling — lavender-tinted plaster */}
-      <mesh receiveShadow position={[0, 1.40, -0.08]} rotation={[Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[100, 100, 16, 16]} />
-        <meshPhysicalMaterial color="#cfc8e8" roughness={0.82} metalness={0.0} clearcoat={0.04} clearcoatRoughness={0.6} />
-      </mesh>
+      <LightFixtureLights />
       <MountFloor />
-      <mesh position={[0, 1.34, 0.01]} castShadow><cylinderGeometry args={[0.10, 0.095, 0.030, 20]} /><primitive object={chromeMat} /></mesh>
-      <mesh position={[0, 1.32, 0.01]} castShadow>
-        <sphereGeometry args={[0.098, 18, 9, 0, Math.PI * 2, 0, Math.PI * 0.5]} /><primitive object={brassMat} />
+
+      {/* ── Ceiling canopy — brass dome ──────────────────────────────── */}
+      <mesh position={[0, CEIL_Y, 0]} castShadow>
+        <primitive object={canopyGeo} />
+        <primitive object={brassMat} />
       </mesh>
-      <mesh position={[0, 1.04, 0.01]} castShadow><cylinderGeometry args={[0.009, 0.009, 0.60, 10]} /><primitive object={chromeMat} /></mesh>
-      <mesh position={[0, 0.72, 0.01]} castShadow rotation={[Math.PI/2, 0, 0]}>
-        <torusGeometry args={[0.195, 0.014, 10, 28]} /><primitive object={brassMat} />
+      {/* Canopy rim ring */}
+      <mesh position={[0, CEIL_Y - 0.030, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.094, 0.006, 12, 48]} />
+        <primitive object={brassMat} />
       </mesh>
-      <mesh position={[0, 0.48, 0.01]} castShadow>
-        <cylinderGeometry args={[0.22, 0.20, 0.45, 28, 1, true]} />
-        <meshPhysicalMaterial color="#f4ede0" roughness={0.85} side={THREE.DoubleSide} transparent opacity={0.92} />
+
+      {/* ── Braided textile cord — core + two helical strand tubes ──── */}
+      {/* Core */}
+      <mesh position={[0, CEIL_Y - 0.032 - CORD_LEN / 2, 0]}>
+        <cylinderGeometry args={[0.0030, 0.0030, CORD_LEN, 6]} />
+        <primitive object={cordMat} />
       </mesh>
-      <mesh position={[0, 0.245, 0.01]} castShadow rotation={[Math.PI/2, 0, 0]}>
-        <torusGeometry args={[0.202, 0.012, 10, 28]} /><primitive object={brassMat} />
+      {/* Two TubeGeometry helices wound around core — actual braid look */}
+      {strandGeos.map((geo, si) => (
+        <mesh key={`braid-${si}`} position={[0, CEIL_Y - 0.032, 0]}>
+          <primitive object={geo} />
+          <primitive object={cordMat} />
+        </mesh>
+      ))}
+
+      {/* ── E26 socket collar — threaded brass cylinder ───────────────── */}
+      <mesh position={[0, NECK_Y + 0.020, 0]} castShadow>
+        <cylinderGeometry args={[0.036, 0.030, 0.040, 24]} />
+        <primitive object={socketMat} />
       </mesh>
-      <mesh position={[0, 0.52, 0.01]} castShadow><cylinderGeometry args={[0.024, 0.018, 0.055, 14]} /><primitive object={chromeMat} /></mesh>
-      <mesh position={[0, 0.47, 0.01]}>
-        <sphereGeometry args={[0.048, 16, 16]} />
-        <meshStandardMaterial color="#ffe8a0" emissive="#ffcc40" emissiveIntensity={3.2} transparent opacity={0.88} depthWrite={false} />
+      {/* Socket base ring */}
+      <mesh position={[0, NECK_Y, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.034, 0.006, 10, 24]} />
+        <primitive object={brassMat} />
       </mesh>
-      <mesh position={[0, 0.46, 0.01]} rotation={[Math.PI/2, 0, 0]}>
-        <torusGeometry args={[0.012, 0.003, 8, 20]} />
-        <meshStandardMaterial color="#ffaa00" emissive="#ff8800" emissiveIntensity={4} />
+      {/* Threaded detail bands */}
+      {[-0.012, 0, 0.012].map((dy, i) => (
+        <mesh key={`thread-${i}`} position={[0, NECK_Y + 0.020 + dy, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.036, 0.0018, 6, 24]} />
+          <primitive object={brassMat} />
+        </mesh>
+      ))}
+
+      {/* ── Ceramic shade — outer bell ────────────────────────────────── */}
+      <mesh position={[0, BOWL_Y, 0]} castShadow receiveShadow>
+        <primitive object={bowlGeo} />
+        <primitive object={ceramicMat} />
       </mesh>
-      <pointLight ref={glowRef} position={[0, 0.46, 0.01]} intensity={2.8} color="#ffe060" distance={4.5} decay={2} castShadow shadow-mapSize={[512, 512]} />
-      <pointLight position={[0, 0.90, 0.01]} intensity={0.5} color="#ffe8c0" distance={2.0} decay={2} />
-      <ContactShadows frames={1} position={[0, -0.88, -0.06]} blur={3.0} opacity={0.30} scale={4} color="#1a0808" />
+
+      {/* ── Interior — bright gold, the glow that makes a shade look real */}
+      {/* BackSide + emissive gold: when camera peeks inside, it sees blazing
+          warm gold catching the bulb light — exactly like a real lamp shade. */}
+      <mesh position={[0, BOWL_Y, 0]}>
+        <primitive object={bowlGeo} />
+        <primitive object={interiorMat} />
+      </mesh>
+
+      {/* ── Rim cap — shows ceramic thickness ────────────────────────── */}
+      <mesh position={[0, RIM_Y, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[0.272, 0.284, 128]} />
+        <primitive object={ceramicMat} />
+      </mesh>
+
+      {/* ── Edison A-style teardrop bulb — FBO glass transmission ──────── */}
+      {/* Outer glass envelope */}
+      <mesh position={[0, BULB_Y, 0]} castShadow>
+        <primitive object={bulbGeo} />
+        <MeshTransmissionMaterial
+          color="#fff8e8"
+          transmission={0.97}
+          thickness={0.06}
+          roughness={0.0}
+          ior={1.46}
+          chromaticAberration={0.08}
+          anisotropicBlur={0.08}
+          temporalDistortion={0.02}
+          distortion={0.15}
+          distortionScale={0.25}
+          emissive="#ffaa22"
+          emissiveIntensity={1.8}
+          backside={true}
+          samples={6}
+        />
+      </mesh>
+
+      {/* ── SPIRAL FILAMENT — the defining feature of an Edison bulb ────── */}
+      {/* 5 turns of glowing coil, clearly visible through the glass.
+          This is what makes it unmistakably an Edison bulb vs a plain globe. */}
+      <mesh position={[0, BULB_Y + 0.008, 0]}>
+        <primitive object={filamentGeo} />
+        <primitive object={filamentMat} />
+      </mesh>
+
+      {/* ── Bulb glow lights — two points for warm illumination ─────────── */}
+      {/* Inner point — lights the gold shade interior from inside */}
+      <pointLight ref={innerGlow} position={[0, BULB_Y + 0.02, 0]}
+        color="#ff9933" distance={1.2} decay={2} intensity={4.2} />
+      {/* Outer point — casts warm light down onto floor/wall */}
+      <pointLight ref={glowRef} position={[0, BULB_Y - 0.02, 0]}
+        color="#ffcc55" distance={4.5} decay={2} intensity={2.8}
+        castShadow shadow-mapSize={[512, 512]} />
+
+      <ContactShadows frames={1} position={[0, -0.95, -0.02]}
+        blur={3.5} opacity={0.28} scale={4} color="#180820" />
     </group>
   )
 }
@@ -3012,28 +3340,16 @@ function WallTexScene({ material }: { material: WallMaterial }) {
       */}
       <group position={[0, 0.25, 0]} rotation={[0, -0.16, 0]}>
         <mesh castShadow receiveShadow>
-          <boxGeometry args={[1.85, 2.70, blockDepth, 128, 160, material === "stone" ? 58 : 2]} />
+          <boxGeometry args={[material === "stone" ? 1.87 : 1.85, 2.70, blockDepth, 128, 160, 2]} />
           {/* right side */}
-          {material === "stone" ? (
-            <meshStandardMaterial attach="material-0"
-              map={sideA}
-              displacementMap={sideD}
-              displacementScale={dispScale}
-              displacementBias={-dispScale * 0.5}
-              normalMap={sideN}
-              normalScale={new THREE.Vector2(normScale, normScale)}
-              roughnessMap={sideR}
-              roughness={1} metalness={0} envMapIntensity={0}
-            />
-          ) : (
-            <meshStandardMaterial attach="material-0"
-              map={sideA}
-              normalMap={sideN}
-              normalScale={new THREE.Vector2(normScale * 0.6, normScale * 0.6)}
-              roughnessMap={sideR}
-              roughness={1} metalness={0} envMapIntensity={0}
-            />
-          )}
+          {/* Side face — no displacement on any material to prevent corner gaps */}
+          <meshStandardMaterial attach="material-0"
+            map={sideA}
+            normalMap={sideN}
+            normalScale={new THREE.Vector2(normScale * 0.6, normScale * 0.6)}
+            roughnessMap={sideR}
+            roughness={1} metalness={0} envMapIntensity={0}
+          />
           {/* left — not visible */}
           <meshStandardMaterial attach="material-1" color={sideTint} roughness={sideRough} metalness={0} />
           {/* top */}
@@ -3060,7 +3376,7 @@ function WallTexScene({ material }: { material: WallMaterial }) {
             map={albedo}
             displacementMap={maps.displacement}
             displacementScale={dispScale}
-            displacementBias={material === "stone" || material === "concrete" ? -dispScale * 1.1 : -dispScale * 0.5}
+            displacementBias={-dispScale * 0.92}
             normalMap={maps.normal}
             normalScale={new THREE.Vector2(normScale, normScale)}
             roughnessMap={maps.roughness}
@@ -3538,11 +3854,11 @@ const CAM = {
   fullmo:  { pos: [1.55, 0.22, 0.48], fov: 50 } as CamCfg,
   tilt:    { pos: [1.75, 0.15, 0.48], fov: 48 } as CamCfg,
   mirror:  { pos: [0.80, 0.04, 1.85], fov: 50 } as CamCfg,
-  light:   { pos: [0.70, 0.72, 1.80], fov: 50 } as CamCfg,
+  light:   { pos: [0.55, 0.55, 2.20], fov: 52 } as CamCfg,
   measure: { pos: [0,    0.04, 2.10], fov: 44 } as CamCfg,
 }
 
-function resolveScene(option: string): { scene: JSX.Element; cam: CamCfg; env: string } {
+function resolveScene(option: string): { scene: JSX.Element; cam: CamCfg; env: string; customLights?: boolean } {
   switch (option) {
     case "TV/Monitor":
       return { scene: <TVItemScene />, cam: CAM.item, env: "apartment" }
@@ -3553,7 +3869,7 @@ function resolveScene(option: string): { scene: JSX.Element; cam: CamCfg; env: s
     case "Mirror":
       return { scene: <MirrorScene />, cam: CAM.mirror, env: "apartment" }
     case "Light Fixture":
-      return { scene: <LightFixtureScene />, cam: CAM.light, env: "apartment" }
+      return { scene: <LightFixtureScene />, cam: CAM.light, env: "apartment", customLights: true }
     case "Fixed (flat against wall)":
       return { scene: <FixedScene />, cam: CAM.mount, env: "city" }
     case "Tilting (angle adjustment)":
@@ -3590,9 +3906,9 @@ function resolveScene(option: string): { scene: JSX.Element; cam: CamCfg; env: s
 // ─── Shared Canvas wrapper ────────────────────────────────────────────────────
 
 function SceneCanvas({
-  cam, scene, thumbnail = false, env = "city", frameloop = "always", postprocess = true,
+  cam, scene, thumbnail = false, env = "city", frameloop = "always", postprocess = true, customLights = false,
 }: {
-  cam: CamCfg; scene: JSX.Element; thumbnail?: boolean; env?: string; frameloop?: "always" | "demand" | "never"; postprocess?: boolean
+  cam: CamCfg; scene: JSX.Element; thumbnail?: boolean; env?: string; frameloop?: "always" | "demand" | "never"; postprocess?: boolean; customLights?: boolean
 }) {
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768
 
@@ -3601,32 +3917,23 @@ function SceneCanvas({
     ? (isMobile ? "/hdri/lebombo_2k.hdr"          : "/hdri/lebombo_4k.hdr")
     : (isMobile ? "/hdri/potsdamer_platz_2k.hdr"   : "/hdri/potsdamer_platz_4k.hdr")
 
-  // Wall type scenes use transparent canvas so CSS gradient shows through unaffected by tone mapping
-  const useTransparent = !postprocess
+  // All scenes use transparent canvas — CSS gradient shows through for every scene type
+  const useTransparent = true
+  const gradientBg = [
+    "radial-gradient(ellipse 70% 55% at 8% 5%, rgba(255, 255, 255, 0.82) 0%, transparent 60%)",
+    "radial-gradient(ellipse 150% 70% at 50% 100%, rgba(167, 139, 250, 0.52) 0%, rgba(196, 181, 253, 0.18) 48%, rgba(220, 213, 252, 0.06) 65%, transparent 82%)",
+    "linear-gradient(135deg, rgba(255,255,255,0.97) 0%, rgba(237,233,254,0.80) 100%)",
+  ].join(", ")
 
   return (
-    <div style={{
-      width: "100%", height: "100%", position: "relative",
-      ...(useTransparent ? {
-        background: [
-          /* Soft warm pool of light under the object — implied ground plane */
-          "radial-gradient(ellipse 85% 40% at 50% 95%, rgba(232, 214, 255, 0.50) 0%, transparent 55%)",
-          /* Key-light bloom top-left — matches the scene directional light angle */
-          "radial-gradient(ellipse 60% 65% at 12% 2%, rgba(218, 192, 255, 0.42) 0%, transparent 58%)",
-          /* Deep shadow corner bottom-right — creates vignette depth */
-          "radial-gradient(ellipse 50% 50% at 92% 98%, rgba(22, 4, 68, 0.72) 0%, transparent 52%)",
-          /* Rich Levl purple base — saturated core */
-          "linear-gradient(148deg, #c4a2f0 0%, #8e4ed4 32%, #5a1eaa 62%, #36088a 100%)",
-        ].join(", "),
-      } : {}),
-    }}>
+    <div style={{ width: "100%", height: "100%", position: "relative", background: gradientBg }}>
     <Canvas
       shadows={!thumbnail}
       dpr={thumbnail ? 1 : (isMobile ? [1, 1.5] : [1, 2])}
       frameloop={frameloop}
       gl={{
         antialias: !isMobile,
-        alpha: useTransparent,
+        alpha: true,
         toneMapping: THREE.ACESFilmicToneMapping,
         outputColorSpace: THREE.SRGBColorSpace,
         powerPreference: "high-performance",
@@ -3634,8 +3941,6 @@ function SceneCanvas({
       performance={{ min: 0.5 }}
       style={{ width: "100%", height: "100%" }}
     >
-      {/* Default bg — skipped for transparent (wall type) scenes so CSS gradient shows through */}
-      {!useTransparent && <color attach="background" args={["#f9f8f6"]} />}
       <PerspectiveCamera makeDefault position={cam.pos} fov={cam.fov} near={0.05} far={200} />
 
       {thumbnail ? (
@@ -3644,12 +3949,14 @@ function SceneCanvas({
           <directionalLight position={[3, 5, 4]} intensity={1.4} color="#fff2e8" />
           <pointLight position={[-3, -1, 3]} intensity={0.3} color="#c8a4ff" />
         </>
-      ) : (
+      ) : customLights ? null : (
+        /* customLights=true scenes (e.g. Light Fixture) supply their own rig —
+           skip these shared lights entirely so they can't fill in shadows. */
         <>
-          <ambientLight intensity={0.45} />
-          <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={0.8} castShadow
+          <ambientLight intensity={0.15} />
+          <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={0.5} castShadow
             shadow-mapSize={isMobile ? [1024, 1024] : [2048, 2048]} />
-          <pointLight position={[-10, -10, -10]} intensity={0.4} color="#818cf8" />
+          <pointLight position={[-10, -10, -10]} intensity={0.2} color="#818cf8" />
           <Lights />
         </>
       )}
@@ -3657,29 +3964,16 @@ function SceneCanvas({
       {scene}
       <Environment files={hdr} />
 
-      {/* ── Post-processing (desktop only — too GPU-heavy for mobile) ── */}
+      {/* ── Post-processing: N8AO + SMAA only — bloom removed entirely ── */}
       {!thumbnail && !isMobile && postprocess && (
         <EffectComposer multisampling={0}>
-          {/* Bloom — threshold 0.95 only catches genuinely emissive elements
-              (TV screen, light bulb, mirror hot-spots, chrome speculars).
-              Near-white surfaces under strong light top out ~0.90 after ACES,
-              so 0.95 keeps them clean. */}
-          <Bloom
-            luminanceThreshold={0.95}
-            luminanceSmoothing={0.60}
-            intensity={0.25}
-            radius={0.60}
-            mipmapBlur
-          />
-          {/* N8AO — ambient occlusion: depth in corners, bracket crevices */}
           <N8AO
             quality="high"
-            aoRadius={2.5}
-            intensity={1.8}
-            distanceFalloff={1.2}
+            aoRadius={1.2}
+            intensity={3.2}
+            distanceFalloff={0.8}
             color="black"
           />
-          {/* SMAA — crisp antialiasing */}
           <SMAA />
         </EffectComposer>
       )}
@@ -3707,12 +4001,12 @@ export function Option3DImpl({
 }: {
   option: string; thumbnail?: boolean; frameloop?: "always" | "demand" | "never"
 }) {
-  const { scene, cam, env } = resolveScene(option)
+  const { scene, cam, env, customLights } = resolveScene(option)
   const effectiveFrameloop = frameloop === "always" && STATIC_SCENES.has(option)
     ? "demand"
     : frameloop
   const postprocess = !NO_POSTPROCESS_SCENES.has(option)
-  return <SceneCanvas cam={cam} scene={scene} thumbnail={thumbnail} env={env} frameloop={effectiveFrameloop} postprocess={postprocess} />
+  return <SceneCanvas cam={cam} scene={scene} thumbnail={thumbnail} env={env} frameloop={effectiveFrameloop} postprocess={postprocess} customLights={customLights} />
 }
 
 /**

@@ -7,7 +7,12 @@
     "build": "next build",
     "dev": "rm -rf .next && next dev",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "render:tv":      "bash -c '\"/Applications/Blender.app/Contents/MacOS/Blender\" --background --python \"$0\"' scripts/render_tv_monitor.py",
+    "render:mirror":  "bash -c '\"/Applications/Blender.app/Contents/MacOS/Blender\" --background --python \"$0\"' scripts/render_mirror.py",
+    "render:shelves": "bash -c '\"/Applications/Blender.app/Contents/MacOS/Blender\" --background --python \"$0\"' scripts/render_floating_shelves.py",
+    "render:art":     "bash -c '\"/Applications/Blender.app/Contents/MacOS/Blender\" --background --python \"$0\"' scripts/render_art_frame.py",
+    "render:fixture": "bash -c '\"/Applications/Blender.app/Contents/MacOS/Blender\" --background --python \"$0\"' scripts/render_light_fixture.py"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "^1.4.0",

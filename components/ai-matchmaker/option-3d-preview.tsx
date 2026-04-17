@@ -55,23 +55,24 @@ export const Option3DPreview = memo(function Option3DPreview({
   className?: string
   disableHover?: boolean
 }) {
-  // Start mounted+active: new cards always appear scrolled into view
   const [canvasMounted, setCanvasMounted] = useState(true)
-  const [frameActive, setFrameActive] = useState(true)
+  const [frameActive, setFrameActive]     = useState(true)
+  const [visible, setVisible]             = useState(true)
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
-
-    // Far observer — unmounts canvas entirely when >500px off-screen, freeing WebGL context
+    const isMobile = window.innerWidth < 768
+    // Desktop: 2500px buffer so canvases almost never unmount while scrolling
+    // Mobile: 500px to stay within WebGL context limit
+    const farMargin = isMobile ? "500px 0px" : "2500px 0px"
     const farObs = new IntersectionObserver(
       ([entry]) => setCanvasMounted(entry.isIntersecting),
-      { rootMargin: "500px 0px" }
+      { rootMargin: farMargin }
     )
-    // Exact observer — pauses frameloop when just outside viewport
     const exactObs = new IntersectionObserver(
-      ([entry]) => setFrameActive(entry.isIntersecting),
+      ([entry]) => { setFrameActive(entry.isIntersecting); setVisible(entry.isIntersecting) },
       { rootMargin: "80px 0px" }
     )
     farObs.observe(el)
@@ -88,7 +89,8 @@ export const Option3DPreview = memo(function Option3DPreview({
   ) : null
 
   return (
-    <div ref={containerRef} className={`relative w-full h-full ${className ?? ""}`}>
+    <div ref={containerRef} className={`relative w-full h-full ${className ?? ""}`}
+      style={{ opacity: visible ? 1 : 0, transition: "opacity 0.15s ease" }}>
       {disableHover ? (
         // No Framer Motion at all — zero hover animation guaranteed
         <div className="relative w-full h-full">{canvas}</div>
