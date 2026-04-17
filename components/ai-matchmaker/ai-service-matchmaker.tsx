@@ -1090,45 +1090,37 @@ const MessageItem = memo(
                 {/* Check if any options have 3D previews */}
                 {message.options.some(opt => THREE_D_OPTIONS.has(opt)) ? (
                   // No translateZ/backfaceVisibility here — those fight the Canvas WebGL layer
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {message.options.map((option, index) => {
-                      const has3D = THREE_D_OPTIONS.has(option)
-                      return (
+                  <div className="flex flex-col gap-2">
+                    {/* 3D cards — always 2 columns, max size */}
+                    <div className="grid grid-cols-2 gap-2">
+                      {message.options.filter(opt => THREE_D_OPTIONS.has(opt)).map((option, index) => (
                 <motion.button
                   key={`${message.id}-${option}-${index}`}
                   initial={{ opacity: 0, y: 20, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   whileTap={{ scale: 0.98 }}
                   transition={{ delay: index * 0.05, type: "spring", stiffness: 260, damping: 20 }}
-                  className={`group relative flex flex-col items-center overflow-hidden
+                  className="group relative flex flex-col items-center overflow-hidden
                     bg-gradient-to-b from-white/95 to-white/80 dark:from-gray-800/95 dark:to-gray-900/80
                     rounded-2xl text-xs font-semibold
                     border border-white/30
                     shadow-[0_2px_6px_rgba(44,38,80,0.07),0_8px_24px_rgba(44,38,80,0.06),0_20px_48px_rgba(38,32,72,0.05),0_36px_72px_rgba(30,26,64,0.03),0_-1px_0_rgba(255,255,255,0.82)]
                     dark:shadow-[0_2px_6px_rgba(0,0,0,0.24),0_8px_24px_rgba(0,0,0,0.18),0_20px_48px_rgba(0,0,0,0.12),0_36px_72px_rgba(0,0,0,0.07),0_-1px_0_rgba(255,255,255,0.05)]
-                    backdrop-blur-md
-                    ${!has3D ? 'justify-center min-h-[80px]' : ''}`}
+                    backdrop-blur-md"
                   onClick={() => handleOptionClick(option)}
                 >
-
-                  {has3D ? (
-                    <div className="w-full aspect-square overflow-hidden relative">
-                      {isMountItem(option) ? (
-                        // Mount items: Blender path-traced PNG + WebGL fallback
-                        <MountHybridPreview option={option} className="w-full h-full" />
-                      ) : (
-                        // All other 3D options (wall types, brackets, cables, etc.): unchanged
-                        <Option3DPreview
-                          option={option}
-                          className="w-full h-full"
-                          disableHover={!!WALL_TIPS[option]}
-                        />
-                      )}
-                    </div>
-                  ) : null}
-
-                  {/* Label strip */}
-                  <div className={`relative w-full px-3 text-center ${has3D ? 'bg-white/40 dark:bg-gray-900/40 backdrop-blur-md border-t border-white/10' : ''} ${WALL_TIPS[option] ? 'pt-2 pb-1.5' : 'py-2.5'}`}>
+                  <div className="w-full aspect-square overflow-hidden relative">
+                    {isMountItem(option) ? (
+                      <MountHybridPreview option={option} className="w-full h-full" />
+                    ) : (
+                      <Option3DPreview
+                        option={option}
+                        className="w-full h-full"
+                        disableHover={!!WALL_TIPS[option]}
+                      />
+                    )}
+                  </div>
+                  <div className={`relative w-full px-3 text-center bg-white/40 dark:bg-gray-900/40 backdrop-blur-md border-t border-white/10 ${WALL_TIPS[option] ? 'pt-2 pb-1.5' : 'py-2.5'}`}>
                     <span className="bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 bg-clip-text text-transparent">
                       {option}
                     </span>
@@ -1139,8 +1131,31 @@ const MessageItem = memo(
                     )}
                   </div>
                 </motion.button>
-                      )
-                    })}
+                      ))}
+                    </div>
+                    {/* Non-3D options (e.g. "Other") — full width below the grid */}
+                    {message.options.filter(opt => !THREE_D_OPTIONS.has(opt)).map((option, index) => (
+                      <motion.button
+                        key={`${message.id}-${option}-other-${index}`}
+                        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        whileTap={{ scale: 0.98 }}
+                        transition={{ delay: (message.options!.length + index) * 0.05, type: "spring", stiffness: 260, damping: 20 }}
+                        className="w-full group relative flex flex-col items-center justify-center overflow-hidden
+                          min-h-[52px]
+                          bg-gradient-to-b from-white/95 to-white/80 dark:from-gray-800/95 dark:to-gray-900/80
+                          rounded-2xl text-xs font-semibold
+                          border border-white/30
+                          shadow-[0_2px_6px_rgba(44,38,80,0.07),0_8px_24px_rgba(44,38,80,0.06),0_20px_48px_rgba(38,32,72,0.05),0_36px_72px_rgba(30,26,64,0.03),0_-1px_0_rgba(255,255,255,0.82)]
+                          dark:shadow-[0_2px_6px_rgba(0,0,0,0.24),0_8px_24px_rgba(0,0,0,0.18),0_20px_48px_rgba(0,0,0,0.12),0_36px_72px_rgba(0,0,0,0.07),0_-1px_0_rgba(255,255,255,0.05)]
+                          backdrop-blur-md"
+                        onClick={() => handleOptionClick(option)}
+                      >
+                        <span className="bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 bg-clip-text text-transparent px-3 py-2.5">
+                          {option}
+                        </span>
+                      </motion.button>
+                    ))}
                   </div>
                 ) : (
                   <div className="flex flex-wrap gap-2">
