@@ -313,7 +313,7 @@ cam_obj  = bpy.data.objects.new('Camera', cam_data)
 bpy.context.collection.objects.link(cam_obj); scene.camera = cam_obj
 # Look at the middle of the fixture (between cap and cage)
 look_z   = (CAP_Z + CAGE_Z) / 2
-cam_pos  = Vector((0.0, -1.45, look_z - 0.04))
+cam_pos  = Vector((0.0, -1.20, look_z - 0.04))
 look_at  = Vector((0.0,  0.00, look_z))
 cam_obj.location = cam_pos
 cam_obj.rotation_euler = (look_at - cam_pos).to_track_quat('-Z','Y').to_euler()
