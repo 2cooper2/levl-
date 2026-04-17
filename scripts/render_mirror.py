@@ -717,7 +717,7 @@ def add_area(loc, energy, size, color, rot_xyz):
 # Lighting: keep key strong (directional shadows), reduce fill/rim/top so
 # dark walnut frame reads dark — ambient floor was washing out all colors.
 add_area((-2.5, -2.0, 2.5), 300, 1.8, (1.00, 0.97, 0.90), (34,  0, -28))  # key — restored so reflection stays bright
-add_area(( 3.5, -1.5, 2.5), 380, 0.8, (0.90, 0.94, 1.00), ( 38,  0, -65))  # fill — raised to Z=2.5, tilted down to aim at back wall, no floor hotspot
+add_area(( 3.5, -3.8, 2.5), 420, 0.4, (0.90, 0.94, 1.00), ( 28,  0, -52))  # fill — pushed far back so near-floor is out of beam, aims across to back wall
 add_area(( 0.0, -0.8, 4.0),  60, 3.0, (1.00, 0.98, 0.94), (78,  0,   0))  # top
 # rim light removed — was behind the back wall (Y=2.8) causing right-side glow
 
