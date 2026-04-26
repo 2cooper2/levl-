@@ -127,7 +127,8 @@ ICONS = {
         "rot_xyz": (math.radians(-14), 0, -math.pi/2 - math.radians(25)),
         "scale":   1.40,
         "camera_fov_deg": 60,
-        "x_offset": -0.05,    # nudge mirror left to center visually
+        "x_offset": 0.0,
+        "auto_center_x": True,   # measure post-rotation world bbox & re-center horizontally
         "force_silver_frame": True,
         "frame_is_largest": True,
         "glass_target": "smallest",    # mirror disc material → glass+clearcoat
@@ -455,6 +456,39 @@ def make_icon_fn(key, cfg):
             o.location.y = ICON_Y
             o.location.x = x_off
             o.location.z = z_off
+
+        # auto_center_x: measure the post-position world bbox and shift the
+        # icon along X so its bbox-center sits at the camera's image center
+        # (camera ray's X intercept on the icon's Y-plane).
+        if cfg.get("auto_center_x"):
+            bpy.context.view_layer.update()
+            mins = [float('inf')]*3; maxs = [float('-inf')]*3
+            for o in meshes:
+                for c in o.bound_box:
+                    w = o.matrix_world @ mathutils.Vector(c)
+                    for i in range(3):
+                        mins[i] = min(mins[i], w[i])
+                        maxs[i] = max(maxs[i], w[i])
+            bbox_cx = (mins[0] + maxs[0]) / 2
+            # Camera's X projection at the icon's Y plane (where the mesh sits)
+            cam = next((o for o in bpy.data.objects if o.type == 'CAMERA'), None)
+            if cam:
+                cam_pos = cam.matrix_world.translation
+                # Where camera's principal ray (toward target) crosses Y=ICON_Y plane
+                # CAM_POS.y = -1.68 (per add_camera in render_category_cards.py).
+                # camera target Y = 0. So forward = +Y.
+                # At y=ICON_Y, cam ray X = cam_pos.x + (cam_pos.x_to_target)*(...)
+                # Simpler: since target.x = 0 and cam.x = 0.12, the camera's center
+                # ray hits the icon's Y plane at slightly negative X from cam X
+                # offset. Compute via parametric:
+                cam_target_y = 0.0  # build()'s camera target.y
+                t = (ICON_Y - cam_pos.y) / (cam_target_y - cam_pos.y)
+                cam_ray_x_at_icon_y = cam_pos.x + (0.0 - cam_pos.x) * t
+                shift = cam_ray_x_at_icon_y - bbox_cx
+                for o in meshes:
+                    o.location.x += shift
+                print(f"  [{key}] auto_center_x: bbox_cx={bbox_cx:.3f} ray_x={cam_ray_x_at_icon_y:.3f} shift={shift:+.3f}")
+                bpy.context.view_layer.update()
 
         bpy.context.view_layer.update()
         primary = meshes[0]
