@@ -118,14 +118,15 @@ ICONS = {
         "strip_cord_above_world_z": -0.15,
     },
     "mirror": {
-        # Sketchfab "RUSTA Hugo" — modern round wall mirror with thin black
-        # frame and visible 3D depth profile. No gold.
-        # Scale stays at 0.55 (don't shrink); FOV widened to 30° so the
-        # round mirror fits inside the camera frame without clipping.
+        # Sketchfab "RUSTA Hugo" — modern round wall mirror.
+        # 12° forward lean for slight gradient on reflection.
+        # smoked_glass=True tints the mirror surface so it reads as a
+        # high-end tinted/smoked glass instead of a flat lavender disc.
         "glb":     "sketchfab_mirror_rusta.glb",
-        "rot_xyz": (0, 0, -math.pi/2),
+        "rot_xyz": (math.radians(-12), 0, -math.pi/2),
         "scale":   0.55,
         "camera_fov_deg": 30,
+        "smoked_glass": True,
     },
 }
 
@@ -199,6 +200,32 @@ def make_icon_fn(key, cfg):
                     bsdf.inputs["Metallic"].default_value = 0.55
                     bsdf.inputs["Roughness"].default_value = 0.40
                     print(f"  [{key}] mat '{mat.name}' → desaturated greyscale")
+
+        # Optional smoked-glass mirror surface — replaces the largest-area
+        # material's base color with a deep blue-grey tint and tunes the
+        # metallic/roughness so it reads as high-end smoked glass instead
+        # of a flat lavender disc.
+        if cfg.get("smoked_glass"):
+            area_by_mat = {}
+            for m in meshes:
+                for p in m.data.polygons:
+                    if p.material_index < len(m.data.materials):
+                        mat = m.data.materials[p.material_index]
+                        if mat is None: continue
+                        area_by_mat[mat.name] = area_by_mat.get(mat.name, 0) + p.area
+            if area_by_mat:
+                largest = max(area_by_mat.items(), key=lambda x: x[1])[0]
+                sm = bpy.data.materials.get(largest)
+                if sm and sm.use_nodes:
+                    bsdf = next((n for n in sm.node_tree.nodes if n.bl_idname == "ShaderNodeBsdfPrincipled"), None)
+                    if bsdf:
+                        for lk in list(sm.node_tree.links):
+                            if lk.to_node == bsdf and lk.to_socket.name == "Base Color":
+                                sm.node_tree.links.remove(lk)
+                        bsdf.inputs["Base Color"].default_value = (0.08, 0.08, 0.14, 1.0)
+                        bsdf.inputs["Metallic"].default_value = 0.85
+                        bsdf.inputs["Roughness"].default_value = 0.08
+                        print(f"  [{key}] mirror surface '{largest}' → smoked glass")
 
         # Optional: hue-shift the frame material(s) using the drill recipe so
         # the frame looks painted/baked-in (not photoscanned). Keeps the
