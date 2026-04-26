@@ -125,12 +125,12 @@ ICONS = {
         # brushed-metal surface detail).
         "glb":     "sketchfab_mirror_stockholm.glb",
         "rot_xyz": (math.radians(-6), 0, -math.pi/2 - math.radians(35)),
-        "scale":   0.55,
-        "camera_fov_deg": 30,
+        "scale":   0.70,
+        "camera_fov_deg": 36,
         "force_silver_frame": True,
         "frame_is_largest": True,
-        "light_scale": 0.55,
-        "exposure_offset": -0.4,
+        "light_scale": 0.35,
+        "exposure_offset": -0.7,
     },
 }
 
