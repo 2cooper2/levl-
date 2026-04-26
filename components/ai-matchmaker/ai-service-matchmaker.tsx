@@ -44,10 +44,10 @@ function isMountOption(opt: string): boolean {
 
 // Static Blender renders for mount TYPE option cards (Fixed/Tilting/etc.)
 const MOUNT_TYPE_RENDERS: Record<string, string> = {
-  "Fixed (flat against wall)":                   "/assets/renders/mount-fixed.png",
-  "Tilting (angle adjustment)":                  "/assets/renders/mount-tilting.png",
-  "Full-motion/Articulating (swivel and tilt)":  "/assets/renders/mount-fullmotion.png",
-  "Ceiling mount":                               "/assets/renders/mount-ceiling.png",
+  "Fixed (flat against wall)":                   "/assets/renders/mount-fixed.webp",
+  "Tilting (angle adjustment)":                  "/assets/renders/mount-tilting.webp",
+  "Full-motion/Articulating (swivel and tilt)":  "/assets/renders/mount-fullmotion.webp",
+  "Ceiling mount":                               "/assets/renders/mount-ceiling.webp",
 }
 const MOUNT_TYPE_VIDEOS: Record<string, string> = {
   "Tilting (angle adjustment)":                  "/assets/renders/mount-tilting.webm",
@@ -59,11 +59,11 @@ function isMountTypeRender(opt: string): boolean {
 
 // Static Blender renders for wall type cards (replaces WebGL WallTexScene)
 const WALL_RENDERS: Record<string, string> = {
-  "Drywall/Sheetrock": "/assets/renders/wall-drywall.png",
-  "Brick":             "/assets/renders/wall-brick.png",
-  "Concrete":          "/assets/renders/wall-concrete.png",
-  "Plaster":           "/assets/renders/wall-plaster.png",
-  "Stone":             "/assets/renders/wall-stone.png",
+  "Drywall/Sheetrock": "/assets/renders/wall-drywall.webp",
+  "Brick":             "/assets/renders/wall-brick.webp",
+  "Concrete":          "/assets/renders/wall-concrete.webp",
+  "Plaster":           "/assets/renders/wall-plaster.webp",
+  "Stone":             "/assets/renders/wall-stone.webp",
 }
 function isWallRender(opt: string): boolean {
   return opt in WALL_RENDERS
@@ -2169,14 +2169,14 @@ const [detectedPreferences, setDetectedPreferences] = useState<{
 
   const categories = useMemo(
     () => [
-      { icon: Tv,       name: "Mounting",    serviceType: "tvMounting",  cardRender: "/assets/renders/category-mounting-v2.png" },
-      { icon: Truck,    name: "Moving",      serviceType: "moving",      cardRender: "/assets/renders/category-moving-v2.png" },
-      { icon: Spray,    name: "Painting",    serviceType: "painting",    cardRender: "/assets/renders/category-painting-v2.png" },
-      { icon: Wrench,   name: "Assembly",    serviceType: "furniture",   cardRender: "/assets/renders/category-assembly-v2.png" },
-      { icon: Zap,      name: "Electrical",  serviceType: "electrical",  cardRender: "/assets/renders/category-electrical.png" },
-      { icon: Droplet,  name: "Plumbing",    serviceType: "plumbing",    cardRender: "/assets/renders/category-plumbing.png" },
-      { icon: Leaf,     name: "Landscaping", serviceType: "landscaping", cardRender: "/assets/renders/category-landscaping.png" },
-      { icon: Layers,   name: "Flooring",    serviceType: "flooring",    cardRender: "/assets/renders/category-flooring.png" },
+      { icon: Tv,       name: "Mounting",    serviceType: "tvMounting",  cardRender: "/assets/renders/category-mounting-v2.webp" },
+      { icon: Truck,    name: "Moving",      serviceType: "moving",      cardRender: "/assets/renders/category-moving-v2.webp" },
+      { icon: Spray,    name: "Painting",    serviceType: "painting",    cardRender: "/assets/renders/category-painting-v2.webp" },
+      { icon: Wrench,   name: "Assembly",    serviceType: "furniture",   cardRender: "/assets/renders/category-assembly-v2.webp" },
+      { icon: Zap,      name: "Electrical",  serviceType: "electrical",  cardRender: "/assets/renders/category-electrical.webp" },
+      { icon: Droplet,  name: "Plumbing",    serviceType: "plumbing",    cardRender: "/assets/renders/category-plumbing.webp" },
+      { icon: Leaf,     name: "Landscaping", serviceType: "landscaping", cardRender: "/assets/renders/category-landscaping.webp" },
+      { icon: Layers,   name: "Flooring",    serviceType: "flooring",    cardRender: "/assets/renders/category-flooring.webp" },
     ],
     [],
   )
