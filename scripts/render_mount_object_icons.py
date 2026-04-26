@@ -125,8 +125,8 @@ ICONS = {
         # brushed-metal surface detail).
         "glb":     "sketchfab_mirror_stockholm.glb",
         "rot_xyz": (math.radians(-6), 0, -math.pi/2 - math.radians(35)),
-        "scale":   1.00,
-        "camera_fov_deg": 50,
+        "scale":   1.40,
+        "camera_fov_deg": 60,
         "force_silver_frame": True,
         "frame_is_largest": True,
         "glass_target": "smallest",    # mirror disc material → glass+clearcoat
