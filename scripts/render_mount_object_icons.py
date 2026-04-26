@@ -97,25 +97,44 @@ ICONS = {
         "scale":   0.50,
     },
     "art-frame": {
-        # Sketchfab "PICTURE FRAME 15*20" — gold ornate frame. Painting mesh
-        # excluded; only frame_lambert1_0 exported. Native front normal -Y
-        # already faces camera.
+        # Sketchfab "PICTURE FRAME 15*20" — ornate frame. Gold material
+        # overridden to brushed silver per "no gold". Painting excluded.
         "glb":     "sketchfab_art_frame.glb",
         "rot_xyz": (0, 0, 0),
-        "scale":   0.55,
+        "scale":   0.85,
+        "camera_fov_deg": 42,
+        "force_silver_frame": True,
+        "silver_all_materials": True,
+        "light_scale": 0.45,
+        "front_light_scale": 0.18,
+        "exposure_offset": -0.5,
     },
     "floating-shelves": {
-        # Sketchfab "Wooden Wall Bookshelf" — single dark-wood shelf w/
-        # metal brackets. Native shelf laying horizontal; camera sees front.
-        "glb":     "sketchfab_floating_shelves.glb",
-        "rot_xyz": (0, 0, 0),
-        "scale":   0.55,
+        # Sketchfab "Scandinavian Shelf Decorative Set" — recessed shelf
+        # frame with 4 shelves holding books, vases, baskets, picture
+        # frames, candles. Front normal +X → -π/2 Z to face camera.
+        # Head-on (no side rotation) — recessed bookcase side walls occlude
+        # contents at any side angle.
+        "glb":     "sketchfab_floating_shelves_scandi_clean.glb",
+        "rot_xyz": (0, 0, -math.pi/2 - math.radians(20)),
+        "scale":   0.95,
+        "camera_fov_deg": 42,
+        "light_scale": 0.55,
+        "front_light_scale": 0.45,
+        "exposure_offset": -0.3,
     },
     "light-fixture": {
+        # mark-peters brass pendant. Cord stripped post-scale. Brass material
+        # overridden to brushed silver per "no gold".
         "glb":     "sketchfab_light_fixture.glb",
         "rot_xyz": (0, 0, 0),
         "scale":   0.55,
         "strip_cord_above_world_z": -0.15,
+        "force_silver_frame": True,
+        "silver_all_materials": True,
+        "light_scale": 0.55,
+        "front_light_scale": 0.20,
+        "exposure_offset": -0.4,
     },
     "mirror": {
         # Sketchfab "IKEA Stockholm" — round wall mirror with chunky frame.
@@ -223,9 +242,12 @@ def make_icon_fn(key, cfg):
             print(f"  [{key}] silver-frame areas: {area_by_mat}")
             if area_by_mat:
                 ranked = sorted(area_by_mat.items(), key=lambda x: -x[1])
-                # Stockholm: wood frame = LARGEST area (curved donut),
-                # mirror glass = smaller (flat disc). So override the largest.
-                target_mats = [ranked[0][0]] if cfg.get("frame_is_largest") else [n for n, _ in ranked[1:]]
+                if cfg.get("silver_all_materials"):
+                    target_mats = [n for n, _ in ranked]
+                elif cfg.get("frame_is_largest"):
+                    target_mats = [ranked[0][0]]
+                else:
+                    target_mats = [n for n, _ in ranked[1:]]
                 for mat_name in target_mats:
                     fm = bpy.data.materials.get(mat_name)
                     if not (fm and fm.use_nodes): continue
