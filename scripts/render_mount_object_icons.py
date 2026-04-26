@@ -124,9 +124,10 @@ ICONS = {
         # Lighting backed off so the silver doesn't blow out (preserves the
         # brushed-metal surface detail).
         "glb":     "sketchfab_mirror_stockholm.glb",
-        "rot_xyz": (math.radians(-6), 0, -math.pi/2 - math.radians(35)),
+        "rot_xyz": (math.radians(-14), 0, -math.pi/2 - math.radians(25)),
         "scale":   1.40,
         "camera_fov_deg": 60,
+        "x_offset": -0.05,    # nudge mirror left to center visually
         "force_silver_frame": True,
         "frame_is_largest": True,
         "glass_target": "smallest",    # mirror disc material → glass+clearcoat
@@ -448,8 +449,12 @@ def make_icon_fn(key, cfg):
         # is already centered at origin from step 1, so this puts the
         # centroid at ICON_Y (with the TV's depth straddling the card).
         bpy.context.view_layer.update()
+        x_off = cfg.get("x_offset", 0.0)
+        z_off = cfg.get("z_offset", 0.0)
         for o in meshes:
             o.location.y = ICON_Y
+            o.location.x = x_off
+            o.location.z = z_off
 
         bpy.context.view_layer.update()
         primary = meshes[0]
