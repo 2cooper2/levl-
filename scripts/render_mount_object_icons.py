@@ -127,8 +127,7 @@ ICONS = {
         "rot_xyz": (math.radians(-14), 0, -math.pi/2 - math.radians(25)),
         "scale":   1.40,
         "camera_fov_deg": 60,
-        "x_offset": 0.0,
-        "auto_center_x": True,   # measure post-rotation world bbox & re-center horizontally
+        "x_offset": -0.10,
         "force_silver_frame": True,
         "frame_is_largest": True,
         "glass_target": "smallest",    # mirror disc material → glass+clearcoat
