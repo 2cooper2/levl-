@@ -118,15 +118,18 @@ ICONS = {
         "strip_cord_above_world_z": -0.15,
     },
     "mirror": {
-        # Sketchfab "IKEA Stockholm" — round wall mirror with chunky light
-        # wood (oak/birch) frame. Matches the reference styling shown by
-        # user (round, wooden chunky rim, visible 3D depth).
-        # Largest face normal +X → -π/2 Z to face camera. Then -35° Z for
-        # 3/4 side perspective (drill/roller staging).
+        # Sketchfab "IKEA Stockholm" — round wall mirror with chunky frame.
+        # Wood frame overridden to brushed silver metal (no wood, no gold).
+        # frame_is_largest=True: Stockholm's curved wood frame has more
+        # polys than the flat mirror disc, so the silver override targets
+        # the LARGEST-area material.
+        # 6° forward tilt exposes more of the bottom rim profile depth.
         "glb":     "sketchfab_mirror_stockholm.glb",
-        "rot_xyz": (0, 0, -math.pi/2 - math.radians(35)),
+        "rot_xyz": (math.radians(-6), 0, -math.pi/2 - math.radians(35)),
         "scale":   0.55,
         "camera_fov_deg": 30,
+        "force_silver_frame": True,
+        "frame_is_largest": True,
     },
 }
 
@@ -200,6 +203,47 @@ def make_icon_fn(key, cfg):
                     bsdf.inputs["Metallic"].default_value = 0.55
                     bsdf.inputs["Roughness"].default_value = 0.40
                     print(f"  [{key}] mat '{mat.name}' → desaturated greyscale")
+
+        # Optional silver-metal frame override. For models where the FRAME
+        # has a curved/wrap-around geometry with MORE polygons than the flat
+        # mirror disc (e.g., Stockholm), the largest-area material IS the
+        # frame. force_silver_frame_largest=True targets that case.
+        if cfg.get("force_silver_frame"):
+            area_by_mat = {}
+            for m in meshes:
+                for p in m.data.polygons:
+                    if p.material_index < len(m.data.materials):
+                        mat = m.data.materials[p.material_index]
+                        if mat is None: continue
+                        area_by_mat[mat.name] = area_by_mat.get(mat.name, 0) + p.area
+            print(f"  [{key}] silver-frame areas: {area_by_mat}")
+            if area_by_mat:
+                ranked = sorted(area_by_mat.items(), key=lambda x: -x[1])
+                # Stockholm: wood frame = LARGEST area (curved donut),
+                # mirror glass = smaller (flat disc). So override the largest.
+                target_mats = [ranked[0][0]] if cfg.get("frame_is_largest") else [n for n, _ in ranked[1:]]
+                for mat_name in target_mats:
+                    fm = bpy.data.materials.get(mat_name)
+                    if not (fm and fm.use_nodes): continue
+                    nt = fm.node_tree
+                    bsdf = next((n for n in nt.nodes if n.bl_idname == "ShaderNodeBsdfPrincipled"), None)
+                    if not bsdf: continue
+                    for lk in list(nt.links):
+                        if lk.to_node == bsdf and (lk.to_socket.name == "Base Color"
+                                                   or lk.to_socket.name == "Normal"):
+                            nt.links.remove(lk)
+                    bsdf.inputs["Base Color"].default_value = (0.78, 0.78, 0.82, 1.0)
+                    bsdf.inputs["Metallic"].default_value = 1.0
+                    bsdf.inputs["Roughness"].default_value = 0.28
+                    # Brushed-noise normal for surface variation
+                    noise = nt.nodes.new("ShaderNodeTexNoise")
+                    noise.inputs["Scale"].default_value = 80.0
+                    noise.inputs["Detail"].default_value = 6.0
+                    bump = nt.nodes.new("ShaderNodeBump")
+                    bump.inputs["Strength"].default_value = 0.10
+                    nt.links.new(noise.outputs["Fac"], bump.inputs["Height"])
+                    nt.links.new(bump.outputs["Normal"], bsdf.inputs["Normal"])
+                    print(f"  [{key}] frame mat '{mat_name}' → brushed silver metal")
 
         # Optional smoked-glass mirror surface — replaces the largest-area
         # material's base color with a deep blue-grey tint and tunes the
