@@ -204,6 +204,7 @@ ICONS = {
         "rot_xyz": (0, 0, 0),
         "target_h": 2.6,
         "z_floor": 0.0,
+        "x_offset": 0.30,   # shift right to compensate camera 3/4 perspective
     },
     "art-frame": {
         # Sketchfab "City Map Framed Wall Art Print, Amsterdam" — modern
