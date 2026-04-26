@@ -34,12 +34,13 @@ import dynamic from "next/dynamic"
 // Static render images for mount object option cards
 const MOUNT_RENDERS: Record<string, string> = {
   "TV/Monitor":        "/assets/renders/tv-monitor.webp",
+  "Mirror":            "/assets/renders/mirror.webp",
   "Art/Picture Frame": "/assets/renders/art-frame.png",
   "Floating Shelves":  "/assets/renders/floating-shelves.png",
   "Light Fixture":     "/assets/renders/light-fixture.png",
 }
 function isMountOption(opt: string): boolean {
-  return opt in MOUNT_RENDERS || opt === "Mirror"
+  return opt in MOUNT_RENDERS
 }
 
 // Static Blender renders for mount TYPE option cards (Fixed/Tilting/etc.)
