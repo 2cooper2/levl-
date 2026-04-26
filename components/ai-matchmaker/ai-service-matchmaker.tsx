@@ -35,9 +35,9 @@ import dynamic from "next/dynamic"
 const MOUNT_RENDERS: Record<string, string> = {
   "TV/Monitor":        "/assets/renders/tv-monitor.webp",
   "Mirror":            "/assets/renders/mirror.webp",
-  "Art/Picture Frame": "/assets/renders/art-frame.png",
-  "Floating Shelves":  "/assets/renders/floating-shelves.png",
-  "Light Fixture":     "/assets/renders/light-fixture.png",
+  "Art/Picture Frame": "/assets/renders/art-frame.webp",
+  "Floating Shelves":  "/assets/renders/floating-shelves.webp",
+  "Light Fixture":     "/assets/renders/light-fixture.webp",
 }
 function isMountOption(opt: string): boolean {
   return opt in MOUNT_RENDERS
