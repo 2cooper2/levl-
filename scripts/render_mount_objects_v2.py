@@ -207,31 +207,29 @@ ICONS = {
         "x_offset": 0.30,   # shift right to compensate camera 3/4 perspective
     },
     "art-frame": {
-        # Sketchfab "City Map Framed Wall Art Print, Amsterdam" — modern
-        # matte-black thin frame with white matt + map print. Print face
-        # normal already -Y (toward camera) — no rotation needed.
+        # Multi-frame composition (small/medium/large overlapping). Render
+        # logic in compose_art_frame_trio() below.
         "glb":     "sketchfab_art_frame_modern.glb",
-        "rot_xyz": (0, 0, 0),
-        "target_h": 1.7,
-        "z_floor": 0.0,
+        "multi_frame": True,
     },
     "floating-shelves": {
-        # Sketchfab "Scandinavian Shelf Decorative Set" — bookcase walls
-        # excluded so just the shelves + decor objects render. Front normal
-        # +X → -π/2 Z so the shelves face the screen head-on.
+        # Scandinavian shelf set, head-on (no walls). Bigger so it reads
+        # closer in frame and the colorful objects are easily visible.
         "glb":     "sketchfab_floating_shelves_scandi_clean.glb",
         "rot_xyz": (0, 0, -math.pi/2),
-        "target_h": 2.0,
+        "target_h": 2.6,
         "z_floor": 0.0,
+        "x_offset": 0.30,
     },
     "light-fixture": {
-        # Brass pendant w/ cord + ceiling mount cup at top. Cord NOT stripped
-        # this time — full pendant rendered including hanging wire + ceiling
-        # box. Bigger (target_h 2.4) so the wire reads clearly.
-        "glb":     "sketchfab_light_fixture.glb",
+        # Decorative Hanging Light Bulbs Set — elegant glass Edison bulbs
+        # on cords with central globe. More elegant + bigger than the
+        # previous brass pendant.
+        "glb":     "sketchfab_pendant_bulbs.glb",
         "rot_xyz": (0, 0, 0),
-        "target_h": 2.4,
+        "target_h": 2.6,
         "z_floor": 0.0,
+        "x_offset": 0.30,
     },
     "tv-monitor": {
         "glb":     "sketchfab_tv.glb",
@@ -240,6 +238,31 @@ ICONS = {
         "z_floor": 0.0,
     },
 }
+
+
+def import_glb_at(glb_path, target_height, rot_xyz=(0,0,0),
+                  z_floor=0.0, x_offset=0.0, y_offset=0.0):
+    """Import + fit + pose a single GLB. Returns the meshes."""
+    meshes = import_glb(glb_path)
+    fit_and_pose(meshes, target_height=target_height, rot_xyz=rot_xyz,
+                 z_floor=z_floor, x_offset=x_offset, y_offset=y_offset)
+    return meshes
+
+
+def compose_art_frame_trio(glb_path):
+    """Three frames at small / medium / large scales, overlapping but each
+    frame's silhouette readable. Sizes 1.0 / 1.6 / 2.2 m tall; arranged
+    left-back / center / right-front so the largest is forward and smaller
+    ones recede behind."""
+    # Large frame (rear-right-ish, dominant)
+    import_glb_at(glb_path, target_height=2.2, rot_xyz=(0, 0, 0),
+                  z_floor=0.0, x_offset=0.45, y_offset=0.40)
+    # Medium frame (left, slightly forward)
+    import_glb_at(glb_path, target_height=1.6, rot_xyz=(0, 0, math.radians(8)),
+                  z_floor=0.0, x_offset=-0.65, y_offset=-0.10)
+    # Small frame (right-front, leaning more toward camera)
+    import_glb_at(glb_path, target_height=1.05, rot_xyz=(0, 0, math.radians(-6)),
+                  z_floor=0.0, x_offset=0.95, y_offset=-0.45)
 
 
 def render_one(key):
@@ -257,15 +280,18 @@ def render_one(key):
     add_lights()
     add_shadow_catcher(0.0)
 
-    meshes = import_glb(glb)
-    fit_and_pose(
-        meshes,
-        target_height=cfg.get("target_h", 1.6),
-        rot_xyz=cfg.get("rot_xyz", (0, 0, 0)),
-        z_floor=cfg.get("z_floor", 0.0),
-        x_offset=cfg.get("x_offset", 0.0),
-        y_offset=cfg.get("y_offset", 0.0),
-    )
+    if cfg.get("multi_frame"):
+        compose_art_frame_trio(glb)
+    else:
+        meshes = import_glb(glb)
+        fit_and_pose(
+            meshes,
+            target_height=cfg.get("target_h", 1.6),
+            rot_xyz=cfg.get("rot_xyz", (0, 0, 0)),
+            z_floor=cfg.get("z_floor", 0.0),
+            x_offset=cfg.get("x_offset", 0.0),
+            y_offset=cfg.get("y_offset", 0.0),
+        )
 
     bpy.ops.render.render(write_still=True)
 
