@@ -119,11 +119,11 @@ ICONS = {
     },
     "mirror": {
         # Sketchfab "RUSTA Hugo" — modern round wall mirror.
-        # 12° forward lean for slight gradient on reflection.
-        # smoked_glass=True tints the mirror surface so it reads as a
-        # high-end tinted/smoked glass instead of a flat lavender disc.
+        # Side perspective: -π/2 Z (face camera) THEN -35° Z (turn 35° to
+        # the side) so the mirror's frame depth profile is visible — same
+        # 3/4 staging as the drill/roller/tape gun icons.
         "glb":     "sketchfab_mirror_rusta.glb",
-        "rot_xyz": (math.radians(-12), 0, -math.pi/2),
+        "rot_xyz": (0, 0, -math.pi/2 - math.radians(35)),
         "scale":   0.55,
         "camera_fov_deg": 30,
         "smoked_glass": True,
