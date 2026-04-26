@@ -118,15 +118,15 @@ ICONS = {
         "strip_cord_above_world_z": -0.15,
     },
     "mirror": {
-        # Sketchfab "RUSTA Hugo" — modern round wall mirror.
-        # Side perspective: -π/2 Z (face camera) THEN -35° Z (turn 35° to
-        # the side) so the mirror's frame depth profile is visible — same
-        # 3/4 staging as the drill/roller/tape gun icons.
-        "glb":     "sketchfab_mirror_rusta.glb",
+        # Sketchfab "IKEA Stockholm" — round wall mirror with chunky light
+        # wood (oak/birch) frame. Matches the reference styling shown by
+        # user (round, wooden chunky rim, visible 3D depth).
+        # Largest face normal +X → -π/2 Z to face camera. Then -35° Z for
+        # 3/4 side perspective (drill/roller staging).
+        "glb":     "sketchfab_mirror_stockholm.glb",
         "rot_xyz": (0, 0, -math.pi/2 - math.radians(35)),
         "scale":   0.55,
         "camera_fov_deg": 30,
-        "smoked_glass": True,
     },
 }
 
