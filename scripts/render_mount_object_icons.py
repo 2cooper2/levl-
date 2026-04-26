@@ -125,11 +125,12 @@ ICONS = {
         # brushed-metal surface detail).
         "glb":     "sketchfab_mirror_stockholm.glb",
         "rot_xyz": (math.radians(-6), 0, -math.pi/2 - math.radians(35)),
-        "scale":   0.70,
-        "camera_fov_deg": 36,
+        "scale":   0.85,
+        "camera_fov_deg": 42,
         "force_silver_frame": True,
         "frame_is_largest": True,
-        "light_scale": 0.35,
+        "light_scale": 0.45,           # rim/back lights stay readable
+        "front_light_scale": 0.12,     # front lights dimmed hard
         "exposure_offset": -0.7,
     },
 }
@@ -453,11 +454,16 @@ def make_icon_fn(key, cfg):
         # Per-icon lighting back-off — for highly reflective materials that
         # blow out under build()'s default brightness.
         light_scale = cfg.get("light_scale")
-        if light_scale is not None:
+        front_light_scale = cfg.get("front_light_scale")
+        if light_scale is not None or front_light_scale is not None:
             for o in bpy.data.objects:
-                if o.type == 'LIGHT':
-                    o.data.energy *= light_scale
-            print(f"  [{key}] all lights * {light_scale}")
+                if o.type != 'LIGHT': continue
+                # Front lights are the ones in front of the icon (negative Y).
+                is_front = o.location.y < 0.0
+                s = front_light_scale if (is_front and front_light_scale is not None) else light_scale
+                if s is not None:
+                    o.data.energy *= s
+            print(f"  [{key}] light scaling: front={front_light_scale} else={light_scale}")
         exposure_offset = cfg.get("exposure_offset")
         if exposure_offset is not None:
             bpy.context.scene.view_settings.exposure += exposure_offset
