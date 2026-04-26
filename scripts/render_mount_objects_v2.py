@@ -206,24 +206,30 @@ ICONS = {
         "z_floor": 0.0,
     },
     "art-frame": {
-        "glb":     "sketchfab_art_frame_modern.glb",   # to be downloaded
+        # Sketchfab "City Map Framed Wall Art Print, Amsterdam" — modern
+        # matte-black thin frame with white matt + map print. Print face
+        # normal already -Y (toward camera) — no rotation needed.
+        "glb":     "sketchfab_art_frame_modern.glb",
         "rot_xyz": (0, 0, 0),
         "target_h": 1.7,
         "z_floor": 0.0,
     },
     "floating-shelves": {
+        # Sketchfab "Scandinavian Shelf Decorative Set" — bookcase walls
+        # excluded so just the shelves + decor objects render. Front normal
+        # +X → -π/2 Z so the shelves face the screen head-on.
         "glb":     "sketchfab_floating_shelves_scandi_clean.glb",
-        # Front normal +X → -π/2 Z so screen-facing.
         "rot_xyz": (0, 0, -math.pi/2),
-        "target_h": 1.9,
+        "target_h": 2.0,
         "z_floor": 0.0,
     },
     "light-fixture": {
-        # Brass pendant w/ cord + ceiling cup. Don't strip cord (user wants it).
-        # Hangs from ceiling — z_floor anchors top of cord.
+        # Brass pendant w/ cord + ceiling mount cup at top. Cord NOT stripped
+        # this time — full pendant rendered including hanging wire + ceiling
+        # box. Bigger (target_h 2.4) so the wire reads clearly.
         "glb":     "sketchfab_light_fixture.glb",
         "rot_xyz": (0, 0, 0),
-        "target_h": 2.0,
+        "target_h": 2.4,
         "z_floor": 0.0,
     },
     "tv-monitor": {
