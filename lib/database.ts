@@ -13,7 +13,7 @@ export const createDatabaseClient = () => {
   if (typeof window === "undefined") {
     // Server-side
     if (!supabaseUrl || !supabaseServiceRoleKey) {
-      console.error("Missing Supabase credentials for server")
+      console.warn("Supabase server credentials not configured — running without DB")
       return null
     }
 
@@ -33,7 +33,7 @@ export const createDatabaseClient = () => {
     if (clientInstance) return clientInstance
 
     if (!supabaseUrl || !supabaseAnonKey) {
-      console.error("Missing Supabase credentials for client")
+      console.warn("Supabase client credentials not configured — running without DB")
       return null
     }
 
@@ -56,7 +56,7 @@ export const createDatabaseClient = () => {
 // Server-side database client
 export const createServerDatabaseClient = () => {
   if (!supabaseUrl || !supabaseServiceRoleKey) {
-    console.error("Missing Supabase credentials for server")
+    console.warn("Supabase server credentials not configured — running without DB")
     return null
   }
 

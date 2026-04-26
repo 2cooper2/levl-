@@ -27,17 +27,65 @@ import { motion, AnimatePresence } from "framer-motion"
 import { ProviderCard } from "@/components/ai-matchmaker/provider-card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { LevlPortal } from "@/components/levl-portal"
 import Image from "next/image"
 import { Option3DPreview, THREE_D_OPTIONS } from "@/components/ai-matchmaker/option-3d-preview"
-import { MountHybridPreview, isMountItem } from "@/components/ai-matchmaker/mount-hybrid-preview"
 import dynamic from "next/dynamic"
-const TVSizeMeasure = dynamic(
-  () => import("@/components/ai-matchmaker/option-3d-impl").then((m) => ({ default: m.TVSizeMeasure })),
-  { ssr: false }
-)
 
+// Static render images for mount object option cards
+const MOUNT_RENDERS: Record<string, string> = {
+  "TV/Monitor":        "/assets/renders/tv-monitor.png",
+  "Art/Picture Frame": "/assets/renders/art-frame.png",
+  "Floating Shelves":  "/assets/renders/floating-shelves.png",
+  "Light Fixture":     "/assets/renders/light-fixture.png",
+}
+function isMountOption(opt: string): boolean {
+  return opt in MOUNT_RENDERS || opt === "Mirror"
+}
+
+// Static Blender renders for mount TYPE option cards (Fixed/Tilting/etc.)
+const MOUNT_TYPE_RENDERS: Record<string, string> = {
+  "Fixed (flat against wall)":                   "/assets/renders/mount-fixed.png",
+  "Tilting (angle adjustment)":                  "/assets/renders/mount-tilting.png",
+  "Full-motion/Articulating (swivel and tilt)":  "/assets/renders/mount-fullmotion.png",
+  "Ceiling mount":                               "/assets/renders/mount-ceiling.png",
+}
+const MOUNT_TYPE_VIDEOS: Record<string, string> = {
+  "Tilting (angle adjustment)":                  "/assets/renders/mount-tilting.webm",
+  "Full-motion/Articulating (swivel and tilt)":  "/assets/renders/mount-fullmotion.webm",
+}
+function isMountTypeRender(opt: string): boolean {
+  return opt in MOUNT_TYPE_RENDERS
+}
+
+// Static Blender renders for wall type cards (replaces WebGL WallTexScene)
+const WALL_RENDERS: Record<string, string> = {
+  "Drywall/Sheetrock": "/assets/renders/wall-drywall.png",
+  "Brick":             "/assets/renders/wall-brick.png",
+  "Concrete":          "/assets/renders/wall-concrete.png",
+  "Plaster":           "/assets/renders/wall-plaster.png",
+  "Stone":             "/assets/renders/wall-stone.png",
+}
+function isWallRender(opt: string): boolean {
+  return opt in WALL_RENDERS
+}
+
+// Maps non-TV mount answers to their own service sub-type
+const MOUNT_OBJECT_SERVICE_MAP: Record<string, string> = {
+  "Art/Picture Frame": "artMounting",
+  "Floating Shelves":  "shelvesMounting",
+  "Mirror":            "mirrorMounting",
+  "Light Fixture":     "lightFixtureMounting",
+}
+
+// Static Blender renders for cable management cards (replaces WebGL cable scenes)
+const CABLE_RENDERS: Record<string, string> = {
+  "Yes, hide all cables in wall": "/assets/renders/cable-hidden.png",
+  "Yes, use cable covers":        "/assets/renders/cable-covers.png",
+  "No, cables visible is fine":   "/assets/renders/cable-visible.png",
+}
+function isCableRender(opt: string): boolean {
+  return opt in CABLE_RENDERS
+}
 
 // Tip text shown overlaid on the lavender canvas for specific wall types
 const WALL_TIPS: Record<string, string> = {
@@ -262,8 +310,6 @@ const serviceSpecificQuestions: ServiceSpecificQuestions = {
       "What type of TV mount do you have/need?",
       "Do you need cable management (hiding cables in the wall)?",
       "Will you have a soundbar or other accessories to mount/attach with the TV?",
-      "Is the mounting location near a power outlet?",
-      "Do you need help with any additional setup (streaming devices, gaming consoles, etc.)?",
     ],
     options: {
       "What would you like to mount?": [
@@ -317,20 +363,8 @@ const serviceSpecificQuestions: ServiceSpecificQuestions = {
         "No additional accessories",
         "Unsure",
       ],
-      "Is the mounting location near a power outlet?": [
-        "Yes, within 3 feet",
-        "Yes, but farther away",
-        "No, need outlet installed",
-        "Unsure",
-      ],
-      "Do you need help with any additional setup (streaming devices, gaming consoles, etc.)?": [
-        "Yes, full entertainment system setup",
-        "Yes, just basic device connection",
-        "No, just TV mounting",
-        "Unsure",
-      ],
     },
-    required: [true, true, true, false, false, false, false, false],
+    required: [true, true, true, false, false, false],
   },
   plumbing: {
     questions: [
@@ -463,7 +497,6 @@ const serviceSpecificQuestions: ServiceSpecificQuestions = {
       "What type of furniture needs assembly?",
       "How many pieces need assembly?",
       "What is the brand/source of the furniture?",
-      "Do you have all the necessary tools?",
       "Are the assembly instructions available?",
       "Is the furniture already delivered to your location?",
       "Do you need the packaging materials removed after assembly?",
@@ -501,7 +534,6 @@ const serviceSpecificQuestions: ServiceSpecificQuestions = {
         "Custom/Local",
         "Unsure",
       ],
-      "Do you have all the necessary tools?": ["Yes, all tools ready", "Missing some tools", "No tools", "Unsure"],
       "Are the assembly instructions available?": [
         "Yes, have instructions",
         "Lost/missing instructions",
@@ -531,7 +563,7 @@ const serviceSpecificQuestions: ServiceSpecificQuestions = {
         "Unsure",
       ],
     },
-    required: [true, true, false, false, false, false, false, false],
+    required: [true, true, false, false, false, false, false],
   },
   moving: {
     questions: [
@@ -955,6 +987,188 @@ const serviceSpecificQuestions: ServiceSpecificQuestions = {
     },
     required: [true, true, false, true, false, false, false],
   },
+  // ── Non-TV mount sub-paths ─────────────────────────────────────────────────
+  artMounting: {
+    questions: [
+      "What type of wall do you have?",
+      "How many pieces need to be hung?",
+      "What is the approximate size of each piece?",
+      "Do you need precise alignment or gallery-wall arrangement?",
+      "Is there any special requirement for the hanging?",
+    ],
+    options: {
+      "What type of wall do you have?": [
+        "Drywall/Sheetrock",
+        "Plaster",
+        "Brick",
+        "Concrete",
+        "Stone",
+        "Unsure",
+      ],
+      "How many pieces need to be hung?": [
+        "1 piece",
+        "2–4 pieces",
+        "5–10 pieces",
+        "More than 10 pieces",
+        "Unsure",
+      ],
+      "What is the approximate size of each piece?": [
+        "Small (under 24 inches)",
+        "Medium (24–48 inches)",
+        "Large (48–72 inches)",
+        "Extra large (over 72 inches)",
+        "Mixed sizes",
+        "Unsure",
+      ],
+      "Do you need precise alignment or gallery-wall arrangement?": [
+        "Yes, precise gallery-style layout",
+        "Yes, just level and centered",
+        "No, casual placement is fine",
+        "Unsure",
+      ],
+      "Is there any special requirement for the hanging?": [
+        "Heavy piece (over 50 lbs)",
+        "Valuable/fragile artwork",
+        "Canvas/no frame",
+        "No special requirements",
+        "Unsure",
+      ],
+    },
+    required: [true, true, false, false, false],
+  },
+  shelvesMounting: {
+    questions: [
+      "What type of wall do you have?",
+      "How many shelves need to be installed?",
+      "What is the approximate load per shelf?",
+      "Are the shelves floating (no visible brackets)?",
+      "Do you already have the shelves, or need help sourcing them?",
+    ],
+    options: {
+      "What type of wall do you have?": [
+        "Drywall/Sheetrock",
+        "Plaster",
+        "Brick",
+        "Concrete",
+        "Stone",
+        "Unsure",
+      ],
+      "How many shelves need to be installed?": [
+        "1 shelf",
+        "2–3 shelves",
+        "4–6 shelves",
+        "More than 6 shelves",
+        "Unsure",
+      ],
+      "What is the approximate load per shelf?": [
+        "Light — books, décor (under 20 lbs)",
+        "Medium — small appliances (20–50 lbs)",
+        "Heavy — storage, equipment (50+ lbs)",
+        "Unsure",
+      ],
+      "Are the shelves floating (no visible brackets)?": [
+        "Yes, floating/invisible brackets",
+        "No, standard bracket-mounted",
+        "Unsure",
+      ],
+      "Do you already have the shelves, or need help sourcing them?": [
+        "I have the shelves ready",
+        "I need help choosing/sourcing shelves",
+        "Unsure",
+      ],
+    },
+    required: [true, true, false, false, false],
+  },
+  mirrorMounting: {
+    questions: [
+      "What type of wall do you have?",
+      "How large is the mirror?",
+      "What type of mirror is it?",
+      "Does the mirror already have hanging hardware?",
+    ],
+    options: {
+      "What type of wall do you have?": [
+        "Drywall/Sheetrock",
+        "Plaster",
+        "Brick",
+        "Concrete",
+        "Stone",
+        "Unsure",
+      ],
+      "How large is the mirror?": [
+        "Small (under 24 inches)",
+        "Medium (24–48 inches)",
+        "Large (48–72 inches)",
+        "Extra large/Full-length (over 72 inches)",
+        "Unsure",
+      ],
+      "What type of mirror is it?": [
+        "Decorative/framed mirror",
+        "Full-length mirror",
+        "Bathroom vanity mirror",
+        "Frameless/beveled mirror",
+        "Antique/heavy mirror",
+        "Unsure",
+      ],
+      "Does the mirror already have hanging hardware?": [
+        "Yes, has hooks/wire",
+        "No, needs hardware added",
+        "Unsure",
+      ],
+    },
+    required: [true, true, false, false],
+  },
+  lightFixtureMounting: {
+    questions: [
+      "What type of light fixture needs to be installed?",
+      "Where is the fixture being installed?",
+      "Is there existing wiring at the installation point?",
+      "What type of ceiling or wall surface is it?",
+      "Do you need any additional electrical work alongside this?",
+    ],
+    options: {
+      "What type of light fixture needs to be installed?": [
+        "Ceiling light/flush mount",
+        "Chandelier/pendant light",
+        "Wall sconce",
+        "Recessed/can lights",
+        "Track lighting",
+        "Outdoor light",
+        "Unsure",
+      ],
+      "Where is the fixture being installed?": [
+        "Living room",
+        "Bedroom",
+        "Kitchen",
+        "Bathroom",
+        "Dining room",
+        "Hallway/Entryway",
+        "Outdoor/Exterior",
+        "Unsure",
+      ],
+      "Is there existing wiring at the installation point?": [
+        "Yes, replacing an existing fixture",
+        "Existing wiring but no fixture",
+        "No wiring — new installation",
+        "Unsure",
+      ],
+      "What type of ceiling or wall surface is it?": [
+        "Drywall/Sheetrock",
+        "Plaster",
+        "Concrete/Masonry",
+        "Vaulted/Angled ceiling",
+        "High ceiling (10 ft+)",
+        "Unsure",
+      ],
+      "Do you need any additional electrical work alongside this?": [
+        "Yes, need a new circuit or outlet",
+        "Yes, dimmer switch installation",
+        "No, just the fixture installation",
+        "Unsure",
+      ],
+    },
+    required: [true, true, true, false, false],
+  },
 }
 
 const questionSkipLogic: {
@@ -966,34 +1180,14 @@ const questionSkipLogic: {
 } = {
   tvMounting: {
     "What would you like to mount?": {
-      "Art/Picture Frame": new Set([
-        "What size is your TV?",
-        "What type of TV mount do you have/need?",
-        "Do you need cable management (hiding cables in the wall)?",
-        "Will you have a soundbar or other accessories to mount/attach with the TV?",
-        "Do you need help with any additional setup (streaming devices, gaming consoles, etc.)?",
-      ]),
-      "Floating Shelves": new Set([
-        "What size is your TV?",
-        "What type of TV mount do you have/need?",
-        "Do you need cable management (hiding cables in the wall)?",
-        "Will you have a soundbar or other accessories to mount/attach with the TV?",
-        "Do you need help with any additional setup (streaming devices, gaming consoles, etc.)?",
-      ]),
-      "Mirror": new Set([
-        "What size is your TV?",
-        "What type of TV mount do you have/need?",
-        "Do you need cable management (hiding cables in the wall)?",
-        "Will you have a soundbar or other accessories to mount/attach with the TV?",
-        "Do you need help with any additional setup (streaming devices, gaming consoles, etc.)?",
-      ]),
+      // Non-TV paths are handled by service-type switching — these are fallbacks for "Other"
       "Other": new Set([
         "What size is your TV?",
         "What type of TV mount do you have/need?",
         "Will you have a soundbar or other accessories to mount/attach with the TV?",
-        "Do you need help with any additional setup (streaming devices, gaming consoles, etc.)?",
       ]),
     },
+    // "I have a mount" no longer skips mount-type — we still need to know which type they have
   },
   painting: {
     "Do you have a color scheme in mind?": {
@@ -1002,11 +1196,125 @@ const questionSkipLogic: {
     "What is the current wall condition?": {
       "Good condition": new Set(["Do walls need repair before painting?"]),
     },
+    "Do you need interior or exterior painting?": {
+      "Interior only": new Set([]),
+      "Exterior only": new Set(["What is the current wall condition?", "Do walls need repair before painting?"]),
+    },
   },
   plumbing: {
     "Is there active water leakage?": {
       "No active leak": new Set(["Do you need emergency shutoff assistance?"]),
       "Water shut off": new Set(["Do you need emergency shutoff assistance?"]),
+    },
+    "What type of plumbing issue are you experiencing?": {
+      "Installation of new fixture": new Set(["Is there active water leakage?", "Have you tried any DIY fixes already?"]),
+    },
+  },
+  moving: {
+    "What type of move are you planning?": {
+      "Single item/Partial": new Set(["How many rooms need to be moved?", "Do you need storage services?"]),
+      "Storage unit": new Set(["How many rooms need to be moved?"]),
+    },
+    "What is the distance of your move?": {
+      "Same building": new Set([]),
+    },
+    "Do you have any large or specialty items?": {
+      "No specialty items": new Set([]),
+    },
+  },
+  cleaning: {
+    "What type of cleaning service do you need?": {
+      "One-time deep clean": new Set(["How often do you need cleaning?"]),
+      "Move-in/Move-out": new Set(["How often do you need cleaning?"]),
+      "Post-construction": new Set(["How often do you need cleaning?"]),
+      "Post-renovation": new Set(["How often do you need cleaning?"]),
+      "Event cleanup": new Set(["How often do you need cleaning?"]),
+      "Office cleaning": new Set(["Do you have any pets?"]),
+    },
+    "Do you need cleaning supplies provided?": {
+      "I have all supplies": new Set(["Any allergies or product preferences?"]),
+    },
+  },
+  electrical: {
+    "What type of electrical work do you need?": {
+      "Safety inspection": new Set(["Is this a repair or new installation?", "Has this issue occurred before?"]),
+      "Troubleshooting/Diagnosis": new Set(["Is this a repair or new installation?"]),
+    },
+    "How urgent is this electrical work?": {
+      "Emergency (safety hazard)": new Set(["Do you need a permit for this work?"]),
+    },
+    "Is the property residential or commercial?": {
+      "Residential": new Set([]),
+    },
+    "Has this issue occurred before?": {
+      "No, first time": new Set([]),
+    },
+  },
+  landscaping: {
+    "What type of landscaping service do you need?": {
+      "Lawn maintenance": new Set([
+        "Are there any specific features you want to include?",
+        "Do you need irrigation or drainage work?",
+      ]),
+      "Landscape cleanup": new Set([
+        "Are there any specific features you want to include?",
+        "Do you need irrigation or drainage work?",
+      ]),
+      "Tree service/trimming": new Set([
+        "Are there any specific features you want to include?",
+        "Do you need irrigation or drainage work?",
+      ]),
+    },
+    "Do you need regular maintenance or a one-time service?": {
+      "One-time project": new Set(["When would you like the work to be completed?"]),
+    },
+    "Are there any specific features you want to include?": {
+      "None/Unsure": new Set(["Do you need irrigation or drainage work?"]),
+    },
+  },
+  furniture: {
+    "What type of furniture needs assembly?": {
+      "1 piece (already answered)": new Set([]),
+    },
+    "Are the assembly instructions available?": {
+      "Yes, have instructions": new Set([]),
+    },
+    "Is the furniture already delivered to your location?": {
+      "Yes, at location": new Set([]),
+    },
+  },
+  flooring: {
+    "What type of flooring project do you need?": {
+      "Repair": new Set(["Do you need removal of existing flooring?"]),
+      "Cleaning/Maintenance": new Set([
+        "What type of flooring material are you interested in?",
+        "Do you need removal of existing flooring?",
+        "What is the subfloor condition?",
+      ]),
+      "Refinishing": new Set(["Do you need removal of existing flooring?"]),
+    },
+    "Is this for a residential or commercial property?": {
+      "Residential": new Set([]),
+    },
+  },
+  roofing: {
+    "What type of roofing service do you need?": {
+      "Inspection only": new Set([
+        "Have you noticed any leaks or damage?",
+        "Do you need emergency services?",
+      ]),
+      "Emergency leak repair": new Set(["What is your timeline for this project?"]),
+    },
+    "Have you noticed any leaks or damage?": {
+      "No visible issues": new Set(["Do you need emergency services?"]),
+    },
+    "Do you need emergency services?": {
+      "No, can wait": new Set([]),
+    },
+  },
+  lightFixtureMounting: {
+    "Is there existing wiring at the installation point?": {
+      "Yes, replacing an existing fixture": new Set(["Do you need any additional electrical work alongside this?"]),
     },
   },
 }
@@ -1074,16 +1382,29 @@ const MessageItem = memo(
     if (message.type === "ai") {
       return (
         <motion.div
-          className="flex flex-col items-start"
+          className="flex flex-col items-start w-full"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
           layout={false}
         >
-          <div className={`relative bg-gradient-to-br from-white via-[#fefeff] to-[#fbf9ff] dark:from-gray-800 dark:via-gray-800 dark:to-lavender-950 rounded-3xl px-5 py-3 ${message.options?.some(o => isMountItem(o)) ? 'w-full' : 'max-w-[80%]'} shadow-[0_0_0_1px_rgba(88,82,100,0.09),0_16px_16px_rgba(64,58,84,0.20),0_28px_20px_rgba(60,54,80,0.09),0_-1px_0_rgba(255,255,255,0.88)] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.05),0_16px_16px_rgba(0,0,0,0.32),0_28px_20px_rgba(0,0,0,0.14),0_-1px_0_rgba(255,255,255,0.05)] translate-y-[-14px] transition-all duration-300 transform`}>
+          <div className={`relative bg-gradient-to-br from-white via-[#fefeff] to-[#fbf9ff] dark:from-gray-800 dark:via-gray-800 dark:to-lavender-950 rounded-3xl px-5 py-3 ${(message.options?.some(o => isMountOption(o) || isMountTypeRender(o)) || message.content === "What size is your TV?") ? 'w-full' : message.options?.some(o => isWallRender(o)) ? 'max-w-[92%]' : 'max-w-[80%]'} shadow-[0_0_0_1px_rgba(88,82,100,0.09),0_16px_16px_rgba(64,58,84,0.20),0_28px_20px_rgba(60,54,80,0.09),0_-1px_0_rgba(255,255,255,0.88)] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.05),0_16px_16px_rgba(0,0,0,0.32),0_28px_20px_rgba(0,0,0,0.14),0_-1px_0_rgba(255,255,255,0.05)] translate-y-[-14px] transition-all duration-300 transform`}>
             <div className="absolute inset-x-0 bottom-0 h-1/2 rounded-b-3xl bg-gradient-to-t from-black/5 to-transparent dark:from-white/5"></div>
 
-            <p className="text-sm relative z-10">{message.content}</p>
+            <p className="text-sm relative z-10">
+              {message.content.split(/(\*[^*]+\*)/).map((part, i) =>
+                part.startsWith('*') && part.endsWith('*') && part.length > 2 ? (
+                  <span
+                    key={i}
+                    className="italic inline-block bg-lavender-100 dark:bg-lavender-900/40 text-lavender-800 dark:text-lavender-200 rounded-md px-2 py-1 my-1"
+                  >
+                    {part.slice(1, -1)}
+                  </span>
+                ) : (
+                  <span key={i}>{part}</span>
+                )
+              )}
+            </p>
 
             {message.options && (
               <div className="mt-4 relative z-10">
@@ -1091,8 +1412,8 @@ const MessageItem = memo(
                 {message.options.some(opt => THREE_D_OPTIONS.has(opt)) ? (
                   // No translateZ/backfaceVisibility here — those fight the Canvas WebGL layer
                   <div className="flex flex-col gap-2">
-                    {/* 3D cards — always 2 columns, max size */}
-                    <div className="grid grid-cols-2 gap-2">
+                    {/* cards — 2 columns mobile, 3 on md+ */}
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-1.5">
                       {message.options.filter(opt => THREE_D_OPTIONS.has(opt)).map((option, index) => (
                 <motion.button
                   key={`${message.id}-${option}-${index}`}
@@ -1100,18 +1421,79 @@ const MessageItem = memo(
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   whileTap={{ scale: 0.98 }}
                   transition={{ delay: index * 0.05, type: "spring", stiffness: 260, damping: 20 }}
-                  className="group relative flex flex-col items-center overflow-hidden
+                  className="group relative flex flex-col items-center
                     bg-gradient-to-b from-white/95 to-white/80 dark:from-gray-800/95 dark:to-gray-900/80
                     rounded-2xl text-xs font-semibold
-                    border border-white/30
-                    shadow-[0_2px_6px_rgba(44,38,80,0.07),0_8px_24px_rgba(44,38,80,0.06),0_20px_48px_rgba(38,32,72,0.05),0_36px_72px_rgba(30,26,64,0.03),0_-1px_0_rgba(255,255,255,0.82)]
-                    dark:shadow-[0_2px_6px_rgba(0,0,0,0.24),0_8px_24px_rgba(0,0,0,0.18),0_20px_48px_rgba(0,0,0,0.12),0_36px_72px_rgba(0,0,0,0.07),0_-1px_0_rgba(255,255,255,0.05)]
+                    shadow-[0_2px_6px_rgba(44,38,80,0.07),0_8px_24px_rgba(44,38,80,0.06),0_20px_48px_rgba(38,32,72,0.05),0_36px_72px_rgba(30,26,64,0.03)]
+                    dark:shadow-[0_2px_6px_rgba(0,0,0,0.24),0_8px_24px_rgba(0,0,0,0.18),0_20px_48px_rgba(0,0,0,0.12),0_36px_72px_rgba(0,0,0,0.07)]
                     backdrop-blur-md"
                   onClick={() => handleOptionClick(option)}
                 >
-                  <div className="w-full aspect-square overflow-hidden relative">
-                    {isMountItem(option) ? (
-                      <MountHybridPreview option={option} className="w-full h-full" />
+                  <div className="w-full aspect-[8/13] relative overflow-hidden">
+                    {isMountTypeRender(option) ? (
+                      <div className="w-full h-full relative" style={{ background: 'linear-gradient(180deg, #1e1530 0%, #2d2050 45%, #3a2d5c 100%)' }}>
+                        {MOUNT_TYPE_VIDEOS[option] ? (
+                          <video
+                            src={MOUNT_TYPE_VIDEOS[option]}
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            className="absolute inset-0 w-full h-full object-contain p-2"
+                          />
+                        ) : (
+                          <Image
+                            src={MOUNT_TYPE_RENDERS[option]}
+                            alt={option}
+                            fill
+                            className="object-contain p-2"
+                            sizes="(max-width: 768px) 45vw, 200px"
+                          />
+                        )}
+                      </div>
+                    ) : isMountOption(option) ? (
+                      MOUNT_RENDERS[option] ? (
+                        <div className="w-full h-full relative" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0.08) 35%, transparent 60%), linear-gradient(135deg, #ede9ff 0%, #c4b8f5 100%)' }}>
+                          <Image
+                            src={MOUNT_RENDERS[option]}
+                            alt={option}
+                            fill
+                            className="object-contain p-3"
+                            sizes="(max-width: 768px) 45vw, 200px"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0.08) 35%, transparent 60%), linear-gradient(135deg, #ede9ff 0%, #c4b8f5 100%)' }}>
+                          <span className="text-[10px] text-purple-400 font-medium">Coming soon</span>
+                        </div>
+                      )
+                    ) : isWallRender(option) ? (
+                      <div className="w-full h-full relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #ede9ff 0%, #c4b8f5 100%)' }}>
+                        {/* Bokeh blur orbs — lavender light circles that give frosted depth */}
+                        <div style={{ position:'absolute', inset:0, zIndex:1, pointerEvents:'none' }}>
+                          <div style={{ position:'absolute', width:'140%', height:'140%', top:'-20%', left:'-20%', background:'radial-gradient(ellipse at 30% 40%, rgba(200,185,255,0.90) 0%, rgba(180,160,255,0.60) 25%, transparent 65%)', filter:'blur(32px)' }} />
+                          <div style={{ position:'absolute', width:'120%', height:'120%', top:'10%', left:'15%', background:'radial-gradient(ellipse at 70% 60%, rgba(220,210,255,0.80) 0%, rgba(160,140,240,0.50) 30%, transparent 65%)', filter:'blur(40px)' }} />
+                          <div style={{ position:'absolute', width:'80%', height:'80%', bottom:'-10%', right:'-5%', background:'radial-gradient(ellipse at 60% 70%, rgba(180,165,255,0.70) 0%, transparent 60%)', filter:'blur(28px)' }} />
+                        </div>
+                        <Image
+                          src={WALL_RENDERS[option]}
+                          alt={option}
+                          fill
+                          className="object-contain"
+                          style={{ zIndex:2 }}
+                          sizes="(max-width: 768px) 45vw, 200px"
+                        />
+                      </div>
+                    ) : isCableRender(option) ? (
+                      <div className="w-full h-full relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0.08) 35%, transparent 60%), linear-gradient(135deg, #ede9ff 0%, #c4b8f5 100%)' }}>
+                        <Image
+                          src={CABLE_RENDERS[option]}
+                          alt={option}
+                          fill
+                          className="object-contain p-2"
+                          sizes="(max-width: 768px) 45vw, 200px"
+                        />
+                      </div>
                     ) : (
                       <Option3DPreview
                         option={option}
@@ -1120,7 +1502,7 @@ const MessageItem = memo(
                       />
                     )}
                   </div>
-                  <div className={`relative w-full px-3 text-center bg-white/40 dark:bg-gray-900/40 backdrop-blur-md border-t border-white/10 ${WALL_TIPS[option] ? 'pt-2 pb-1.5' : 'py-2.5'}`}>
+                  <div className={`relative w-full px-3 text-center bg-white/40 dark:bg-gray-900/40 backdrop-blur-md ${WALL_TIPS[option] ? 'pt-2 pb-1.5' : 'py-2.5'}`}>
                     <span className="bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 bg-clip-text text-transparent">
                       {option}
                     </span>
@@ -1173,8 +1555,29 @@ const MessageItem = memo(
                     ))}
                   </div>
                 )}
-                
-                {/* 3D TV size illustration */}
+
+                {/* Mount type illustration */}
+                {message.content === "What type of TV mount do you have/need?" && (
+                  <>
+                    <motion.div
+                      className="mt-4 relative w-full h-64 sm:h-80 overflow-hidden rounded-xl border border-lavender-200/70"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3, duration: 0.3 }}
+                      style={{ background: 'linear-gradient(180deg, #1e1530 0%, #2d2050 45%, #3a2d5c 100%)' }}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src="/assets/renders/tv-monitor.png"
+                        alt="TV mount types"
+                        className="absolute inset-0 w-full h-full object-contain"
+                        style={{ zIndex: 2 }}
+                      />
+                    </motion.div>
+                  </>
+                )}
+
+                {/* TV size illustration — Blender render */}
                 {message.content === "What size is your TV?" && (
                   <>
                     <motion.div
@@ -1182,12 +1585,20 @@ const MessageItem = memo(
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.3, duration: 0.3 }}
+                      style={{ background: 'linear-gradient(135deg, #ede9ff 0%, #c4b8f5 100%)' }}
                     >
-                      <TVSizeMeasure />
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src="/assets/renders/tv-measure.webp"
+                        alt="TV diagonal measurement"
+                        className="absolute inset-0 w-full h-full object-contain"
+                        style={{ zIndex: 2 }}
+                      />
                     </motion.div>
                     <p className="mt-3 mb-1 text-xs font-medium text-black text-center">Measure corner to corner diagonally</p>
                   </>
                 )}
+
               </div>
             )}
             {message.services && (
@@ -1300,8 +1711,7 @@ export function AIServiceMatchmaker() {
   const [conversationStage, setConversationStage] = useState<
     "initial" | "understanding" | "service-specific" | "recommending" | "refining" | "finalizing"
   >("initial")
-  const [showPortal, setShowPortal] = useState(false)
-  const [detectedPreferences, setDetectedPreferences] = useState<{
+const [detectedPreferences, setDetectedPreferences] = useState<{
     category: string | null
     timeframe: string | null
   }>({
@@ -1333,10 +1743,8 @@ export function AIServiceMatchmaker() {
   }, [])
 
   // Preload the 3D module bundle immediately on mount — before user clicks anything.
-  // This ensures shader compilation starts early so cards appear without lag.
   useEffect(() => {
     import("@/components/ai-matchmaker/option-3d-impl").catch(() => {})
-    import("@/components/ai-matchmaker/mount-glow-canvas").catch(() => {})
   }, [])
 
   // Track whether the user has interacted (clicked a category or sent a message)
@@ -1391,16 +1799,20 @@ export function AIServiceMatchmaker() {
 
       if (aiModel.conversationContext.currentServiceType) {
         const serviceTypeMap: { [key: string]: string } = {
-          tvMounting: "Mounting",
-          furniture: "Assembly",
-          painting: "Painting",
-          plumbing: "Plumbing",
-          moving: "Moving",
-          cleaning: "Cleaning",
-          electrical: "Electrical",
-          landscaping: "Landscaping",
-          flooring: "Flooring",
-          roofing: "Roofing",
+          tvMounting:           "Mounting",
+          artMounting:          "Mounting",
+          shelvesMounting:      "Mounting",
+          mirrorMounting:       "Mounting",
+          lightFixtureMounting: "Mounting",
+          furniture:            "Assembly",
+          painting:             "Painting",
+          plumbing:             "Plumbing",
+          moving:               "Moving",
+          cleaning:             "Cleaning",
+          electrical:           "Electrical",
+          landscaping:          "Landscaping",
+          flooring:             "Flooring",
+          roofing:              "Roofing",
         }
         const expectedCategory = serviceTypeMap[aiModel.conversationContext.currentServiceType]
         if (service.category === expectedCategory) {
@@ -1493,16 +1905,61 @@ export function AIServiceMatchmaker() {
       setMessages((prev) => [...prev, userMessage])
 
       if (conversationStage === "service-specific") {
-        const serviceType = aiModel.conversationContext.currentServiceType
+        let serviceType = aiModel.conversationContext.currentServiceType
         if (!serviceType) return
 
         const questionIndex = aiModel.conversationContext.currentServiceQuestion
         const questions = serviceSpecificQuestions[serviceType].questions
         const currentQuestion = questions[questionIndex]
-        const nextQuestionIndex = getNextQuestionIndex(serviceType, questionIndex, option, currentQuestion)
 
         const updatedAnswers = new Map(aiModel.conversationContext.serviceSpecificAnswers)
         updatedAnswers.set(currentQuestion, option)
+
+        // ── Branch to sub-path when user picks a non-TV mount item ────────────
+        if (currentQuestion === "What would you like to mount?" && option in MOUNT_OBJECT_SERVICE_MAP) {
+          const newServiceType = MOUNT_OBJECT_SERVICE_MAP[option]
+          const newQuestions = serviceSpecificQuestions[newServiceType].questions
+          const firstQuestion = newQuestions[0]
+          const firstOptions = serviceSpecificQuestions[newServiceType].options[firstQuestion]
+
+          setAIModel((prev) => ({
+            ...prev,
+            conversationContext: {
+              ...prev.conversationContext,
+              currentServiceType: newServiceType,
+              serviceSpecificAnswers: updatedAnswers,
+              currentServiceQuestion: 0,
+            },
+          }))
+
+          setIsTyping(true)
+          const loadingId = `loading-${Date.now()}`
+          setMessages((prev) => [...prev, { id: loadingId, type: "loading", content: "", timestamp: new Date() }])
+          setTimeout(() => {
+            if (!isMountedRef.current) return
+            setMessages((prev) => {
+              const filtered = prev.filter((msg) => msg.id !== loadingId)
+              return [
+                ...filtered,
+                {
+                  id: `ai-${Date.now()}`,
+                  type: "ai",
+                  content: firstQuestion,
+                  timestamp: new Date(),
+                  options: firstOptions,
+                },
+              ]
+            })
+            setIsTyping(false)
+          }, 800)
+          return
+        }
+
+        const nextQuestionIndex = getNextQuestionIndex(serviceType, questionIndex, option, currentQuestion)
+
+        // ── Cross-category trigger: new wiring needed during light fixture install ──
+        const needsElectrical =
+          (currentQuestion === "Is there existing wiring at the installation point?" && option === "No wiring — new installation")
 
         setAIModel((prev) => ({
           ...prev,
@@ -1515,7 +1972,7 @@ export function AIServiceMatchmaker() {
 
         if (nextQuestionIndex < questions.length) {
           const nextQuestion = questions[nextQuestionIndex]
-          const options = serviceSpecificQuestions[serviceType].options[nextQuestion]
+          const nextOptions = serviceSpecificQuestions[serviceType].options[nextQuestion]
 
           setIsTyping(true)
           const loadingId = `loading-${Date.now()}`
@@ -1533,16 +1990,26 @@ export function AIServiceMatchmaker() {
             if (!isMountedRef.current) return
             setMessages((prev) => {
               const filtered = prev.filter((msg) => msg.id !== loadingId)
-              return [
+              const next: Message[] = [
                 ...filtered,
                 {
                   id: `ai-${Date.now()}`,
-                  type: "ai",
+                  type: "ai" as const,
                   content: nextQuestion,
                   timestamp: new Date(),
-                  options: options,
+                  options: nextOptions,
                 },
               ]
+              // Append electrical note after the next question bubble
+              if (needsElectrical) {
+                next.push({
+                  id: `ai-elec-${Date.now()}`,
+                  type: "ai" as const,
+                  content: "Just so you know — our providers can also handle any electrical work (outlet installation, new circuits) as part of the same job.",
+                  timestamp: new Date(),
+                })
+              }
+              return next
             })
             setIsTyping(false)
           }, 800)
@@ -1658,16 +2125,20 @@ export function AIServiceMatchmaker() {
     })
 
     const categoryNames: { [key: string]: string } = {
-      tvMounting: "TV Mounting",
-      furniture: "Furniture Assembly",
-      painting: "Painting",
-      plumbing: "Plumbing",
-      moving: "Moving",
-      cleaning: "Cleaning",
-      electrical: "Electrical",
-      landscaping: "Landscaping",
-      flooring: "Flooring",
-      roofing: "Roofing",
+      tvMounting:           "TV Mounting",
+      artMounting:          "Art & Picture Frame Mounting",
+      shelvesMounting:      "Floating Shelves Installation",
+      mirrorMounting:       "Mirror Mounting",
+      lightFixtureMounting: "Light Fixture Installation",
+      furniture:            "Furniture Assembly",
+      painting:             "Painting",
+      plumbing:             "Plumbing",
+      moving:               "Moving",
+      cleaning:             "Cleaning",
+      electrical:           "Electrical",
+      landscaping:          "Landscaping",
+      flooring:             "Flooring",
+      roofing:              "Roofing",
     }
 
     const loadingId = `loading-${Date.now()}`
@@ -1687,7 +2158,7 @@ export function AIServiceMatchmaker() {
         {
           id: `ai-${Date.now()}`,
           type: "ai",
-          content: `Great! I'll help you find the best ${categoryNames[serviceType] || serviceType} service. When would you like this service completed?\n\n*All answers will be sent to your selected handyman to help them prepare for your job.*`,
+          content: `Great! I'll help you find the best ${categoryNames[serviceType] || serviceType} service. When would you like this service completed?\n\n*All details will be sent to your selected handyman to help them prepare for your project.*`,
           timestamp: new Date(),
           options: ["ASAP", "This week", "Within 2 weeks", "I'm flexible with timing", "Unsure"],
         },
@@ -1698,16 +2169,14 @@ export function AIServiceMatchmaker() {
 
   const categories = useMemo(
     () => [
-      { icon: Tv, name: "Mounting", serviceType: "tvMounting" },
-      { icon: Truck, name: "Moving", serviceType: "moving" },
-      { icon: Spray, name: "Painting", serviceType: "painting" },
-      { icon: Wrench, name: "Assembly", serviceType: "furniture" },
-      { icon: Sparkles, name: "Cleaning", serviceType: "cleaning" },
-      { icon: Zap, name: "Electrical", serviceType: "electrical" },
-      { icon: Droplet, name: "Plumbing", serviceType: "plumbing" },
-      { icon: Leaf, name: "Landscaping", serviceType: "landscaping" },
-      { icon: Layers, name: "Flooring", serviceType: "flooring" },
-      { icon: HardHat, name: "Roofing", serviceType: "roofing" },
+      { icon: Tv,       name: "Mounting",    serviceType: "tvMounting",  cardRender: "/assets/renders/category-mounting-v2.png" },
+      { icon: Truck,    name: "Moving",      serviceType: "moving",      cardRender: "/assets/renders/category-moving-v2.png" },
+      { icon: Spray,    name: "Painting",    serviceType: "painting",    cardRender: "/assets/renders/category-painting-v2.png" },
+      { icon: Wrench,   name: "Assembly",    serviceType: "furniture",   cardRender: "/assets/renders/category-assembly-v2.png" },
+      { icon: Zap,      name: "Electrical",  serviceType: "electrical",  cardRender: "/assets/renders/category-electrical.png" },
+      { icon: Droplet,  name: "Plumbing",    serviceType: "plumbing",    cardRender: "/assets/renders/category-plumbing.png" },
+      { icon: Leaf,     name: "Landscaping", serviceType: "landscaping", cardRender: "/assets/renders/category-landscaping.png" },
+      { icon: Layers,   name: "Flooring",    serviceType: "flooring",    cardRender: "/assets/renders/category-flooring.png" },
     ],
     [],
   )
@@ -1822,31 +2291,17 @@ export function AIServiceMatchmaker() {
                 >
                   Worker
                 </button>
-                <Dialog open={showPortal} onOpenChange={setShowPortal}>
-                  <DialogTrigger asChild>
-                    <button
-                      className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-black dark:text-white"
-                      style={{ textShadow: "0px 2px 4px rgba(66,60,86,0.17), 0px 5px 12px rgba(62,56,82,0.11)" }}
-                    >
-                      Portal
-                    </button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0">
-                    <DialogHeader className="sr-only">
-                      <DialogTitle>LevL Portal</DialogTitle>
-                    </DialogHeader>
-                    <div className="w-full h-full overflow-hidden">
-                      <LevlPortal />
-                    </div>
-                  </DialogContent>
-                </Dialog>
-
                 <Link
-                  href="/dashboard"
-                  className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-black dark:text-white"
-                  style={{ textShadow: "0px 2px 4px rgba(66,60,86,0.17), 0px 5px 12px rgba(62,56,82,0.11)" }}
+                  href="/pool"
+                  className="text-xs font-black px-3 py-1.5 rounded-full transition-all active:scale-95 hover:scale-105"
+                  style={{
+                    background: "linear-gradient(135deg,rgba(109,40,217,0.92),rgba(124,58,237,0.85))",
+                    border: "1px solid rgba(167,139,250,0.5)",
+                    boxShadow: "0 4px 10px -3px rgba(109,40,217,0.45), 0 -1px 3px 0 rgba(255,255,255,0.2) inset",
+                    color: "#fff",
+                  }}
                 >
-                  Dashboard
+                  Levl Pool
                 </Link>
                 <Link
                   href="/profile"
@@ -1880,6 +2335,77 @@ export function AIServiceMatchmaker() {
                 >
                   <div className="flex space-x-4 snap-x snap-mandatory px-4 md:px-8 -ml-2 md:-ml-4 mr-4 md:mr-8">
                     {categories.map((category, index) => (
+                      category.cardRender ? (
+                        /* Neumorphic pillowed bubble card */
+                        <motion.button
+                          key={index}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.6, delay: index * 0.05, ease: "easeOut" }}
+                          whileHover={{ y: -8, scale: 1.03, transition: { duration: 0.3 } }}
+                          className="shrink-0 my-2 mx-1 scale-[1.04] cursor-pointer"
+                          style={{
+                            width: 136,
+                            height: 158,
+                            borderRadius: 18,
+                            overflow: "hidden",
+                            position: "relative",
+                            // Match card's rendered lavender — fills transparent PNG corners seamlessly
+                            background: "linear-gradient(to bottom, #e1d5fe 0%, #b497f2 100%)",
+                            // Deep side shadows wrap to the back; top-left rim catch light; bottom lift
+                            boxShadow: [
+                              "10px 18px 16px -6px rgba(0,0,0,0.56)",
+                              "-10px 18px 16px -6px rgba(0,0,0,0.28)",
+                              "0 6px 8px -10px rgba(50,10,110,0.05)",
+                              "-3px -4px 14px 1px rgba(200,180,255,0.20)",
+                            ].join(", "),
+                          }}
+                          onClick={() => handleCategoryClick(category.serviceType)}
+                        >
+                          {/* Blender render — fills card */}
+                          <Image
+                            src={category.cardRender}
+                            alt={category.name}
+                            width={136}
+                            height={158}
+                            className="w-full h-full object-cover"
+                          />
+                          {/* Convex dome overlay — radial bright centre fading to edge shadow */}
+                          <div
+                            aria-hidden="true"
+                            style={{
+                              position: "absolute",
+                              inset: 0,
+                              borderRadius: 18,
+                              pointerEvents: "none",
+                              background:
+                                "radial-gradient(ellipse at 50% 42%, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0.05) 42%, rgba(0,0,0,0.14) 100%)",
+                              boxShadow: [
+                                "inset 0 0 0 1px rgba(255,255,255,0.10)",
+                                "inset 3px 5px 16px 0 rgba(255,255,255,0.14)",
+                                "inset -3px -5px 16px 0 rgba(0,0,0,0.22)",
+                              ].join(", "),
+                            }}
+                          />
+                          {/* Specular highlight — light source hitting curved top-left surface */}
+                          <div
+                            aria-hidden="true"
+                            style={{
+                              position: "absolute",
+                              top: 8,
+                              left: 8,
+                              width: 46,
+                              height: 28,
+                              borderRadius: "50%",
+                              pointerEvents: "none",
+                              background:
+                                "radial-gradient(ellipse at center, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0.10) 55%, transparent 78%)",
+                              filter: "blur(5px)",
+                              transform: "rotate(-18deg)",
+                            }}
+                          />
+                        </motion.button>
+                      ) : (
                       <EnhancedCategoryCard
                         key={index}
                         icon={category.icon}
@@ -1891,6 +2417,7 @@ export function AIServiceMatchmaker() {
                         boxShadow="6px 10px 8px -6px rgba(0,0,0,0.45), -6px 10px 8px -6px rgba(0,0,0,0.45), 0 28px 22px -4px rgba(0,0,0,0.16), 0 19px 12px -4px rgba(0,0,0,0.11)"
                         onClick={() => handleCategoryClick(category.serviceType)}
                       />
+                      )
                     ))}
                   </div>
                 </div>

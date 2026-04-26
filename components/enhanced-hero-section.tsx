@@ -538,15 +538,20 @@ export function EnhancedHeroSection() {
     })),
   )
 
-  const [particles] = useState(() =>
-    Array.from({ length: 20 }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: Math.random() * 3 + 1,
-      duration: Math.random() * 6 + 4,
-    })),
-  )
+  const [particles, setParticles] = useState<
+    { id: number; x: number; y: number; size: number; duration: number }[]
+  >([])
+  useEffect(() => {
+    setParticles(
+      Array.from({ length: 20 }, (_, i) => ({
+        id: i,
+        x: Math.random() * 100,
+        y: Math.random() * 100,
+        size: Math.random() * 3 + 1,
+        duration: Math.random() * 6 + 4,
+      })),
+    )
+  }, [])
 
   // Initialize skills state with the skillsData
   const [skills, setSkills] = useState(skillsData)

@@ -25,3 +25,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# credential verification scratch — snapshots and saved auth contain personal data
+scripts/.tr_*
+
+# Claude Code local config
+.claude/

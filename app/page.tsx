@@ -1,27 +1,20 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { EnhancedHeroSection } from "@/components/enhanced-hero-section"
-import { AIServiceMatchmaker } from "@/components/ai-matchmaker/ai-service-matchmaker"
+import Link from "next/link"
+import { LevlLogo } from "@/components/levl-logo"
+
+const cardStyle: React.CSSProperties = {
+  background:
+    "linear-gradient(135deg, rgba(255,255,255,0.97) 0%, rgba(255,255,255,0.92) 60%, rgba(237,233,254,0.85) 100%)",
+  border: "1px solid rgba(167,139,250,0.3)",
+  boxShadow:
+    "0 20px 25px -5px rgba(0,0,0,0.18), 0 10px 10px -5px rgba(0,0,0,0.1), 0 -2px 6px 0 rgba(255,255,255,0.8) inset",
+  borderRadius: "1rem",
+}
 
 export default function Home() {
-  const router = useRouter()
-  const [ready, setReady] = useState(false)
-
-  useEffect(() => {
-    if (!sessionStorage.getItem("levl-session")) {
-      router.replace("/role")
-    } else {
-      setReady(true)
-    }
-  }, [])
-
-  if (!ready) return null
-
   return (
-    <div className="flex min-h-screen flex-col" style={{ margin: 0, padding: 0 }}>
-      {/* Levl Void — full-page cyclorama background */}
+    <div className="flex min-h-screen flex-col items-center justify-center px-6" style={{ margin: 0 }}>
       <div
         className="fixed inset-0 -z-10 pointer-events-none"
         style={{
@@ -32,14 +25,40 @@ export default function Home() {
         }}
       />
 
-      {/* AI Service Matchmaker */}
-      <div className="relative z-50" style={{ marginTop: 0 }}>
-        <AIServiceMatchmaker />
+      <div className="mb-10 flex flex-col items-center gap-3">
+        <LevlLogo />
+        <p className="text-sm font-medium" style={{ color: "#8b5cf6" }}>
+          How are you using Levl today?
+        </p>
       </div>
 
-      <main className="flex-1" style={{ marginTop: 0, paddingTop: 0 }}>
-        <EnhancedHeroSection />
-      </main>
+      <div className="grid w-full max-w-md grid-cols-1 gap-4 sm:max-w-2xl sm:grid-cols-2">
+        <Link
+          href="/client"
+          className="group relative flex flex-col items-center justify-center gap-2 px-8 py-10 transition-transform hover:scale-[1.02] active:scale-[0.99]"
+          style={cardStyle}
+        >
+          <span className="text-3xl font-bold" style={{ color: "#7c3aed" }}>
+            Client
+          </span>
+          <span className="text-sm" style={{ color: "#a78bfa" }}>
+            Find a pro for the job
+          </span>
+        </Link>
+
+        <Link
+          href="/work"
+          className="group relative flex flex-col items-center justify-center gap-2 px-8 py-10 transition-transform hover:scale-[1.02] active:scale-[0.99]"
+          style={cardStyle}
+        >
+          <span className="text-3xl font-bold" style={{ color: "#7c3aed" }}>
+            Worker
+          </span>
+          <span className="text-sm" style={{ color: "#a78bfa" }}>
+            Get matched to paying work
+          </span>
+        </Link>
+      </div>
     </div>
   )
 }

@@ -12,8 +12,11 @@ import {
 import Link from "next/link"
 import { createPortal } from "react-dom"
 import { EnhancedCategoryCard } from "@/components/enhanced-category-card"
+import { EnhancedHeroSection } from "@/components/enhanced-hero-section"
 import { LevlLogo } from "@/components/levl-logo"
 import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { LevlPortal } from "@/components/portal/portal-page"
 
 const cardStyle: React.CSSProperties = {
   background: "linear-gradient(135deg, rgba(255,255,255,0.97) 0%, rgba(255,255,255,0.92) 60%, rgba(237,233,254,0.85) 100%)",
@@ -767,6 +770,7 @@ const perks = [
 
 export default function WorkPage() {
   const [scrolled, setScrolled] = useState(false)
+  const [showPortal, setShowPortal] = useState(false)
   const router = useRouter()
 
   const switchToClient = useCallback(() => {
@@ -805,18 +809,45 @@ export default function WorkPage() {
           <Link href="/work" className="flex items-center">
             <LevlLogo className="h-14 w-14" />
           </Link>
-          <button
-            onClick={switchToClient}
-            className="text-xs font-black px-3 py-1.5 rounded-full transition-all active:scale-95 hover:scale-105"
-            style={{
-              background: "linear-gradient(135deg,rgba(255,255,255,0.97),rgba(237,233,254,0.82))",
-              border: "1px solid rgba(167,139,250,0.45)",
-              boxShadow: "0 4px 10px -3px rgba(0,0,0,0.22), 0 -1px 3px 0 rgba(255,255,255,0.9) inset",
-              color: "#7c3aed",
-            }}
-          >
-            Client
-          </button>
+          <div className="flex items-center gap-3">
+            <Dialog open={showPortal} onOpenChange={setShowPortal}>
+              <DialogTrigger asChild>
+                <button
+                  className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none text-black dark:text-white"
+                  style={{ textShadow: "0px 2px 4px rgba(66,60,86,0.17), 0px 5px 12px rgba(62,56,82,0.11)" }}
+                >
+                  Portal
+                </button>
+              </DialogTrigger>
+              <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0">
+                <DialogHeader className="sr-only">
+                  <DialogTitle>LevL Portal</DialogTitle>
+                </DialogHeader>
+                <div className="w-full h-full overflow-y-auto overscroll-contain">
+                  <LevlPortal />
+                </div>
+              </DialogContent>
+            </Dialog>
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none text-black dark:text-white"
+              style={{ textShadow: "0px 2px 4px rgba(66,60,86,0.17), 0px 5px 12px rgba(62,56,82,0.11)" }}
+            >
+              Dashboard
+            </Link>
+            <button
+              onClick={switchToClient}
+              className="text-xs font-black px-3 py-1.5 rounded-full transition-all active:scale-95 hover:scale-105"
+              style={{
+                background: "linear-gradient(135deg,rgba(255,255,255,0.97),rgba(237,233,254,0.82))",
+                border: "1px solid rgba(167,139,250,0.45)",
+                boxShadow: "0 4px 10px -3px rgba(0,0,0,0.22), 0 -1px 3px 0 rgba(255,255,255,0.9) inset",
+                color: "#7c3aed",
+              }}
+            >
+              Client
+            </button>
+          </div>
         </div>
         {/* Rounded pill border at bottom — only visible when scrolled */}
         <div className="absolute bottom-0 left-[8%] right-[8%] h-px rounded-full pointer-events-none"
@@ -834,25 +865,68 @@ export default function WorkPage() {
           <div className="flex gap-4 px-6" style={{ width: "max-content" }}>
             {categories.map((cat, i) => (
               <div key={cat.name} className="relative" style={{ width: "7rem" }}>
-                {/* Floating growth badge */}
-                <motion.div
-                  initial={{ opacity: 0, y: 6, scale: 0.85 }}
-                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.06 + 0.2, duration: 0.35, ease: [0.22,1,0.36,1] }}
-                  className="absolute -top-3 -right-1 z-20 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-black pointer-events-none select-none"
-                  style={cat.growth >= 0 ? {
-                    background: "linear-gradient(135deg,#22c55e,#16a34a)",
-                    color: "white",
-                    boxShadow: "0 2px 8px rgba(34,197,94,0.45), 0 1px 0 rgba(255,255,255,0.2) inset",
-                  } : {
-                    background: "linear-gradient(135deg,#ef4444,#dc2626)",
-                    color: "white",
-                    boxShadow: "0 2px 8px rgba(239,68,68,0.45), 0 1px 0 rgba(255,255,255,0.2) inset",
-                  }}
-                >
-                  {cat.growth >= 0 ? `↑${cat.growth}%` : `↓${Math.abs(cat.growth)}%`}
-                </motion.div>
+                {/* Floating growth badge — flame for Mounting (hot category), pill for others */}
+                {cat.name === "Mounting" ? (
+                  <motion.div
+                    initial={{ opacity: 0, y: 6, scale: 0.85 }}
+                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.06 + 0.2, duration: 0.35, ease: [0.22,1,0.36,1] }}
+                    className="absolute z-20 pointer-events-none select-none"
+                    style={{ top: -42, right: -4, width: 56, height: 66, filter: "drop-shadow(0 5px 12px rgba(124,58,237,0.6))" }}
+                  >
+                    <svg viewBox="0 0 24 28" width="56" height="66" preserveAspectRatio="xMidYMid meet" style={{ position: "absolute", inset: 0 }}>
+                      <defs>
+                        <linearGradient id={`flame-body-${i}`} x1="0.5" y1="0" x2="0.5" y2="1">
+                          <stop offset="0%"   stopColor="#f5f3ff" />
+                          <stop offset="22%"  stopColor="#c4b5fd" />
+                          <stop offset="55%"  stopColor="#a78bfa" />
+                          <stop offset="100%" stopColor="#5b21b6" />
+                        </linearGradient>
+                        <radialGradient id={`flame-core-${i}`} cx="0.5" cy="0.72" r="0.55">
+                          <stop offset="0%"   stopColor="#ffffff" stopOpacity="0.9" />
+                          <stop offset="55%"  stopColor="#ddd6fe" stopOpacity="0.35" />
+                          <stop offset="100%" stopColor="#a78bfa" stopOpacity="0" />
+                        </radialGradient>
+                      </defs>
+                      {/* Outer flame silhouette (Lucide-style, filled) */}
+                      <path
+                        d="M8.5 18.5A2.5 2.5 0 0 0 11 16c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"
+                        transform="translate(0, 4)"
+                        fill={`url(#flame-body-${i})`}
+                        stroke="rgba(76,29,149,0.65)"
+                        strokeWidth="0.45"
+                        strokeLinejoin="round"
+                      />
+                      {/* Inner core glow */}
+                      <ellipse cx="12" cy="20.5" rx="5" ry="5.5" fill={`url(#flame-core-${i})`} />
+                    </svg>
+                    <div className="absolute inset-x-0 flex items-center justify-center" style={{ bottom: 10 }}>
+                      <span className="text-[10px] font-black text-white leading-none tracking-tight" style={{ textShadow: "0 1px 2px rgba(0,0,0,0.6)" }}>
+                        ↑{cat.growth}%
+                      </span>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0, y: 6, scale: 0.85 }}
+                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.06 + 0.2, duration: 0.35, ease: [0.22,1,0.36,1] }}
+                    className="absolute -top-3 -right-1 z-20 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-black pointer-events-none select-none"
+                    style={cat.growth >= 0 ? {
+                      background: "linear-gradient(135deg,#22c55e,#16a34a)",
+                      color: "white",
+                      boxShadow: "0 2px 8px rgba(34,197,94,0.45), 0 1px 0 rgba(255,255,255,0.2) inset",
+                    } : {
+                      background: "linear-gradient(135deg,#ef4444,#dc2626)",
+                      color: "white",
+                      boxShadow: "0 2px 8px rgba(239,68,68,0.45), 0 1px 0 rgba(255,255,255,0.2) inset",
+                    }}
+                  >
+                    {cat.growth >= 0 ? `↑${cat.growth}%` : `↓${Math.abs(cat.growth)}%`}
+                  </motion.div>
+                )}
                 <EnhancedCategoryCard icon={cat.icon} name={cat.name} count={cat.count} index={i} size="small" className="w-28 h-32 scale-[1.04]" onClick={() => {}}
                   boxShadow="6px 10px 8px -6px rgba(0,0,0,0.45), -6px 10px 8px -6px rgba(0,0,0,0.45), 0 28px 22px -4px rgba(0,0,0,0.16), 0 19px 12px -4px rgba(0,0,0,0.11)"
                 />
@@ -1017,6 +1091,9 @@ export default function WorkPage() {
           </motion.div>
           <FAQ />
         </section>
+
+        {/* ── Skill Accelerator ── */}
+        <EnhancedHeroSection />
 
         {/* ── CTA ── */}
         <section className="px-6 pb-24">

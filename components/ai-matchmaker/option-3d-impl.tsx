@@ -3,8 +3,8 @@
 import { useRef, useMemo, useState, useEffect, type JSX } from "react"
 import Image from "next/image"
 import { Canvas, useFrame } from "@react-three/fiber"
-import { ContactShadows, Environment, GradientTexture, MeshTransmissionMaterial, PerspectiveCamera, RoundedBox } from "@react-three/drei"
-import { EffectComposer, Bloom, N8AO, SMAA } from "@react-three/postprocessing"
+import { ContactShadows, Environment, GradientTexture, MeshTransmissionMaterial, PerspectiveCamera, RoundedBox, MeshReflectorMaterial, Bvh, SoftShadows } from "@react-three/drei"
+import { EffectComposer, Bloom, N8AO, SMAA, DepthOfField, ChromaticAberration, Vignette, TiltShift2, BrightnessContrast } from "@react-three/postprocessing"
 import * as THREE from "three"
 
 // ─── Brand palette ────────────────────────────────────────────────────────────
@@ -24,34 +24,36 @@ const C = {
 function smoothstep(t: number) { return t * t * (3 - 2 * t) }
 
 // ─── PBR material factories ────────────────────────────────────────────────────
-function mkChrome(roughness = 0.08): THREE.MeshPhysicalMaterial {
+function mkChrome(roughness = 0.14): THREE.MeshPhysicalMaterial {
+  // Medium brushed-aluminum look — holds color in shadow, bright streak in key light
   return new THREE.MeshPhysicalMaterial({
-    color: C.chrome, metalness: 0.98, roughness,
-    clearcoat: 0.9, clearcoatRoughness: 0.06, envMapIntensity: 2.0,
+    color: "#7a8494", metalness: 0.75, roughness,
+    clearcoat: 0.6, clearcoatRoughness: 0.12, envMapIntensity: 0.15,
   })
 }
-function mkGunmetal(roughness = 0.22): THREE.MeshPhysicalMaterial {
+function mkGunmetal(roughness = 0.38): THREE.MeshPhysicalMaterial {
+  // Dark matte metal — clearly readable dark gray like real powder-coated mount hardware
   return new THREE.MeshPhysicalMaterial({
-    color: C.gunmetal, metalness: 0.92, roughness,
-    clearcoat: 0.3, clearcoatRoughness: 0.18, envMapIntensity: 1.4,
+    color: "#3a3f4a", metalness: 0.65, roughness,
+    clearcoat: 0.2, clearcoatRoughness: 0.25, envMapIntensity: 0.12,
   })
 }
 function mkBrushedSteel(): THREE.MeshPhysicalMaterial {
   return new THREE.MeshPhysicalMaterial({
-    color: C.steel, metalness: 0.9, roughness: 0.2,
-    clearcoat: 0.4, clearcoatRoughness: 0.12, envMapIntensity: 1.8,
+    color: "#6a7080", metalness: 0.72, roughness: 0.30,
+    clearcoat: 0.3, clearcoatRoughness: 0.18, envMapIntensity: 0.14,
   })
 }
 function mkGold(): THREE.MeshPhysicalMaterial {
   return new THREE.MeshPhysicalMaterial({
-    color: "#c8902a", metalness: 0.98, roughness: 0.10,
-    clearcoat: 0.9, clearcoatRoughness: 0.06, envMapIntensity: 2.4,
+    color: "#c8902a", metalness: 0.88, roughness: 0.18,
+    clearcoat: 0.7, clearcoatRoughness: 0.10, envMapIntensity: 0.50,
   })
 }
 function mkBrushedNickel(): THREE.MeshPhysicalMaterial {
   return new THREE.MeshPhysicalMaterial({
-    color: "#b8bcc8", metalness: 0.95, roughness: 0.18,
-    clearcoat: 0.6, clearcoatRoughness: 0.10, envMapIntensity: 1.8,
+    color: "#8890a0", metalness: 0.78, roughness: 0.28,
+    clearcoat: 0.4, clearcoatRoughness: 0.15, envMapIntensity: 0.16,
   })
 }
 
@@ -462,8 +464,9 @@ function Outlet({ position }: { position: [number, number, number] }) {
 function TVPanel({ children }: { children?: React.ReactNode }) {
   const sideBezelMat = useMemo(
     () => new THREE.MeshPhysicalMaterial({
-      color: "#111214", metalness: 0.0, roughness: 0.10,
-      clearcoat: 1.0, clearcoatRoughness: 0.06, envMapIntensity: 1.8,
+      // Slightly lighter than void wall so TV edge reads against background
+      color: "#282c36", metalness: 0.0, roughness: 0.14,
+      clearcoat: 1.0, clearcoatRoughness: 0.06, envMapIntensity: 0.25,
     }), []
   )
   const screenTex = useMemo(() => getSunsetTex(), [])
@@ -479,15 +482,15 @@ function TVPanel({ children }: { children?: React.ReactNode }) {
         <boxGeometry args={[1.52, 0.862, 0.003]} />
         <meshPhysicalMaterial
           map={screenTex ?? undefined}
-          emissive={new THREE.Color("#0a1828")}
-          emissiveIntensity={0.35}
+          emissive={new THREE.Color("#0d2050")}
+          emissiveIntensity={1.40}
           roughness={0.04} metalness={0.0}
           clearcoat={1.0} clearcoatRoughness={0.008}
           envMapIntensity={0.8}
         />
       </mesh>
       {/* Screen ambient glow — warm light from sunset content */}
-      <pointLight position={[0, 0.006, 0.12]} intensity={0.35} color="#d07820" distance={1.2} decay={2} />
+      <pointLight position={[0, 0.006, 0.12]} intensity={0.65} color="#d07820" distance={1.4} decay={2} />
       {/* Branding LED strip */}
       <mesh position={[0, -0.462, 0.026]}>
         <boxGeometry args={[1.18, 0.007, 0.007]} />
@@ -509,16 +512,18 @@ function TVPanel({ children }: { children?: React.ReactNode }) {
 
 /**
  * Wall — thick box so it fills the frame from any camera angle.
- * Using a box (not plane) means the sides are also shaded surfaces,
- * never leaving a transparent void even on very wide aspect ratios.
+ * Pass dark=true (void mount scenes) to use meshBasicMaterial so lights
+ * don't brighten the background wall.
  */
-function Wall({ color = "#e8e4dd", tex }: { color?: string; tex?: THREE.Texture }) {
+function Wall({ color = "#e8e4dd", tex, dark = false }: { color?: string; tex?: THREE.Texture; dark?: boolean }) {
   return (
     <mesh receiveShadow position={[0, 0.2, -0.12]}>
       <boxGeometry args={[100, 100, 0.18]} />
-      {tex
-        ? <meshPhysicalMaterial map={tex} roughness={0.8} metalness={0.0} clearcoat={0.04} clearcoatRoughness={0.5} />
-        : <meshPhysicalMaterial color={color} roughness={0.8} metalness={0.0} clearcoat={0.04} clearcoatRoughness={0.5} />}
+      {dark
+        ? <meshBasicMaterial color={color} />
+        : tex
+          ? <meshPhysicalMaterial map={tex} roughness={0.8} metalness={0.0} clearcoat={0.04} clearcoatRoughness={0.5} />
+          : <meshPhysicalMaterial color={color} roughness={0.8} metalness={0.0} clearcoat={0.04} clearcoatRoughness={0.5} />}
     </mesh>
   )
 }
@@ -852,24 +857,24 @@ function MountFloor() {
   )
 }
 
-/** Dramatic raking rig — wall-section quality for mount objects */
+/** Void-quality lighting rig for mount type scenes */
 function MountSceneLights() {
   return (
     <>
-      {/* Dark hemisphere — kills flat fill, forces shadows to read deep */}
-      <hemisphereLight args={["#d8d0f0", "#b0a8c8", 0.22]} />
-      {/* Primary left rake — steep angle, catches every edge and relief like the wall section */}
-      <directionalLight position={[-5, 3.5, 4.0]} intensity={2.20} color="#fff8f0" castShadow
+      {/* Ambient fill — lavender void character, stops shadow sides going pure black */}
+      <ambientLight intensity={0.35} color="#b8a8e0" />
+      {/* Primary key — warm white from upper-left, raking across mount hardware */}
+      <directionalLight position={[-4, 3.0, 5.0]} intensity={4.0} color="#fff4e8" castShadow
         shadow-mapSize={[2048, 2048]} shadow-camera-near={0.1} shadow-camera-far={20}
         shadow-camera-left={-3} shadow-camera-right={3}
         shadow-camera-top={3} shadow-camera-bottom={-3}
         shadow-bias={-0.0004} shadow-normalBias={0.012} />
-      {/* Right-top rim — separates object from background, picks up specular on chrome/gold */}
-      <directionalLight position={[4.5, 4.0, 2.5]} intensity={0.70} color="#e8f0ff" />
-      {/* Back-right separation — thin rim that stops objects merging with wall */}
-      <directionalLight position={[3.0, -1.0, -3.0]} intensity={0.28} color="#c8b8f0" />
-      {/* Deep lavender fill from below — same hue as wall types, keeps shadow purple not black */}
-      <pointLight position={[1.0, -1.5, 2.0]} intensity={0.30} color="#c8b0f8" />
+      {/* Front fill — from camera direction, lifts TV face and mount front face */}
+      <directionalLight position={[0, 0.5, 8.0]} intensity={1.2} color="#e8e4ff" />
+      {/* Cool rim from right — separates arms/brackets from dark background */}
+      <directionalLight position={[5, 2.0, 2.0]} intensity={0.8} color="#c0c8f0" />
+      {/* Purple bounce below — lavender void character */}
+      <pointLight position={[0, -2.0, 2.0]} intensity={0.40} color="#9878cc" />
     </>
   )
 }
@@ -1476,62 +1481,60 @@ function getPaintingTex(): THREE.CanvasTexture | null {
 // ─── Camera rigs ──────────────────────────────────────────────────────────────
 
 /**
- * TiltingCamRig — tight framing throughout.
- * Side view (x=2.0, z=0.55) is close enough to read every hardware detail.
- * Front view (z=2.20) gives an intimate TV-fill frame.
- * Cycle: 4.5 s side | 2 s pan | 4 s front | 2 s return = 12.5 s
+ * TiltingCamRig — starts front-angled so TV face + tilt mechanism both visible.
+ * Angled front (x=0.9, z=1.5) shows TV face + mechanism at same time.
+ * Pans to true side briefly then returns.
+ * Cycle: 5 s angled-front | 2 s pan to side | 3 s side | 2 s return = 12 s
  */
 function TiltingCamRig() {
   const startRef = useRef<number | null>(null)
   useFrame(({ camera, clock }) => {
     if (startRef.current === null) startRef.current = clock.elapsedTime
-    const cycle = (clock.elapsedTime - startRef.current) % 12.5
+    const cycle = (clock.elapsedTime - startRef.current) % 12.0
     let x: number, z: number
-    if (cycle < 4.5) {
-      x = 1.75; z = 0.48              // intimate side — full hardware detail
-    } else if (cycle < 6.5) {
-      const p = smoothstep((cycle - 4.5) / 2.0)
-      x = 1.75 * (1 - p); z = 0.48 + p * 1.32
-    } else if (cycle < 10.5) {
-      x = 0; z = 1.80                 // close front view — TV fills frame
-    } else if (cycle < 12.5) {
-      const p = smoothstep((cycle - 10.5) / 2.0)
-      x = 1.75 * p; z = 1.80 - p * 1.32
+    if (cycle < 5.0) {
+      x = 0.90; z = 1.50              // front-angled — TV face visible + mechanism readable
+    } else if (cycle < 7.0) {
+      const p = smoothstep((cycle - 5.0) / 2.0)
+      x = 0.90 + p * 0.85; z = 1.50 - p * 1.02
+    } else if (cycle < 10.0) {
+      x = 1.75; z = 0.48              // side profile — full hardware depth
+    } else if (cycle < 12.0) {
+      const p = smoothstep((cycle - 10.0) / 2.0)
+      x = 1.75 * (1 - p) + 0.90 * p; z = 0.48 + p * 1.02
     } else {
-      x = 1.75; z = 0.48
+      x = 0.90; z = 1.50
     }
-    camera.position.set(x, 0.15, z)
+    camera.position.set(x, 0.12, z)
     camera.lookAt(0, 0.06, 0)
   })
   return null
 }
 
 /**
- * FullMotionCamRig — tight cinematic framing.
- * Side view (x=1.75, z=0.55) shows full IK arm depth close-up.
- * Front view (z=2.20) fills frame with TV.
- * Cycle: 5 s side | 2 s pan | 3.5 s front | 2 s return = 12.5 s
+ * FullMotionCamRig — starts front-angled so TV + arm both visible immediately.
+ * Cycle: 5 s angled-front | 2 s pan to side | 3 s side | 2 s return = 12 s
  */
 function FullMotionCamRig() {
   const startRef = useRef<number | null>(null)
   useFrame(({ camera, clock }) => {
     if (startRef.current === null) startRef.current = clock.elapsedTime
-    const cycle = (clock.elapsedTime - startRef.current) % 12.5
+    const cycle = (clock.elapsedTime - startRef.current) % 12.0
     let x: number, z: number
     if (cycle < 5.0) {
-      x = 1.55; z = 0.48              // intimate side — IK arm kinematics fully readable
+      x = 0.85; z = 1.45              // front-angled — arm + TV face both readable
     } else if (cycle < 7.0) {
       const p = smoothstep((cycle - 5.0) / 2.0)
-      x = 1.55 * (1 - p); z = 0.48 + p * 1.32
-    } else if (cycle < 10.5) {
-      x = 0; z = 1.80                 // close front — TV fills frame edge-to-edge
-    } else if (cycle < 12.5) {
-      const p = smoothstep((cycle - 10.5) / 2.0)
-      x = 1.55 * p; z = 1.80 - p * 1.32
+      x = 0.85 + p * 0.70; z = 1.45 - p * 0.97
+    } else if (cycle < 10.0) {
+      x = 1.55; z = 0.48              // side — full arm kinematics visible
+    } else if (cycle < 12.0) {
+      const p = smoothstep((cycle - 10.0) / 2.0)
+      x = 1.55 * (1 - p) + 0.85 * p; z = 0.48 + p * 0.97
     } else {
-      x = 1.55; z = 0.48
+      x = 0.85; z = 1.45
     }
-    camera.position.set(x, 0.22, z)
+    camera.position.set(x, 0.18, z)
     camera.lookAt(0, 0, 0)
   })
   return null
@@ -1540,10 +1543,12 @@ function FullMotionCamRig() {
 // ─── Mount-type scenes ────────────────────────────────────────────────────────
 
 function FixedScene() {
-  const chromeMat = useMemo(() => mkChrome(0.12), [])
+  const chromeMat = mkChrome(0.12)
   return (
     <group>
-      <Wall />
+      <color attach="background" args={["#1e1530"]} />
+      <Wall color="#1e1530" dark />
+      <MountSceneLights />
       <WallPlate />
       {([-0.62, 0.62] as const).map((x) => (
         <group key={x} position={[x, 0, 0.06]}>
@@ -1571,9 +1576,9 @@ function FixedScene() {
  */
 function TiltingScene() {
   const tvRef      = useRef<THREE.Group>(null)
-  const chromeMat  = useMemo(() => mkChrome(0.10), [])
-  const gungMat    = useMemo(() => mkGunmetal(0.20), [])
-  const axleMat    = useMemo(() => mkBrushedNickel(), [])
+  const chromeMat  = mkChrome(0.10)
+  const gungMat    = mkGunmetal(0.20)
+  const axleMat    = mkBrushedNickel()
 
   useFrame(({ clock }) => {
     const θ = Math.sin(clock.elapsedTime * 0.68) * 0.30
@@ -1582,13 +1587,15 @@ function TiltingScene() {
 
   return (
     <group>
-      {/* Solid wall slab for side-view depth */}
+      <color attach="background" args={["#1e1530"]} />
+      <MountSceneLights />
+      {/* Dark void wall — unlit so lights don't brighten it */}
       <mesh receiveShadow position={[0, 0, -0.12]}>
         <boxGeometry args={[100, 100, 0.18]} />
-        <meshPhysicalMaterial color="#e8e4dd" roughness={0.8} metalness={0.0} clearcoat={0.04} clearcoatRoughness={0.5} />
+        <meshBasicMaterial color="#1e1530" />
       </mesh>
       {/* Floor */}
-      <Floor color="#d4d0c8" />
+      <Floor color="#0e0c18" />
 
       {/* Wall mounting plate */}
       <mesh position={[0, 0, -0.02]} castShadow>
@@ -1649,9 +1656,9 @@ function FullMotionScene() {
   const arm2Ref = useRef<THREE.Group>(null)
   const tvRef   = useRef<THREE.Group>(null)
 
-  const armMat  = useMemo(() => mkGunmetal(0.24), [])
-  const railMat = useMemo(() => mkBrushedSteel(), [])
-  const jntMat  = useMemo(() => mkChrome(0.09), [])
+  const armMat  = mkGunmetal(0.24)
+  const railMat = mkBrushedSteel()
+  const jntMat  = mkChrome(0.09)
 
   useFrame(({ clock }) => {
     const t  = clock.elapsedTime
@@ -1666,7 +1673,9 @@ function FullMotionScene() {
 
   return (
     <group>
-      <Wall />
+      <color attach="background" args={["#1e1530"]} />
+      <Wall color="#1e1530" dark />
+      <MountSceneLights />
       <WallPlate w={0.26} h={0.38} />
       <FullMotionCamRig />
 
@@ -1721,10 +1730,10 @@ function FullMotionScene() {
  */
 function CeilingScene() {
   const tvRef     = useRef<THREE.Group>(null)
-  const chromeMat = useMemo(() => mkChrome(0.07), [])
-  const gungMat   = useMemo(() => mkGunmetal(0.20), [])
-  const nickelMat = useMemo(() => mkBrushedNickel(), [])
-  const goldMat   = useMemo(() => mkGold(), [])
+  const chromeMat = mkChrome(0.07)
+  const gungMat   = mkGunmetal(0.20)
+  const nickelMat = mkBrushedNickel()
+  const goldMat   = mkGold()
 
   useFrame(({ clock }) => {
     if (tvRef.current) {
@@ -1735,18 +1744,20 @@ function CeilingScene() {
 
   return (
     <group>
-      {/* Ceiling slab */}
+      <color attach="background" args={["#1e1530"]} />
+      {/* Ceiling slab — unlit so lights don't brighten it */}
       <mesh receiveShadow position={[0, 1.30, -0.06]} rotation={[Math.PI / 2, 0, 0]}>
         <planeGeometry args={[100, 100, 16, 16]} />
-        <meshPhysicalMaterial color="#f0ece4" roughness={0.8} metalness={0.0} clearcoat={0.05} clearcoatRoughness={0.6} />
+        <meshBasicMaterial color="#1e1530" />
       </mesh>
       {/* Ceiling cornice strip */}
       <mesh position={[0, 1.285, -0.01]}>
         <boxGeometry args={[100, 0.028, 0.058]} />
-        <meshPhysicalMaterial color="#e8e4dc" roughness={0.8} metalness={0.0} />
+        <meshBasicMaterial color="#1e1530" />
       </mesh>
-      <Wall />
-      <Floor color="#d2cec6" />
+      <Wall color="#1e1530" dark />
+      <Floor color="#0e0c18" />
+      <MountSceneLights />
 
       {/* ── T-track ceiling flange plate ── */}
       <mesh position={[0, 1.26, 0.01]} castShadow>
@@ -2291,34 +2302,61 @@ function TVSizeMeasureScene() {
 
   const bezelMat = useMemo(
     () => new THREE.MeshPhysicalMaterial({
-      color: "#111214", metalness: 0.0, roughness: 0.10,
-      clearcoat: 1.0, clearcoatRoughness: 0.06, envMapIntensity: 1.8,
+      // NO clearcoat — clearcoat applies to ALL faces including sides, which is what
+      // was creating the white border no matter what base roughness we used.
+      // Real TV bezels are matte-dark injection-molded plastic; the "glassy" look
+      // comes from the chrome hairline strips + screen glass on top, not the bezel body.
+      color: "#060708", metalness: 0.0, roughness: 0.72,
+      envMapIntensity: 0.4,
     }), []
   )
   const bezelChromeMat = useMemo(() => new THREE.MeshPhysicalMaterial({
-    color: "#c0c8d8", metalness: 0.90, roughness: 0.18,
-    clearcoat: 0.55, clearcoatRoughness: 0.20, envMapIntensity: 1.2,
+    // True polished chrome — reflects studio HDRI as a single bright hairline streak
+    color: "#e0e8f8", metalness: 0.98, roughness: 0.04,
+    clearcoat: 1.0, clearcoatRoughness: 0.02, envMapIntensity: 3.0,
   }), [])
-  const screenEmissive = useMemo(() => new THREE.Color("#0a1830"), [])
+  const screenEmissive = useMemo(() => new THREE.Color("#0d2050"), [])
 
-  // ── Tape materials ─────────────────────────────────────────────────────────
-  // MeshBasicMaterial = unlit, perfectly flat yellow — eliminates lighting wrinkle
-  const tapeFaceMat = useMemo(() => new THREE.MeshBasicMaterial({ color: "#f5c200" }), [])
+  // Screen surface glow texture — radial blue gradient, brighter at center like a real panel
+  const screenGlowTex = useMemo(() => {
+    const W = 512, H = 288
+    const canvas = document.createElement("canvas")
+    canvas.width = W; canvas.height = H
+    const ctx = canvas.getContext("2d")!
+    ctx.clearRect(0, 0, W, H)
+    // Deep dark base
+    ctx.fillStyle = "#050c1e"
+    ctx.fillRect(0, 0, W, H)
+    // Soft radial bloom — center is slightly lighter blue, suggests panel glow
+    const rg = ctx.createRadialGradient(W*0.5, H*0.5, 0, W*0.5, H*0.5, W*0.62)
+    rg.addColorStop(0,   "rgba(20, 55, 140, 0.55)")
+    rg.addColorStop(0.4, "rgba(10, 28,  80, 0.30)")
+    rg.addColorStop(1,   "rgba(0,   8,  20, 0.00)")
+    ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H)
+    const tex = new THREE.CanvasTexture(canvas)
+    return tex
+  }, [])
+
+  // ── Tape materials — physical metallic so it catches the key light ─────────
+  const tapeFaceMat = useMemo(() => new THREE.MeshPhysicalMaterial({
+    color: "#f2b800", metalness: 0.55, roughness: 0.22,
+    clearcoat: 0.4, clearcoatRoughness: 0.30, envMapIntensity: 1.0,
+  }), [])
   const tickBlackMat = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: "#111111", roughness: 0.5 }), []
+    () => new THREE.MeshStandardMaterial({ color: "#0a0a0a", roughness: 0.4, metalness: 0.1 }), []
   )
   const tickRedMat = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: "#cc0000", roughness: 0.5 }), []
+    () => new THREE.MeshStandardMaterial({ color: "#dd0000", roughness: 0.35, metalness: 0.05, emissive: "#440000", emissiveIntensity: 0.3 }), []
   )
 
-  // ── Housing materials — RED ────────────────────────────────────────────────
+  // ── Housing materials — high-gloss injection moulded red plastic ───────────
   const housingMat = useMemo(
     () => new THREE.MeshPhysicalMaterial({
-      color: "#c01010", roughness: 0.28, metalness: 0.05,
-      clearcoat: 0.55, clearcoatRoughness: 0.10,
+      color: "#c80e0e", roughness: 0.18, metalness: 0.0,
+      clearcoat: 1.0, clearcoatRoughness: 0.06, envMapIntensity: 1.4,
     }), []
   )
-  const housingClipMat   = useMemo(() => new THREE.MeshStandardMaterial({ color: "#aaaaaa", roughness: 0.22, metalness: 0.88 }), [])
+  const housingClipMat   = useMemo(() => new THREE.MeshPhysicalMaterial({ color: "#c8cdd8", roughness: 0.08, metalness: 0.88, clearcoat: 0.6, clearcoatRoughness: 0.10 }), [])
 
   // ── Hook — polished chrome ─────────────────────────────────────────────────
   const hookMat = useMemo(() => new THREE.MeshPhysicalMaterial({
@@ -2387,34 +2425,60 @@ function TVSizeMeasureScene() {
     <group>
       <MeasureCamRig />
 
-      {/* ── Levl Void — deep lavender cyclorama with dramatic depth ─────── */}
-      <color attach="background" args={["#b8aed4"]} />
-      {/* Outer void sphere — very dark at poles, mid-lavender at equator */}
+      {/* ── Levl Void — deep dramatic lavender cyclorama ────────────────── */}
+      <color attach="background" args={["#7a6ea0"]} />
+      {/* Outer void — very dark blue-purple, creates a studio-dark outer shell */}
       <mesh scale={[18, 18, 18]}>
         <sphereGeometry args={[1, 48, 24]} />
-        <meshStandardMaterial color="#8a7eb0" roughness={1} metalness={0} side={THREE.BackSide} envMapIntensity={0} />
+        <meshStandardMaterial color="#4e4470" roughness={1} metalness={0} side={THREE.BackSide} envMapIntensity={0} />
       </mesh>
-      {/* Inner glow sphere — brighter lavender closer to scene, creates depth gradient */}
+      {/* Inner glow — richer lavender, brighter closer to subject */}
       <mesh scale={[7, 7, 7]}>
         <sphereGeometry args={[1, 32, 16]} />
-        <meshStandardMaterial color="#cec6e8" roughness={1} metalness={0} side={THREE.BackSide} envMapIntensity={0} transparent opacity={0.55} />
+        <meshStandardMaterial color="#9e94c8" roughness={1} metalness={0} side={THREE.BackSide} envMapIntensity={0} transparent opacity={0.60} />
       </mesh>
-      <Wall color="#c0b8dc" />
-      <Floor color="#b8b0d4" />
+      <Wall color="#8878b8" />
+      {/* ── UE5-style planar reflection floor ───────────────────────────────
+          MeshReflectorMaterial renders the scene from below the floor plane,
+          compositing a live mirror reflection — same technique as UE5 planar
+          reflectors and Apple commercial product floors.                      */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.10, 1.0]}>
+        <planeGeometry args={[60, 60]} />
+        <MeshReflectorMaterial
+          blur={[512, 128]}
+          resolution={1024}
+          mixBlur={5}
+          mixStrength={2.8}
+          roughness={0.04}
+          depthScale={1.4}
+          minDepthThreshold={0.0}
+          maxDepthThreshold={2.0}
+          color="#0e0c14"
+          metalness={0.0}
+          mirror={0.92}
+        />
+      </mesh>
 
-      {/* ── Levl Void lighting — strong rake creates deep directional shadows ── */}
-      {/* Very dark ambient so shadows read strongly */}
-      <hemisphereLight args={["#d8d0f0", "#9080c0", 0.35]} />
-      {/* Primary left rake — sharp directional shadow across background wall */}
-      <directionalLight position={[-4, 3.0, 4.0]} intensity={2.80} color="#fff4ee" castShadow
-        shadow-mapSize={[2048, 2048]} shadow-camera-near={0.1} shadow-camera-far={22}
+      {/* ── Apple-commercial 2-source product lighting rig ──────────────────
+           KEY  : hard raking from far upper-left, barely in front of TV plane.
+                  Creates one dramatic specular sweep across the bezel face.
+           FILL : cool gentle bounce from below/right — stops shadows going black.
+           No rim, no graze — both were hitting the bezel side faces and creating
+           the white border. The chrome hairline trim catches the key light
+           to provide edge definition without lighting the box sides.           */}
+      <hemisphereLight args={["#c8c0e8", "#3a2860", 0.05]} />
+      {/* BVH acceleration — prerequisite for path tracing + faster shadow/reflection casts */}
+      <Bvh firstHitOnly>
+      {/* KEY — far upper-left, barely forward of TV plane */}
+      <directionalLight position={[-6, 2.5, 0.8]} intensity={5.5} color="#fff8f0" castShadow
+        shadow-mapSize={[8192, 8192]} shadow-camera-near={0.1} shadow-camera-far={22}
         shadow-camera-left={-4} shadow-camera-right={4}
         shadow-camera-top={4} shadow-camera-bottom={-4}
-        shadow-bias={-0.0003} shadow-normalBias={0.010} />
-      {/* Top-right rim — edge highlight on bezel + housing */}
-      <directionalLight position={[4, 6, 2]} intensity={0.90} color="#ffffff" />
-      {/* Deep lavender fill from below-right — keeps shadows purple not black */}
-      <pointLight position={[1.8, -0.8, 2.5]} intensity={0.55} color="#c8b8f0" />
+        shadow-bias={-0.0002} shadow-normalBias={0.004} />
+      {/* COOL FILL — from below-front, only touches face of TV, not sides */}
+      <directionalLight position={[0, -3.0, 3.5]} intensity={0.30} color="#b0b8e8" />
+      {/* Purple bounce below */}
+      <pointLight position={[0, -2.5, 2.5]} intensity={0.15} color="#8878cc" />
 
 
       {/* ── TV bezel ── */}
@@ -2424,8 +2488,9 @@ function TVSizeMeasureScene() {
       {/* Screen glass */}
       <mesh position={[0, SCR_Y, 0.074]}>
         <boxGeometry args={[2.00, 1.12, 0.003]} />
-        <meshPhysicalMaterial color={C.screen} emissive={screenEmissive} emissiveIntensity={0.55}
-          roughness={0.45} metalness={0.0} clearcoat={0} envMapIntensity={0} />
+        {/* Screen glass — emissive panel glow + faint studio env reflection (like real glass) */}
+        <meshPhysicalMaterial color={C.screen} emissive={screenEmissive} emissiveIntensity={1.40}
+          roughness={0.25} metalness={0.0} clearcoat={1.0} clearcoatRoughness={0.04} envMapIntensity={0.12} />
       </mesh>
 
       {/* ── Chrome hairline perimeter edge — all 4 sides of bezel face ────── */}
@@ -2454,6 +2519,11 @@ function TVSizeMeasureScene() {
         <meshBasicMaterial color="#040506" />
       </mesh>
 
+      {/* ── Screen glow gradient — radial blue panel glow, no point-light dot */}
+      <mesh position={[0, SCR_Y, 0.0757]}>
+        <planeGeometry args={[2.00, 1.12]} />
+        <meshBasicMaterial map={screenGlowTex} transparent depthWrite={false} />
+      </mesh>
       {/* ── Screen vignette — black fade blended into edges, transparent center */}
       <mesh position={[0, SCR_Y, 0.0759]}>
         <planeGeometry args={[2.00, 1.12]} />
@@ -2590,7 +2660,19 @@ function TVSizeMeasureScene() {
         </mesh>
       </group>
 
-      {/* Shadow handled by directional light castShadow — housing + bezel + wall all configured */}
+      </Bvh>
+
+      {/* Soft floating contact shadow — depth-composited drop shadow beneath TV */}
+      <ContactShadows
+        position={[0, -1.10, 1.0]}
+        rotation={[-Math.PI / 2, 0, 0]}
+        scale={7}
+        blur={3.5}
+        opacity={0.55}
+        far={2.8}
+        color="#2a1a50"
+        frames={1}
+      />
     </group>
   )
 }
@@ -3846,16 +3928,20 @@ function VisibleCablesScene() {
 type CamCfg = { pos: [number, number, number]; fov: number }
 
 const CAM = {
-  mount:   { pos: [0,    0.10, 1.80], fov: 44 } as CamCfg,
+  // Fixed: angled side-front so mount bracket peeks out beside TV
+  mount:   { pos: [0.70, 0.08, 2.20], fov: 52 } as CamCfg,
   wall:    { pos: [2.60, 0.72, 4.50], fov: 42 } as CamCfg,
   item:    { pos: [0.85, 0.06, 1.90], fov: 50 } as CamCfg,
   cable:   { pos: [0,   -0.04, 1.80], fov: 46 } as CamCfg,
-  ceil:    { pos: [0.06, 0.28, 1.95], fov: 48 } as CamCfg,
-  fullmo:  { pos: [1.55, 0.22, 0.48], fov: 50 } as CamCfg,
-  tilt:    { pos: [1.75, 0.15, 0.48], fov: 48 } as CamCfg,
+  // Ceiling: look slightly up from below-front to see pole descending to TV
+  ceil:    { pos: [0.50, -0.30, 2.20], fov: 52 } as CamCfg,
+  // Full-motion: front-angled to show arm extended + TV face
+  fullmo:  { pos: [0.90, 0.12, 1.40], fov: 56 } as CamCfg,
+  // Tilting: front-angled to show TV face + tilting mechanism below
+  tilt:    { pos: [0.80, 0.10, 1.60], fov: 52 } as CamCfg,
   mirror:  { pos: [0.80, 0.04, 1.85], fov: 50 } as CamCfg,
   light:   { pos: [0.55, 0.55, 2.20], fov: 52 } as CamCfg,
-  measure: { pos: [0,    0.04, 2.10], fov: 44 } as CamCfg,
+  measure: { pos: [0.55, -0.18, 2.05], fov: 46 } as CamCfg,
 }
 
 function resolveScene(option: string): { scene: JSX.Element; cam: CamCfg; env: string; customLights?: boolean } {
@@ -3871,13 +3957,13 @@ function resolveScene(option: string): { scene: JSX.Element; cam: CamCfg; env: s
     case "Light Fixture":
       return { scene: <LightFixtureScene />, cam: CAM.light, env: "apartment", customLights: true }
     case "Fixed (flat against wall)":
-      return { scene: <FixedScene />, cam: CAM.mount, env: "city" }
+      return { scene: <FixedScene />, cam: CAM.mount, env: "apartment", customLights: true }
     case "Tilting (angle adjustment)":
-      return { scene: <TiltingScene />, cam: CAM.tilt, env: "city" }
+      return { scene: <TiltingScene />, cam: CAM.tilt, env: "apartment", customLights: true }
     case "Full-motion/Articulating (swivel and tilt)":
-      return { scene: <FullMotionScene />, cam: CAM.fullmo, env: "city" }
+      return { scene: <FullMotionScene />, cam: CAM.fullmo, env: "apartment", customLights: true }
     case "Ceiling mount":
-      return { scene: <CeilingScene />, cam: CAM.ceil, env: "city" }
+      return { scene: <CeilingScene />, cam: CAM.ceil, env: "apartment", customLights: true }
     case "Drywall/Sheetrock":
       return { scene: <WallTexScene material="drywall"   />, cam: CAM.wall, env: "apartment" }
     case "Brick":
@@ -3906,41 +3992,48 @@ function resolveScene(option: string): { scene: JSX.Element; cam: CamCfg; env: s
 // ─── Shared Canvas wrapper ────────────────────────────────────────────────────
 
 function SceneCanvas({
-  cam, scene, thumbnail = false, env = "city", frameloop = "always", postprocess = true, customLights = false,
+  cam, scene, thumbnail = false, env = "city", frameloop = "always", postprocess = true, customLights = false, extraPostFX = false,
 }: {
-  cam: CamCfg; scene: JSX.Element; thumbnail?: boolean; env?: string; frameloop?: "always" | "demand" | "never"; postprocess?: boolean; customLights?: boolean
+  cam: CamCfg; scene: JSX.Element; thumbnail?: boolean; env?: string; frameloop?: "always" | "demand" | "never"; postprocess?: boolean; customLights?: boolean; extraPostFX?: boolean
 }) {
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768
 
-  // HDR: 4K desktop / 2K mobile — sharper reflections on metallic materials
+  // HDR: studio cyclorama for product photography, apartment for fixtures, city for everything else
   const hdr = env === "apartment"
-    ? (isMobile ? "/hdri/lebombo_2k.hdr"          : "/hdri/lebombo_4k.hdr")
-    : (isMobile ? "/hdri/potsdamer_platz_2k.hdr"   : "/hdri/potsdamer_platz_4k.hdr")
+    ? (isMobile ? "/hdri/lebombo_2k.hdr"               : "/hdri/lebombo_4k.hdr")
+    : env === "studio"
+    ? "/hdri/cyclorama_hard_light_2k.hdr"
+    : (isMobile ? "/hdri/potsdamer_platz_2k.hdr"       : "/hdri/potsdamer_platz_4k.hdr")
 
   // All scenes use transparent canvas — CSS gradient shows through for every scene type
   const useTransparent = true
-  const gradientBg = [
-    "radial-gradient(ellipse 70% 55% at 8% 5%, rgba(255, 255, 255, 0.82) 0%, transparent 60%)",
-    "radial-gradient(ellipse 150% 70% at 50% 100%, rgba(167, 139, 250, 0.52) 0%, rgba(196, 181, 253, 0.18) 48%, rgba(220, 213, 252, 0.06) 65%, transparent 82%)",
-    "linear-gradient(135deg, rgba(255,255,255,0.97) 0%, rgba(237,233,254,0.80) 100%)",
-  ].join(", ")
+  // Mount type + ceiling scenes (customLights=true) use dark lavender void background
+  const gradientBg = customLights
+    ? "linear-gradient(180deg, #1e1530 0%, #2d2050 45%, #3a2d5c 100%)"
+    : [
+        "radial-gradient(ellipse 70% 55% at 8% 5%, rgba(255, 255, 255, 0.82) 0%, transparent 60%)",
+        "radial-gradient(ellipse 150% 70% at 50% 100%, rgba(167, 139, 250, 0.52) 0%, rgba(196, 181, 253, 0.18) 48%, rgba(220, 213, 252, 0.06) 65%, transparent 82%)",
+        "linear-gradient(135deg, rgba(255,255,255,0.97) 0%, rgba(237,233,254,0.80) 100%)",
+      ].join(", ")
 
   return (
     <div style={{ width: "100%", height: "100%", position: "relative", background: gradientBg }}>
     <Canvas
-      shadows={!thumbnail}
+      shadows="soft"
       dpr={thumbnail ? 1 : (isMobile ? [1, 1.5] : [1, 2])}
       frameloop={frameloop}
       gl={{
         antialias: !isMobile,
         alpha: true,
         toneMapping: THREE.ACESFilmicToneMapping,
+        toneMappingExposure: 1.15,
         outputColorSpace: THREE.SRGBColorSpace,
         powerPreference: "high-performance",
       }}
       performance={{ min: 0.5 }}
       style={{ width: "100%", height: "100%" }}
     >
+      {!thumbnail && <SoftShadows size={25} samples={16} focus={0.5} />}
       <PerspectiveCamera makeDefault position={cam.pos} fov={cam.fov} near={0.05} far={200} />
 
       {thumbnail ? (
@@ -3964,16 +4057,29 @@ function SceneCanvas({
       {scene}
       <Environment files={hdr} />
 
-      {/* ── Post-processing: N8AO + SMAA only — bloom removed entirely ── */}
-      {!thumbnail && !isMobile && postprocess && (
+      {/* ── Post-processing ── */}
+      {!thumbnail && !isMobile && postprocess && !extraPostFX && (
         <EffectComposer multisampling={0}>
-          <N8AO
-            quality="high"
-            aoRadius={1.2}
-            intensity={3.2}
-            distanceFalloff={0.8}
-            color="black"
-          />
+          <N8AO quality="high" aoRadius={1.2} intensity={3.2} distanceFalloff={0.8} color="black" />
+          <SMAA />
+        </EffectComposer>
+      )}
+      {!thumbnail && !isMobile && postprocess && extraPostFX && (
+        <EffectComposer multisampling={8}>
+          {/* SSAO — crushes corners and bezel-to-screen joints into deep shadow */}
+          <N8AO quality="ultra" aoRadius={0.45} intensity={3.5} distanceFalloff={0.5} color="black" />
+          {/* Tight precision bloom — only screen glow bleeds, no diffuse haze over bezel */}
+          <Bloom luminanceThreshold={0.65} luminanceSmoothing={0.15} intensity={1.2} mipmapBlur levels={6} />
+          {/* Long-lens DOF — Apple uses f/2.8–f/4 telephoto, floor + bg softly out of focus */}
+          <DepthOfField focusDistance={0.008} focalLength={0.055} bokehScale={3.0} height={700} />
+          {/* S-curve contrast — separates blacks from mids, punchy commercial look */}
+          <BrightnessContrast brightness={-0.03} contrast={0.20} />
+          {/* Micro CA — faint fringe only at extreme edges, lens character */}
+          <ChromaticAberration offset={[0.0004, 0.0002] as any} radialModulation={true} modulationOffset={0.5} />
+          {/* Deep vignette — draws eye to TV center like a product studio shot */}
+          <Vignette eskil={false} offset={0.12} darkness={0.75} />
+          {/* Tilt-shift compression — top/bottom blur makes TV look like macro product photo */}
+          <TiltShift2 blur={0.10} />
           <SMAA />
         </EffectComposer>
       )}
@@ -4015,5 +4121,6 @@ export function Option3DImpl({
  */
 export function TVSizeMeasure() {
   const { scene, cam } = resolveScene("__tv_measure")
-  return <SceneCanvas cam={cam} env="city" scene={scene} />
+  // "city" = potsdamer platz neutral outdoor HDRI — no room/window reflections on screen
+  return <SceneCanvas cam={cam} env="studio" scene={scene} customLights={true} extraPostFX={true} />
 }
