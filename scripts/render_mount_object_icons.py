@@ -125,12 +125,13 @@ ICONS = {
         # brushed-metal surface detail).
         "glb":     "sketchfab_mirror_stockholm.glb",
         "rot_xyz": (math.radians(-6), 0, -math.pi/2 - math.radians(35)),
-        "scale":   0.85,
-        "camera_fov_deg": 42,
+        "scale":   1.00,
+        "camera_fov_deg": 50,
         "force_silver_frame": True,
         "frame_is_largest": True,
-        "light_scale": 0.45,           # rim/back lights stay readable
-        "front_light_scale": 0.12,     # front lights dimmed hard
+        "glass_target": "smallest",    # mirror disc material → glass+clearcoat
+        "light_scale": 0.45,
+        "front_light_scale": 0.12,
         "exposure_offset": -0.7,
     },
 }
@@ -247,11 +248,13 @@ def make_icon_fn(key, cfg):
                     nt.links.new(bump.outputs["Normal"], bsdf.inputs["Normal"])
                     print(f"  [{key}] frame mat '{mat_name}' → brushed silver metal (matte)")
 
-        # Optional smoked-glass mirror surface — replaces the largest-area
-        # material's base color with a deep blue-grey tint and tunes the
-        # metallic/roughness so it reads as high-end smoked glass instead
-        # of a flat lavender disc.
-        if cfg.get("smoked_glass"):
+        # Glass-mirror surface override — reads as a real glass mirror plate
+        # rather than a flat lavender disc. High-metallic + low-roughness +
+        # clearcoat layer simulates the glass surface on top of silvered
+        # backing. Use cfg["glass_target"] = 'largest' or 'smallest' to
+        # pick which material is the actual mirror plane.
+        glass_target = cfg.get("glass_target")  # 'largest' | 'smallest' | None
+        if glass_target:
             area_by_mat = {}
             for m in meshes:
                 for p in m.data.polygons:
@@ -260,18 +263,34 @@ def make_icon_fn(key, cfg):
                         if mat is None: continue
                         area_by_mat[mat.name] = area_by_mat.get(mat.name, 0) + p.area
             if area_by_mat:
-                largest = max(area_by_mat.items(), key=lambda x: x[1])[0]
-                sm = bpy.data.materials.get(largest)
+                ranked = sorted(area_by_mat.items(), key=lambda x: -x[1])
+                target_mat = ranked[0][0] if glass_target == 'largest' else ranked[-1][0]
+                sm = bpy.data.materials.get(target_mat)
                 if sm and sm.use_nodes:
                     bsdf = next((n for n in sm.node_tree.nodes if n.bl_idname == "ShaderNodeBsdfPrincipled"), None)
                     if bsdf:
                         for lk in list(sm.node_tree.links):
                             if lk.to_node == bsdf and lk.to_socket.name == "Base Color":
                                 sm.node_tree.links.remove(lk)
-                        bsdf.inputs["Base Color"].default_value = (0.08, 0.08, 0.14, 1.0)
-                        bsdf.inputs["Metallic"].default_value = 0.85
-                        bsdf.inputs["Roughness"].default_value = 0.08
-                        print(f"  [{key}] mirror surface '{largest}' → smoked glass")
+                        # Slight dark tint so reflections aren't a uniform
+                        # lavender wash — gives mirror perceptible body.
+                        bsdf.inputs["Base Color"].default_value = (0.06, 0.06, 0.10, 1.0)
+                        bsdf.inputs["Metallic"].default_value = 1.0
+                        bsdf.inputs["Roughness"].default_value = 0.03
+                        # Clear glass coat (Blender 4.x has Coat Weight)
+                        for coat_input in ("Coat Weight", "Clearcoat"):
+                            if coat_input in bsdf.inputs:
+                                bsdf.inputs[coat_input].default_value = 0.6
+                                break
+                        for coat_rough in ("Coat Roughness", "Clearcoat Roughness"):
+                            if coat_rough in bsdf.inputs:
+                                bsdf.inputs[coat_rough].default_value = 0.01
+                                break
+                        for ior_input in ("IOR", "Coat IOR"):
+                            if ior_input in bsdf.inputs:
+                                bsdf.inputs[ior_input].default_value = 1.55
+                                break
+                        print(f"  [{key}] glass mirror surface '{target_mat}' → tinted glass + clearcoat")
 
         # Optional: hue-shift the frame material(s) using the drill recipe so
         # the frame looks painted/baked-in (not photoscanned). Keeps the
