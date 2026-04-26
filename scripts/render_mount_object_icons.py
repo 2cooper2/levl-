@@ -120,16 +120,17 @@ ICONS = {
     "mirror": {
         # Sketchfab "IKEA Stockholm" — round wall mirror with chunky frame.
         # Wood frame overridden to brushed silver metal (no wood, no gold).
-        # frame_is_largest=True: Stockholm's curved wood frame has more
-        # polys than the flat mirror disc, so the silver override targets
-        # the LARGEST-area material.
-        # 6° forward tilt exposes more of the bottom rim profile depth.
+        # 6° forward tilt + side perspective for visible 3D bottom-rim depth.
+        # Lighting backed off so the silver doesn't blow out (preserves the
+        # brushed-metal surface detail).
         "glb":     "sketchfab_mirror_stockholm.glb",
         "rot_xyz": (math.radians(-6), 0, -math.pi/2 - math.radians(35)),
         "scale":   0.55,
         "camera_fov_deg": 30,
         "force_silver_frame": True,
         "frame_is_largest": True,
+        "light_scale": 0.55,
+        "exposure_offset": -0.4,
     },
 }
 
@@ -232,18 +233,18 @@ def make_icon_fn(key, cfg):
                         if lk.to_node == bsdf and (lk.to_socket.name == "Base Color"
                                                    or lk.to_socket.name == "Normal"):
                             nt.links.remove(lk)
-                    bsdf.inputs["Base Color"].default_value = (0.78, 0.78, 0.82, 1.0)
+                    bsdf.inputs["Base Color"].default_value = (0.62, 0.62, 0.66, 1.0)
                     bsdf.inputs["Metallic"].default_value = 1.0
-                    bsdf.inputs["Roughness"].default_value = 0.28
+                    bsdf.inputs["Roughness"].default_value = 0.55
                     # Brushed-noise normal for surface variation
                     noise = nt.nodes.new("ShaderNodeTexNoise")
                     noise.inputs["Scale"].default_value = 80.0
                     noise.inputs["Detail"].default_value = 6.0
                     bump = nt.nodes.new("ShaderNodeBump")
-                    bump.inputs["Strength"].default_value = 0.10
+                    bump.inputs["Strength"].default_value = 0.15
                     nt.links.new(noise.outputs["Fac"], bump.inputs["Height"])
                     nt.links.new(bump.outputs["Normal"], bsdf.inputs["Normal"])
-                    print(f"  [{key}] frame mat '{mat_name}' → brushed silver metal")
+                    print(f"  [{key}] frame mat '{mat_name}' → brushed silver metal (matte)")
 
         # Optional smoked-glass mirror surface — replaces the largest-area
         # material's base color with a deep blue-grey tint and tunes the
@@ -448,6 +449,19 @@ def make_icon_fn(key, cfg):
             if cam:
                 cam.data.angle = math.radians(fov_override)
                 print(f"  [{key}] camera FOV set to {fov_override}°")
+
+        # Per-icon lighting back-off — for highly reflective materials that
+        # blow out under build()'s default brightness.
+        light_scale = cfg.get("light_scale")
+        if light_scale is not None:
+            for o in bpy.data.objects:
+                if o.type == 'LIGHT':
+                    o.data.energy *= light_scale
+            print(f"  [{key}] all lights * {light_scale}")
+        exposure_offset = cfg.get("exposure_offset")
+        if exposure_offset is not None:
+            bpy.context.scene.view_settings.exposure += exposure_offset
+            print(f"  [{key}] exposure {exposure_offset:+.2f} → {bpy.context.scene.view_settings.exposure:.2f}")
 
         for o in meshes:
             bpy.ops.object.select_all(action='DESELECT')
