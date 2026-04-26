@@ -202,7 +202,7 @@ ICONS = {
     "mirror": {
         "glb":     "sketchfab_mirror_stockholm.glb",
         "rot_xyz": (0, 0, 0),
-        "target_h": 2.0,
+        "target_h": 2.6,
         "z_floor": 0.0,
     },
     "art-frame": {
