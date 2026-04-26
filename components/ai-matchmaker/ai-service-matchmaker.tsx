@@ -33,7 +33,7 @@ import dynamic from "next/dynamic"
 
 // Static render images for mount object option cards
 const MOUNT_RENDERS: Record<string, string> = {
-  "TV/Monitor":        "/assets/renders/tv-monitor.png",
+  "TV/Monitor":        "/assets/renders/tv-monitor.webp",
   "Art/Picture Frame": "/assets/renders/art-frame.png",
   "Floating Shelves":  "/assets/renders/floating-shelves.png",
   "Light Fixture":     "/assets/renders/light-fixture.png",
