@@ -242,8 +242,10 @@ for key, drawer in [("new_york", draw_new_york),
                     ("los_angeles", draw_los_angeles),
                     ("kansas_city", draw_kansas_city)]:
     im = drawer()
-    # Save raw — we'll rotate via the Blender UV mapping node so the print
-    # mesh shows the texture top-right at display top-right right-side-up.
+    # Print mesh's UV applies a 180° rotation vs standard image coords.
+    # Pre-rotating the texture 180° so labels drawn at the texture's
+    # top-right display at the print's top-right right-side-up.
+    im = im.transpose(Image.ROTATE_180)
     out = os.path.join(OUT, f"city_{key}.png")
     im.save(out)
     print(f"saved {out}")
