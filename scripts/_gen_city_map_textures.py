@@ -241,9 +241,11 @@ for key, drawer in [("new_york", draw_new_york),
                     ("los_angeles", draw_los_angeles),
                     ("kansas_city", draw_kansas_city)]:
     im = drawer()
-    # Pre-rotate 180° so the print mesh's UV (which flips both axes vs
-    # standard image coords) ends up showing the text top-right right-side-up.
-    im = im.transpose(Image.ROTATE_180)
+    # Print mesh's UV applies a vertical flip vs standard image coords.
+    # Pre-flipping the image vertically (top↔bottom) so text drawn at the
+    # texture's top-right ends up displaying at the print's top-right with
+    # right-side-up glyphs.
+    im = im.transpose(Image.FLIP_TOP_BOTTOM)
     out = os.path.join(OUT, f"city_{key}.png")
     im.save(out)
     print(f"saved {out}")
