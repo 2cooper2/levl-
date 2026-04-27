@@ -32,23 +32,42 @@ def fetch_tile(z, x, y):
         data = r.read()
     return Image.open(__import__("io").BytesIO(data))
 
-def fetch_city(lat, lon, name, key):
-    cx, cy = lonlat_to_tile(lon, lat, ZOOM)
-    # Center tile + 1 each side = 4x4 grid (covers city downtown nicely)
-    tx0 = int(cx) - 2
-    ty0 = int(cy) - 2
-    SIZE = 4
-    canvas = Image.new("RGB", (256 * SIZE, 256 * SIZE), (240, 240, 240))
+def fetch_city(lat, lon, name, key, zoom=ZOOM):
+    """The print mesh's visible UV is u=0.002-0.811 v=0.193-0.998 — only the
+    LEFT 81% × TOP 80% of the texture is shown. So we paste the tile-stitched
+    map so its CENTER falls at PIL (414, 405) instead of texture center (512,
+    512), which puts the city's center at the visible UV center."""
+    cx_tile, cy_tile = lonlat_to_tile(lon, lat, zoom)
+
+    # Visible UV center in texture pixels
+    UV_CX = int(((0.002 + 0.811) / 2) * 1024)   # ≈416
+    UV_CY = int((1 - (0.193 + 0.998) / 2) * 1024)  # ≈405
+
+    # Render city map at 5x5 = 1280×1280 then offset-paste to 1024 canvas.
+    SIZE = 5
+    map_w = 256 * SIZE
+    panel = Image.new("RGB", (map_w, map_w), (240, 240, 240))
+    tx0 = int(cx_tile) - SIZE // 2
+    ty0 = int(cy_tile) - SIZE // 2
+    # Pixel offset of the lat/lon center within the panel
+    panel_cx = int((cx_tile - tx0) * 256)
+    panel_cy = int((cy_tile - ty0) * 256)
     for dy in range(SIZE):
         for dx in range(SIZE):
-            tx = tx0 + dx
-            ty = ty0 + dy
             try:
-                tile = fetch_tile(ZOOM, tx, ty)
-                canvas.paste(tile, (dx * 256, dy * 256))
+                tile = fetch_tile(zoom, tx0 + dx, ty0 + dy)
+                panel.paste(tile, (dx * 256, dy * 256))
                 time.sleep(0.15)
             except Exception as e:
-                print(f"  [WARN] tile ({tx},{ty}) failed: {e}")
+                print(f"  [WARN] tile ({tx0+dx},{ty0+dy}) failed: {e}")
+
+    # Crop a 1024×1024 window from the panel centered on (panel_cx,panel_cy)
+    # then offset within the texture so city center lands at UV center.
+    canvas = Image.new("RGB", (1024, 1024), (240, 240, 240))
+    src_x0 = panel_cx - UV_CX
+    src_y0 = panel_cy - UV_CY
+    crop = panel.crop((src_x0, src_y0, src_x0 + 1024, src_y0 + 1024))
+    canvas.paste(crop, (0, 0))
     # Crop the canvas (1024x1024 center) — already exactly 1024x1024
     # Add city label
     d = ImageDraw.Draw(canvas)
