@@ -248,20 +248,63 @@ def import_glb_at(glb_path, target_height, rot_xyz=(0,0,0),
     return meshes
 
 
+def swap_print_texture(meshes, image_path):
+    """Find the PRINT mesh's material and replace its base-color image with
+    the given file. Used to put a custom city map on each frame instance."""
+    if not os.path.exists(image_path):
+        print(f"  [WARN] missing texture {image_path}")
+        return
+    # Find a mesh whose name contains 'PRINT' OR a mesh whose largest face
+    # has the print material (the flat picture rectangle inside the frame).
+    target_mesh = None
+    for m in meshes:
+        if 'PRINT' in m.name.upper() or 'Print' in m.name:
+            target_mesh = m; break
+    if target_mesh is None:
+        # fallback: pick the mesh with the LARGER flat face area
+        target_mesh = max(meshes, key=lambda m: max((p.area for p in m.data.polygons), default=0))
+    # On its first material, replace any existing image-texture node's image
+    if not target_mesh.data.materials:
+        return
+    mat = target_mesh.data.materials[0]
+    if not (mat and mat.use_nodes):
+        return
+    # Make sure each mesh instance has its OWN material so swapping doesn't
+    # affect other instances of the same GLB.
+    new_mat = mat.copy()
+    target_mesh.data.materials[0] = new_mat
+    nt = new_mat.node_tree
+    img = bpy.data.images.load(image_path)
+    img.colorspace_settings.name = "sRGB"
+    for n in nt.nodes:
+        if n.type == 'TEX_IMAGE':
+            n.image = img
+            print(f"  [{target_mesh.name}] swapped print texture → {os.path.basename(image_path)}")
+            return
+
+
 def compose_art_frame_trio(glb_path):
-    """Three frames at small / medium / large scales, overlapping but each
-    frame's silhouette readable. Sizes 1.0 / 1.6 / 2.2 m tall; arranged
-    left-back / center / right-front so the largest is forward and smaller
-    ones recede behind."""
-    # Large frame (rear-right-ish, dominant)
-    import_glb_at(glb_path, target_height=2.2, rot_xyz=(0, 0, 0),
-                  z_floor=0.0, x_offset=0.45, y_offset=0.40)
-    # Medium frame (left, slightly forward)
-    import_glb_at(glb_path, target_height=1.6, rot_xyz=(0, 0, math.radians(8)),
-                  z_floor=0.0, x_offset=-0.65, y_offset=-0.10)
-    # Small frame (right-front, leaning more toward camera)
-    import_glb_at(glb_path, target_height=1.05, rot_xyz=(0, 0, math.radians(-6)),
-                  z_floor=0.0, x_offset=0.95, y_offset=-0.45)
+    """Three frames — large NEW YORK (rear), medium KANSAS CITY (left),
+    small LOS ANGELES (right-front). Print textures are procedurally
+    generated stylized city maps."""
+    here = os.path.dirname(glb_path)
+    base_glb = os.path.join(here, "sketchfab_art_frame_modern.glb")
+    tex_ny    = os.path.join(here, "city_new_york.png")
+    tex_kc    = os.path.join(here, "city_kansas_city.png")
+    tex_la    = os.path.join(here, "city_los_angeles.png")
+
+    # Large — New York (rear-right, dominant)
+    m_lg = import_glb_at(base_glb, target_height=2.2, rot_xyz=(0, 0, 0),
+                         z_floor=0.0, x_offset=0.45, y_offset=0.40)
+    swap_print_texture(m_lg, tex_ny)
+    # Medium — Kansas City (left, slightly forward)
+    m_md = import_glb_at(base_glb, target_height=1.6, rot_xyz=(0, 0, math.radians(8)),
+                         z_floor=0.0, x_offset=-0.65, y_offset=-0.10)
+    swap_print_texture(m_md, tex_kc)
+    # Small — Los Angeles (right-front, leaning more)
+    m_sm = import_glb_at(base_glb, target_height=1.05, rot_xyz=(0, 0, math.radians(-6)),
+                         z_floor=0.0, x_offset=0.95, y_offset=-0.45)
+    swap_print_texture(m_sm, tex_la)
 
 
 def render_one(key):
