@@ -26,7 +26,7 @@ ANIM_TMP = os.path.join(OUT_DIR, "anim_articulating")
 FFMPEG = "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/imageio_ffmpeg/binaries/ffmpeg-macos-aarch64-v7.1"
 
 W_RENDER, H_RENDER = 480, 620
-FRAMES  = int(os.environ.get("LEVL_FRAMES",  "48"))
+FRAMES  = int(os.environ.get("LEVL_FRAMES",  "96"))
 FPS     = 24
 SAMPLES = int(os.environ.get("LEVL_SAMPLES", "96"))
 
@@ -182,32 +182,38 @@ def add_empty(name, location, parent=None):
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# TILTING — wall plate (fixed) + hinge axis (rotates X) + tilt frame
+# TILTING — modeled from the Starburst SB-3270WMT reference photo:
+#   Two tall vertical wall rails (FIXED) on left + right.
+#   A horizontal tilt frame between them that pivots forward/back around a
+#   horizontal X axis at the top where rails meet frame.
 # ════════════════════════════════════════════════════════════════════════════
 def build_tilting_rig():
     mat = black_metal_mat()
-    # Wall plate (fixed) — 4cm thick × 8cm wide × 1m tall
-    add_box("WallPlate",       (0.040, 0.040, 0.500),  (-0.55, 0.000,  0.000), mat=mat)
-    add_box("WallPlateInner",  (0.020, 0.060, 0.420),  (-0.55, 0.020,  0.000), mat=mat)
 
-    # Hinge empty at the back-mid of the wall plate (the tilt pivot axis is X)
-    hinge = add_empty("TiltHinge", (-0.50, 0.040, 0.000))
+    # ── FIXED: two tall vertical wall rails with mounting-slot silhouette ──
+    # Left rail
+    add_box("WallRail_L",      (0.040, 0.030, 0.500),  (-0.45, 0.000, 0.000), mat=mat)
+    add_box("WallRail_L_Tab",  (0.060, 0.030, 0.040),  (-0.45, 0.000, 0.470), mat=mat)
+    # Right rail
+    add_box("WallRail_R",      (0.040, 0.030, 0.500),  ( 0.45, 0.000, 0.000), mat=mat)
+    add_box("WallRail_R_Tab",  (0.060, 0.030, 0.040),  ( 0.45, 0.000, 0.470), mat=mat)
 
-    # Tilt frame (everything that pivots) — parented to hinge.
-    # Long vertical rails on the back of the VESA plate
-    add_box("LeftRail",   (0.025, 0.025, 0.350),  (-0.30, 0.080,  0.000), parent=hinge, mat=mat)
-    add_box("RightRail",  (0.025, 0.025, 0.350),  ( 0.30, 0.080,  0.000), parent=hinge, mat=mat)
-    # VESA back plate + middle thicker section
-    add_box("VESABack",     (0.020, 0.020, 0.220), (0.30, 0.130, 0.000),  parent=hinge, mat=mat)
-    add_box("VESABackMid",  (0.130, 0.018, 0.140), (0.30, 0.120, 0.000),  parent=hinge, mat=mat)
-    # Horizontal cross-rails behind TV (top + bottom)
-    add_box("TopRail",      (0.450, 0.030, 0.030), (0.30, 0.170, 0.180),  parent=hinge, mat=mat)
-    add_box("BotRail",      (0.450, 0.030, 0.030), (0.30, 0.170, -0.180), parent=hinge, mat=mat)
-    # Side hooks gripping TV edges
-    add_box("HookL",        (0.030, 0.040, 0.260), (-0.13, 0.200, 0.000), parent=hinge, mat=mat)
-    add_box("HookL_Tab",    (0.030, 0.060, 0.030), (-0.13, 0.230, -0.250), parent=hinge, mat=mat)
-    add_box("HookR",        (0.030, 0.040, 0.260), ( 0.73, 0.200, 0.000), parent=hinge, mat=mat)
-    add_box("HookR_Tab",    (0.030, 0.060, 0.030), ( 0.73, 0.230, -0.250), parent=hinge, mat=mat)
+    # ── Hinge: a horizontal X axis empty at the TOP-FRONT of the rails ──
+    hinge = add_empty("TiltHinge", (0.000, 0.040, 0.380))
+
+    # ── PIVOTING tilt frame (parented to hinge) ──
+    # Top horizontal cross-bar (at the hinge axis line)
+    add_box("TF_TopBar",   (0.470, 0.030, 0.030), (0.000, 0.040, 0.000), parent=hinge, mat=mat)
+    # Two thick vertical side rails of the tilt frame, hanging DOWN from
+    # the top bar (when not tilted) — these are the "arms" that move.
+    add_box("TF_LeftSide", (0.030, 0.030, 0.380), (-0.420, 0.060, -0.190), parent=hinge, mat=mat)
+    add_box("TF_RightSide",(0.030, 0.030, 0.380), ( 0.420, 0.060, -0.190), parent=hinge, mat=mat)
+    # Bottom horizontal cross-bar
+    add_box("TF_BotBar",   (0.470, 0.030, 0.030), (0.000, 0.060, -0.380), parent=hinge, mat=mat)
+    # Horizontal mid-bar stiffener (where TV's VESA bracket sits)
+    add_box("TF_MidBar",   (0.430, 0.030, 0.030), (0.000, 0.080, -0.180), parent=hinge, mat=mat)
+    # VESA mounting plate in the middle
+    add_box("TF_VESAPlate",(0.140, 0.020, 0.110), (0.000, 0.090, -0.180), parent=hinge, mat=mat)
 
     return hinge
 
@@ -226,28 +232,34 @@ def keyframe_tilting(hinge):
 # FULL-MOTION — wall plate + 2 parallel arm chains (shoulder→elbow→wrist)
 # Both chains receive identical keyframes; VESA is parented to the upper wrist.
 # ════════════════════════════════════════════════════════════════════════════
-def build_arm_chain(suffix, z, mat, anchor_to=None):
-    """Build one arm chain at world Z=z. Returns (shoulder, elbow, wrist)."""
+def build_arm_chain(suffix, z, mat):
+    """One arm chain: shoulder → THICK upper arm → elbow → THICK forearm → wrist.
+       Arm cross-section is 0.05×0.05 (thick visible bars, not thin rods)."""
+    ARM_T = 0.025          # arm half-thickness (cross-section 0.05)
+    UPPER_LEN = 0.20       # upper arm half-length (full = 0.40)
+    LOWER_LEN = 0.20       # forearm half-length
+
     # Shoulder empty mounted on the wall plate
     shoulder = add_empty(f"Shoulder_{suffix}", (-0.50, 0.040, z))
     add_cyl(f"ShoulderKnuckle_{suffix}", 0.045, 0.10, (0, 0, 0),
             axis='Z', parent=shoulder, mat=mat)
-    # Upper arm — its CENTER is forward of shoulder by 0.090 along the arm axis
-    add_box(f"UpperArm_{suffix}", (0.180, 0.025, 0.022), (0.180, 0.05, 0),
-            parent=shoulder, mat=mat)
+    # Upper arm — thick bar, runs out from shoulder along +X (its local axis).
+    # Center is at half-length along +X.
+    add_box(f"UpperArm_{suffix}", (UPPER_LEN, ARM_T, ARM_T),
+            (UPPER_LEN, 0, 0), parent=shoulder, mat=mat)
 
-    # Elbow empty at end of upper arm — placed in shoulder's LOCAL frame
-    elbow = add_empty(f"Elbow_{suffix}", (0.360, 0.05, 0))
+    # Elbow empty at end of upper arm (local x=2*UPPER_LEN of shoulder)
+    elbow = add_empty(f"Elbow_{suffix}", (UPPER_LEN * 2, 0, 0))
     elbow.parent = shoulder
     elbow.matrix_parent_inverse = shoulder.matrix_world.inverted()
     add_cyl(f"ElbowKnuckle_{suffix}", 0.045, 0.10, (0, 0, 0),
             axis='Z', parent=elbow, mat=mat)
-    # Forearm
-    add_box(f"Forearm_{suffix}", (0.180, 0.025, 0.022), (0.180, 0.04, 0),
-            parent=elbow, mat=mat)
+    # Forearm — thick bar
+    add_box(f"Forearm_{suffix}", (LOWER_LEN, ARM_T, ARM_T),
+            (LOWER_LEN, 0, 0), parent=elbow, mat=mat)
 
     # Wrist empty at end of forearm
-    wrist = add_empty(f"Wrist_{suffix}", (0.360, 0.04, 0))
+    wrist = add_empty(f"Wrist_{suffix}", (LOWER_LEN * 2, 0, 0))
     wrist.parent = elbow
     wrist.matrix_parent_inverse = elbow.matrix_world.inverted()
     add_cyl(f"WristKnuckle_{suffix}", 0.045, 0.10, (0, 0, 0),
@@ -257,25 +269,39 @@ def build_arm_chain(suffix, z, mat, anchor_to=None):
 
 
 def build_fullmotion_rig():
+    """Modeled from the Mounting Dream full-motion reference:
+         - Tall wall plate on the left (FIXED)
+         - Dual parallelogram arm chain (upper + lower arms) extending
+           forward — the visible 'arms' that fold + extend
+         - TV-side bracket: vertical rails connected by horizontal frame
+       Arms are THICK (0.05m × 0.05m) so they read clearly as articulating
+       elements, not thin rods."""
     mat = black_metal_mat()
-    # Wall plate (fixed)
-    add_box("WallPlate",       (0.040, 0.040, 0.500),  (-0.55, 0.000,  0.000), mat=mat)
-    add_box("WallPlateInner",  (0.020, 0.060, 0.420),  (-0.55, 0.020,  0.000), mat=mat)
+    # Wall plate (FIXED) — large vertical mounting plate
+    add_box("WallPlate",      (0.030, 0.040, 0.500),  (-0.55, 0.000, 0.000), mat=mat)
+    add_box("WallPlate_Top",  (0.060, 0.030, 0.040),  (-0.55, 0.000, 0.470), mat=mat)
+    add_box("WallPlate_Bot",  (0.060, 0.030, 0.040),  (-0.55, 0.000, -0.470), mat=mat)
 
-    # TWO parallel arm chains
-    sT, eT, wT = build_arm_chain("T",  0.150, mat)
-    sB, eB, wB = build_arm_chain("B", -0.150, mat)
+    # TWO parallel arm chains (parallelogram linkage — both move identically)
+    sT, eT, wT = build_arm_chain("T",  0.140, mat)
+    sB, eB, wB = build_arm_chain("B", -0.140, mat)
 
-    # VESA back plate + cross-rails + hooks parented to TOP wrist
-    # In wT's local frame: positions chosen so VESA hangs off the wrist
-    add_box("VESABack",     (0.020, 0.020, 0.220), (0.07, 0.040, -0.150), parent=wT, mat=mat)
-    add_box("VESABackMid",  (0.130, 0.018, 0.140), (0.07, 0.030, -0.150), parent=wT, mat=mat)
-    add_box("TopRail",      (0.450, 0.030, 0.030), (0.07, 0.080,  0.030), parent=wT, mat=mat)
-    add_box("BotRail",      (0.450, 0.030, 0.030), (0.07, 0.080, -0.330), parent=wT, mat=mat)
-    add_box("HookL",        (0.030, 0.040, 0.260), (-0.36, 0.110, -0.150), parent=wT, mat=mat)
-    add_box("HookL_Tab",    (0.030, 0.060, 0.030), (-0.36, 0.140, -0.400), parent=wT, mat=mat)
-    add_box("HookR",        (0.030, 0.040, 0.260), ( 0.50, 0.110, -0.150), parent=wT, mat=mat)
-    add_box("HookR_Tab",    (0.030, 0.060, 0.030), ( 0.50, 0.140, -0.400), parent=wT, mat=mat)
+    # TV-side bracket parented to TOP wrist — vertical rails + horizontal
+    # connectors. Positions are in wT's LOCAL frame (X = arm forward axis).
+    # When arm rotates, this whole bracket follows.
+    # Vertical TV rails (the "side bars" of the TV-side bracket)
+    add_box("TVRail_L",     (0.030, 0.030, 0.220), ( 0.040, -0.240, -0.140), parent=wT, mat=mat)
+    add_box("TVRail_R",     (0.030, 0.030, 0.220), ( 0.040,  0.240, -0.140), parent=wT, mat=mat)
+    # Horizontal cross-bars connecting the rails (top + bottom)
+    add_box("TV_TopBar",    (0.030, 0.270, 0.030), ( 0.040,  0.000,  0.060), parent=wT, mat=mat)
+    add_box("TV_BotBar",    (0.030, 0.270, 0.030), ( 0.040,  0.000, -0.340), parent=wT, mat=mat)
+    # VESA mounting plate in the middle
+    add_box("TV_VESAPlate", (0.020, 0.130, 0.110), ( 0.040,  0.000, -0.140), parent=wT, mat=mat)
+    # Tabs at top and bottom of each rail
+    add_box("TVRail_L_Tab", (0.030, 0.060, 0.030), ( 0.040, -0.240,  0.080), parent=wT, mat=mat)
+    add_box("TVRail_L_Bot", (0.030, 0.060, 0.030), ( 0.040, -0.240, -0.360), parent=wT, mat=mat)
+    add_box("TVRail_R_Tab", (0.030, 0.060, 0.030), ( 0.040,  0.240,  0.080), parent=wT, mat=mat)
+    add_box("TVRail_R_Bot", (0.030, 0.060, 0.030), ( 0.040,  0.240, -0.360), parent=wT, mat=mat)
 
     return (sT, eT), (sB, eB)
 
