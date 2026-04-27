@@ -50,6 +50,12 @@ const MOUNT_TYPE_RENDERS: Record<string, string> = {
   "Full-motion/Articulating (swivel and tilt)":  "/assets/renders/mount-fullmotion.webp",
   "Ceiling mount":                               "/assets/renders/mount-ceiling.webp",
 }
+// Video versions for the mount types that have a turntable animation.
+// Falls back to the static webp render in MOUNT_TYPE_RENDERS if absent.
+const MOUNT_TYPE_VIDEOS: Record<string, string> = {
+  "Tilting (angle adjustment)":                  "/assets/renders/mount-tilting.webm",
+  "Full-motion/Articulating (swivel and tilt)":  "/assets/renders/mount-fullmotion.webm",
+}
 function isMountTypeRender(opt: string): boolean {
   return opt in MOUNT_TYPE_RENDERS
 }
@@ -1429,13 +1435,24 @@ const MessageItem = memo(
                   <div className="w-full aspect-[8/13] relative overflow-hidden">
                     {isMountTypeRender(option) ? (
                       <div className="w-full h-full relative" style={{ background: 'linear-gradient(180deg, #1e1530 0%, #2d2050 45%, #3a2d5c 100%)' }}>
-                        <Image
-                          src={MOUNT_TYPE_RENDERS[option]}
-                          alt={option}
-                          fill
-                          className="object-contain p-2"
-                          sizes="(max-width: 768px) 45vw, 200px"
-                        />
+                        {MOUNT_TYPE_VIDEOS[option] ? (
+                          <video
+                            src={MOUNT_TYPE_VIDEOS[option]}
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            className="absolute inset-0 w-full h-full object-contain p-2"
+                          />
+                        ) : (
+                          <Image
+                            src={MOUNT_TYPE_RENDERS[option]}
+                            alt={option}
+                            fill
+                            className="object-contain p-2"
+                            sizes="(max-width: 768px) 45vw, 200px"
+                          />
+                        )}
                       </div>
                     ) : isMountOption(option) ? (
                       MOUNT_RENDERS[option] ? (
