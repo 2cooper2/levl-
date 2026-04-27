@@ -261,11 +261,28 @@ ICONS = {
         "x_offset": 0.30,
         "camera_fov_deg": 60,
     },
-    # mount-fullmotion + mount-ceiling intentionally omitted — Sketchfab
-    # didn't surface usable free assets (the sevai "Tv Mount" is a TV stand,
-    # the only ceiling option was a tabletop projector). The existing
-    # mount-fullmotion.webp / mount-ceiling.webp procedural renders read
-    # better as UI thumbnails since they include a TV alongside the bracket.
+    "mount-fullmotion": {
+        # Procedural — modeled directly from a Ktaxon TMD product photo
+        # (wall plate + shoulder/elbow/wrist articulations + VESA back
+        # plate + horizontal cross-rails + side hooks). Built by
+        # _build_procedural_mounts.py.
+        "glb":     "procedural_mount_fullmotion.glb",
+        "rot_xyz": (0, 0, 0),
+        "target_h": 1.6,
+        "z_floor": 0.0,
+        "x_offset": 0.30,
+        "camera_fov_deg": 60,
+    },
+    "mount-ceiling": {
+        # Procedural — modeled from a MOUNTUP-style ceiling-drop reference
+        # (ceiling plate + drop pole + swivel + 4-arm VESA cross).
+        "glb":     "procedural_mount_ceiling.glb",
+        "rot_xyz": (0, 0, 0),
+        "target_h": 1.8,
+        "z_floor": 0.0,
+        "x_offset": 0.30,
+        "camera_fov_deg": 60,
+    },
 }
 
 
