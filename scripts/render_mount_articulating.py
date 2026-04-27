@@ -234,10 +234,11 @@ def keyframe_tilting(hinge):
 # ════════════════════════════════════════════════════════════════════════════
 def build_arm_chain(suffix, z, mat):
     """One arm chain: shoulder → THICK upper arm → elbow → THICK forearm → wrist.
-       Arm cross-section is 0.05×0.05 (thick visible bars, not thin rods)."""
-    ARM_T = 0.025          # arm half-thickness (cross-section 0.05)
-    UPPER_LEN = 0.20       # upper arm half-length (full = 0.40)
-    LOWER_LEN = 0.20       # forearm half-length
+       Arm cross-section is 0.08×0.08 (thick visible bars, not thin rods).
+       Total arm length = 4× UPPER_LEN = 1.0m before scaling."""
+    ARM_T = 0.040          # arm half-thickness (cross-section 0.08)
+    UPPER_LEN = 0.25       # upper arm half-length (full = 0.50)
+    LOWER_LEN = 0.25       # forearm half-length
 
     # Shoulder empty mounted on the wall plate
     shoulder = add_empty(f"Shoulder_{suffix}", (-0.50, 0.040, z))
@@ -277,14 +278,23 @@ def build_fullmotion_rig():
        Arms are THICK (0.05m × 0.05m) so they read clearly as articulating
        elements, not thin rods."""
     mat = black_metal_mat()
-    # Wall plate (FIXED) — large vertical mounting plate
-    add_box("WallPlate",      (0.030, 0.040, 0.500),  (-0.55, 0.000, 0.000), mat=mat)
-    add_box("WallPlate_Top",  (0.060, 0.030, 0.040),  (-0.55, 0.000, 0.470), mat=mat)
-    add_box("WallPlate_Bot",  (0.060, 0.030, 0.040),  (-0.55, 0.000, -0.470), mat=mat)
+    # Wall plate (FIXED) — TWO vertical rails connected by horizontal cross-bars.
+    # Matches the Mounting Dream reference where the wall mount has two
+    # parallel mounting rails (one for each arm chain pivot).
+    # Left rail (in front of camera) — slightly forward of right rail
+    add_box("WallRail_Front",   (0.030, 0.030, 0.520),  (-0.55, -0.060, 0.000), mat=mat)
+    # Right rail
+    add_box("WallRail_Back",    (0.030, 0.030, 0.520),  (-0.55,  0.060, 0.000), mat=mat)
+    # Top horizontal cross-bar connecting both rails
+    add_box("WallPlate_Top",    (0.030, 0.150, 0.030),  (-0.55,  0.000, 0.490), mat=mat)
+    # Bottom horizontal cross-bar
+    add_box("WallPlate_Bot",    (0.030, 0.150, 0.030),  (-0.55,  0.000, -0.490), mat=mat)
+    # Mid horizontal stiffener
+    add_box("WallPlate_Mid",    (0.030, 0.150, 0.030),  (-0.55,  0.000, 0.000), mat=mat)
 
     # TWO parallel arm chains (parallelogram linkage — both move identically)
-    sT, eT, wT = build_arm_chain("T",  0.140, mat)
-    sB, eB, wB = build_arm_chain("B", -0.140, mat)
+    sT, eT, wT = build_arm_chain("T",  0.150, mat)
+    sB, eB, wB = build_arm_chain("B", -0.150, mat)
 
     # TV-side bracket parented to TOP wrist — vertical rails + horizontal
     # connectors. Positions are in wT's LOCAL frame (X = arm forward axis).
@@ -315,9 +325,11 @@ def keyframe_fullmotion(top, bot):
     sT, eT = top
     sB, eB = bot
 
-    SHOULDER_FOLD = math.radians( 65)   # angled back toward the wall
+    # Reduced fold angles so the arms stay clearly visible throughout the
+    # whole loop instead of disappearing flat against the wall.
+    SHOULDER_FOLD = math.radians( 30)   # mild angle back
     SHOULDER_EXT  = math.radians( -5)   # straight out
-    ELBOW_FOLD    = math.radians(-120)  # bent back so forearm hugs the wall
+    ELBOW_FOLD    = math.radians(-50)   # bent at the elbow but not collapsed
     ELBOW_EXT     = math.radians(  0)   # straight
     SWEEP_AMP     = math.radians( 20)   # lateral sweep amplitude
 
