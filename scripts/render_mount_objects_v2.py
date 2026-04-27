@@ -205,7 +205,10 @@ ICONS = {
         "target_h": 2.6,
         "z_floor": 0.0,
         "x_offset": 0.30,
-        "camera_fov_deg": 52,    # widened so top of mirror isn't cropped
+        # FOV 60° gives ~25% headroom + room for the rake-key shadow on
+        # the right (locked light at (-4.5,-1.5,4.5) throws shadows far
+        # right; FOV 52° clipped the shadow tip).
+        "camera_fov_deg": 60,
     },
     "art-frame": {
         # Multi-frame composition (small/medium/large overlapping). Render
@@ -225,7 +228,7 @@ ICONS = {
         "target_h": 2.6,
         "z_floor": 0.0,
         "x_offset": 0.30,
-        "camera_fov_deg": 52,    # widened so top shelf isn't cropped
+        "camera_fov_deg": 60,    # extra headroom + side margin for shadows
     },
     "light-fixture": {
         "glb":     "sketchfab_pendant_bulbs.glb",
@@ -233,7 +236,7 @@ ICONS = {
         "target_h": 2.6,
         "z_floor": 0.0,
         "x_offset": 0.30,
-        "camera_fov_deg": 52,    # widened so top cords aren't cropped
+        "camera_fov_deg": 60,    # cords were cropping at top edge at 52°
     },
     "tv-monitor": {
         "glb":     "sketchfab_tv.glb",
