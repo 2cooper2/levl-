@@ -25,6 +25,33 @@ def lonlat_to_tile(lon, lat, z):
     y = (1 - math.log(math.tan(rad) + 1/math.cos(rad)) / math.pi) / 2 * 2**z
     return x, y
 
+DUOTONE_PALETTE = {
+    "kansas_city": ((0.96, 0.92, 1.00), (0.32, 0.18, 0.62)),  # light lavender → deep purple
+    "los_angeles": ((0.97, 0.94, 1.00), (0.50, 0.36, 0.84)),  # mid lavender duotone
+    "new_york":    ((0.99, 0.97, 1.00), (0.65, 0.55, 0.92)),  # very light lavender
+}
+
+
+def lavender_duotone(img, key):
+    """Map grayscale luminance → linear interpolation between a light
+    and dark lavender. Each city gets its own dark-end shade so the trio
+    reads as small/medium/large in graduated lavender tones."""
+    light, dark = DUOTONE_PALETTE.get(key, ((0.97, 0.94, 1.00), (0.45, 0.30, 0.78)))
+    gs = img.convert("L")
+    out = Image.new("RGB", img.size, (255, 255, 255))
+    px_in  = gs.load()
+    px_out = out.load()
+    W_, H_ = img.size
+    for y in range(H_):
+        for x in range(W_):
+            t = px_in[x, y] / 255.0  # 0=dark, 1=light
+            r = int((dark[0] + (light[0] - dark[0]) * t) * 255)
+            g = int((dark[1] + (light[1] - dark[1]) * t) * 255)
+            b = int((dark[2] + (light[2] - dark[2]) * t) * 255)
+            px_out[x, y] = (r, g, b)
+    return out
+
+
 def fetch_tile(z, x, y):
     url = f"https://tile.openstreetmap.org/{z}/{x}/{y}.png"
     req = urllib.request.Request(url, headers={"User-Agent": UA})
@@ -68,6 +95,9 @@ def fetch_city(lat, lon, name, key, zoom=ZOOM):
     src_y0 = panel_cy - UV_CY
     crop = panel.crop((src_x0, src_y0, src_x0 + 1024, src_y0 + 1024))
     canvas.paste(crop, (0, 0))
+
+    # Duotone recolor — convert to lavender palette to match Levl style.
+    canvas = lavender_duotone(canvas, key)
     # Crop the canvas (1024x1024 center) — already exactly 1024x1024
     # Add city label
     d = ImageDraw.Draw(canvas)
