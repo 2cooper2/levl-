@@ -278,21 +278,23 @@ def build_fullmotion_rig():
        Arms are THICK (0.05m × 0.05m) so they read clearly as articulating
        elements, not thin rods."""
     mat = black_metal_mat()
-    # Wall plate (FIXED) — TWO vertical rails connected by horizontal cross-bars.
-    # Matches the Mounting Dream reference where the wall mount has two
-    # parallel mounting rails (one for each arm chain pivot).
-    # Left rail (in front of camera) — slightly forward of right rail
-    add_box("WallRail_Front",   (0.030, 0.030, 0.520),  (-0.55, -0.060, 0.000), mat=mat)
-    # Right rail
-    add_box("WallRail_Back",    (0.030, 0.030, 0.520),  (-0.55,  0.060, 0.000), mat=mat)
-    # Top horizontal cross-bar connecting both rails
-    add_box("WallPlate_Top",    (0.030, 0.150, 0.030),  (-0.55,  0.000, 0.490), mat=mat)
+    # Wall plate (FIXED) — TWO vertical rails spaced apart in X (left-right
+    # in camera view) so they read as two distinct rails, connected by
+    # horizontal cross-bars top/mid/bottom to form a frame. Matches the
+    # Mounting Dream reference's 2-rail wall mount.
+    # Inner rail (closer to arm pivot — shoulders attach here)
+    add_box("WallRail_Inner",   (0.030, 0.030, 0.520),  (-0.55,  0.000, 0.000), mat=mat)
+    # Outer rail (further from arm pivot, parallel)
+    add_box("WallRail_Outer",   (0.030, 0.030, 0.520),  (-0.85,  0.000, 0.000), mat=mat)
+    # Top horizontal cross-bar bridging the two rails
+    add_box("WallPlate_Top",    (0.180, 0.030, 0.030),  (-0.70,  0.000, 0.490), mat=mat)
     # Bottom horizontal cross-bar
-    add_box("WallPlate_Bot",    (0.030, 0.150, 0.030),  (-0.55,  0.000, -0.490), mat=mat)
+    add_box("WallPlate_Bot",    (0.180, 0.030, 0.030),  (-0.70,  0.000, -0.490), mat=mat)
     # Mid horizontal stiffener
-    add_box("WallPlate_Mid",    (0.030, 0.150, 0.030),  (-0.55,  0.000, 0.000), mat=mat)
+    add_box("WallPlate_Mid",    (0.180, 0.030, 0.030),  (-0.70,  0.000, 0.000), mat=mat)
 
-    # TWO parallel arm chains (parallelogram linkage — both move identically)
+    # TWO parallel arm chains (parallelogram linkage — both move identically).
+    # Shoulders sit on the INNER rail (x=-0.50, where build_arm_chain places them).
     sT, eT, wT = build_arm_chain("T",  0.150, mat)
     sB, eB, wB = build_arm_chain("B", -0.150, mat)
 
