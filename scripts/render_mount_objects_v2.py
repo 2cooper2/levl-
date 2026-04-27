@@ -249,38 +249,50 @@ def import_glb_at(glb_path, target_height, rot_xyz=(0,0,0),
 
 
 def swap_print_texture(meshes, image_path):
-    """Find the PRINT mesh's material and replace its base-color image with
-    the given file. Used to put a custom city map on each frame instance."""
+    """Replace the print mesh's base-color image. Inserts a Mapping node
+    that rotates/scales the UV so the texture's top-right corner displays
+    at the print's top-right with right-side-up glyphs (the imported GLB's
+    UV layout is mirrored vs standard image coords)."""
     if not os.path.exists(image_path):
         print(f"  [WARN] missing texture {image_path}")
         return
-    # Find a mesh whose name contains 'PRINT' OR a mesh whose largest face
-    # has the print material (the flat picture rectangle inside the frame).
     target_mesh = None
     for m in meshes:
         if 'PRINT' in m.name.upper() or 'Print' in m.name:
             target_mesh = m; break
     if target_mesh is None:
-        # fallback: pick the mesh with the LARGER flat face area
         target_mesh = max(meshes, key=lambda m: max((p.area for p in m.data.polygons), default=0))
-    # On its first material, replace any existing image-texture node's image
     if not target_mesh.data.materials:
         return
     mat = target_mesh.data.materials[0]
     if not (mat and mat.use_nodes):
         return
-    # Make sure each mesh instance has its OWN material so swapping doesn't
-    # affect other instances of the same GLB.
     new_mat = mat.copy()
     target_mesh.data.materials[0] = new_mat
     nt = new_mat.node_tree
     img = bpy.data.images.load(image_path)
     img.colorspace_settings.name = "sRGB"
+    tex_node = None
     for n in nt.nodes:
         if n.type == 'TEX_IMAGE':
             n.image = img
-            print(f"  [{target_mesh.name}] swapped print texture → {os.path.basename(image_path)}")
-            return
+            tex_node = n
+            break
+    if tex_node is None:
+        return
+    # Ensure UV-coord → mapping → image. Insert a Mapping node that rotates
+    # 180° so the texture orientation matches the GLB's UV.
+    mapping = nt.nodes.new("ShaderNodeMapping")
+    coord   = nt.nodes.new("ShaderNodeTexCoord")
+    mapping.inputs["Rotation"].default_value = (0, 0, math.pi)  # 180°
+    mapping.inputs["Location"].default_value = (1.0, 1.0, 0.0)  # offset back
+    nt.links.new(coord.outputs["UV"], mapping.inputs["Vector"])
+    # Disconnect any existing input on the Image node's Vector socket
+    for lk in list(nt.links):
+        if lk.to_node == tex_node and lk.to_socket.name == "Vector":
+            nt.links.remove(lk)
+    nt.links.new(mapping.outputs["Vector"], tex_node.inputs["Vector"])
+    print(f"  [{target_mesh.name}] swapped print + UV-rotated 180° → {os.path.basename(image_path)}")
 
 
 def compose_art_frame_trio(glb_path):

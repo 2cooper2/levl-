@@ -241,11 +241,8 @@ for key, drawer in [("new_york", draw_new_york),
                     ("los_angeles", draw_los_angeles),
                     ("kansas_city", draw_kansas_city)]:
     im = drawer()
-    # Print mesh's UV applies a vertical flip vs standard image coords.
-    # Pre-flipping the image vertically (top↔bottom) so text drawn at the
-    # texture's top-right ends up displaying at the print's top-right with
-    # right-side-up glyphs.
-    im = im.transpose(Image.FLIP_TOP_BOTTOM)
+    # Save raw — we'll rotate via the Blender UV mapping node so the print
+    # mesh shows the texture top-right at display top-right right-side-up.
     out = os.path.join(OUT, f"city_{key}.png")
     im.save(out)
     print(f"saved {out}")
