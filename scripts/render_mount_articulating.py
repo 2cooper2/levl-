@@ -281,23 +281,16 @@ def build_fullmotion_rig():
 
 
 def keyframe_fullmotion(top, bot):
-    """Both arm chains get identical animation: shoulder + elbow rotate
-       sinusoidally so the arm folds toward the wall at one end of the
-       cycle and extends fully at the other."""
+    """Both arm chains rotate 360° around the shoulder over the loop —
+       the wrist traces a full circle in the horizontal plane. Elbow
+       stays straight so the arm reads as a single sweep arm."""
     sT, eT = top
     sB, eB = bot
-    SHOULDER_FOLD = math.radians(40)    # how much it angles back toward wall
-    SHOULDER_EXT  = math.radians(-10)   # extended (slightly forward of the X axis)
-    ELBOW_FOLD    = math.radians(-90)   # bent at right angle when folded
-    ELBOW_EXT     = math.radians(0)     # straight when extended
 
     for f in range(1, FRAMES + 1):
         t = (f - 1) / FRAMES
-        # Triangle wave: 0 → 1 → 0 over the loop. Smooth out with cosine.
-        fold_t = (1 - math.cos(t * 2 * math.pi)) / 2  # 0 at t=0/1, 1 at t=0.5
-        sh_z = SHOULDER_FOLD + (SHOULDER_EXT - SHOULDER_FOLD) * fold_t
-        el_z = ELBOW_FOLD    + (ELBOW_EXT    - ELBOW_FOLD)    * fold_t
-
+        sh_z = t * 2 * math.pi   # full 360° over the loop
+        el_z = 0                 # straight arm
         bpy.context.scene.frame_set(f)
         for s in (sT, sB):
             s.rotation_euler[2] = sh_z
@@ -343,6 +336,10 @@ def render_one(key, build_fn, keyframe_fn):
     # 2.5× brings the rig to roughly the same on-screen size as the static
     # mount-fullmotion.webp (which used target_h=1.8 with the locked camera).
     root.scale = (2.5, 2.5, 2.5)
+    # Lift so the bottom of the wall plate sits on the floor (z=0).
+    # Wall plate's half-height in builder coords is 0.5; after 2.5× scale
+    # that's 1.25m, so root.z=1.25 puts the wall-plate bottom on z=0.
+    root.location = (0, 0, 1.25)
 
     bpy.ops.render.render(animation=True)
 
