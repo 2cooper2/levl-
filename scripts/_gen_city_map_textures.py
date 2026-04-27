@@ -91,9 +91,11 @@ def river_curve(d, points, color=BG, width=22):
         d.line([points[i], points[i + 1]], fill=color, width=width)
 
 
-def label(d, text, font_size=86, position=(int(W * 0.79), int(H * 0.05)),
-          color=DARK, anchor="ra"):
-    """Top-right city label using a serif font (Times New Roman Bold)."""
+def label(img, text, font_size=86, color=DARK):
+    """Render the city label at the texture's TOP-LEFT, pre-mirrored, so
+    the print mesh's horizontally-flipped UV displays it at the top-right
+    of the print right-side-up. Renders text on a small image, flips it,
+    pastes onto the main texture."""
     paths = [
         "/System/Library/Fonts/Supplemental/Times New Roman Bold.ttf",
         "/System/Library/Fonts/Supplemental/Times New Roman.ttf",
@@ -105,7 +107,20 @@ def label(d, text, font_size=86, position=(int(W * 0.79), int(H * 0.05)),
                 fnt = ImageFont.truetype(p, font_size); break
             except Exception: pass
     if fnt is None: fnt = ImageFont.load_default()
-    d.text(position, text, fill=color, font=fnt, anchor=anchor)
+    # Measure text size
+    tmp = Image.new("RGBA", (1, 1), (0, 0, 0, 0))
+    tmp_d = ImageDraw.Draw(tmp)
+    bbox = tmp_d.textbbox((0, 0), text, font=fnt)
+    tw = bbox[2] - bbox[0] + 12
+    th = bbox[3] - bbox[1] + 12
+    txt_img = Image.new("RGBA", (tw, th), (0, 0, 0, 0))
+    ImageDraw.Draw(txt_img).text((-bbox[0] + 6, -bbox[1] + 6), text, fill=color, font=fnt)
+    # Mirror horizontally so the UV's H-flip un-mirrors it on display
+    txt_img = txt_img.transpose(Image.FLIP_LEFT_RIGHT)
+    # Paste at texture's TOP-LEFT (which displays at print's top-right via UV)
+    px = int(W * 0.04)
+    py = int(H * 0.05)
+    img.paste(txt_img, (px, py), txt_img)
 
 
 # ── per-city composers ───────────────────────────────────────────────────────
@@ -136,7 +151,7 @@ def draw_new_york(seed=42):
     for y_pct in (0.18, 0.31, 0.46, 0.58, 0.73, 0.88):
         y = int(H * y_pct)
         d.line([(0, y), (W, y)], fill=ORANGE_DK, width=3)
-    label(d, "NEW YORK", font_size=84, position=(int(W * 0.79), int(H * 0.05)))
+    label(img, "NEW YORK", font_size=84)
     add_grain(img)
     return img
 
@@ -194,7 +209,7 @@ def draw_los_angeles(seed=37):
     # Pershing Square (small park) in downtown core
     px = int(cx + 60 * cos_a); py = int(cy + 60 * sin_a)
     d.rectangle([px - 35, py - 35, px + 35, py + 35], fill=BLOCK_PARK)
-    label(d, "LOS ANGELES", font_size=66, position=(int(W * 0.79), int(H * 0.05)))
+    label(img, "LOS ANGELES", font_size=66)
     add_grain(img)
     return img
 
@@ -231,7 +246,7 @@ def draw_kansas_city(seed=12):
         x = random.randint(80, W - 200); y = random.randint(int(H * 0.45), H - 80)
         sz = random.randint(50, 110)
         d.rectangle([x, y, x + sz, y + int(sz * 0.7)], fill=BLOCK_PARK)
-    label(d, "KANSAS CITY", font_size=68, position=(int(W * 0.79), int(H * 0.05)))
+    label(img, "KANSAS CITY", font_size=68)
     add_grain(img)
     return img
 
