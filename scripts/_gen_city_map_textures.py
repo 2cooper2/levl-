@@ -115,15 +115,13 @@ def label(img, text, font_size=86, color=DARK):
     th = bbox[3] - bbox[1] + 12
     txt_img = Image.new("RGBA", (tw, th), (0, 0, 0, 0))
     ImageDraw.Draw(txt_img).text((-bbox[0] + 6, -bbox[1] + 6), text, fill=color, font=fnt)
-    # Print mesh's UV is flipped on BOTH axes AND only spans v=0.193-0.998
-    # of the texture (front face). Pre-rotate text 180° + paste so the text
-    # falls just inside the lowest V of the front face, which displays at
-    # the print's top-right.
-    txt_img = txt_img.transpose(Image.ROTATE_180)
-    px = int(W * 0.04)
-    # py = image y where text TOP starts. Want text bottom at v=0.20 (just
-    # inside front face's v=0.193 lower bound). Image y for v=0.20 = 819.
-    # So text top at 819 - th.
+    # Print mesh's UV V-axis is flipped (image bottom → display top), U-axis
+    # is NOT. Place text at texture BOTTOM-RIGHT, vertically flipped, so it
+    # ends up display TOP-RIGHT right-side-up.
+    txt_img = txt_img.transpose(Image.FLIP_TOP_BOTTOM)
+    # Text right edge at PIL x = 800 (u≈0.78 just inside front face u≤0.811)
+    # Text bottom edge at PIL y = 819 (v≈0.20 just inside front face v≥0.193)
+    px = 800 - tw
     py = 819 - th
     img.paste(txt_img, (px, py), txt_img)
 
