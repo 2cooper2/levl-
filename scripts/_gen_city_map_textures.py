@@ -115,11 +115,12 @@ def label(img, text, font_size=86, color=DARK):
     th = bbox[3] - bbox[1] + 12
     txt_img = Image.new("RGBA", (tw, th), (0, 0, 0, 0))
     ImageDraw.Draw(txt_img).text((-bbox[0] + 6, -bbox[1] + 6), text, fill=color, font=fnt)
-    # Mirror horizontally so the UV's H-flip un-mirrors it on display
-    txt_img = txt_img.transpose(Image.FLIP_LEFT_RIGHT)
-    # Paste at texture's TOP-LEFT (which displays at print's top-right via UV)
+    # Print mesh's UV is flipped on BOTH axes vs standard image coords.
+    # Pre-rotate text 180° so it reads right-side-up after UV transform.
+    txt_img = txt_img.transpose(Image.ROTATE_180)
+    # Paste at texture's BOTTOM-LEFT (which the UV maps to display TOP-RIGHT).
     px = int(W * 0.04)
-    py = int(H * 0.05)
+    py = int(H - th - W * 0.04)
     img.paste(txt_img, (px, py), txt_img)
 
 
