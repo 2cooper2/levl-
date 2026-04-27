@@ -100,9 +100,9 @@ def add_lights():
     area('Top',   ( 0.0, -0.8, 6.0),   45, 3.0, (1.00, 0.98, 0.95), (80, 0,   0))
 
 
-def add_camera():
+def add_camera(fov_deg=42):
     cd = bpy.data.cameras.new('Camera')
-    cd.lens_unit = 'FOV'; cd.angle = math.radians(42)
+    cd.lens_unit = 'FOV'; cd.angle = math.radians(fov_deg)
     cd.clip_start = 0.01; cd.clip_end = 50.0
     co = bpy.data.objects.new('Camera', cd)
     bpy.context.collection.objects.link(co)
@@ -213,23 +213,20 @@ ICONS = {
         "multi_frame": True,
     },
     "floating-shelves": {
-        # Scandinavian shelf set, head-on (no walls). Bigger so it reads
-        # closer in frame and the colorful objects are easily visible.
         "glb":     "sketchfab_floating_shelves_scandi_clean.glb",
         "rot_xyz": (0, 0, -math.pi/2),
         "target_h": 2.6,
         "z_floor": 0.0,
         "x_offset": 0.30,
+        "camera_fov_deg": 52,    # widened so top shelf isn't cropped
     },
     "light-fixture": {
-        # Decorative Hanging Light Bulbs Set — elegant glass Edison bulbs
-        # on cords with central globe. More elegant + bigger than the
-        # previous brass pendant.
         "glb":     "sketchfab_pendant_bulbs.glb",
         "rot_xyz": (0, 0, 0),
         "target_h": 2.6,
         "z_floor": 0.0,
         "x_offset": 0.30,
+        "camera_fov_deg": 52,    # widened so top cords aren't cropped
     },
     "tv-monitor": {
         "glb":     "sketchfab_tv.glb",
@@ -276,7 +273,7 @@ def render_one(key):
     reset()
     setup_render(raw_path)
     setup_world()
-    add_camera()
+    add_camera(fov_deg=cfg.get("camera_fov_deg", 42))
     add_lights()
     add_shadow_catcher(0.0)
 
