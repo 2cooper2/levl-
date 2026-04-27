@@ -32,12 +32,13 @@ def add_grain(img, intensity=8):
                         max(0, min(255, b + n)))
 
 
-def fill_blocks(d, density=0.28):
-    """Sprinkle small irregular blocks across the canvas in 2-3 cream tones."""
-    n = int((W * H) * density / 1800)
+def fill_blocks(d, density=0.45):
+    """Sprinkle small irregular blocks across the canvas in 2-3 cream tones.
+    Smaller block size + higher density gives the zoomed-out city feel."""
+    n = int((W * H) * density / 700)
     for _ in range(n):
         x = random.randint(0, W); y = random.randint(0, H)
-        w = random.randint(18, 70); h = random.randint(18, 70)
+        w = random.randint(8, 32); h = random.randint(8, 32)
         choice = random.random()
         if choice < 0.6:   col = BLOCK_LIGHT
         elif choice < 0.8: col = BLOCK_MED
@@ -46,18 +47,19 @@ def fill_blocks(d, density=0.28):
         d.rectangle([x - w//2, y - h//2, x + w//2, y + h//2], fill=col)
 
 
-def grid_streets(d, spacing=24, jitter=4):
-    """Dense fine-street grid in dark grey with subtle randomization."""
+def grid_streets(d, spacing=14, jitter=2):
+    """Fine-street grid in dark grey with subtle randomization. Smaller
+    spacing means more streets visible — gives a wider-area zoom-out feel."""
     for x in range(0, W, spacing):
         ox = random.randint(-jitter, jitter)
         d.line([(x + ox, 0), (x + ox, H)],
-               fill=DARK if (x // spacing) % 6 == 0 else GREY,
-               width=2 if (x // spacing) % 6 == 0 else 1)
+               fill=DARK if (x // spacing) % 8 == 0 else GREY,
+               width=2 if (x // spacing) % 8 == 0 else 1)
     for y in range(0, H, spacing):
         oy = random.randint(-jitter, jitter)
         d.line([(0, y + oy), (W, y + oy)],
-               fill=DARK if (y // spacing) % 6 == 0 else GREY,
-               width=2 if (y // spacing) % 6 == 0 else 1)
+               fill=DARK if (y // spacing) % 8 == 0 else GREY,
+               width=2 if (y // spacing) % 8 == 0 else 1)
 
 
 def diagonal_avenues(d, count=4, color=ORANGE_DK):
@@ -239,8 +241,9 @@ for key, drawer in [("new_york", draw_new_york),
                     ("los_angeles", draw_los_angeles),
                     ("kansas_city", draw_kansas_city)]:
     im = drawer()
-    # Pre-flip horizontally so the print mesh's mirrored UV reads correctly.
-    im = im.transpose(Image.FLIP_LEFT_RIGHT)
+    # Pre-rotate 180° so the print mesh's UV (which flips both axes vs
+    # standard image coords) ends up showing the text top-right right-side-up.
+    im = im.transpose(Image.ROTATE_180)
     out = os.path.join(OUT, f"city_{key}.png")
     im.save(out)
     print(f"saved {out}")
