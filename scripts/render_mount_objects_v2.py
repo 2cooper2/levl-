@@ -204,13 +204,15 @@ ICONS = {
         "rot_xyz": (0, 0, 0),
         "target_h": 2.6,
         "z_floor": 0.0,
-        "x_offset": 0.30,   # shift right to compensate camera 3/4 perspective
+        "x_offset": 0.30,
+        "camera_fov_deg": 52,    # widened so top of mirror isn't cropped
     },
     "art-frame": {
         # Multi-frame composition (small/medium/large overlapping). Render
         # logic in compose_art_frame_trio() below.
         "glb":     "sketchfab_art_frame_modern.glb",
         "multi_frame": True,
+        "camera_fov_deg": 52,    # widened so top of largest frame isn't cropped
     },
     "floating-shelves": {
         "glb":     "sketchfab_floating_shelves_scandi_clean.glb",
