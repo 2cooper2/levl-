@@ -283,27 +283,54 @@ def swap_print_texture(meshes, image_path):
     print(f"  [{target_mesh.name}] swapped print texture → {os.path.basename(image_path)}")
 
 
+def stretch_z(meshes, factor):
+    """Non-uniform Z-scale around z=0 (frames already snapped bottom-to-floor
+    by fit_and_pose, so this stretches purely upward → taller portrait piece)."""
+    if abs(factor - 1.0) < 1e-3:
+        return
+    Sz = mathutils.Matrix.Scale(factor, 4, Vector((0, 0, 1)))
+    for o in meshes:
+        o.matrix_world = Sz @ o.matrix_world
+    bpy.ops.object.select_all(action='DESELECT')
+    for o in meshes: o.select_set(True)
+    bpy.context.view_layer.objects.active = meshes[0]
+    try: bpy.ops.object.transform_apply(location=True, scale=True, rotation=True)
+    except RuntimeError: pass
+
+
 def compose_art_frame_trio(glb_path):
-    """Three frames — large NEW YORK (rear), medium KANSAS CITY (left),
-    small LOS ANGELES (right-front). Print textures are procedurally
-    generated stylized city maps."""
+    """Three frames composited as one piece:
+      • KC (largest, upright, taller portrait) — back, dominant
+      • LA (medium, taller portrait, leaning back against KC) — front-left
+      • NY (small, leaning back against KC) — front-right
+    Lean = negative X-axis rotation (top tilts +Y, away from camera at -Y)."""
     here = os.path.dirname(glb_path)
     base_glb = os.path.join(here, "sketchfab_art_frame_modern.glb")
     tex_ny    = os.path.join(here, "city_new_york.png")
     tex_kc    = os.path.join(here, "city_kansas_city.png")
     tex_la    = os.path.join(here, "city_los_angeles.png")
 
-    # Large — Kansas City downtown (rear-right, dominant)
+    # KC — large, upright, stretched tall (rear, dominant). Front face plane
+    # sits at world y ≈ 0.45 (slight thickness ~±0.02 around that).
     m_lg = import_glb_at(base_glb, target_height=2.2, rot_xyz=(0, 0, 0),
-                         z_floor=0.0, x_offset=0.45, y_offset=0.40)
+                         z_floor=0.0, x_offset=0.30, y_offset=0.45)
+    stretch_z(m_lg, 1.45)
     swap_print_texture(m_lg, tex_kc)
-    # Medium — Los Angeles downtown (left, slightly forward)
-    m_md = import_glb_at(base_glb, target_height=1.6, rot_xyz=(0, 0, math.radians(8)),
-                         z_floor=0.0, x_offset=-0.65, y_offset=-0.10)
+
+    # LA — medium, stretched tall, leaning back 22° so its TOP edge actually
+    # rests against KC's front face (top y ≈ -0.40 + sin22°·2.24 ≈ 0.44).
+    # Geometric contact = Cycles renders a real cast shadow on KC.
+    m_md = import_glb_at(base_glb, target_height=1.6,
+                         rot_xyz=(math.radians(-22), 0, math.radians(8)),
+                         z_floor=0.0, x_offset=-0.40, y_offset=-0.40)
+    stretch_z(m_md, 1.40)
     swap_print_texture(m_md, tex_la)
-    # Small — Manhattan (right-front, leaning more)
-    m_sm = import_glb_at(base_glb, target_height=1.05, rot_xyz=(0, 0, math.radians(-6)),
-                         z_floor=0.0, x_offset=0.95, y_offset=-0.45)
+
+    # NY — small, leaning back 25° so its top contacts KC at ~30% height
+    # (top y ≈ 0.00 + sin25°·1.05 ≈ 0.44). Right side, slight opposite yaw.
+    m_sm = import_glb_at(base_glb, target_height=1.05,
+                         rot_xyz=(math.radians(-25), 0, math.radians(-6)),
+                         z_floor=0.0, x_offset=0.95, y_offset=0.00)
     swap_print_texture(m_sm, tex_ny)
 
 

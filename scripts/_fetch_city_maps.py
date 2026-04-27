@@ -11,9 +11,11 @@ os.makedirs(OUT, exist_ok=True)
 ZOOM = 12
 
 CITIES = {
-    "kansas_city": (39.0997, -94.5786, "Kansas City"),
-    "los_angeles": (34.0522, -118.2437, "Los Angeles"),
-    "new_york":    (40.7580, -73.9855, "Manhattan"),
+    "kansas_city": (39.0997, -94.5786,  "Kansas City"),
+    # Westside LA (Brentwood/West LA) — coast at far-left edge, ocean visible
+    # but not dominant; ~5km inland from the Pacific.
+    "los_angeles": (34.0600, -118.4400, "Los Angeles"),
+    "new_york":    (40.7580, -73.9855,  "Manhattan"),
 }
 
 UA = "LevlIconRenderer/1.0 (caydonac@gmail.com)"
@@ -25,30 +27,59 @@ def lonlat_to_tile(lon, lat, z):
     y = (1 - math.log(math.tan(rad) + 1/math.cos(rad)) / math.pi) / 2 * 2**z
     return x, y
 
-DUOTONE_PALETTE = {
-    "kansas_city": ((0.96, 0.92, 1.00), (0.32, 0.18, 0.62)),  # light lavender → deep purple
-    "los_angeles": ((0.97, 0.94, 1.00), (0.50, 0.36, 0.84)),  # mid lavender duotone
-    "new_york":    ((0.99, 0.97, 1.00), (0.65, 0.55, 0.92)),  # very light lavender
+# Per-city background + water lavender shades (graduated dark→light for KC/LA/NY).
+# Roads are always black; this just controls the land bg + water tint.
+CITY_PALETTE = {
+    #              (land bg RGB,            water lavender RGB,      building tint RGB)
+    "kansas_city": ((220, 208, 240),        ( 78,  52, 162),         (200, 188, 224)),
+    "los_angeles": ((232, 222, 248),        ( 95,  70, 178),         (215, 202, 236)),
+    "new_york":    ((242, 235, 252),        (115,  88, 196),         (228, 218, 246)),
 }
 
+ROAD_BLACK = (15, 15, 18)
 
-def lavender_duotone(img, key):
-    """Map grayscale luminance → linear interpolation between a light
-    and dark lavender. Each city gets its own dark-end shade so the trio
-    reads as small/medium/large in graduated lavender tones."""
-    light, dark = DUOTONE_PALETTE.get(key, ((0.97, 0.94, 1.00), (0.45, 0.30, 0.78)))
-    gs = img.convert("L")
-    out = Image.new("RGB", img.size, (255, 255, 255))
-    px_in  = gs.load()
+
+def osm_to_levl(img, key):
+    """Recolor OSM standard tiles → Levl palette.
+
+    Strategy: classify into FOUR explicit categories (water, park, land,
+    building); everything else → BLACK. Catches all road types plus their
+    anti-aliased outlines, dashes, and thin map lines that previously fell
+    through and stayed light/washed out.
+
+    OSM palette landmarks (approx):
+      water       ~(170,211,223) — B>R, blueish
+      park/forest ~(199,235,161) / (173,209,158) — G>R and G>B
+      land bg     ~(242,239,233) / (255,244,195) beach — high+warm
+      building    ~(217,208,201) gray-tan
+      ALL ROADS   white / yellow / orange / pink → BLACK
+      labels      dark text → BLACK (caught by ELSE branch)
+    """
+    bg, water, building = CITY_PALETTE.get(key, CITY_PALETTE["los_angeles"])
+    src = img.convert("RGB")
+    out = Image.new("RGB", src.size, bg)
+    px_in = src.load()
     px_out = out.load()
-    W_, H_ = img.size
+    W_, H_ = src.size
     for y in range(H_):
         for x in range(W_):
-            t = px_in[x, y] / 255.0  # 0=dark, 1=light
-            r = int((dark[0] + (light[0] - dark[0]) * t) * 255)
-            g = int((dark[1] + (light[1] - dark[1]) * t) * 255)
-            b = int((dark[2] + (light[2] - dark[2]) * t) * 255)
-            px_out[x, y] = (r, g, b)
+            r, g, b = px_in[x, y]
+            # water — distinctly blue
+            if b > r + 8 and b > 175 and b > g - 5:
+                px_out[x, y] = water
+            # parks / green spaces — distinctly green
+            elif g > r + 8 and g > b + 8 and g > 180:
+                px_out[x, y] = bg
+            # land background — high luminance, warm cream/beach (R ≥ G ≥ B
+            # with all channels >170 covers cream land + pale beach yellow)
+            elif r > 230 and g > 215 and b > 170 and r >= g and (r - b) < 90 and (g - b) < 70:
+                px_out[x, y] = bg
+            # buildings — gray-beige cluster
+            elif 200 < r < 230 and 195 < g < 220 and 190 < b < 215 and abs(r - g) < 25 and abs(g - b) < 25:
+                px_out[x, y] = building
+            # everything else (any road, any text, any line) → BLACK
+            else:
+                px_out[x, y] = ROAD_BLACK
     return out
 
 
@@ -97,7 +128,7 @@ def fetch_city(lat, lon, name, key, zoom=ZOOM):
     canvas.paste(crop, (0, 0))
 
     # Duotone recolor — convert to lavender palette to match Levl style.
-    canvas = lavender_duotone(canvas, key)
+    canvas = osm_to_levl(canvas, key)
     # Crop the canvas (1024x1024 center) — already exactly 1024x1024
     # Add city label
     d = ImageDraw.Draw(canvas)
