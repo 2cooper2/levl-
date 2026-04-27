@@ -281,16 +281,32 @@ def build_fullmotion_rig():
 
 
 def keyframe_fullmotion(top, bot):
-    """Both arm chains rotate 360° around the shoulder over the loop —
-       the wrist traces a full circle in the horizontal plane. Elbow
-       stays straight so the arm reads as a single sweep arm."""
+    """Fold + extend + lateral sweep — matches the original WebGL motion.
+       phase=0 (loop start): arms folded against the wall plate.
+       phase=π (mid-loop):    arms fully extended straight out.
+       Lateral sweep ±20° overlays so the TV swings side-to-side too.
+       Both arm chains receive identical keyframes — parallelogram linkage."""
     sT, eT = top
     sB, eB = bot
 
+    SHOULDER_FOLD = math.radians( 65)   # angled back toward the wall
+    SHOULDER_EXT  = math.radians( -5)   # straight out
+    ELBOW_FOLD    = math.radians(-120)  # bent back so forearm hugs the wall
+    ELBOW_EXT     = math.radians(  0)   # straight
+    SWEEP_AMP     = math.radians( 20)   # lateral sweep amplitude
+
     for f in range(1, FRAMES + 1):
         t = (f - 1) / FRAMES
-        sh_z = t * 2 * math.pi   # full 360° over the loop
-        el_z = 0                 # straight arm
+        phase = t * 2 * math.pi
+        # fold_t: 1 = fully folded, 0 = fully extended.
+        # cos(phase) is 1 at phase=0 (folded) and -1 at phase=π (extended).
+        fold_t = (1 + math.cos(phase)) / 2
+        # Sweep: sin(phase) gives ±1 oscillation across the loop.
+        sweep = math.sin(phase)
+
+        sh_z = SHOULDER_FOLD * fold_t + SHOULDER_EXT * (1 - fold_t) + SWEEP_AMP * sweep
+        el_z = ELBOW_FOLD    * fold_t + ELBOW_EXT    * (1 - fold_t)
+
         bpy.context.scene.frame_set(f)
         for s in (sT, sB):
             s.rotation_euler[2] = sh_z
