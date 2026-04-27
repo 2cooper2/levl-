@@ -232,128 +232,130 @@ def keyframe_tilting(hinge):
 # FULL-MOTION — wall plate + 2 parallel arm chains (shoulder→elbow→wrist)
 # Both chains receive identical keyframes; VESA is parented to the upper wrist.
 # ════════════════════════════════════════════════════════════════════════════
-def build_arm_chain(suffix, z, mat):
-    """One arm chain: shoulder → THICK upper arm → elbow → THICK forearm → wrist.
-       Arm cross-section is 0.08×0.08 (thick visible bars, not thin rods).
-       Total arm length = 4× UPPER_LEN = 1.0m before scaling."""
-    ARM_T = 0.040          # arm half-thickness (cross-section 0.08)
-    UPPER_LEN = 0.25       # upper arm half-length (full = 0.50)
-    LOWER_LEN = 0.25       # forearm half-length
-
-    # Shoulder empty mounted on the wall plate
-    shoulder = add_empty(f"Shoulder_{suffix}", (-0.50, 0.040, z))
-    add_cyl(f"ShoulderKnuckle_{suffix}", 0.045, 0.10, (0, 0, 0),
-            axis='Z', parent=shoulder, mat=mat)
-    # Upper arm — thick bar, runs out from shoulder along +X (its local axis).
-    # Center is at half-length along +X.
-    add_box(f"UpperArm_{suffix}", (UPPER_LEN, ARM_T, ARM_T),
-            (UPPER_LEN, 0, 0), parent=shoulder, mat=mat)
-
-    # Elbow empty at end of upper arm (local x=2*UPPER_LEN of shoulder)
-    elbow = add_empty(f"Elbow_{suffix}", (UPPER_LEN * 2, 0, 0))
-    elbow.parent = shoulder
-    elbow.matrix_parent_inverse = shoulder.matrix_world.inverted()
-    add_cyl(f"ElbowKnuckle_{suffix}", 0.045, 0.10, (0, 0, 0),
-            axis='Z', parent=elbow, mat=mat)
-    # Forearm — thick bar
-    add_box(f"Forearm_{suffix}", (LOWER_LEN, ARM_T, ARM_T),
-            (LOWER_LEN, 0, 0), parent=elbow, mat=mat)
-
-    # Wrist empty at end of forearm
-    wrist = add_empty(f"Wrist_{suffix}", (LOWER_LEN * 2, 0, 0))
-    wrist.parent = elbow
-    wrist.matrix_parent_inverse = elbow.matrix_world.inverted()
-    add_cyl(f"WristKnuckle_{suffix}", 0.045, 0.10, (0, 0, 0),
-            axis='Z', parent=wrist, mat=mat)
-
-    return shoulder, elbow, wrist
-
-
 def build_fullmotion_rig():
-    """Modeled from the Mounting Dream full-motion reference:
-         - Tall wall plate on the left (FIXED)
-         - Dual parallelogram arm chain (upper + lower arms) extending
-           forward — the visible 'arms' that fold + extend
-         - TV-side bracket: vertical rails connected by horizontal frame
-       Arms are THICK (0.05m × 0.05m) so they read clearly as articulating
-       elements, not thin rods."""
+    """Modeled from the AlfaShop full-motion mount reference:
+         - 2-rail wall plate (FIXED) with horizontal cross-bars
+         - 4 angled trusses forming a trapezoidal arm frame (these are the
+           "arms") that rotate as a unit around a vertical wall-side pivot
+         - Central vertical pivot column at the apex of the trusses
+         - Horizontal swing arm from central column to the TV-side bracket
+         - 2-rail TV-side bracket with VESA mounting plate
+
+       Animation: trapezoidal truss rotates around wall-side Z axis to
+       extend the TV bracket out, plus the TV bracket pivots on the central
+       column for the lateral swivel. Returns (PivotWall, PivotCenter)."""
     mat = black_metal_mat()
-    # Wall plate (FIXED) — TWO vertical rails spaced apart in X (left-right
-    # in camera view) so they read as two distinct rails, connected by
-    # horizontal cross-bars top/mid/bottom to form a frame. Matches the
-    # Mounting Dream reference's 2-rail wall mount.
-    # Inner rail (closer to arm pivot — shoulders attach here)
-    add_box("WallRail_Inner",   (0.030, 0.030, 0.520),  (-0.55,  0.000, 0.000), mat=mat)
-    # Outer rail (further from arm pivot, parallel)
-    add_box("WallRail_Outer",   (0.030, 0.030, 0.520),  (-0.85,  0.000, 0.000), mat=mat)
-    # Top horizontal cross-bar bridging the two rails
-    add_box("WallPlate_Top",    (0.180, 0.030, 0.030),  (-0.70,  0.000, 0.490), mat=mat)
-    # Bottom horizontal cross-bar
-    add_box("WallPlate_Bot",    (0.180, 0.030, 0.030),  (-0.70,  0.000, -0.490), mat=mat)
-    # Mid horizontal stiffener
-    add_box("WallPlate_Mid",    (0.180, 0.030, 0.030),  (-0.70,  0.000, 0.000), mat=mat)
 
-    # TWO parallel arm chains (parallelogram linkage — both move identically).
-    # Shoulders sit on the INNER rail (x=-0.50, where build_arm_chain places them).
-    sT, eT, wT = build_arm_chain("T",  0.150, mat)
-    sB, eB, wB = build_arm_chain("B", -0.150, mat)
+    # ── FIXED 2-rail wall plate ──────────────────────────────────────────
+    # 2 vertical rails spaced 0.30m apart in X (camera-left/right) so they
+    # read as separate rails from the locked camera angle.
+    add_box("WallRail_L",       (0.030, 0.030, 0.520), (-0.85, 0.000,  0.000), mat=mat)
+    add_box("WallRail_R",       (0.030, 0.030, 0.520), (-0.55, 0.000,  0.000), mat=mat)
+    # Horizontal cross-bars (top, mid, bottom)
+    add_box("WallPlate_Top",    (0.180, 0.030, 0.030), (-0.70, 0.000,  0.490), mat=mat)
+    add_box("WallPlate_Mid",    (0.180, 0.030, 0.030), (-0.70, 0.000,  0.000), mat=mat)
+    add_box("WallPlate_Bot",    (0.180, 0.030, 0.030), (-0.70, 0.000, -0.490), mat=mat)
 
-    # TV-side bracket parented to TOP wrist — vertical rails + horizontal
-    # connectors. Positions are in wT's LOCAL frame (X = arm forward axis).
-    # When arm rotates, this whole bracket follows.
-    # Vertical TV rails (the "side bars" of the TV-side bracket)
-    add_box("TVRail_L",     (0.030, 0.030, 0.220), ( 0.040, -0.240, -0.140), parent=wT, mat=mat)
-    add_box("TVRail_R",     (0.030, 0.030, 0.220), ( 0.040,  0.240, -0.140), parent=wT, mat=mat)
-    # Horizontal cross-bars connecting the rails (top + bottom)
-    add_box("TV_TopBar",    (0.030, 0.270, 0.030), ( 0.040,  0.000,  0.060), parent=wT, mat=mat)
-    add_box("TV_BotBar",    (0.030, 0.270, 0.030), ( 0.040,  0.000, -0.340), parent=wT, mat=mat)
-    # VESA mounting plate in the middle
-    add_box("TV_VESAPlate", (0.020, 0.130, 0.110), ( 0.040,  0.000, -0.140), parent=wT, mat=mat)
-    # Tabs at top and bottom of each rail
-    add_box("TVRail_L_Tab", (0.030, 0.060, 0.030), ( 0.040, -0.240,  0.080), parent=wT, mat=mat)
-    add_box("TVRail_L_Bot", (0.030, 0.060, 0.030), ( 0.040, -0.240, -0.360), parent=wT, mat=mat)
-    add_box("TVRail_R_Tab", (0.030, 0.060, 0.030), ( 0.040,  0.240,  0.080), parent=wT, mat=mat)
-    add_box("TVRail_R_Bot", (0.030, 0.060, 0.030), ( 0.040,  0.240, -0.360), parent=wT, mat=mat)
+    # ── PIVOT 1: trapezoidal truss (rotates around wall-side Z axis) ─────
+    pivot_wall = add_empty("PivotWall", (-0.55, 0.040, 0.000))
 
-    return (sT, eT), (sB, eB)
+    # Central pivot column (target of the trusses)
+    # Local position from PivotWall: forward by 0.65 (in PivotWall's +X / forward)
+    # Length 1.0m vertical, thickness 0.04m
+    add_box("CenterPivotCol", (0.030, 0.030, 0.500),
+            (0.65, 0.000, 0.000), parent=pivot_wall, mat=mat)
+
+    # Four angled trusses — each goes from a wall-rail corner to a corner
+    # of the central pivot column. Modeled as boxes sized to span the gap.
+    # Wall-side endpoints (in PivotWall local frame, since wall rails are
+    # at world x=-0.55 and pivot_wall is at world x=-0.55, the rails are
+    # at LOCAL x=0). Truss endpoints in pivot_wall local space:
+    #   Wall ends:    (0.00, ±0.150, ±0.450)
+    #   Center ends:  (0.65, 0.000, ±0.450)
+    # For a box bar between two points, place at midpoint, scale length to
+    # the distance, rotate to align with the line.
+    def add_truss(name, p_start, p_end, parent):
+        sx, sy, sz = p_start
+        ex, ey, ez = p_end
+        dx, dy, dz = ex - sx, ey - sy, ez - sz
+        length = math.sqrt(dx*dx + dy*dy + dz*dz)
+        mid = ((sx+ex)/2, (sy+ey)/2, (sz+ez)/2)
+        # Default box orientation has its long axis along X, so rotate that
+        # axis to align with the (dx,dy,dz) direction.
+        from mathutils import Vector
+        x_axis = Vector((1, 0, 0))
+        target = Vector((dx, dy, dz)).normalized()
+        quat = x_axis.rotation_difference(target)
+        rot_e = quat.to_euler()
+        bpy.ops.mesh.primitive_cube_add(size=2.0, location=mid)
+        obj = bpy.context.object
+        obj.name = name
+        obj.scale = (length / 2, 0.020, 0.020)
+        obj.rotation_euler = rot_e
+        bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
+        m = obj.modifiers.new("Bevel", "BEVEL")
+        m.width = 0.004; m.segments = 3; m.limit_method = 'ANGLE'
+        obj.parent = parent
+        obj.matrix_parent_inverse = parent.matrix_world.inverted()
+        obj.data.materials.clear()
+        obj.data.materials.append(mat)
+        return obj
+
+    add_truss("Truss_TL", ( 0.00, -0.150,  0.450), (0.65, 0.000,  0.450), pivot_wall)
+    add_truss("Truss_TR", ( 0.00,  0.150,  0.450), (0.65, 0.000,  0.450), pivot_wall)
+    add_truss("Truss_BL", ( 0.00, -0.150, -0.450), (0.65, 0.000, -0.450), pivot_wall)
+    add_truss("Truss_BR", ( 0.00,  0.150, -0.450), (0.65, 0.000, -0.450), pivot_wall)
+
+    # ── PIVOT 2: TV-side bracket pivots on the central column ────────────
+    pivot_center = add_empty("PivotCenter", (0.65, 0.000, 0.000))
+    pivot_center.parent = pivot_wall
+    pivot_center.matrix_parent_inverse = pivot_wall.matrix_world.inverted()
+
+    # Horizontal swing arms (top + bottom) from central column to TV bracket
+    add_box("SwingArm_Top",  (0.300, 0.020, 0.030), (0.300, 0.000,  0.450),
+            parent=pivot_center, mat=mat)
+    add_box("SwingArm_Bot",  (0.300, 0.020, 0.030), (0.300, 0.000, -0.450),
+            parent=pivot_center, mat=mat)
+
+    # TV-side bracket: 2 vertical rails + cross-bars + VESA plate
+    add_box("TVRail_L",      (0.030, 0.030, 0.520), (0.600, -0.150, 0.000),
+            parent=pivot_center, mat=mat)
+    add_box("TVRail_R",      (0.030, 0.030, 0.520), (0.600,  0.150, 0.000),
+            parent=pivot_center, mat=mat)
+    add_box("TVBracket_Top", (0.030, 0.180, 0.030), (0.600,  0.000,  0.490),
+            parent=pivot_center, mat=mat)
+    add_box("TVBracket_Mid", (0.030, 0.180, 0.030), (0.600,  0.000,  0.000),
+            parent=pivot_center, mat=mat)
+    add_box("TVBracket_Bot", (0.030, 0.180, 0.030), (0.600,  0.000, -0.490),
+            parent=pivot_center, mat=mat)
+    # VESA mounting plate in the middle (large rectangular plate with holes
+    # — holes not modeled, suggested by the plate's prominence)
+    add_box("VESAPlate",     (0.015, 0.150, 0.180), (0.585,  0.000, 0.000),
+            parent=pivot_center, mat=mat)
+
+    return pivot_wall, pivot_center
 
 
-def keyframe_fullmotion(top, bot):
-    """Fold + extend + lateral sweep — matches the original WebGL motion.
-       phase=0 (loop start): arms folded against the wall plate.
-       phase=π (mid-loop):    arms fully extended straight out.
-       Lateral sweep ±20° overlays so the TV swings side-to-side too.
-       Both arm chains receive identical keyframes — parallelogram linkage."""
-    sT, eT = top
-    sB, eB = bot
+def keyframe_fullmotion(rig):
+    """Dual-pivot animation matching the AlfaShop full-motion mount:
+       PivotWall (the trapezoidal-truss arm assembly) rotates around its
+       Z axis to swing the TV bracket out from / back toward the wall.
+       PivotCenter (the TV bracket on the central column) counter-rotates
+       so the TV face stays approximately camera-facing through the swing.
+    """
+    pivot_wall, pivot_center = rig
 
-    # Reduced fold angles so the arms stay clearly visible throughout the
-    # whole loop instead of disappearing flat against the wall.
-    SHOULDER_FOLD = math.radians( 30)   # mild angle back
-    SHOULDER_EXT  = math.radians( -5)   # straight out
-    ELBOW_FOLD    = math.radians(-50)   # bent at the elbow but not collapsed
-    ELBOW_EXT     = math.radians(  0)   # straight
-    SWEEP_AMP     = math.radians( 20)   # lateral sweep amplitude
+    WALL_AMP   = math.radians(35)   # how far the truss swings out
+    CENTER_AMP = math.radians(25)   # TV bracket counter-swivel
 
     for f in range(1, FRAMES + 1):
         t = (f - 1) / FRAMES
         phase = t * 2 * math.pi
-        # fold_t: 1 = fully folded, 0 = fully extended.
-        # cos(phase) is 1 at phase=0 (folded) and -1 at phase=π (extended).
-        fold_t = (1 + math.cos(phase)) / 2
-        # Sweep: sin(phase) gives ±1 oscillation across the loop.
-        sweep = math.sin(phase)
-
-        sh_z = SHOULDER_FOLD * fold_t + SHOULDER_EXT * (1 - fold_t) + SWEEP_AMP * sweep
-        el_z = ELBOW_FOLD    * fold_t + ELBOW_EXT    * (1 - fold_t)
-
         bpy.context.scene.frame_set(f)
-        for s in (sT, sB):
-            s.rotation_euler[2] = sh_z
-            s.keyframe_insert("rotation_euler", index=2, frame=f)
-        for e in (eT, eB):
-            e.rotation_euler[2] = el_z
-            e.keyframe_insert("rotation_euler", index=2, frame=f)
+        pivot_wall.rotation_euler[2] = math.sin(phase) * WALL_AMP
+        pivot_wall.keyframe_insert("rotation_euler", index=2, frame=f)
+        pivot_center.rotation_euler[2] = -math.sin(phase) * CENTER_AMP
+        pivot_center.keyframe_insert("rotation_euler", index=2, frame=f)
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -372,7 +374,7 @@ def render_one(key, build_fn, keyframe_fn):
     add_shadow_catcher()
 
     rig = build_fn()
-    keyframe_fn(rig) if not isinstance(rig, tuple) else keyframe_fn(*rig)
+    keyframe_fn(rig)
 
     # Scale the entire rig to match the visual size of the static webps
     # (which use target_h=1.8 in render_mount_objects_v2.py). Joint rotations
