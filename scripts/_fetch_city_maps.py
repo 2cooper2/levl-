@@ -129,7 +129,14 @@ def fetch_city(lat, lon, name, key, zoom=ZOOM):
 
     # Duotone recolor — convert to lavender palette to match Levl style.
     canvas = osm_to_levl(canvas, key)
-    # Crop the canvas (1024x1024 center) — already exactly 1024x1024
+
+    # V-flip the map BEFORE label paste. The print mesh's UV is DirectX-style
+    # (PIL bottom → display top), so without this, OSM north (drawn at PIL
+    # top) ends up at the frame's bottom — i.e., upside-down map. The label
+    # block below has its own V-flip and stays at PIL bottom, which already
+    # corresponds to display top-right — leave it alone.
+    canvas = canvas.transpose(Image.FLIP_TOP_BOTTOM)
+
     # Add city label
     d = ImageDraw.Draw(canvas)
     paths = ["/System/Library/Fonts/Supplemental/Times New Roman Bold.ttf"]

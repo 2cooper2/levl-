@@ -100,15 +100,15 @@ def add_lights():
     area('Top',   ( 0.0, -0.8, 6.0),   45, 3.0, (1.00, 0.98, 0.95), (80, 0,   0))
 
 
-def add_camera(fov_deg=42):
+def add_camera(fov_deg=42, cam_pos=None, look_at=None):
     cd = bpy.data.cameras.new('Camera')
     cd.lens_unit = 'FOV'; cd.angle = math.radians(fov_deg)
     cd.clip_start = 0.01; cd.clip_end = 50.0
     co = bpy.data.objects.new('Camera', cd)
     bpy.context.collection.objects.link(co)
     bpy.context.scene.camera = co
-    cam_pos = Vector((2.60, -4.50, 0.97))
-    look_at = Vector((0.00,  0.00, 0.28))
+    cam_pos = Vector(cam_pos) if cam_pos else Vector((2.60, -4.50, 0.97))
+    look_at = Vector(look_at) if look_at else Vector((0.00,  0.00, 0.28))
     co.location = cam_pos
     co.rotation_euler = (look_at - cam_pos).to_track_quat('-Z', 'Y').to_euler()
 
@@ -209,10 +209,15 @@ ICONS = {
     },
     "art-frame": {
         # Multi-frame composition (small/medium/large overlapping). Render
-        # logic in compose_art_frame_trio() below.
+        # logic in compose_art_frame_trio() below. Per-icon camera override:
+        # raised look-at, wide FOV so the trio sits low in the card with
+        # headroom above and the floor visible below. Distance ~4.5m holds
+        # KC's 4m width inside the horizontal view.
         "glb":     "sketchfab_art_frame_modern.glb",
         "multi_frame": True,
-        "camera_fov_deg": 52,    # widened so top of largest frame isn't cropped
+        "camera_fov_deg": 65,
+        "camera_pos":     (1.85, -4.00, 1.50),
+        "camera_look_at": (0.00,  0.00, 2.40),
     },
     "floating-shelves": {
         "glb":     "sketchfab_floating_shelves_scandi_clean.glb",
@@ -310,27 +315,24 @@ def compose_art_frame_trio(glb_path):
     tex_kc    = os.path.join(here, "city_kansas_city.png")
     tex_la    = os.path.join(here, "city_los_angeles.png")
 
-    # KC — large, upright, stretched tall (rear, dominant). Front face plane
-    # sits at world y ≈ 0.45 (slight thickness ~±0.02 around that).
-    m_lg = import_glb_at(base_glb, target_height=2.2, rot_xyz=(0, 0, 0),
-                         z_floor=0.0, x_offset=0.30, y_offset=0.45)
-    stretch_z(m_lg, 1.45)
+    # KC — biggest, tall 4.0 × 4.0 square (no Z-stretch — stretch distorts
+    # the texture). Centered at x=0, y=0.45.
+    m_lg = import_glb_at(base_glb, target_height=4.0, rot_xyz=(0, 0, 0),
+                         z_floor=0.0, x_offset=0.0, y_offset=0.45)
     swap_print_texture(m_lg, tex_kc)
 
-    # LA — medium, stretched tall, leaning back 22° so its TOP edge actually
-    # rests against KC's front face (top y ≈ -0.40 + sin22°·2.24 ≈ 0.44).
-    # Geometric contact = Cycles renders a real cast shadow on KC.
-    m_md = import_glb_at(base_glb, target_height=1.6,
-                         rot_xyz=(math.radians(-22), 0, math.radians(8)),
-                         z_floor=0.0, x_offset=-0.40, y_offset=-0.40)
-    stretch_z(m_md, 1.40)
+    # LA — 2.5 × 2.46h post-rotation. Mild 10° lean. y_offset tuned so the
+    # TOP-BACK corner just kisses KC's front-face plane (y≈0.42) — touches
+    # without phasing through.
+    m_md = import_glb_at(base_glb, target_height=2.5,
+                         rot_xyz=(math.radians(-10), 0, 0),
+                         z_floor=0.0, x_offset=-0.70, y_offset=0.08)
     swap_print_texture(m_md, tex_la)
 
-    # NY — small, leaning back 25° so its top contacts KC at ~30% height
-    # (top y ≈ 0.00 + sin25°·1.05 ≈ 0.44). Right side, slight opposite yaw.
-    m_sm = import_glb_at(base_glb, target_height=1.05,
-                         rot_xyz=(math.radians(-25), 0, math.radians(-6)),
-                         z_floor=0.0, x_offset=0.95, y_offset=0.00)
+    # NY — small, 1.5 × 1.47h post-rotation. Mild 12° lean.
+    m_sm = import_glb_at(base_glb, target_height=1.5,
+                         rot_xyz=(math.radians(-12), 0, 0),
+                         z_floor=0.0, x_offset=1.10, y_offset=0.19)
     swap_print_texture(m_sm, tex_ny)
 
 
@@ -345,7 +347,9 @@ def render_one(key):
     reset()
     setup_render(raw_path)
     setup_world()
-    add_camera(fov_deg=cfg.get("camera_fov_deg", 42))
+    add_camera(fov_deg=cfg.get("camera_fov_deg", 42),
+               cam_pos=cfg.get("camera_pos"),
+               look_at=cfg.get("camera_look_at"))
     add_lights()
     add_shadow_catcher(0.0)
 
