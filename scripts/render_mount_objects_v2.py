@@ -217,7 +217,7 @@ ICONS = {
         "multi_frame": True,
         "camera_fov_deg": 65,
         "camera_pos":     (2.50, -3.50, 1.50),
-        "camera_look_at": (0.00,  0.00, 2.00),
+        "camera_look_at": (0.00,  0.00, 1.70),
     },
     "floating-shelves": {
         "glb":     "sketchfab_floating_shelves_scandi_clean.glb",
