@@ -242,10 +242,8 @@ for key, drawer in [("new_york", draw_new_york),
                     ("los_angeles", draw_los_angeles),
                     ("kansas_city", draw_kansas_city)]:
     im = drawer()
-    # Print mesh's UV applies a 180° rotation vs standard image coords.
-    # Pre-rotating the texture 180° so labels drawn at the texture's
-    # top-right display at the print's top-right right-side-up.
-    im = im.transpose(Image.ROTATE_180)
+    # No flip — print mesh's UV maps texture top-right (high U, high V)
+    # directly to display top-right. Confirmed via per-vertex UV probe.
     out = os.path.join(OUT, f"city_{key}.png")
     im.save(out)
     print(f"saved {out}")
