@@ -293,18 +293,18 @@ def compose_art_frame_trio(glb_path):
     tex_kc    = os.path.join(here, "city_kansas_city.png")
     tex_la    = os.path.join(here, "city_los_angeles.png")
 
-    # Large — New York (rear-right, dominant)
+    # Large — Kansas City downtown (rear-right, dominant)
     m_lg = import_glb_at(base_glb, target_height=2.2, rot_xyz=(0, 0, 0),
                          z_floor=0.0, x_offset=0.45, y_offset=0.40)
-    swap_print_texture(m_lg, tex_ny)
-    # Medium — Kansas City (left, slightly forward)
+    swap_print_texture(m_lg, tex_kc)
+    # Medium — Los Angeles downtown (left, slightly forward)
     m_md = import_glb_at(base_glb, target_height=1.6, rot_xyz=(0, 0, math.radians(8)),
                          z_floor=0.0, x_offset=-0.65, y_offset=-0.10)
-    swap_print_texture(m_md, tex_kc)
-    # Small — Los Angeles (right-front, leaning more)
+    swap_print_texture(m_md, tex_la)
+    # Small — Manhattan (right-front, leaning more)
     m_sm = import_glb_at(base_glb, target_height=1.05, rot_xyz=(0, 0, math.radians(-6)),
                          z_floor=0.0, x_offset=0.95, y_offset=-0.45)
-    swap_print_texture(m_sm, tex_la)
+    swap_print_texture(m_sm, tex_ny)
 
 
 def render_one(key):

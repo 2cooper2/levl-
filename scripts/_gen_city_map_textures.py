@@ -139,31 +139,58 @@ def draw_new_york(seed=42):
 
 
 def draw_los_angeles(seed=37):
+    """Downtown LA — the historic plat is rotated ~38° NW from true north.
+    Two grids meeting: the rotated downtown grid + the conventional N/S grid
+    of the rest of the city. 110 and 101 freeways frame downtown."""
     random.seed(seed)
     img = Image.new("RGB", (W, H), BG)
     d = ImageDraw.Draw(img)
-    fill_blocks(d, density=0.40)
-    # LA's irregular grid + freeways
-    grid_streets(d, spacing=30, jitter=6)
-    # Major freeways (101, 110, 5, 405, 10) sweeping through
-    cx, cy = W // 2, H // 2 + 60
-    # 101 (Hollywood) east-west diagonal
-    d.line([(0, H * 0.30), (W, H * 0.45)], fill=ORANGE, width=6)
-    # 110 (Harbor) north-south through center
-    d.line([(W * 0.55, 0), (W * 0.45, H)], fill=ORANGE, width=6)
-    # 5 (Golden State) slant from upper-right to lower-left
-    d.line([(W, H * 0.10), (W * 0.20, H)], fill=ORANGE, width=5)
-    # 405 (San Diego) far west
-    d.line([(W * 0.18, 0), (W * 0.10, H)], fill=ORANGE_DK, width=5)
-    # 10 (Santa Monica) east-west lower
-    d.line([(0, H * 0.78), (W, H * 0.70)], fill=ORANGE_DK, width=5)
-    # Ring road + inner radial (like a downtown grid centered)
-    radial_avenues(d, cx=int(W * 0.44), cy=int(H * 0.55), count=10, r_min=40, r_max=240, color=DARK)
-    ring_roads(d, int(W * 0.44), int(H * 0.55), radii=[120, 200, 280], color=DARK, width=1)
-    # Beach/Pacific on the bottom-left curve
-    for x in range(0, int(W * 0.55), 6):
-        y = int(H - 70 + 40 * math.sin(x * 0.01))
-        d.ellipse([x - 4, y - 4, x + 60, y + 12], fill=BG)
+    fill_blocks(d, density=0.42)
+    # Conventional N/S grid (background, lighter)
+    grid_streets(d, spacing=28, jitter=4)
+    # Rotated downtown grid — overlay on top of background
+    cx, cy = int(W * 0.50), int(H * 0.55)
+    angle = math.radians(38)
+    cos_a, sin_a = math.cos(angle), math.sin(angle)
+    R = 520
+    spacing = 32
+    for i in range(-30, 31):
+        # parallel lines along one axis of rotated grid
+        d_off = i * spacing
+        x1 = cx + d_off * cos_a - R * sin_a
+        y1 = cy + d_off * sin_a + R * cos_a
+        x2 = cx + d_off * cos_a + R * sin_a
+        y2 = cy + d_off * sin_a - R * cos_a
+        emph = (i % 5 == 0)
+        d.line([(x1, y1), (x2, y2)],
+               fill=DARK if emph else GREY,
+               width=2 if emph else 1)
+        # perpendicular axis
+        x1 = cx - R * cos_a - d_off * sin_a
+        y1 = cy - R * sin_a + d_off * cos_a
+        x2 = cx + R * cos_a - d_off * sin_a
+        y2 = cy + R * sin_a + d_off * cos_a
+        d.line([(x1, y1), (x2, y2)],
+               fill=DARK if emph else GREY,
+               width=2 if emph else 1)
+    # 110 freeway (Harbor) — north-south through downtown
+    d.line([(W * 0.62, 0), (W * 0.46, H)], fill=ORANGE, width=7)
+    # 101 freeway (Hollywood) — sweeping east-west through downtown
+    d.line([(0, H * 0.26), (W, H * 0.42)], fill=ORANGE, width=6)
+    # 10 (Santa Monica) — south of downtown
+    d.line([(0, H * 0.82), (W, H * 0.74)], fill=ORANGE_DK, width=5)
+    # 5 freeway slanting through east side
+    d.line([(W, H * 0.05), (W * 0.65, H)], fill=ORANGE_DK, width=5)
+    # LA River curving through east
+    pts = []
+    for t in (i / 60 for i in range(61)):
+        x = int(W * 0.78 + 28 * math.sin(t * 5))
+        y = int(t * H)
+        pts.append((x, y))
+    river_curve(d, pts, color=ORANGE, width=8)
+    # Pershing Square (small park) in downtown core
+    px = int(cx + 60 * cos_a); py = int(cy + 60 * sin_a)
+    d.rectangle([px - 35, py - 35, px + 35, py + 35], fill=BLOCK_PARK)
     label(d, "LOS ANGELES", font_size=66, position=(W - 50, 50))
     add_grain(img)
     return img
