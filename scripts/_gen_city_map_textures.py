@@ -91,6 +91,9 @@ def draw_city(name, key, seed=0, motif="grid"):
     tw = bbox[2] - bbox[0]
     d.text((W - tw - 56, 50), label, fill=DARK, font=fnt_lg)
 
+    # Pre-flip horizontally so text reads correctly through the print mesh's
+    # mirrored UV (the existing Amsterdam print texture is flipped too).
+    img = img.transpose(Image.FLIP_LEFT_RIGHT)
     out_path = os.path.join(OUT, f"city_{key}.png")
     img.save(out_path)
     print(f"saved {out_path}")
