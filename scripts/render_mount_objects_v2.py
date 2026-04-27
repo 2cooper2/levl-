@@ -244,6 +244,28 @@ ICONS = {
         "target_h": 1.6,
         "z_floor": 0.0,
     },
+    # ── TV-mount type icons (rendered through the same wall-types rig) ────
+    "mount-fixed": {
+        "glb":     "sketchfab_mount_fixed.glb",
+        "rot_xyz": (0, 0, 0),
+        "target_h": 1.8,
+        "z_floor": 0.0,
+        "x_offset": 0.30,
+        "camera_fov_deg": 60,
+    },
+    "mount-tilting": {
+        "glb":     "sketchfab_mount_tilting.glb",
+        "rot_xyz": (0, 0, 0),
+        "target_h": 1.8,
+        "z_floor": 0.0,
+        "x_offset": 0.30,
+        "camera_fov_deg": 60,
+    },
+    # mount-fullmotion + mount-ceiling intentionally omitted — Sketchfab
+    # didn't surface usable free assets (the sevai "Tv Mount" is a TV stand,
+    # the only ceiling option was a tabletop projector). The existing
+    # mount-fullmotion.webp / mount-ceiling.webp procedural renders read
+    # better as UI thumbnails since they include a TV alongside the bracket.
 }
 
 
