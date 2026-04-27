@@ -280,19 +280,7 @@ def swap_print_texture(meshes, image_path):
             break
     if tex_node is None:
         return
-    # Ensure UV-coord → mapping → image. Insert a Mapping node that rotates
-    # 180° so the texture orientation matches the GLB's UV.
-    mapping = nt.nodes.new("ShaderNodeMapping")
-    coord   = nt.nodes.new("ShaderNodeTexCoord")
-    mapping.inputs["Rotation"].default_value = (0, 0, math.pi)  # 180°
-    mapping.inputs["Location"].default_value = (1.0, 1.0, 0.0)  # offset back
-    nt.links.new(coord.outputs["UV"], mapping.inputs["Vector"])
-    # Disconnect any existing input on the Image node's Vector socket
-    for lk in list(nt.links):
-        if lk.to_node == tex_node and lk.to_socket.name == "Vector":
-            nt.links.remove(lk)
-    nt.links.new(mapping.outputs["Vector"], tex_node.inputs["Vector"])
-    print(f"  [{target_mesh.name}] swapped print + UV-rotated 180° → {os.path.basename(image_path)}")
+    print(f"  [{target_mesh.name}] swapped print texture → {os.path.basename(image_path)}")
 
 
 def compose_art_frame_trio(glb_path):

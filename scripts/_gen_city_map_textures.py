@@ -91,7 +91,8 @@ def river_curve(d, points, color=BG, width=22):
         d.line([points[i], points[i + 1]], fill=color, width=width)
 
 
-def label(d, text, font_size=86, position=(W - 60, 50), color=DARK, anchor="ra"):
+def label(d, text, font_size=86, position=(int(W * 0.79), int(H * 0.05)),
+          color=DARK, anchor="ra"):
     """Top-right city label using a serif font (Times New Roman Bold)."""
     paths = [
         "/System/Library/Fonts/Supplemental/Times New Roman Bold.ttf",
@@ -135,7 +136,7 @@ def draw_new_york(seed=42):
     for y_pct in (0.18, 0.31, 0.46, 0.58, 0.73, 0.88):
         y = int(H * y_pct)
         d.line([(0, y), (W, y)], fill=ORANGE_DK, width=3)
-    label(d, "NEW YORK", font_size=84, position=(W - 50, 50))
+    label(d, "NEW YORK", font_size=84, position=(int(W * 0.79), int(H * 0.05)))
     add_grain(img)
     return img
 
@@ -193,7 +194,7 @@ def draw_los_angeles(seed=37):
     # Pershing Square (small park) in downtown core
     px = int(cx + 60 * cos_a); py = int(cy + 60 * sin_a)
     d.rectangle([px - 35, py - 35, px + 35, py + 35], fill=BLOCK_PARK)
-    label(d, "LOS ANGELES", font_size=66, position=(W - 50, 50))
+    label(d, "LOS ANGELES", font_size=66, position=(int(W * 0.79), int(H * 0.05)))
     add_grain(img)
     return img
 
@@ -230,7 +231,7 @@ def draw_kansas_city(seed=12):
         x = random.randint(80, W - 200); y = random.randint(int(H * 0.45), H - 80)
         sz = random.randint(50, 110)
         d.rectangle([x, y, x + sz, y + int(sz * 0.7)], fill=BLOCK_PARK)
-    label(d, "KANSAS CITY", font_size=68, position=(W - 50, 50))
+    label(d, "KANSAS CITY", font_size=68, position=(int(W * 0.79), int(H * 0.05)))
     add_grain(img)
     return img
 
