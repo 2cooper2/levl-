@@ -216,8 +216,8 @@ ICONS = {
         "glb":     "sketchfab_art_frame_modern.glb",
         "multi_frame": True,
         "camera_fov_deg": 65,
-        "camera_pos":     (1.85, -4.00, 1.50),
-        "camera_look_at": (0.00,  0.00, 2.40),
+        "camera_pos":     (2.50, -3.50, 1.50),
+        "camera_look_at": (0.00,  0.00, 2.00),
     },
     "floating-shelves": {
         "glb":     "sketchfab_floating_shelves_scandi_clean.glb",
@@ -315,10 +315,12 @@ def compose_art_frame_trio(glb_path):
     tex_kc    = os.path.join(here, "city_kansas_city.png")
     tex_la    = os.path.join(here, "city_los_angeles.png")
 
+    # X-offsets shifted -0.16 from the centered set so the trio's weighted
+    # x-mass lands on the camera's optical axis at the new ~36°-side angle.
     # KC — biggest, tall 4.0 × 4.0 square (no Z-stretch — stretch distorts
-    # the texture). Centered at x=0, y=0.45.
+    # the texture).
     m_lg = import_glb_at(base_glb, target_height=4.0, rot_xyz=(0, 0, 0),
-                         z_floor=0.0, x_offset=0.0, y_offset=0.45)
+                         z_floor=0.0, x_offset=-0.16, y_offset=0.45)
     swap_print_texture(m_lg, tex_kc)
 
     # LA — 2.5 × 2.46h post-rotation. Mild 10° lean. y_offset tuned so the
@@ -326,13 +328,13 @@ def compose_art_frame_trio(glb_path):
     # without phasing through.
     m_md = import_glb_at(base_glb, target_height=2.5,
                          rot_xyz=(math.radians(-10), 0, 0),
-                         z_floor=0.0, x_offset=-0.70, y_offset=0.08)
+                         z_floor=0.0, x_offset=-0.86, y_offset=0.08)
     swap_print_texture(m_md, tex_la)
 
     # NY — small, 1.5 × 1.47h post-rotation. Mild 12° lean.
     m_sm = import_glb_at(base_glb, target_height=1.5,
                          rot_xyz=(math.radians(-12), 0, 0),
-                         z_floor=0.0, x_offset=1.10, y_offset=0.19)
+                         z_floor=0.0, x_offset=0.94, y_offset=0.19)
     swap_print_texture(m_sm, tex_ny)
 
 
