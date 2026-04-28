@@ -606,8 +606,7 @@ def keyframe_tilt(parts):
     Simulates a TV being tilted on a hooked mount."""
     main_ctrl = parts.get("tv_root")
     rails  = [bpy.data.objects.get(n) for n in ("Rectangle203", "Rectangle208")]
-    hooks  = [bpy.data.objects.get(n) for n in ("Arc014", "Arc020")]
-    movers = [o for o in (rails + hooks) if o]
+    movers = [o for o in rails if o]
     if not (movers and main_ctrl):
         return
 
@@ -739,12 +738,19 @@ def render_one(key):
             cyl.hide_render = True
 
     if key == "tilting":
-        # Tilting mount: hide wall plate AND all horizontal hinge cylinders.
-        # Only the static VESA front plate + tilting rails remain visible.
+        # Tilting mount: DELETE wall plate, all horizontal hinge cylinders,
+        # dummies, and the Pivot empties. Strip Main_controller's Child Of
+        # constraint (it depended on Dummy002). Only static VESA + rails +
+        # arcs/hooks remain.
+        main_ctrl = bpy.data.objects.get("Main_controller")
+        if main_ctrl:
+            for c in list(main_ctrl.constraints):
+                main_ctrl.constraints.remove(c)
         for nm in ("Rectangle200", "Cylinder040", "Cylinder045",
-                   "Cylinder042", "Cylinder043"):
+                   "Cylinder042", "Cylinder043", "Dummy001", "Dummy002",
+                   "Pivot_Cylinder042", "Pivot_Cylinder043"):
             o = bpy.data.objects.get(nm)
-            if o: o.hide_viewport = True; o.hide_render = True
+            if o: bpy.data.objects.remove(o, do_unlink=True)
         keyframe_tilt(parts)
     elif key == "fullmotion":
         keyframe_swivel(clean_pivots)
