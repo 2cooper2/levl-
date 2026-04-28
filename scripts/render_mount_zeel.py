@@ -403,7 +403,7 @@ def render_one(key):
         # baseline, so we shift BEFORE keyframing takes effect by tweaking
         # its location in its local frame. With root.scale ≈ 0.9, a -0.10
         # translation in tv_root's local Y maps to ~-0.09 world Y.
-        tv_root.location.y -= 0.10
+        tv_root.location.y -= 0.25
 
     if key == "tilting":
         keyframe_tilt(parts)
