@@ -134,9 +134,12 @@ def black_metal_mat():
 
 # ── Import + setup ──────────────────────────────────────────────────────────
 def import_zeel():
-    """Import the Zeel mount FBX. Apply matte-black material, then bake a
-    transform onto every top-level object that centers the model on origin
-    and scales it to 2m. Returns the list of top-level objects."""
+    """Import the Zeel mount FBX. Wrap all top-level imported objects under
+    a single ROOT empty, then scale + translate ONLY the root — children's
+    parent-relative offsets are preserved through their existing FBX
+    parenting (Cylinder043→Cylinder040→Dummy002, etc.). NO transform_apply,
+    so the parented shoulder→arm→endpoint chain stays intact for animation.
+    Returns (new_objs, root_empty)."""
     before = set(bpy.context.scene.objects)
     bpy.ops.import_scene.fbx(filepath=FBX)
     new_objs = [o for o in bpy.context.scene.objects if o not in before]
@@ -148,7 +151,7 @@ def import_zeel():
             o.data.materials.clear()
             o.data.materials.append(mat)
 
-    # Compute world bbox of imported meshes
+    # World bbox of all imported meshes (BEFORE any transformation)
     mins = [float('inf')] * 3; maxs = [float('-inf')] * 3
     for o in new_objs:
         if o.type != 'MESH': continue
@@ -160,27 +163,34 @@ def import_zeel():
     cy = (mins[1] + maxs[1]) / 2
     cz_min = mins[2]
     biggest = max(maxs[i] - mins[i] for i in range(3))
-    target = 2.0
-    sc = target / max(biggest, 0.001)
+    sc = 2.0 / max(biggest, 0.001)
 
-    # Apply Scale@origin first then Translation. Bake into matrix_world of
-    # every TOP-LEVEL object (parented chains follow naturally).
-    S = mathutils.Matrix.Scale(sc, 4)
-    T = mathutils.Matrix.Translation((-cx * sc, -cy * sc, -cz_min * sc))
-    M = T @ S
-    for o in new_objs:
+    # Create root empty at origin (identity transform initially)
+    bpy.ops.object.empty_add(type='PLAIN_AXES', location=(0, 0, 0))
+    root = bpy.context.object
+    root.name = "ZeelRoot"
+
+    # Parent every top-level imported object to root, preserving world pos.
+    # The FBX child hierarchies (Cyl→Cyl→Dummy etc.) survive intact.
+    for o in list(new_objs):
+        if o is root: continue
         if o.parent is None:
-            o.matrix_world = M @ o.matrix_world
+            old_world = o.matrix_world.copy()
+            o.parent = root
+            o.matrix_parent_inverse = root.matrix_world.inverted()
+            o.matrix_world = old_world
 
-    bpy.ops.object.select_all(action='DESELECT')
-    for o in new_objs:
-        o.select_set(True)
-    bpy.context.view_layer.objects.active = new_objs[0]
-    try: bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-    except RuntimeError: pass
     bpy.context.view_layer.update()
 
-    return new_objs
+    # Now scale + translate the root. Children inherit the transform via
+    # parenting, so the entire FBX hierarchy moves/scales as one unit.
+    # Root.location chosen so the model's bbox center lands at world (0,0,*)
+    # and bottom at z=0.
+    root.scale = (sc, sc, sc)
+    root.location = (-sc * cx, -sc * cy, -sc * cz_min)
+    bpy.context.view_layer.update()
+
+    return new_objs, root
 
 
 def get_zeel_parts():
@@ -206,15 +216,12 @@ def get_zeel_parts():
     }
 
 
-def wrap_shoulder_pivot(shoulder):
-    """Wrap a shoulder cylinder in a WORLD-AXIS-ALIGNED empty at the same
-    world location, so rotating the empty's Z is a clean vertical swivel
-    around the wall pivot regardless of the FBX's local axis orientation.
-    Returns the empty (the new pivot to keyframe)."""
+def wrap_shoulder_pivot(shoulder, root):
+    """Insert a world-axis-aligned pivot empty between root and the shoulder
+    cylinder, located at the wall-side end of the cylinder. Rotating the
+    pivot's Z gives a clean vertical swivel around the wall mount point."""
     if shoulder is None: return None
     bpy.context.view_layer.update()
-    # Compute the world-X = wall-side end of the shoulder cylinder (its
-    # geometric back face), so rotation pivots there, not the cylinder center.
     mins = [float('inf')] * 3; maxs = [float('-inf')] * 3
     for c in shoulder.bound_box:
         w = shoulder.matrix_world @ Vector(c)
@@ -222,21 +229,25 @@ def wrap_shoulder_pivot(shoulder):
             mins[i] = min(mins[i], w[i]); maxs[i] = max(maxs[i], w[i])
     pivot_loc = (
         (mins[0] + maxs[0]) / 2,
-        maxs[1],   # WALL-SIDE end (max world Y for this asset)
+        maxs[1],   # WALL-SIDE end of cylinder
         (mins[2] + maxs[2]) / 2,
     )
     bpy.ops.object.empty_add(type='PLAIN_AXES', location=pivot_loc, radius=0.05)
     pivot = bpy.context.object
     pivot.name = f"Pivot_{shoulder.name}"
-    # Hard-parent the shoulder under the empty; preserve world position
-    old_world = shoulder.matrix_world.copy()
+    # Insert pivot between root and shoulder: root → pivot → shoulder
+    old_pivot_world = pivot.matrix_world.copy()
+    pivot.parent = root
+    pivot.matrix_parent_inverse = root.matrix_world.inverted()
+    pivot.matrix_world = old_pivot_world
+    old_shoulder_world = shoulder.matrix_world.copy()
     shoulder.parent = pivot
     shoulder.matrix_parent_inverse = pivot.matrix_world.inverted()
-    shoulder.matrix_world = old_world
+    shoulder.matrix_world = old_shoulder_world
     return pivot
 
 
-def attach_tv_bracket_to_arm(parts):
+def attach_tv_bracket_to_arm(parts, root):
     """Hard-parent the TV-side bracket (Main_controller + its children —
     VESA plate, vertical rails, tilt arms) to the arm endpoint (Dummy002)
     so the WHOLE TV assembly moves rigidly with the swinging arm. Wall
@@ -253,8 +264,8 @@ def attach_tv_bracket_to_arm(parts):
     tv_root.matrix_parent_inverse = arm_a_end.matrix_world.inverted()
     tv_root.matrix_world = old_world
     # Wrap shoulders in world-aligned pivot empties
-    parts["pivot_a"] = wrap_shoulder_pivot(parts.get("shoulder_a"))
-    parts["pivot_b"] = wrap_shoulder_pivot(parts.get("shoulder_b"))
+    parts["pivot_a"] = wrap_shoulder_pivot(parts.get("shoulder_a"), root)
+    parts["pivot_b"] = wrap_shoulder_pivot(parts.get("shoulder_b"), root)
 
 
 # ── Animation keyframes ──────────────────────────────────────────────────────
@@ -314,9 +325,9 @@ def render_one(key):
     add_lights()
     add_shadow_catcher()
 
-    new_objs = import_zeel()
+    new_objs, root = import_zeel()
     parts = get_zeel_parts()
-    attach_tv_bracket_to_arm(parts)
+    attach_tv_bracket_to_arm(parts, root)
 
     if key == "tilting":
         keyframe_tilt(parts)
