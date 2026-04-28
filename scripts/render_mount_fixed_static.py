@@ -117,6 +117,14 @@ def import_and_frame():
     before = set(bpy.context.scene.objects)
     bpy.ops.import_scene.gltf(filepath=GLB)
     new_objs = [o for o in bpy.context.scene.objects if o not in before]
+
+    # Object_8 is the horizontal arm assembly — for a TRUE fixed mount we
+    # want only the wall plate + vertical hook rails, no articulating arms.
+    obj8 = bpy.data.objects.get("Object_8")
+    if obj8:
+        bpy.data.objects.remove(obj8, do_unlink=True)
+        new_objs = [o for o in new_objs if o is not obj8]
+
     mat = black_metal_mat()
     for o in new_objs:
         if o.type == 'MESH':
@@ -157,7 +165,7 @@ def main():
     reset()
     setup_render(out_png)
     setup_world()
-    add_camera(fov_deg=55, cam_pos=(3.20, -2.00, 1.40))
+    add_camera(fov_deg=48, cam_pos=(2.80, -1.75, 1.30), look_at=(0.30, 0, 1.00))
     add_lights()
     add_shadow_catcher()
     import_and_frame()

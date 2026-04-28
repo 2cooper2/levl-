@@ -605,10 +605,17 @@ def keyframe_tilt(parts):
     at the TOP of the rails (where they hook onto the VESA plate).
     Simulates a TV being tilted on a hooked mount."""
     main_ctrl = parts.get("tv_root")
-    rails  = [bpy.data.objects.get(n) for n in ("Rectangle203", "Rectangle208")]
+    rails = [bpy.data.objects.get(n) for n in ("Rectangle203", "Rectangle208")]
     movers = [o for o in rails if o]
     if not (movers and main_ctrl):
         return
+
+    # Shift rails forward (toward camera) so they sit fully in front of the
+    # VESA plate (no Y overlap = no clipping). At -0.22 the rails' max Y is
+    # just past the plate's near face.
+    for o in movers:
+        o.location.y -= 0.22
+    bpy.context.view_layer.update()
 
     bpy.context.view_layer.update()
     top_z = float('-inf'); xs = []; ys = []
@@ -725,17 +732,16 @@ def render_one(key):
     if wall_plate:
         wall_plate.location.y -= 0.21
 
-    # Build clean parametric kinematic chain (replaces FBX-based pivots).
-    # Pivots placed at correct geometric joint positions; bars connect
-    # pivot-to-pivot; visible knuckles at every joint.
-    clean_pivots = build_clean_mount(root)
+    # Build clean parametric kinematic chain (replaces FBX-based pivots) —
+    # only needed for the full-motion render. Tilting uses just the rails.
+    clean_pivots = build_clean_mount(root) if key == "fullmotion" else None
 
-    # Hide ALL FBX hinge cylinders — clean chain handles all visible geometry.
-    for nm in ("Cylinder040", "Cylinder045", "Cylinder042", "Cylinder043"):
-        cyl = bpy.data.objects.get(nm)
-        if cyl:
-            cyl.hide_viewport = True
-            cyl.hide_render = True
+    if key == "fullmotion":
+        for nm in ("Cylinder040", "Cylinder045", "Cylinder042", "Cylinder043"):
+            cyl = bpy.data.objects.get(nm)
+            if cyl:
+                cyl.hide_viewport = True
+                cyl.hide_render = True
 
     if key == "tilting":
         # Tilting mount: DELETE wall plate, all horizontal hinge cylinders,
@@ -748,7 +754,8 @@ def render_one(key):
                 main_ctrl.constraints.remove(c)
         for nm in ("Rectangle200", "Cylinder040", "Cylinder045",
                    "Cylinder042", "Cylinder043", "Dummy001", "Dummy002",
-                   "Pivot_Cylinder042", "Pivot_Cylinder043"):
+                   "Pivot_Cylinder042", "Pivot_Cylinder043",
+                   "Arc014", "Arc020"):
             o = bpy.data.objects.get(nm)
             if o: bpy.data.objects.remove(o, do_unlink=True)
         keyframe_tilt(parts)
