@@ -206,11 +206,43 @@ def get_zeel_parts():
     }
 
 
+def wrap_shoulder_pivot(shoulder):
+    """Wrap a shoulder cylinder in a WORLD-AXIS-ALIGNED empty at the same
+    world location, so rotating the empty's Z is a clean vertical swivel
+    around the wall pivot regardless of the FBX's local axis orientation.
+    Returns the empty (the new pivot to keyframe)."""
+    if shoulder is None: return None
+    bpy.context.view_layer.update()
+    # Compute the world-X = wall-side end of the shoulder cylinder (its
+    # geometric back face), so rotation pivots there, not the cylinder center.
+    mins = [float('inf')] * 3; maxs = [float('-inf')] * 3
+    for c in shoulder.bound_box:
+        w = shoulder.matrix_world @ Vector(c)
+        for i in range(3):
+            mins[i] = min(mins[i], w[i]); maxs[i] = max(maxs[i], w[i])
+    pivot_loc = (
+        (mins[0] + maxs[0]) / 2,
+        maxs[1],   # WALL-SIDE end (max world Y for this asset)
+        (mins[2] + maxs[2]) / 2,
+    )
+    bpy.ops.object.empty_add(type='PLAIN_AXES', location=pivot_loc, radius=0.05)
+    pivot = bpy.context.object
+    pivot.name = f"Pivot_{shoulder.name}"
+    # Hard-parent the shoulder under the empty; preserve world position
+    old_world = shoulder.matrix_world.copy()
+    shoulder.parent = pivot
+    shoulder.matrix_parent_inverse = pivot.matrix_world.inverted()
+    shoulder.matrix_world = old_world
+    return pivot
+
+
 def attach_tv_bracket_to_arm(parts):
     """Hard-parent the TV-side bracket (Main_controller + its children —
     VESA plate, vertical rails, tilt arms) to the arm endpoint (Dummy002)
     so the WHOLE TV assembly moves rigidly with the swinging arm. Wall
-    plate (Rectangle200) stays unparented = fixed."""
+    plate (Rectangle200) stays unparented = fixed.
+    Also wraps both shoulders in world-axis pivot empties and stores them
+    on `parts` so the keyframer can drive them directly around world Z."""
     tv_root = parts["tv_root"]
     arm_a_end = parts["arm_a_end"]
     if not (tv_root and arm_a_end):
@@ -220,6 +252,9 @@ def attach_tv_bracket_to_arm(parts):
     tv_root.parent = arm_a_end
     tv_root.matrix_parent_inverse = arm_a_end.matrix_world.inverted()
     tv_root.matrix_world = old_world
+    # Wrap shoulders in world-aligned pivot empties
+    parts["pivot_a"] = wrap_shoulder_pivot(parts.get("shoulder_a"))
+    parts["pivot_b"] = wrap_shoulder_pivot(parts.get("shoulder_b"))
 
 
 # ── Animation keyframes ──────────────────────────────────────────────────────
@@ -246,23 +281,22 @@ def keyframe_tilt(parts):
 
 
 def keyframe_swivel(parts):
-    """Full-motion swivel: animate the two SHOULDER cylinders (Cylinder043 +
-    Cylinder042) rotating IDENTICALLY around vertical Z. Their parented
-    arms (Cylinder040/045 with Dummy endpoints) follow rigidly, and the
-    Copy Location constraint on Main_controller tracks Dummy002, so the
-    TV bracket swings with the arms — wall plate stays fixed."""
-    sa = parts["shoulder_a"]
-    sb = parts["shoulder_b"]
-    if not (sa and sb):
+    """Full-motion swivel: rotate the world-axis pivot empties wrapping the
+    two shoulders. Both rotate identically (parallelogram). Arms (children)
+    swing with them; TV bracket parented to Dummy002 follows the arm
+    endpoint. Wall plate stays unparented = fixed."""
+    pa = parts.get("pivot_a")
+    pb = parts.get("pivot_b")
+    if not (pa and pb):
         return
     amp = math.radians(40)
     for f in range(1, FRAMES + 1):
         t = (f - 1) / FRAMES
         angle = math.sin(t * 2 * math.pi) * amp
         bpy.context.scene.frame_set(f)
-        for s in (sa, sb):
-            s.rotation_euler[2] = angle
-            s.keyframe_insert("rotation_euler", index=2, frame=f)
+        for piv in (pa, pb):
+            piv.rotation_euler[2] = angle
+            piv.keyframe_insert("rotation_euler", index=2, frame=f)
 
 
 # ── Driver ───────────────────────────────────────────────────────────────────
