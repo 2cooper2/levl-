@@ -600,25 +600,46 @@ def add_arm_bars():
 
 # ── Animation keyframes ──────────────────────────────────────────────────────
 def keyframe_tilt(parts):
-    """Tilt: rotate Rectangle201 (the VESA plate with tilt arms attached)
-    ±15° around X axis. Arms + wall plate stay fixed, only the TV plate
-    pitches forward/back. This needs the Main_controller hard-parenting
-    UNDONE first (it would lock everything together), so unparent before
-    keyframing."""
-    tv_root = parts["tv_root"]
-    if tv_root and tv_root.parent is not None:
-        old_world = tv_root.matrix_world.copy()
-        tv_root.parent = None
-        tv_root.matrix_world = old_world
-    rect201 = bpy.data.objects.get("Rectangle201")
-    target = rect201 or tv_root
-    if not target: return
+    """Tilt motion: VESA front plate stays still. The vertical TV-side
+    rails (Rectangle203, 208) + hooks (Arc014, 020) tilt around an X axis
+    at the TOP of the rails (where they hook onto the VESA plate).
+    Simulates a TV being tilted on a hooked mount."""
+    main_ctrl = parts.get("tv_root")
+    rails  = [bpy.data.objects.get(n) for n in ("Rectangle203", "Rectangle208")]
+    hooks  = [bpy.data.objects.get(n) for n in ("Arc014", "Arc020")]
+    movers = [o for o in (rails + hooks) if o]
+    if not (movers and main_ctrl):
+        return
+
+    bpy.context.view_layer.update()
+    top_z = float('-inf'); xs = []; ys = []
+    for r in rails:
+        if r is None: continue
+        for c in r.bound_box:
+            w = r.matrix_world @ Vector(c)
+            top_z = max(top_z, w.z)
+        xs.append(r.matrix_world.translation.x)
+        ys.append(r.matrix_world.translation.y)
+    pivot_loc = Vector((sum(xs)/len(xs), sum(ys)/len(ys), top_z))
+
+    bpy.ops.object.empty_add(type='PLAIN_AXES', location=pivot_loc)
+    tilt = bpy.context.object; tilt.name = "TiltPivot"
+    old = tilt.matrix_world.copy()
+    tilt.parent = main_ctrl
+    tilt.matrix_parent_inverse = main_ctrl.matrix_world.inverted()
+    tilt.matrix_world = old
+    for o in movers:
+        old = o.matrix_world.copy()
+        o.parent = tilt
+        o.matrix_parent_inverse = tilt.matrix_world.inverted()
+        o.matrix_world = old
+
     amp = math.radians(15)
     for f in range(1, FRAMES + 1):
         t = (f - 1) / FRAMES
         bpy.context.scene.frame_set(f)
-        target.rotation_euler[0] = math.sin(t * 2 * math.pi) * amp
-        target.keyframe_insert("rotation_euler", index=0, frame=f)
+        tilt.rotation_euler[0] = math.sin(t * 2 * math.pi) * amp
+        tilt.keyframe_insert("rotation_euler", index=0, frame=f)
 
 
 def keyframe_swivel(pivots):
@@ -683,8 +704,13 @@ def render_one(key):
     reset()
     setup_render(frame_dir)
     setup_world()
-    # Full-motion mount: shift look_at left so mount renders to the right
-    look_at = (-0.30, 0, 1.00) if key == "fullmotion" else (0, 0, 1.00)
+    # Per-render camera framing
+    if key == "fullmotion":
+        look_at = (-0.30, 0, 1.00)
+    elif key == "tilting":
+        look_at = (0.009, -0.671, 1.22)   # center on front plate
+    else:
+        look_at = (0, 0, 1.00)
     add_camera(fov_deg=55, cam_pos=(3.20, -2.00, 1.40), look_at=look_at)
     add_lights()
     add_shadow_catcher()
@@ -713,9 +739,12 @@ def render_one(key):
             cyl.hide_render = True
 
     if key == "tilting":
-        # Tilting mount: hide wall plate, show only the front plate doing X-tilt
-        wp = bpy.data.objects.get("Rectangle200")
-        if wp: wp.hide_viewport = True; wp.hide_render = True
+        # Tilting mount: hide wall plate AND all horizontal hinge cylinders.
+        # Only the static VESA front plate + tilting rails remain visible.
+        for nm in ("Rectangle200", "Cylinder040", "Cylinder045",
+                   "Cylinder042", "Cylinder043"):
+            o = bpy.data.objects.get(nm)
+            if o: o.hide_viewport = True; o.hide_render = True
         keyframe_tilt(parts)
     elif key == "fullmotion":
         keyframe_swivel(clean_pivots)
