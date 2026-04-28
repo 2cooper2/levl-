@@ -88,7 +88,7 @@ def setup_world():
     nt.links.new(bg.outputs['Background'], out.inputs['Surface'])
 
 
-def add_camera(fov_deg=65, cam_pos=(1.80, -3.20, 1.20), look_at=(0, 0, 1.00)):
+def add_camera(fov_deg=55, cam_pos=(1.80, -3.20, 1.20), look_at=(0, 0, 1.00)):
     cd = bpy.data.cameras.new('Camera')
     cd.lens_unit = 'FOV'; cd.angle = math.radians(fov_deg)
     cd.clip_start = 0.01; cd.clip_end = 50.0
@@ -424,7 +424,7 @@ def keyframe_articulate(parts, root):
                  + arm_b_end.matrix_world.translation) / 2
     rest_main = tv_root.location.copy()
 
-    AMP = math.radians(38)
+    AMP = math.radians(75)
     try:
         bpy.context.preferences.edit.keyframe_new_interpolation_type = 'BEZIER'
     except Exception:
@@ -456,7 +456,7 @@ def render_one(key):
     reset()
     setup_render(frame_dir)
     setup_world()
-    add_camera(fov_deg=65)
+    add_camera(fov_deg=55)
     add_lights()
     add_shadow_catcher()
 
