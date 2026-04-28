@@ -241,7 +241,9 @@ def import_zeel():
     # Root.location chosen so the model's bbox center lands at world (0,0,*)
     # and bottom at z=0.
     root.scale = (sc, sc, sc)
-    root.location = (-sc * cx, -sc * cy, -sc * cz_min)
+    # +0.6 in Z so the mount sits up off the floor at typical wall-mount
+    # height (TV mounts aren't installed at floor level on the actual wall).
+    root.location = (-sc * cx, -sc * cy, -sc * cz_min + 0.6)
     bpy.context.view_layer.update()
 
     return new_objs, root
@@ -403,7 +405,7 @@ def render_one(key):
         # baseline, so we shift BEFORE keyframing takes effect by tweaking
         # its location in its local frame. With root.scale ≈ 0.9, a -0.10
         # translation in tv_root's local Y maps to ~-0.09 world Y.
-        tv_root.location.y -= 0.25
+        tv_root.location.y -= 0.15
 
     if key == "tilting":
         keyframe_tilt(parts)
