@@ -359,12 +359,10 @@ def keyframe_tilt(parts):
 
 
 def keyframe_swivel(parts):
-    """Full-motion swivel: rotate the two shoulder pivots. The Zeel FBX has
-    arm A pointing -X and arm B pointing +X (mirrored), so they must
-    rotate by OPPOSITE angles to maintain the parallelogram linkage.
-    Otherwise the bottom arm gaps off the front plate while the top arm
-    stays attached. TV bracket parented to Dummy002 follows the arm A
-    endpoint; wall plate stays unparented = fixed."""
+    """Full-motion swivel: rotate the world-axis pivot empties wrapping the
+    two shoulders. Both rotate identically (parallelogram). Arms (children)
+    swing with them; TV bracket parented to Dummy002 follows the arm
+    endpoint. Wall plate stays unparented = fixed."""
     pa = parts.get("pivot_a")
     pb = parts.get("pivot_b")
     if not (pa and pb):
@@ -374,12 +372,9 @@ def keyframe_swivel(parts):
         t = (f - 1) / FRAMES
         angle = math.sin(t * 2 * math.pi) * amp
         bpy.context.scene.frame_set(f)
-        # arm A points -X → rotate +angle
-        pa.rotation_euler[2] = angle
-        pa.keyframe_insert("rotation_euler", index=2, frame=f)
-        # arm B points +X → rotate -angle (mirror) so both arms stay parallel
-        pb.rotation_euler[2] = -angle
-        pb.keyframe_insert("rotation_euler", index=2, frame=f)
+        for piv in (pa, pb):
+            piv.rotation_euler[2] = angle
+            piv.keyframe_insert("rotation_euler", index=2, frame=f)
 
 
 # ── Driver ───────────────────────────────────────────────────────────────────
