@@ -183,73 +183,85 @@ def import_zeel():
     return new_objs
 
 
-# ── Identify articulating parts by spatial position ──────────────────────────
-def classify_parts(new_objs):
-    """Find the wall-side parts vs the TV-side / arm parts by their X-position
-    after import. Returns (wall_parts, arm_parts) lists of TOP-LEVEL objects."""
-    bpy.context.view_layer.update()
-    tops = [o for o in new_objs if o.parent is None]
-    def center_x(o):
-        if o.type != 'MESH':
-            xs = []
-            for c in o.children_recursive:
-                if c.type == 'MESH':
-                    for cc in c.bound_box:
-                        xs.append((c.matrix_world @ Vector(cc)).x)
-            return sum(xs) / len(xs) if xs else 0
-        xs = [(o.matrix_world @ Vector(c)).x for c in o.bound_box]
-        return sum(xs) / len(xs)
-    tops_sorted = sorted(tops, key=center_x)
-    if not tops_sorted: return [], []
-    n = len(tops_sorted)
-    cut = max(1, n // 3)
-    wall_parts = tops_sorted[:cut]
-    arm_parts  = tops_sorted[cut:]
-    return wall_parts, arm_parts
+def get_zeel_parts():
+    """Look up the named parts of the Zeel mount FBX after import.
+    The model uses these named parts:
+      Rectangle200       — wall plate (FIXED)
+      Cylinder043/040    — arm chain A (Dummy002 = TV-end)
+      Cylinder042/045    — arm chain B (Dummy001 = TV-end)
+      Main_controller    — group root for the TV-side bracket
+        ├─ Rectangle201  (VESA back plate)
+        ├─ Rectangle203  (left TV-side rail)
+        ├─ Rectangle208  (right TV-side rail)
+        └─ Arc014/020    (tilt arms)
+    Returns dict with the key handles."""
+    g = bpy.data.objects.get
+    return {
+        "wall_plate":   g("Rectangle200"),
+        "shoulder_a":   g("Cylinder043"),
+        "shoulder_b":   g("Cylinder042"),
+        "arm_a_end":    g("Dummy002"),
+        "arm_b_end":    g("Dummy001"),
+        "tv_root":      g("Main_controller"),
+    }
 
 
-def add_arm_pivot(arm_parts):
-    """Re-parent the arm parts under a new empty pivot positioned at the
-    wall-side edge of the arm group. The pivot's rotation is what we keyframe."""
-    bpy.context.view_layer.update()
-    mins = [float('inf')] * 3; maxs = [float('-inf')] * 3
-    for o in arm_parts:
-        for c in o.bound_box:
-            w = o.matrix_world @ Vector(c)
-            for i in range(3):
-                mins[i] = min(mins[i], w[i]); maxs[i] = max(maxs[i], w[i])
-    pivot_loc = (mins[0], (mins[1] + maxs[1]) / 2, (mins[2] + maxs[2]) / 2)
-    bpy.ops.object.empty_add(type='PLAIN_AXES', location=pivot_loc)
-    pivot = bpy.context.object
-    pivot.name = "ArmPivot"
-    # Re-parent without changing world position
-    for o in arm_parts:
-        old_world = o.matrix_world.copy()
-        o.parent = pivot
-        o.matrix_parent_inverse = pivot.matrix_world.inverted()
-        o.matrix_world = old_world
-    return pivot
+def attach_tv_bracket_to_arm(parts):
+    """The TV-side bracket (Main_controller + its children) is NOT parented
+    to the arm chain in the FBX (3ds Max used IK constraints). Add a Copy
+    Location constraint so Main_controller's translation tracks the arm
+    endpoint (Dummy002) — when the shoulder rotates, the arm swings and
+    the TV bracket follows. Rotation isn't copied, so the bracket stays
+    visually flat (parallelogram-style behavior)."""
+    tv_root = parts["tv_root"]
+    arm_a_end = parts["arm_a_end"]
+    if not (tv_root and arm_a_end):
+        return
+    con = tv_root.constraints.new('COPY_LOCATION')
+    con.target = arm_a_end
+    con.use_x = True; con.use_y = True; con.use_z = True
+    con.use_offset = True   # keep tv_root's current offset from the endpoint
 
 
 # ── Animation keyframes ──────────────────────────────────────────────────────
-def keyframe_tilt(pivot):
-    """Tilt the entire arm assembly forward/back ±15° around X axis."""
+def keyframe_tilt(parts):
+    """Tilt: rotate the TV-side rails (Arc014/Arc020 are the tilt arms,
+    parented to Rectangle201). Easiest path — animate Rectangle201 rotation
+    around its X axis, ±15°, and disable the tv_root copy-loc constraint
+    since the wall-side arms don't move."""
+    tv_root = parts["tv_root"]
+    if tv_root and tv_root.constraints:
+        for c in list(tv_root.constraints):
+            tv_root.constraints.remove(c)
+    rect201 = bpy.data.objects.get("Rectangle201")
+    target = rect201 or tv_root
+    if not target: return
     amp = math.radians(15)
     for f in range(1, FRAMES + 1):
         t = (f - 1) / FRAMES
         bpy.context.scene.frame_set(f)
-        pivot.rotation_euler[0] = math.sin(t * 2 * math.pi) * amp
-        pivot.keyframe_insert("rotation_euler", index=0, frame=f)
+        target.rotation_euler[0] = math.sin(t * 2 * math.pi) * amp
+        target.keyframe_insert("rotation_euler", index=0, frame=f)
 
 
-def keyframe_swivel(pivot):
-    """Swing the entire arm assembly side-to-side ±35° around vertical Z."""
-    amp = math.radians(35)
+def keyframe_swivel(parts):
+    """Full-motion swivel: animate the two SHOULDER cylinders (Cylinder043 +
+    Cylinder042) rotating IDENTICALLY around vertical Z. Their parented
+    arms (Cylinder040/045 with Dummy endpoints) follow rigidly, and the
+    Copy Location constraint on Main_controller tracks Dummy002, so the
+    TV bracket swings with the arms — wall plate stays fixed."""
+    sa = parts["shoulder_a"]
+    sb = parts["shoulder_b"]
+    if not (sa and sb):
+        return
+    amp = math.radians(40)
     for f in range(1, FRAMES + 1):
         t = (f - 1) / FRAMES
+        angle = math.sin(t * 2 * math.pi) * amp
         bpy.context.scene.frame_set(f)
-        pivot.rotation_euler[2] = math.sin(t * 2 * math.pi) * amp
-        pivot.keyframe_insert("rotation_euler", index=2, frame=f)
+        for s in (sa, sb):
+            s.rotation_euler[2] = angle
+            s.keyframe_insert("rotation_euler", index=2, frame=f)
 
 
 # ── Driver ───────────────────────────────────────────────────────────────────
@@ -268,13 +280,13 @@ def render_one(key):
     add_shadow_catcher()
 
     new_objs = import_zeel()
-    wall_parts, arm_parts = classify_parts(new_objs)
-    pivot = add_arm_pivot(arm_parts)
+    parts = get_zeel_parts()
+    attach_tv_bracket_to_arm(parts)
 
     if key == "tilting":
-        keyframe_tilt(pivot)
+        keyframe_tilt(parts)
     elif key == "fullmotion":
-        keyframe_swivel(pivot)
+        keyframe_swivel(parts)
 
     bpy.ops.render.render(animation=True)
 
