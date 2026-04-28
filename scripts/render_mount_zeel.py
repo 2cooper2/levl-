@@ -258,15 +258,21 @@ def attach_tv_bracket_to_arm(parts, root):
     arm_a_end = parts["arm_a_end"]
     if not (tv_root and arm_a_end):
         return
-    # Use Copy Location (not hard-parent) so the TV bracket TRANSLATES with
-    # the arm endpoint but DOESN'T inherit its rotation — mimics the
-    # parallelogram linkage of a real full-motion mount, keeping the front
-    # plate visually upright instead of tumbling.
+    # Use a Child Of constraint with location-only enabled. This makes the
+    # TV bracket TRANSLATE with the arm endpoint while preserving the
+    # original relative position offset (without inheriting rotation) —
+    # mimics the parallelogram linkage of a real full-motion mount.
     for c in list(tv_root.constraints):
         tv_root.constraints.remove(c)
-    con = tv_root.constraints.new('COPY_LOCATION')
+    con = tv_root.constraints.new('CHILD_OF')
     con.target = arm_a_end
-    con.use_offset = True
+    # Track only translation; preserve original world transform on rotation/scale
+    con.use_location_x = True; con.use_location_y = True; con.use_location_z = True
+    con.use_rotation_x = False; con.use_rotation_y = False; con.use_rotation_z = False
+    con.use_scale_x = False; con.use_scale_y = False; con.use_scale_z = False
+    # Set inverse so tv_root maintains its current world position relative
+    # to arm_a_end's current world position.
+    con.inverse_matrix = arm_a_end.matrix_world.inverted()
     # Wrap shoulders in world-aligned pivot empties
     parts["pivot_a"] = wrap_shoulder_pivot(parts.get("shoulder_a"), root)
     parts["pivot_b"] = wrap_shoulder_pivot(parts.get("shoulder_b"), root)
