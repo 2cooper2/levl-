@@ -335,6 +335,50 @@ def attach_tv_bracket_to_arm(parts, root):
     parts["pivot_b"] = wrap_shoulder_pivot(parts.get("shoulder_b"), root)
 
 
+# ── Arm bars (Zeel FBX is missing the visible arm geometry between hinges) ──
+def add_arm_bars():
+    """The Zeel FBX has only short cylinder hinge stubs at each end of each
+    arm — no visible long bar geometry between them. Spawn one rectangular
+    bar per arm, positioned between the wall hinge and front hinge, parented
+    to the wall hinge so it inherits the rotation chain. Two arms total."""
+    bar_mat = bpy.data.materials.get("BlackMetal")
+    pairs = [
+        ("Cylinder042", "Cylinder045"),  # right side: wall hinge → front hinge
+        ("Cylinder043", "Cylinder040"),  # left side
+    ]
+    bpy.context.view_layer.update()
+    bars = []
+    for wall_name, front_name in pairs:
+        wall = bpy.data.objects.get(wall_name)
+        front = bpy.data.objects.get(front_name)
+        if not (wall and front): continue
+        wall_c  = wall.matrix_world.translation.copy()
+        front_c = front.matrix_world.translation.copy()
+        midpoint  = (wall_c + front_c) / 2
+        direction = front_c - wall_c
+        length = direction.length
+        if length < 0.01: continue
+        bpy.ops.mesh.primitive_cube_add(size=1.0, location=midpoint)
+        bar = bpy.context.object
+        bar.name = f"ArmBar_{wall_name}"
+        up = mathutils.Vector((0.0, 1.0, 0.0))
+        bar.rotation_euler = up.rotation_difference(direction.normalized()).to_euler()
+        bar.scale = (0.022, length / 2.0 * 0.95, 0.030)
+        bpy.context.view_layer.update()
+        bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
+        bev = bar.modifiers.new("Bevel", 'BEVEL')
+        bev.width = 0.004; bev.segments = 2
+        if bar_mat:
+            bar.data.materials.clear()
+            bar.data.materials.append(bar_mat)
+        old_world = bar.matrix_world.copy()
+        bar.parent = wall
+        bar.matrix_parent_inverse = wall.matrix_world.inverted()
+        bar.matrix_world = old_world
+        bars.append(bar)
+    return bars
+
+
 # ── Animation keyframes ──────────────────────────────────────────────────────
 def keyframe_tilt(parts):
     """Tilt: rotate Rectangle201 (the VESA plate with tilt arms attached)
@@ -358,23 +402,47 @@ def keyframe_tilt(parts):
         target.keyframe_insert("rotation_euler", index=0, frame=f)
 
 
-def keyframe_swivel(parts):
-    """Full-motion swivel: rotate both shoulder pivots by the SAME angle
-    so the arms swing together. The FBX arms aren't a true parallelogram
-    (mirrored vectors), so endpoints diverge slightly at large angles —
-    keep amplitude small (15°) to minimize visible divergence."""
-    pa = parts.get("pivot_a")
-    pb = parts.get("pivot_b")
-    if not (pa and pb):
+def keyframe_articulate(parts, root):
+    """Full-motion product demo: arms swing through their full articulation
+    range to show the mount coming off the wall and swiveling. Both wall
+    pivots rotate by the SAME angle (parallelogram-style), and Main_controller
+    is keyframed each frame to the MIDPOINT of both arm tips so the front
+    plate stays attached to BOTH arms — no diverging, no detached arms."""
+    parts["pivot_a"] = wrap_shoulder_pivot(parts.get("shoulder_a"), root)
+    parts["pivot_b"] = wrap_shoulder_pivot(parts.get("shoulder_b"), root)
+    pa = parts["pivot_a"]; pb = parts["pivot_b"]
+    tv_root   = parts.get("tv_root")
+    arm_a_end = parts.get("arm_a_end")
+    arm_b_end = parts.get("arm_b_end")
+    if not (pa and pb and tv_root and arm_a_end and arm_b_end):
         return
-    amp = math.radians(15)
+    for c in list(tv_root.constraints):
+        tv_root.constraints.remove(c)
+
+    bpy.context.view_layer.update()
+    rest_mid  = (arm_a_end.matrix_world.translation
+                 + arm_b_end.matrix_world.translation) / 2
+    rest_main = tv_root.location.copy()
+
+    AMP = math.radians(75)
+    try:
+        bpy.context.preferences.edit.keyframe_new_interpolation_type = 'BEZIER'
+    except Exception:
+        pass
+
     for f in range(1, FRAMES + 1):
         t = (f - 1) / FRAMES
-        angle = math.sin(t * 2 * math.pi) * amp
+        angle = math.sin(t * 2 * math.pi) * AMP
         bpy.context.scene.frame_set(f)
         for piv in (pa, pb):
             piv.rotation_euler[2] = angle
             piv.keyframe_insert("rotation_euler", index=2, frame=f)
+        bpy.context.view_layer.update()
+        cur_mid = (arm_a_end.matrix_world.translation
+                   + arm_b_end.matrix_world.translation) / 2
+        delta = cur_mid - rest_mid
+        tv_root.location = rest_main + delta
+        tv_root.keyframe_insert("location", frame=f)
 
 
 # ── Driver ───────────────────────────────────────────────────────────────────
@@ -394,28 +462,12 @@ def render_one(key):
 
     new_objs, root = import_zeel()
     parts = get_zeel_parts()
-    attach_tv_bracket_to_arm(parts, root)
-    # Restore the front-plate forward shift (position user liked)
-    tv_root = parts.get("tv_root")
-    if tv_root:
-        tv_root.location.y -= 0.15
-
-    # Hide the wall shoulders (Cylinder043, 042) — they're internal
-    # mechanism cylinders that extend THROUGH the wall plate from the back
-    # to the front in this FBX. Hiding them removes the clip-through
-    # without altering any other geometry. Arms still attach to wall plate
-    # via Cylinder040/045 (which are children of these shoulders so they
-    # still inherit their pivot rotation).
-    for nm in ("Cylinder043", "Cylinder042"):
-        cyl = bpy.data.objects.get(nm)
-        if cyl:
-            cyl.hide_viewport = True
-            cyl.hide_render = True
+    add_arm_bars()
 
     if key == "tilting":
         keyframe_tilt(parts)
     elif key == "fullmotion":
-        keyframe_swivel(parts)
+        keyframe_articulate(parts, root)
 
     bpy.ops.render.render(animation=True)
 
