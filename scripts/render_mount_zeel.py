@@ -82,8 +82,8 @@ def setup_world():
     nt = world.node_tree
     for n in list(nt.nodes): nt.nodes.remove(n)
     bg = nt.nodes.new('ShaderNodeBackground')
-    bg.inputs['Color'].default_value = (0.94, 0.91, 1.00, 1.0)
-    bg.inputs['Strength'].default_value = 0.85
+    bg.inputs['Color'].default_value = (0.85, 0.80, 0.95, 1.0)
+    bg.inputs['Strength'].default_value = 0.35
     out = nt.nodes.new('ShaderNodeOutputWorld')
     nt.links.new(bg.outputs['Background'], out.inputs['Surface'])
 

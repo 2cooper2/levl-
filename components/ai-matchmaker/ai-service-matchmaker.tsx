@@ -1434,7 +1434,7 @@ const MessageItem = memo(
                 >
                   <div className="w-full aspect-[8/13] relative overflow-hidden">
                     {isMountTypeRender(option) ? (
-                      <div className="w-full h-full relative" style={{ background: 'linear-gradient(180deg, #1e1530 0%, #2d2050 45%, #3a2d5c 100%)' }}>
+                      <div className="w-full h-full relative" style={{ background: 'linear-gradient(180deg, #e8ddf2 0%, #d0bfe8 45%, #b9a3dc 100%)' }}>
                         {MOUNT_TYPE_VIDEOS[option] ? (
                           <video
                             src={MOUNT_TYPE_VIDEOS[option]}
