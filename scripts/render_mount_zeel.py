@@ -133,6 +133,60 @@ def black_metal_mat():
 
 
 # ── Import + setup ──────────────────────────────────────────────────────────
+def import_and_attach_tv(parts):
+    """Import the existing sketchfab_tv.glb, scale + position it in front of
+    the VESA bracket (Rectangle201), and parent it to Main_controller so it
+    follows the bracket's motion. The TV's body hides the bolt-through
+    cylinder geometry behind the front plate (which is intentional design
+    detail in the Zeel FBX, not a rendering bug)."""
+    tv_glb = os.path.join(MODELS, "sketchfab_tv.glb")
+    if not os.path.exists(tv_glb):
+        print("[skip] no sketchfab_tv.glb — bolt-through will be visible")
+        return
+    before = set(bpy.context.scene.objects)
+    bpy.ops.import_scene.gltf(filepath=tv_glb)
+    tv_objs = [o for o in bpy.context.scene.objects if o not in before and o.type == 'MESH']
+    if not tv_objs:
+        return
+    # Compute TV bbox + scale to ~1.4m (TV ≈ 65" diagonal)
+    mins = [float('inf')] * 3; maxs = [float('-inf')] * 3
+    for o in tv_objs:
+        for c in o.bound_box:
+            w = o.matrix_world @ Vector(c)
+            for i in range(3):
+                mins[i] = min(mins[i], w[i]); maxs[i] = max(maxs[i], w[i])
+    biggest = max(maxs[i] - mins[i] for i in range(3))
+    sc = 1.4 / max(biggest, 0.001)
+    cx = (mins[0]+maxs[0])/2; cy = (mins[1]+maxs[1])/2; cz = (mins[2]+maxs[2])/2
+    # Wrap TV under an empty placed in front of the VESA bracket
+    rect201 = bpy.data.objects.get("Rectangle201")
+    tv_root = parts.get("tv_root")
+    if not (rect201 and tv_root): return
+    # World position of the front-face of the VESA plate (lowest Y of rect201)
+    r_mins = [float('inf')] * 3; r_maxs = [float('-inf')] * 3
+    for c in rect201.bound_box:
+        w = rect201.matrix_world @ Vector(c)
+        for i in range(3):
+            r_mins[i] = min(r_mins[i], w[i]); r_maxs[i] = max(r_maxs[i], w[i])
+    target_pos = (
+        (r_mins[0] + r_maxs[0]) / 2,
+        r_mins[1] - 0.05,   # 5cm in front of VESA plate
+        (r_mins[2] + r_maxs[2]) / 2,
+    )
+    # Position TV objects: scale and translate to target_pos
+    M = mathutils.Matrix.Translation(target_pos) @ mathutils.Matrix.Scale(sc, 4) @ mathutils.Matrix.Translation((-cx, -cy, -cz))
+    for o in tv_objs:
+        if o.parent is None:
+            o.matrix_world = M @ o.matrix_world
+    # Parent each top-level TV mesh to Main_controller so they follow its motion
+    for o in tv_objs:
+        if o.parent is None:
+            old_world = o.matrix_world.copy()
+            o.parent = tv_root
+            o.matrix_parent_inverse = tv_root.matrix_world.inverted()
+            o.matrix_world = old_world
+
+
 def import_zeel():
     """Import the Zeel mount FBX. Wrap all top-level imported objects under
     a single ROOT empty, then scale + translate ONLY the root — children's
@@ -339,6 +393,17 @@ def render_one(key):
     new_objs, root = import_zeel()
     parts = get_zeel_parts()
     attach_tv_bracket_to_arm(parts, root)
+    # Shift Main_controller forward (toward camera, -Y) so the front plate
+    # clears the arm cylinder geometry — the FBX has the front plate
+    # overlapping the cylinder back end (intentional bolt-through detail in
+    # the source model, but reads as clipping in our render).
+    tv_root = parts.get("tv_root")
+    if tv_root:
+        # The constraint preserves tv_root's CURRENT world pos as the offset
+        # baseline, so we shift BEFORE keyframing takes effect by tweaking
+        # its location in its local frame. With root.scale ≈ 0.9, a -0.10
+        # translation in tv_root's local Y maps to ~-0.09 world Y.
+        tv_root.location.y -= 0.10
 
     if key == "tilting":
         keyframe_tilt(parts)
