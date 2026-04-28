@@ -88,7 +88,7 @@ def setup_world():
     nt.links.new(bg.outputs['Background'], out.inputs['Surface'])
 
 
-def add_camera(fov_deg=55, cam_pos=(2.60, -4.50, 1.20), look_at=(0, 0, 1.00)):
+def add_camera(fov_deg=55, cam_pos=(1.80, -3.20, 1.20), look_at=(0, 0, 1.00)):
     cd = bpy.data.cameras.new('Camera')
     cd.lens_unit = 'FOV'; cd.angle = math.radians(fov_deg)
     cd.clip_start = 0.01; cd.clip_end = 50.0
@@ -207,32 +207,33 @@ def get_zeel_parts():
 
 
 def attach_tv_bracket_to_arm(parts):
-    """The TV-side bracket (Main_controller + its children) is NOT parented
-    to the arm chain in the FBX (3ds Max used IK constraints). Add a Copy
-    Location constraint so Main_controller's translation tracks the arm
-    endpoint (Dummy002) — when the shoulder rotates, the arm swings and
-    the TV bracket follows. Rotation isn't copied, so the bracket stays
-    visually flat (parallelogram-style behavior)."""
+    """Hard-parent the TV-side bracket (Main_controller + its children —
+    VESA plate, vertical rails, tilt arms) to the arm endpoint (Dummy002)
+    so the WHOLE TV assembly moves rigidly with the swinging arm. Wall
+    plate (Rectangle200) stays unparented = fixed."""
     tv_root = parts["tv_root"]
     arm_a_end = parts["arm_a_end"]
     if not (tv_root and arm_a_end):
         return
-    con = tv_root.constraints.new('COPY_LOCATION')
-    con.target = arm_a_end
-    con.use_x = True; con.use_y = True; con.use_z = True
-    con.use_offset = True   # keep tv_root's current offset from the endpoint
+    # Preserve tv_root's current world position when re-parenting
+    old_world = tv_root.matrix_world.copy()
+    tv_root.parent = arm_a_end
+    tv_root.matrix_parent_inverse = arm_a_end.matrix_world.inverted()
+    tv_root.matrix_world = old_world
 
 
 # ── Animation keyframes ──────────────────────────────────────────────────────
 def keyframe_tilt(parts):
-    """Tilt: rotate the TV-side rails (Arc014/Arc020 are the tilt arms,
-    parented to Rectangle201). Easiest path — animate Rectangle201 rotation
-    around its X axis, ±15°, and disable the tv_root copy-loc constraint
-    since the wall-side arms don't move."""
+    """Tilt: rotate Rectangle201 (the VESA plate with tilt arms attached)
+    ±15° around X axis. Arms + wall plate stay fixed, only the TV plate
+    pitches forward/back. This needs the Main_controller hard-parenting
+    UNDONE first (it would lock everything together), so unparent before
+    keyframing."""
     tv_root = parts["tv_root"]
-    if tv_root and tv_root.constraints:
-        for c in list(tv_root.constraints):
-            tv_root.constraints.remove(c)
+    if tv_root and tv_root.parent is not None:
+        old_world = tv_root.matrix_world.copy()
+        tv_root.parent = None
+        tv_root.matrix_world = old_world
     rect201 = bpy.data.objects.get("Rectangle201")
     target = rect201 or tv_root
     if not target: return
