@@ -395,24 +395,29 @@ def render_one(key):
     new_objs, root = import_zeel()
     parts = get_zeel_parts()
     attach_tv_bracket_to_arm(parts, root)
-    # Keep mount geometry as-is per the FBX. To eliminate visual clipping
-    # of the wrist cylinders through the front plate, add a Boolean
-    # Difference modifier on each cylinder that subtracts Rectangle201's
-    # volume. The cylinders look like clean bolt-through hardware that
-    # ends at the plate's back face — front plate stays solid, no
-    # phase-through.
-    rect201 = bpy.data.objects.get("Rectangle201")
-    if rect201:
-        for cyl_name in ("Cylinder040", "Cylinder045"):
-            cyl = bpy.data.objects.get(cyl_name)
-            if cyl:
-                # Remove old booleans first if any
-                for m in list(cyl.modifiers):
-                    if m.type == 'BOOLEAN':
-                        cyl.modifiers.remove(m)
-                bm = cyl.modifiers.new("PlateCarve", 'BOOLEAN')
-                bm.operation = 'DIFFERENCE'
-                bm.object = rect201
+    # Restore the front-plate forward shift (position user liked)
+    tv_root = parts.get("tv_root")
+    if tv_root:
+        tv_root.location.y -= 0.15
+
+    # Boolean-Difference EVERY cylinder against BOTH plates so any portion
+    # of any cylinder that is inside either plate gets cleanly carved away
+    # at render time. Cylinders end at the plate's back face cleanly, plates
+    # stay solid (Boolean carves the cylinder, not the plate).
+    rect200 = bpy.data.objects.get("Rectangle200")  # wall plate
+    rect201 = bpy.data.objects.get("Rectangle201")  # front plate
+    plates = [p for p in (rect200, rect201) if p]
+    for cyl_name in ("Cylinder040", "Cylinder043", "Cylinder042", "Cylinder045"):
+        cyl = bpy.data.objects.get(cyl_name)
+        if not cyl: continue
+        # Remove any old booleans
+        for m in list(cyl.modifiers):
+            if m.type == 'BOOLEAN':
+                cyl.modifiers.remove(m)
+        for i, plate in enumerate(plates):
+            bm = cyl.modifiers.new(f"Carve_{plate.name}", 'BOOLEAN')
+            bm.operation = 'DIFFERENCE'
+            bm.object = plate
 
     if key == "tilting":
         keyframe_tilt(parts)
