@@ -395,17 +395,24 @@ def render_one(key):
     new_objs, root = import_zeel()
     parts = get_zeel_parts()
     attach_tv_bracket_to_arm(parts, root)
-    # Shift Main_controller forward (toward camera, -Y) so the front plate
-    # clears the arm cylinder geometry — the FBX has the front plate
-    # overlapping the cylinder back end (intentional bolt-through detail in
-    # the source model, but reads as clipping in our render).
-    tv_root = parts.get("tv_root")
-    if tv_root:
-        # The constraint preserves tv_root's CURRENT world pos as the offset
-        # baseline, so we shift BEFORE keyframing takes effect by tweaking
-        # its location in its local frame. With root.scale ≈ 0.9, a -0.10
-        # translation in tv_root's local Y maps to ~-0.09 world Y.
-        tv_root.location.y -= 0.15
+    # Keep mount geometry as-is per the FBX. To eliminate visual clipping
+    # of the wrist cylinders through the front plate, add a Boolean
+    # Difference modifier on each cylinder that subtracts Rectangle201's
+    # volume. The cylinders look like clean bolt-through hardware that
+    # ends at the plate's back face — front plate stays solid, no
+    # phase-through.
+    rect201 = bpy.data.objects.get("Rectangle201")
+    if rect201:
+        for cyl_name in ("Cylinder040", "Cylinder045"):
+            cyl = bpy.data.objects.get(cyl_name)
+            if cyl:
+                # Remove old booleans first if any
+                for m in list(cyl.modifiers):
+                    if m.type == 'BOOLEAN':
+                        cyl.modifiers.remove(m)
+                bm = cyl.modifiers.new("PlateCarve", 'BOOLEAN')
+                bm.operation = 'DIFFERENCE'
+                bm.object = rect201
 
     if key == "tilting":
         keyframe_tilt(parts)
