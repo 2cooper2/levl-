@@ -1442,14 +1442,14 @@ const MessageItem = memo(
                             loop
                             muted
                             playsInline
-                            className="absolute inset-0 w-full h-full object-contain p-2"
+                            className="absolute inset-0 w-full h-full object-contain"
                           />
                         ) : (
                           <Image
                             src={MOUNT_TYPE_RENDERS[option]}
                             alt={option}
                             fill
-                            className="object-contain p-2"
+                            className="object-contain"
                             sizes="(max-width: 768px) 45vw, 200px"
                           />
                         )}
@@ -1461,7 +1461,7 @@ const MessageItem = memo(
                             src={MOUNT_RENDERS[option]}
                             alt={option}
                             fill
-                            className="object-contain p-3"
+                            className="object-contain"
                             sizes="(max-width: 768px) 45vw, 200px"
                           />
                         </div>
@@ -1493,7 +1493,7 @@ const MessageItem = memo(
                           src={CABLE_RENDERS[option]}
                           alt={option}
                           fill
-                          className="object-contain p-2"
+                          className="object-contain"
                           sizes="(max-width: 768px) 45vw, 200px"
                         />
                       </div>

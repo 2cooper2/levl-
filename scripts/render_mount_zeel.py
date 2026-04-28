@@ -127,8 +127,8 @@ def black_metal_mat():
     mat.use_nodes = True
     bsdf = mat.node_tree.nodes["Principled BSDF"]
     bsdf.inputs["Base Color"].default_value = (0.045, 0.045, 0.05, 1.0)
-    if "Metallic"  in bsdf.inputs: bsdf.inputs["Metallic"].default_value  = 0.6
-    if "Roughness" in bsdf.inputs: bsdf.inputs["Roughness"].default_value = 0.42
+    if "Metallic"  in bsdf.inputs: bsdf.inputs["Metallic"].default_value  = 0.65
+    if "Roughness" in bsdf.inputs: bsdf.inputs["Roughness"].default_value = 0.28
     return mat
 
 
@@ -683,7 +683,9 @@ def render_one(key):
     reset()
     setup_render(frame_dir)
     setup_world()
-    add_camera(fov_deg=55, cam_pos=(3.20, -2.00, 1.40))
+    # Full-motion mount: shift look_at left so mount renders to the right
+    look_at = (-0.30, 0, 1.00) if key == "fullmotion" else (0, 0, 1.00)
+    add_camera(fov_deg=55, cam_pos=(3.20, -2.00, 1.40), look_at=look_at)
     add_lights()
     add_shadow_catcher()
 
@@ -711,6 +713,9 @@ def render_one(key):
             cyl.hide_render = True
 
     if key == "tilting":
+        # Tilting mount: hide wall plate, show only the front plate doing X-tilt
+        wp = bpy.data.objects.get("Rectangle200")
+        if wp: wp.hide_viewport = True; wp.hide_render = True
         keyframe_tilt(parts)
     elif key == "fullmotion":
         keyframe_swivel(clean_pivots)
