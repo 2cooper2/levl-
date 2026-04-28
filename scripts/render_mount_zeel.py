@@ -359,28 +359,22 @@ def keyframe_tilt(parts):
 
 
 def keyframe_swivel(parts):
-    """Full-motion swivel with proper PARALLELOGRAM linkage. The two arms
-    in the FBX point in OPPOSITE X directions (arm A's vector at +x,
-    arm B's at -x relative to their pivots). For both arm endpoints to
-    translate together (parallelogram constraint), the pivots must rotate
-    by OPPOSITE angles. Otherwise the bottom arm gaps off the front plate
-    while the top one stays attached. TV bracket parented to Dummy002
-    follows the arm A endpoint; arm B endpoint matches it via mirrored
-    rotation. Wall plate stays unparented = fixed."""
+    """Full-motion swivel: rotate both shoulder pivots by the SAME angle
+    so the arms swing together. The FBX arms aren't a true parallelogram
+    (mirrored vectors), so endpoints diverge slightly at large angles —
+    keep amplitude small (15°) to minimize visible divergence."""
     pa = parts.get("pivot_a")
     pb = parts.get("pivot_b")
     if not (pa and pb):
         return
-    amp = math.radians(40)
+    amp = math.radians(15)
     for f in range(1, FRAMES + 1):
         t = (f - 1) / FRAMES
         angle = math.sin(t * 2 * math.pi) * amp
         bpy.context.scene.frame_set(f)
-        # Mirrored rotation = parallel arm motion (parallelogram holds)
-        pa.rotation_euler[2] = angle
-        pa.keyframe_insert("rotation_euler", index=2, frame=f)
-        pb.rotation_euler[2] = -angle
-        pb.keyframe_insert("rotation_euler", index=2, frame=f)
+        for piv in (pa, pb):
+            piv.rotation_euler[2] = angle
+            piv.keyframe_insert("rotation_euler", index=2, frame=f)
 
 
 # ── Driver ───────────────────────────────────────────────────────────────────
@@ -406,55 +400,17 @@ def render_one(key):
     if tv_root:
         tv_root.location.y -= 0.15
 
-    # Each cylinder is shortened to end flush at the back face of the
-    # closest plate, instead of extending through. We do this with bmesh
-    # vertex clipping in world space — fast, deterministic, and works on
-    # imported FBX meshes that Boolean modifiers can choke on.
-    rect200 = bpy.data.objects.get("Rectangle200")  # wall plate
-    rect201 = bpy.data.objects.get("Rectangle201")  # front plate
-
-    def back_face_y(obj):
-        """Largest world Y of obj's bbox (= back face / wall side)."""
-        bpy.context.view_layer.update()
-        return max((obj.matrix_world @ Vector(c)).y for c in obj.bound_box)
-
-    def front_face_y(obj):
-        """Smallest world Y of obj's bbox (= front face / camera side)."""
-        bpy.context.view_layer.update()
-        return min((obj.matrix_world @ Vector(c)).y for c in obj.bound_box)
-
-    def clip_mesh_above_y(obj, world_y_clip):
-        """Move all vertices of obj whose WORLD Y < world_y_clip up to
-        world_y_clip. Effectively shortens the mesh on its forward end so
-        it no longer extends past world_y_clip toward the camera.
-        Operates in object-local space by converting world_y_clip into
-        local Y via the object's inverse world matrix."""
-        bpy.context.view_layer.update()
-        inv = obj.matrix_world.inverted()
-        for v in obj.data.vertices:
-            wv = obj.matrix_world @ v.co
-            if wv.y < world_y_clip:
-                wv.y = world_y_clip
-                v.co = inv @ wv
-
-    # Wall shoulders (Cylinder043, 042): clip them so their front face is
-    # at the wall plate's back face — they're entirely hidden BEHIND
-    # Rectangle200, attached to its back surface.
-    if rect200:
-        wall_back = back_face_y(rect200)
-        for nm in ("Cylinder043", "Cylinder042"):
-            cyl = bpy.data.objects.get(nm)
-            if cyl: clip_mesh_above_y(cyl, wall_back)
-
-    # Wrist cylinders (Cylinder040, 045): clip them so their front face is
-    # at the front plate's back face — they end against Rectangle201's
-    # back surface, not poking through to the visible front side.
-    if rect201:
-        # Back face of front plate AFTER the -0.15 shift
-        front_back = back_face_y(rect201)
-        for nm in ("Cylinder040", "Cylinder045"):
-            cyl = bpy.data.objects.get(nm)
-            if cyl: clip_mesh_above_y(cyl, front_back)
+    # Hide the wall shoulders (Cylinder043, 042) — they're internal
+    # mechanism cylinders that extend THROUGH the wall plate from the back
+    # to the front in this FBX. Hiding them removes the clip-through
+    # without altering any other geometry. Arms still attach to wall plate
+    # via Cylinder040/045 (which are children of these shoulders so they
+    # still inherit their pivot rotation).
+    for nm in ("Cylinder043", "Cylinder042"):
+        cyl = bpy.data.objects.get(nm)
+        if cyl:
+            cyl.hide_viewport = True
+            cyl.hide_render = True
 
     if key == "tilting":
         keyframe_tilt(parts)
