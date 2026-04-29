@@ -71,7 +71,7 @@ def setup_world():
     nt.links.new(bg.outputs['Background'], out.inputs['Surface'])
 
 
-def add_camera(fov_deg=42, cam_pos=(2.05, -1.78, 1.10), look_at=(0, 0, 1.00)):
+def add_camera(fov_deg=42, cam_pos=(1.85, -1.74, 1.22), look_at=(0, 0, 1.22)):
     cd = bpy.data.cameras.new('Camera')
     cd.lens_unit = 'FOV'; cd.angle = math.radians(fov_deg)
     cd.clip_start = 0.01; cd.clip_end = 50.0
@@ -190,7 +190,7 @@ def import_tv_plate(mat, target_x_width=1.10):
 
 
 def build_ceiling_mount(mat):
-    plate = import_tv_plate(mat, target_x_width=1.10)
+    plate = import_tv_plate(mat, target_x_width=0.92)
     if plate is None:
         return None
 
@@ -250,8 +250,7 @@ def main():
     reset()
     setup_render(out_png)
     setup_world()
-    add_camera(fov_deg=42, cam_pos=(2.05, -1.95, 1.20),
-               look_at=(0, 0, 1.10))
+    add_camera()
     add_lights()
     add_shadow_catcher()
 
