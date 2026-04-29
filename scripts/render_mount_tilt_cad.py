@@ -234,60 +234,84 @@ def build_tilt_mount():
             (rail_x, rail_y_ctr, rail_z_ctr),
             (RAIL_W, RAIL_T, rail_h), mat)
 
-        # ── Hook at top of rail (curves backward over plate top) ──
-        hook_y_start = rail_y_ctr + RAIL_T/2
-        hook_y_end   = plate_y_max + 0.04
-        hook_y_len   = hook_y_end - hook_y_start
-        hook = make_box(f"Hook_{side}",
-            (rail_x, (hook_y_start + hook_y_end)/2,
+        # ── L-shape hook: horizontal over plate top + vertical down back side ──
+        hook_h_y_start = rail_y_ctr + RAIL_T/2
+        hook_h_y_end   = plate_y_max + 0.04
+        hook_h = make_box(f"HookH_{side}",
+            (rail_x, (hook_h_y_start + hook_h_y_end)/2,
              rail_z_top - 0.025),
-            (RAIL_W * 1.1, hook_y_len, 0.05), mat)
+            (RAIL_W * 1.10, hook_h_y_end - hook_h_y_start, 0.045), mat)
+        hook_v = make_box(f"HookV_{side}",
+            (rail_x, plate_y_max + 0.02,
+             rail_z_top - 0.025 - 0.04),     # drops down 8cm on plate's far side
+            (RAIL_W * 1.10, 0.04, 0.08), mat)
 
         # ── Pivot bolt at MID — visible knuckle bridging rail and plate ──
         bolt_y_start = rail_y_ctr + RAIL_T/2
         bolt_y_end   = plate_y_min - 0.005
-        bolt_y_len   = bolt_y_end - bolt_y_start
         bolt = make_box(f"PivotBolt_{side}",
             (rail_x, (bolt_y_start + bolt_y_end)/2, pivot_z),
-            (0.045, bolt_y_len, 0.045), mat)
-        # Bolt head visible on rail face
+            (0.045, bolt_y_end - bolt_y_start, 0.045), mat)
         bolt_head = make_cylinder(f"BoltHead_{side}",
             (rail_x, rail_y_ctr - RAIL_T/2 - 0.012, pivot_z),
             radius=0.022, depth=0.025, mat=mat, axis='Y')
 
-        # ── Pull string + tag at BOTTOM of rail ──
+        # ── String anchor (empty at rail bottom — parented to TiltPivot) ──
+        bpy.ops.object.empty_add(type='PLAIN_AXES',
+            location=(rail_x, rail_y_ctr, rail_z_bot))
+        anchor = bpy.context.object
+        anchor.name = f"StringAnchor_{side}"
+
+        # ── Pull string + tag — parented to ANCHOR, hang from rail bottom ──
         pull = make_cylinder(f"PullString_{side}",
-            (rail_x, rail_y_ctr, rail_z_bot - 0.12),
+            (rail_x, rail_y_ctr, rail_z_bot - 0.10),    # top at rail bottom (no gap)
             radius=0.0035, depth=0.20, mat=mat, axis='Z')
         tag = make_box(f"PullTag_{side}",
-            (rail_x, rail_y_ctr, rail_z_bot - 0.245),
+            (rail_x, rail_y_ctr, rail_z_bot - 0.225),
             (0.025, 0.012, 0.022), mat)
 
-        # ── TiltPivot at MID-rail (the bolt pivot axis, X-axis horizontal) ──
+        # ── TiltPivot at MID-rail ──
         bpy.ops.object.empty_add(type='PLAIN_AXES',
             location=(rail_x, plate_y_min, pivot_z))
         tilt = bpy.context.object
         tilt.name = f"TiltPivot_{side}"
 
-        for o in [rail, hook, bolt, bolt_head, pull, tag]:
+        # Rail + hooks + bolt rigidly tilt with TiltPivot
+        for o in [rail, hook_h, hook_v, bolt, bolt_head]:
             reparent(o, tilt)
+        # Anchor follows TiltPivot (so its position tracks rail bottom),
+        # but its rotation is keyframed independently for pendulum sway
+        reparent(anchor, tilt)
+        # String + tag parented to ANCHOR — they swing with anchor's rotation
+        reparent(pull, anchor)
+        reparent(tag, anchor)
 
-        pivots.append(tilt)
+        pivots.append({"tilt": tilt, "anchor": anchor})
 
     return pivots, plate
 
 
 def keyframe_tilt(pivots):
-    """Both TiltPivots rotate ±15° around X axis at MID-rail. Top of rails
-    swings back, bottom swings forward — matches real tilt-mount motion."""
-    amp = math.radians(15)
+    """TiltPivots rotate ±15° around X (top swings back, bottom swings forward).
+    String anchors get a SEPARATE keyframed rotation that lags the rail tilt
+    and uses smaller amplitude — simulates pendulum-like swing/inertia."""
+    AMP_RAIL  = math.radians(15)
+    AMP_STR   = math.radians(8)        # string sways less than rail
+    PHASE_LAG = 0.08                   # ~8% cycle lag (~12 frames)
     for f in range(1, FRAMES + 1):
         t = (f - 1) / FRAMES
         bpy.context.scene.frame_set(f)
-        angle = math.sin(t * 2 * math.pi) * amp
+        rail_angle = AMP_RAIL * math.sin(2 * math.pi * t)
+        # Desired string WORLD angle (lagged sine, smaller amplitude)
+        str_world_angle = AMP_STR * math.sin(2 * math.pi * (t - PHASE_LAG))
+        # Anchor LOCAL angle = world target − parent (TiltPivot) angle,
+        # so the anchor's resulting world rotation = string sway angle.
+        anchor_local_angle = str_world_angle - rail_angle
         for p in pivots:
-            p.rotation_euler[0] = angle
-            p.keyframe_insert("rotation_euler", index=0, frame=f)
+            p["tilt"].rotation_euler[0] = rail_angle
+            p["tilt"].keyframe_insert("rotation_euler", index=0, frame=f)
+            p["anchor"].rotation_euler[0] = anchor_local_angle
+            p["anchor"].keyframe_insert("rotation_euler", index=0, frame=f)
 
 
 def main():
