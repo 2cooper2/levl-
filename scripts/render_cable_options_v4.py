@@ -97,7 +97,7 @@ def setup_world():
     nt.links.new(bg.outputs['Background'], out.inputs['Surface'])
 
 
-def add_camera(fov_deg=42, cam_pos=(0.65, -2.65, 0.85), look_at=(0, 0, 0.85)):
+def add_camera(fov_deg=42, cam_pos=(1.85, -2.05, 0.85), look_at=(0, 0, 0.85)):
     cd = bpy.data.cameras.new('Camera')
     cd.lens_unit = 'FOV'; cd.angle = math.radians(fov_deg)
     cd.clip_start = 0.01; cd.clip_end = 50.0
@@ -222,31 +222,75 @@ def build_wall():
     return wall
 
 
+def screen_mat_glossy(name="TVScreen"):
+    """Glossy glass-like TV screen with clearcoat for window-pane reflection.
+    Base is near-black, clearcoat adds the bright highlight that makes a
+    real flat-panel TV read as glass instead of flat black."""
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    p = m.node_tree.nodes["Principled BSDF"]
+    p.inputs["Base Color"].default_value = (0.008, 0.008, 0.012, 1.0)
+    p.inputs["Metallic"].default_value   = 0.0
+    p.inputs["Roughness"].default_value  = 0.05
+    # Coat (Blender 4+) — adds a glass-like top layer over the base
+    if "Coat Weight" in p.inputs:
+        p.inputs["Coat Weight"].default_value     = 1.0
+        p.inputs["Coat Roughness"].default_value  = 0.04
+    return m
+
+
 def build_tv():
-    """Procedural premium-looking TV: glossy black screen, dark plastic
-    bezel, slim profile. Positioned wall-mounted at TV_Z."""
-    TV_W, TV_H, TV_D = 0.70, 0.42, 0.025      # 70 × 42 cm × 2.5 cm thin
-    BEZEL_T          = 0.012                  # bezel thickness around screen
+    """Procedural premium-looking TV: glossy clearcoat screen + visible
+    chamfered bezel + slim wall mount bracket behind."""
+    TV_W, TV_H, TV_D = 0.78, 0.46, 0.030      # 78 × 46 cm × 3 cm thin
+    BEZEL_T          = 0.014
+    BEZEL_DEPTH      = 0.014                  # bezel protrudes in front of screen
 
     # Materials
-    bezel_mat  = mat_pbr("TVBezel",  (0.025, 0.025, 0.030), metal=0.0, rough=0.42)
-    screen_mat = mat_pbr("TVScreen", (0.005, 0.005, 0.008), metal=0.0, rough=0.10)
+    bezel_mat  = mat_pbr("TVBezel",  (0.045, 0.045, 0.052), metal=0.4, rough=0.32)
+    body_mat   = mat_pbr("TVBody",   (0.025, 0.025, 0.028), metal=0.0, rough=0.40)
+    screen_mat = screen_mat_glossy()
+    bracket_mat = mat_pbr("Bracket", (0.04, 0.04, 0.05), metal=0.6, rough=0.32)
 
-    # Back of TV (the main slab — bezel-colored)
-    make_box("TVBack",
+    # Body (back slab — slim, dark)
+    make_box("TVBody",
              (0, TV_FRONT_FACE_Y + TV_D / 2, TV_Z),
              (TV_W, TV_D, TV_H),
-             bezel_mat, bevel_w=0.004, bevel_segs=3)
-    # Glossy black screen panel (slightly recessed inside bezel)
+             body_mat, bevel_w=0.005, bevel_segs=4)
+
+    # Bezel frame — four thin chamfered bars wrapping the screen front
+    bz_y = TV_FRONT_FACE_Y - BEZEL_DEPTH / 2
+    # Top
+    make_box("BezelTop",
+             (0, bz_y, TV_Z + (TV_H - BEZEL_T) / 2),
+             (TV_W, BEZEL_DEPTH, BEZEL_T), bezel_mat,
+             bevel_w=0.0035, bevel_segs=3)
+    # Bottom
+    make_box("BezelBot",
+             (0, bz_y, TV_Z - (TV_H - BEZEL_T) / 2),
+             (TV_W, BEZEL_DEPTH, BEZEL_T), bezel_mat,
+             bevel_w=0.0035, bevel_segs=3)
+    # Left
+    make_box("BezelLeft",
+             (-(TV_W - BEZEL_T) / 2, bz_y, TV_Z),
+             (BEZEL_T, BEZEL_DEPTH, TV_H - 2 * BEZEL_T), bezel_mat,
+             bevel_w=0.0035, bevel_segs=3)
+    # Right
+    make_box("BezelRight",
+             ((TV_W - BEZEL_T) / 2, bz_y, TV_Z),
+             (BEZEL_T, BEZEL_DEPTH, TV_H - 2 * BEZEL_T), bezel_mat,
+             bevel_w=0.0035, bevel_segs=3)
+
+    # Glossy screen — recessed inside bezel
     make_box("TVScreen",
              (0, TV_FRONT_FACE_Y - 0.001, TV_Z),
-             (TV_W - 2 * BEZEL_T, 0.002, TV_H - 2 * BEZEL_T),
-             screen_mat, bevel_w=0.001)
-    # Wall-mount bracket — thin horizontal plate behind TV
-    bracket_mat = mat_pbr("Bracket", (0.04, 0.04, 0.05), metal=0.4, rough=0.45)
+             (TV_W - 2 * BEZEL_T - 0.002, 0.002, TV_H - 2 * BEZEL_T - 0.002),
+             screen_mat, bevel_w=0.0005)
+
+    # Wall-mount bracket behind TV
     make_box("TVBracket",
-             (0, TV_FRONT_FACE_Y + TV_D + 0.012, TV_Z),
-             (TV_W * 0.55, 0.018, TV_H * 0.40),
+             (0, TV_FRONT_FACE_Y + TV_D + 0.014, TV_Z),
+             (TV_W * 0.52, 0.020, TV_H * 0.42),
              bracket_mat, bevel_w=0.003)
     return None, []
 
@@ -331,18 +375,42 @@ def setup_hidden():
     ]
     cable = make_cable_curve("Cable", spine)
 
-    # Translucent vertical strip on the wall, covering the inside-wall section
-    strip_mat = mat_pbr("WallCutaway",
-                        (0.95, 0.93, 0.90), metal=0.0, rough=0.20,
-                        alpha=0.40, transmission=0.5)
-    strip_h = (HOLE_ENTRY_Z - HOLE_EXIT_Z) + 0.06
+    # See-through cutaway — a clear "open window" in the wall that lets the
+    # cable inside the wall be SEEN. Implementation: a thin dark frame
+    # around the cutaway (so it visually reads as an inset cut into the
+    # drywall) + a near-fully-transparent glass-tinted pane filling the
+    # opening. The cable behind it shows clearly.
+    strip_h = (HOLE_ENTRY_Z - HOLE_EXIT_Z) + 0.04
     strip_z = (HOLE_ENTRY_Z + HOLE_EXIT_Z) / 2
-    make_box("WallCutaway",
-             (CABLE_X_OFF, WALL_FRONT_Y - 0.001, strip_z),
-             (0.060, 0.064, strip_h), strip_mat, bevel_w=0.0)
+    STRIP_W = 0.085
 
-    # Animation: progressively reveal the cable from TV-side down to outlet
-    # by animating bevel_factor_end 0 → 1 over the first 80% of frames.
+    # Frame (dark recess look — four thin bars wrapping the cutaway)
+    frame_mat = mat_pbr("CutawayFrame", (0.18, 0.17, 0.16), metal=0.0, rough=0.55)
+    FT = 0.008  # frame thickness
+    # Top bar
+    make_box("FrameTop",
+             (CABLE_X_OFF, WALL_FRONT_Y - 0.001, strip_z + strip_h/2 + FT/2),
+             (STRIP_W + 2*FT, 0.012, FT), frame_mat, bevel_w=0.0015)
+    make_box("FrameBot",
+             (CABLE_X_OFF, WALL_FRONT_Y - 0.001, strip_z - strip_h/2 - FT/2),
+             (STRIP_W + 2*FT, 0.012, FT), frame_mat, bevel_w=0.0015)
+    make_box("FrameLeft",
+             (CABLE_X_OFF - STRIP_W/2 - FT/2, WALL_FRONT_Y - 0.001, strip_z),
+             (FT, 0.012, strip_h), frame_mat, bevel_w=0.0015)
+    make_box("FrameRight",
+             (CABLE_X_OFF + STRIP_W/2 + FT/2, WALL_FRONT_Y - 0.001, strip_z),
+             (FT, 0.012, strip_h), frame_mat, bevel_w=0.0015)
+
+    # Glass pane filling the cutaway — VERY transparent so cable behind reads
+    strip_mat = mat_pbr("CutawayGlass",
+                        (0.84, 0.92, 0.97), metal=0.0, rough=0.02,
+                        alpha=0.10, transmission=0.95)
+    make_box("CutawayGlass",
+             (CABLE_X_OFF, WALL_FRONT_Y - 0.0035, strip_z),
+             (STRIP_W, 0.005, strip_h), strip_mat, bevel_w=0.0)
+
+    # Animation: progressively reveal the cable from TV-side down to outlet,
+    # so the user sees the cord MOVING DOWN inside the wall.
     cable.data.bevel_factor_start = 0.0
     cable.data.bevel_factor_end   = 0.05
     cable.data.keyframe_insert(data_path="bevel_factor_end", frame=1)
@@ -367,34 +435,26 @@ def setup_covers():
     ]
     make_cable_curve("Cable", spine)
 
-    # Cover anchored at top to TV bottom, grows DOWN. Use a long box at full
-    # final length and animate Z-scale (with origin at the top so it grows
-    # downward).
+    # Cover sized to fully wrap the cord from TV-bottom down to just above
+    # the outlet. Slides DOWN as one piece (translate, not grow) — like
+    # someone is installing it.
     cover_top    = CABLE_TV_Z - 0.005
     cover_bot    = CABLE_OUT_Z + 0.010
-    cover_full_h = cover_top - cover_bot
-    cover_z_ctr  = (cover_top + cover_bot) / 2
+    cover_h      = cover_top - cover_bot
+    cover_z_end  = (cover_top + cover_bot) / 2     # final Z (over cord)
+    cover_z_off  = (TV_Z + 0.40) + cover_h         # starting Z (above TV)
     cover_mat = mat_pbr("Raceway", (0.96, 0.95, 0.93), 0.0, 0.35)
     cover = make_box("Raceway",
-                     (CABLE_X_OFF, -0.115, cover_z_ctr),
-                     (0.080, 0.060, cover_full_h),
-                     cover_mat, bevel_w=0.022, bevel_segs=4)
-    # Move the object's origin to the TOP of the cover so scaling Z scales
-    # downward instead of from center.
-    bpy.ops.object.select_all(action='DESELECT')
-    cover.select_set(True)
-    bpy.context.view_layer.objects.active = cover
-    cover.location.z = cover_top                              # origin → top
-    # Re-position mesh data so it extends DOWN from the new origin
-    for v in cover.data.vertices:
-        v.co.z -= 0.5                                         # was -0.5..+0.5
+                     (CABLE_X_OFF, -0.062, cover_z_off),
+                     (0.115, 0.085, cover_h),
+                     cover_mat, bevel_w=0.030, bevel_segs=5)
 
-    # Animate Z scale 0.02 → 1.0 (cover grows downward)
-    cover.scale.z = 0.02
-    cover.keyframe_insert("scale", index=2, frame=1)
-    cover.scale.z = 1.0
-    cover.keyframe_insert("scale", index=2, frame=int(FRAMES * 0.75))
-    cover.keyframe_insert("scale", index=2, frame=FRAMES)
+    # Translate downward over time — final position fully covers cord.
+    cover.location.z = cover_z_off
+    cover.keyframe_insert("location", index=2, frame=1)
+    cover.location.z = cover_z_end
+    cover.keyframe_insert("location", index=2, frame=int(FRAMES * 0.70))
+    cover.keyframe_insert("location", index=2, frame=FRAMES)
 
 
 # ── Scenario C: VISIBLE — cable just dangles, no animation ───────────────────
