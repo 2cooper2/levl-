@@ -1,14 +1,15 @@
 """
-render_mount_tilt_cad.py — CAD tilt mount with proper mechanics:
-  * Wall plate from Sketchfab fixed-mount GLB (Object_4 — has bolt slots)
-  * Per side: CAD rail + hook (top) + pivot bolt (middle) + pull string (bottom)
-  * Tilt pivot at MID-RAIL (where bolt connects rail to plate) — when rail
-    tilts forward, top swings BACK toward wall, bottom swings FORWARD.
-    Matches real tilt-mount physics.
-  * Two pivots per side (both at mid-rail, one per side) animate synchronously.
+render_mount_tilt_cad.py — Sketchfab-bracket tilt mount with cloth-sim strings:
+  * Wall plate from Sketchfab fixed-mount GLB (Object_4)
+  * TV-side bracket = Object_6 (real two-rail hook bracket from same GLB) +
+    Object_10 (the clamp tabs). These tilt as one rigid assembly.
+  * Tilt pivot at PLATE TOP front edge — where the hooks engage. When the
+    bracket tilts forward, top stays anchored at hook line, bottom swings out.
+  * Pull strings hang from each rail bottom — REAL Blender cloth simulation
+    (pinned top, free bottom, gravity + air damping). Bake before render.
 """
-import bpy, math, os, subprocess, shutil
-from mathutils import Vector
+import bpy, bmesh, math, os, subprocess, shutil
+from mathutils import Vector, Matrix
 
 HERE     = os.path.dirname(__file__)
 PROJECT  = os.path.join(HERE, "..")
@@ -119,32 +120,6 @@ def black_metal_mat():
     return mat
 
 
-def make_box(name, location, scale, mat, bevel_w=0.005):
-    bpy.ops.mesh.primitive_cube_add(size=1.0, location=location)
-    o = bpy.context.object; o.name = name; o.scale = scale
-    bpy.context.view_layer.update()
-    bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
-    bev = o.modifiers.new("Bevel", 'BEVEL'); bev.width = bevel_w; bev.segments = 2
-    if mat:
-        o.data.materials.clear(); o.data.materials.append(mat)
-    return o
-
-
-def make_cylinder(name, location, radius, depth, mat, axis='Z'):
-    bpy.ops.mesh.primitive_cylinder_add(radius=radius, depth=depth, location=location)
-    o = bpy.context.object; o.name = name
-    if axis == 'X':
-        o.rotation_euler[1] = math.radians(90)
-    elif axis == 'Y':
-        o.rotation_euler[0] = math.radians(90)
-    bpy.context.view_layer.update()
-    bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
-    bev = o.modifiers.new("Bevel", 'BEVEL'); bev.width = 0.002; bev.segments = 2
-    if mat:
-        o.data.materials.clear(); o.data.materials.append(mat)
-    return o
-
-
 def reparent(o, p):
     old = o.matrix_world.copy()
     o.parent = p
@@ -152,166 +127,194 @@ def reparent(o, p):
     o.matrix_world = old
 
 
-def import_wall_plate(mat):
-    """Import sketchfab_mount_fixed.glb, keep only Object_4 (the wall plate
-    with bolt slots), apply BlackMetal, scale to ~1.2m wide, center at origin."""
+def _world_bbox(o):
+    mins = [float('inf')]*3; maxs = [float('-inf')]*3
+    for c in o.bound_box:
+        w = o.matrix_world @ Vector(c)
+        for i in range(3):
+            mins[i] = min(mins[i], w[i]); maxs[i] = max(maxs[i], w[i])
+    return mins, maxs
+
+
+def import_assembly(mat):
+    """Import Object_4 (plate), Object_6 (TV-side hook bracket — two rails +
+    hooks at top), Object_10 (clamp tabs). Scale ALL three uniformly by the
+    same factor (plate target width = 1.20m), then translate as a group so
+    plate is centered at X=0/Y=0 with vertical center at Z=1.00. Returns
+    (plate, bracket, clamps)."""
     before = set(bpy.context.scene.objects)
     bpy.ops.import_scene.gltf(filepath=PLATE_GLB)
     new_objs = [o for o in bpy.context.scene.objects if o not in before]
-    plate = bpy.data.objects.get("Object_4")
+    plate   = bpy.data.objects.get("Object_4")
+    bracket = bpy.data.objects.get("Object_6")
+    clamps  = bpy.data.objects.get("Object_10")
+    keep = {plate, bracket, clamps}
     for o in new_objs:
-        if o is plate: continue
-        bpy.data.objects.remove(o, do_unlink=True)
-    if not plate: return None
-    plate.data.materials.clear()
-    plate.data.materials.append(mat)
+        if o not in keep:
+            bpy.data.objects.remove(o, do_unlink=True)
+    if plate is None or bracket is None:
+        return None, None, None
+    for o in (plate, bracket, clamps):
+        if o is None: continue
+        o.data.materials.clear()
+        o.data.materials.append(mat)
 
-    # Scale to target width (1.2m) and center at origin
+    # Scale all three by plate-width factor
     bpy.context.view_layer.update()
-    mins = [float('inf')]*3; maxs = [float('-inf')]*3
-    for c in plate.bound_box:
-        w = plate.matrix_world @ Vector(c)
-        for i in range(3):
-            mins[i] = min(mins[i], w[i]); maxs[i] = max(maxs[i], w[i])
-    width = maxs[0] - mins[0]
-    sc = 1.20 / max(width, 0.001)
-    plate.scale = (sc, sc, sc)
+    pmins, pmaxs = _world_bbox(plate)
+    sc = 1.20 / max(pmaxs[0] - pmins[0], 0.001)
+    for o in (plate, bracket, clamps):
+        if o is None: continue
+        o.scale = (sc * o.scale[0], sc * o.scale[1], sc * o.scale[2])
     bpy.context.view_layer.update()
-    mins2 = [float('inf')]*3; maxs2 = [float('-inf')]*3
-    for c in plate.bound_box:
-        w = plate.matrix_world @ Vector(c)
-        for i in range(3):
-            mins2[i] = min(mins2[i], w[i]); maxs2[i] = max(maxs2[i], w[i])
-    cx = (mins2[0] + maxs2[0]) / 2
-    cy = (mins2[1] + maxs2[1]) / 2
-    cz = (mins2[2] + maxs2[2]) / 2
-    plate.location.x -= cx
-    plate.location.y -= cy
-    plate.location.z += (1.00 - cz)   # center vertically at Z=1.00
+
+    # Translate group so plate is centered at (0,0) in X/Y and Z-mid = 1.00
+    pmins, pmaxs = _world_bbox(plate)
+    cx = (pmins[0] + pmaxs[0]) / 2
+    cy = (pmins[1] + pmaxs[1]) / 2
+    cz = (pmins[2] + pmaxs[2]) / 2
+    dx, dy, dz = -cx, -cy, (1.00 - cz)
+    for o in (plate, bracket, clamps):
+        if o is None: continue
+        o.location.x += dx
+        o.location.y += dy
+        o.location.z += dz
     bpy.context.view_layer.update()
-    return plate
+    return plate, bracket, clamps
+
+
+def make_cloth_string(name, world_top, mat, length=0.30, radius=0.012,
+                      segments=24, sides=10):
+    """Subdivided cylinder mesh with Cloth modifier. Top ring is in 'Pin'
+    vertex group with weight 1.0 → the cloth solver clamps those verts to
+    their object-local origin position. Object is parented to anchor empty,
+    so when the anchor moves with the rail, the pinned top moves in WORLD,
+    and gravity + bending make the rest swing physically."""
+    mesh = bpy.data.meshes.new(name + "_mesh")
+    obj  = bpy.data.objects.new(name, mesh)
+    bpy.context.collection.objects.link(obj)
+    bm = bmesh.new()
+    rings = []
+    for i in range(segments + 1):
+        z = -i * (length / segments)         # local: top at z=0
+        ring = []
+        for j in range(sides):
+            ang = 2 * math.pi * j / sides
+            ring.append(bm.verts.new((radius * math.cos(ang),
+                                      radius * math.sin(ang), z)))
+        rings.append(ring)
+    bm.verts.ensure_lookup_table()
+    for i in range(segments):
+        for j in range(sides):
+            j2 = (j + 1) % sides
+            bm.faces.new([rings[i][j], rings[i][j2],
+                          rings[i+1][j2], rings[i+1][j]])
+    bm.faces.new(rings[0])                       # top cap
+    bm.faces.new(list(reversed(rings[segments]))) # bottom cap
+    bm.to_mesh(mesh); bm.free()
+    obj.data.materials.append(mat)
+
+    # Place object so its origin (z=0 local) sits at world_top — set the
+    # matrix directly so the world transform is committed *before* reparent
+    # reads matrix_world.
+    obj.matrix_world = Matrix.Translation(Vector(world_top))
+    bpy.context.view_layer.update()
+
+    # Pin group — top ring (vertices with z >= -1e-4)
+    vg = obj.vertex_groups.new(name="Pin")
+    top_idxs = [v.index for v in obj.data.vertices if v.co.z > -1e-4]
+    vg.add(top_idxs, 1.0, 'REPLACE')
+
+    cloth = obj.modifiers.new("Cloth", 'CLOTH')
+    cs = cloth.settings
+    cs.vertex_group_mass     = "Pin"
+    cs.pin_stiffness         = 1.0
+    cs.mass                  = 0.012          # 12g per cord — light pull cord
+    cs.tension_stiffness     = 35             # rigid in length
+    cs.compression_stiffness = 35
+    cs.shear_stiffness       = 35
+    cs.bending_stiffness     = 0.04           # very floppy → swings
+    cs.bending_damping       = 0.4
+    cs.air_damping           = 1.8            # natural settle
+    cs.tension_damping       = 5
+    cs.compression_damping   = 5
+    cs.shear_damping         = 5
+    cloth.collision_settings.use_collision      = False
+    cloth.collision_settings.use_self_collision = False
+    return obj
 
 
 def build_tilt_mount():
     mat = black_metal_mat()
-    plate = import_wall_plate(mat)
-    if plate is None:
-        return [], None
+    plate, bracket, clamps = import_assembly(mat)
+    if plate is None or bracket is None:
+        return None, [], None
 
-    # Get plate world bbox after positioning
     bpy.context.view_layer.update()
-    pmins = [float('inf')]*3; pmaxs = [float('-inf')]*3
-    for c in plate.bound_box:
-        w = plate.matrix_world @ Vector(c)
-        for i in range(3):
-            pmins[i] = min(pmins[i], w[i]); pmaxs[i] = max(pmaxs[i], w[i])
-    plate_y_min, plate_y_max = pmins[1], pmaxs[1]
-    plate_z_top = pmaxs[2]
-    plate_z_bot = pmins[2]
-    plate_z_ctr = (plate_z_top + plate_z_bot) / 2
-    plate_h = plate_z_top - plate_z_bot
+    pmins, pmaxs = _world_bbox(plate)
+    bmins, bmaxs = _world_bbox(bracket)
 
-    # Rail dimensions
-    RAIL_W   = 0.07
-    RAIL_T   = 0.04
-    RAIL_EXT = 0.18           # how far rail extends above/below plate
-    GAP      = 0.04
-    RAIL_X   = 0.42
+    plate_y_front = pmins[1]                    # front face of plate
+    plate_z_top   = pmaxs[2]                    # top edge of plate
+    bracket_z_bot = bmins[2]                    # bottom of bracket (string anchor)
+    bracket_y_ctr = (bmins[1] + bmaxs[1]) / 2
 
-    rail_y_ctr = plate_y_min - GAP - RAIL_T / 2
-    rail_z_top = plate_z_top + RAIL_EXT
-    rail_z_bot = plate_z_bot - RAIL_EXT
-    rail_z_ctr = (rail_z_top + rail_z_bot) / 2
-    rail_h     = rail_z_top - rail_z_bot
-    pivot_z    = plate_z_ctr               # tilt pivot at MID-rail/plate-mid
+    # Per-side rail X centers — Object_6 has two clusters at native ±0.15;
+    # after the assembly's uniform scale these land at the bracket's outer
+    # peaks. Pull strings hang from each rail bottom.
+    rail_dx = (bmaxs[0] - bmins[0]) * 0.44      # approx ±44% of bracket width
+    rail_xs = (-rail_dx, +rail_dx)
 
-    pivots = []
-    for side, sign in (("L", -1), ("R", +1)):
-        rail_x = sign * RAIL_X
+    # Single TiltPivot empty at plate top FRONT edge — where Object_6's
+    # hooks engage the plate. The whole TV-side bracket rocks on this line.
+    bpy.ops.object.empty_add(type='PLAIN_AXES',
+        location=(0, plate_y_front, plate_z_top))
+    tilt = bpy.context.object
+    tilt.name = "TiltPivot"
 
-        # ── Rail ──────────────────────────────────────────────
-        rail = make_box(f"Rail_{side}",
-            (rail_x, rail_y_ctr, rail_z_ctr),
-            (RAIL_W, RAIL_T, rail_h), mat)
+    reparent(bracket, tilt)
+    if clamps is not None:
+        reparent(clamps, tilt)
 
-        # ── L-shape hook: horizontal over plate top + vertical down back side ──
-        hook_h_y_start = rail_y_ctr + RAIL_T/2
-        hook_h_y_end   = plate_y_max + 0.04
-        hook_h = make_box(f"HookH_{side}",
-            (rail_x, (hook_h_y_start + hook_h_y_end)/2,
-             rail_z_top - 0.025),
-            (RAIL_W * 1.10, hook_h_y_end - hook_h_y_start, 0.045), mat)
-        hook_v = make_box(f"HookV_{side}",
-            (rail_x, plate_y_max + 0.02,
-             rail_z_top - 0.025 - 0.04),     # drops down 8cm on plate's far side
-            (RAIL_W * 1.10, 0.04, 0.08), mat)
-
-        # ── Pivot bolt at MID — visible knuckle bridging rail and plate ──
-        bolt_y_start = rail_y_ctr + RAIL_T/2
-        bolt_y_end   = plate_y_min - 0.005
-        bolt = make_box(f"PivotBolt_{side}",
-            (rail_x, (bolt_y_start + bolt_y_end)/2, pivot_z),
-            (0.045, bolt_y_end - bolt_y_start, 0.045), mat)
-        bolt_head = make_cylinder(f"BoltHead_{side}",
-            (rail_x, rail_y_ctr - RAIL_T/2 - 0.012, pivot_z),
-            radius=0.022, depth=0.025, mat=mat, axis='Y')
-
-        # ── String anchor (empty at rail bottom — parented to TiltPivot) ──
-        bpy.ops.object.empty_add(type='PLAIN_AXES',
-            location=(rail_x, rail_y_ctr, rail_z_bot))
+    # String anchors + cloth strings — anchors parented to TiltPivot so
+    # their world position follows the bracket bottom as it tilts; cloth
+    # solver sees the moving pinned-top and lets the rest swing freely.
+    strings = []
+    for side, rail_x in zip(("L", "R"), rail_xs):
+        anchor_pos = (rail_x, bracket_y_ctr, bracket_z_bot)
+        bpy.ops.object.empty_add(type='PLAIN_AXES', location=anchor_pos)
         anchor = bpy.context.object
         anchor.name = f"StringAnchor_{side}"
-
-        # ── Pull string + tag — parented to ANCHOR, hang from rail bottom ──
-        pull = make_cylinder(f"PullString_{side}",
-            (rail_x, rail_y_ctr, rail_z_bot - 0.10),    # top at rail bottom (no gap)
-            radius=0.0035, depth=0.20, mat=mat, axis='Z')
-        tag = make_box(f"PullTag_{side}",
-            (rail_x, rail_y_ctr, rail_z_bot - 0.225),
-            (0.025, 0.012, 0.022), mat)
-
-        # ── TiltPivot at MID-rail ──
-        bpy.ops.object.empty_add(type='PLAIN_AXES',
-            location=(rail_x, plate_y_min, pivot_z))
-        tilt = bpy.context.object
-        tilt.name = f"TiltPivot_{side}"
-
-        # Rail + hooks + bolt rigidly tilt with TiltPivot
-        for o in [rail, hook_h, hook_v, bolt, bolt_head]:
-            reparent(o, tilt)
-        # Anchor follows TiltPivot (so its position tracks rail bottom),
-        # but its rotation is keyframed independently for pendulum sway
         reparent(anchor, tilt)
-        # String + tag parented to ANCHOR — they swing with anchor's rotation
-        reparent(pull, anchor)
-        reparent(tag, anchor)
+        cord = make_cloth_string(f"PullString_{side}", anchor_pos, mat)
+        reparent(cord, anchor)
+        strings.append({"anchor": anchor, "cord": cord})
 
-        pivots.append({"tilt": tilt, "anchor": anchor})
-
-    return pivots, plate
+    return tilt, strings, plate
 
 
-def keyframe_tilt(pivots):
-    """TiltPivots rotate ±15° around X (top swings back, bottom swings forward).
-    String anchors get a SEPARATE keyframed rotation that lags the rail tilt
-    and uses smaller amplitude — simulates pendulum-like swing/inertia."""
-    AMP_RAIL  = math.radians(15)
-    AMP_STR   = math.radians(8)        # string sways less than rail
-    PHASE_LAG = 0.08                   # ~8% cycle lag (~12 frames)
+def keyframe_tilt(tilt):
+    """Single TiltPivot rocks ±14° around X. Bracket top stays anchored at
+    plate top edge (the hook line); bottom swings forward then back. The
+    cord physics is handled by the cloth solver — no keyframes needed."""
+    AMP = math.radians(14)
     for f in range(1, FRAMES + 1):
         t = (f - 1) / FRAMES
-        bpy.context.scene.frame_set(f)
-        rail_angle = AMP_RAIL * math.sin(2 * math.pi * t)
-        # Desired string WORLD angle (lagged sine, smaller amplitude)
-        str_world_angle = AMP_STR * math.sin(2 * math.pi * (t - PHASE_LAG))
-        # Anchor LOCAL angle = world target − parent (TiltPivot) angle,
-        # so the anchor's resulting world rotation = string sway angle.
-        anchor_local_angle = str_world_angle - rail_angle
-        for p in pivots:
-            p["tilt"].rotation_euler[0] = rail_angle
-            p["tilt"].keyframe_insert("rotation_euler", index=0, frame=f)
-            p["anchor"].rotation_euler[0] = anchor_local_angle
-            p["anchor"].keyframe_insert("rotation_euler", index=0, frame=f)
+        tilt.rotation_euler[0] = AMP * math.sin(2 * math.pi * t)
+        tilt.keyframe_insert("rotation_euler", index=0, frame=f)
+
+
+def bake_cloth():
+    """Set cloth point-cache range = scene range, then bake all caches."""
+    s = bpy.context.scene
+    for obj in bpy.data.objects:
+        for mod in obj.modifiers:
+            if mod.type == 'CLOTH':
+                pc = mod.point_cache
+                pc.frame_start = s.frame_start
+                pc.frame_end   = s.frame_end
+    s.frame_set(s.frame_start)
+    bpy.ops.ptcache.bake_all(bake=True)
 
 
 def main():
@@ -324,8 +327,11 @@ def main():
     add_camera()
     add_lights()
     add_shadow_catcher()
-    pivots, plate = build_tilt_mount()
-    keyframe_tilt(pivots)
+    tilt, strings, plate = build_tilt_mount()
+    if tilt is None:
+        print("[ERR] assembly import failed"); return
+    keyframe_tilt(tilt)
+    bake_cloth()
 
     bpy.ops.render.render(animation=True)
 
