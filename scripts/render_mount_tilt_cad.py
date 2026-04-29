@@ -256,27 +256,71 @@ def make_cloth_string(name, world_top, mat, length=0.30, radius=0.012,
     return obj
 
 
+def _drill_holes(arm, world_x, world_y_ctr, z_bot, z_top, post_d,
+                 n_holes=10, hole_radius=0.006):
+    """Punch round VESA-style holes down the arm (matches the reference
+    photo's hole-pattern slat). Boolean DIFFERENCE on small cylinders
+    rotated to point along Y (through the arm's depth), then applied so
+    the geometry is baked in for fast rendering."""
+    H = z_top - z_bot
+    margin_top = 0.025
+    margin_bot = 0.020
+    span = H - margin_top - margin_bot
+    cutters = []
+    for i in range(n_holes):
+        z = z_bot + margin_bot + i * span / max(n_holes - 1, 1)
+        bpy.ops.mesh.primitive_cylinder_add(
+            radius=hole_radius,
+            depth=post_d * 4,    # well past the arm depth
+            vertices=14,
+            location=(world_x, world_y_ctr, z),
+            rotation=(math.radians(90), 0, 0),
+        )
+        cutter = bpy.context.object
+        cutter.name = f"_hole_cut_{i}"
+        cutters.append(cutter)
+
+    for i, cutter in enumerate(cutters):
+        m = arm.modifiers.new(f"hole_{i}", 'BOOLEAN')
+        m.operation = 'DIFFERENCE'
+        m.object = cutter
+
+    bpy.ops.object.select_all(action='DESELECT')
+    arm.select_set(True)
+    bpy.context.view_layer.objects.active = arm
+    for mod in list(arm.modifiers):
+        if mod.type == 'BOOLEAN':
+            bpy.ops.object.modifier_apply(modifier=mod.name)
+
+    for cutter in cutters:
+        bpy.data.objects.remove(cutter, do_unlink=True)
+
+
 def build_arms(tilt, mat, bracket_y_front, bracket_z_top, bracket_z_bot,
                post_dx):
-    """Two vertical arms (only) — long thin posts at x=±post_dx, parented to
-    `tilt`. Sits just in front of Object_6 (the stationary hook bracket);
-    pivots from the top where the arms pin onto the hook bracket."""
-    H      = bracket_z_top - bracket_z_bot          # arm height
-    Z_CTR  = (bracket_z_top + bracket_z_bot) / 2
-    POST_T = 0.032                                  # arm thickness (X)
-    POST_D = 0.024                                  # arm depth (Y)
-    GAP    = 0.002                                  # mm-thin gap from bracket
-    Y_CTR  = bracket_y_front - GAP - POST_D / 2     # arms Y center
+    """Two long thin vertical arms with VESA hole pattern, attached flush to
+    the front of Object_6 (no gap) and extending below the hook bracket
+    by EXTEND_BELOW. Pivots from the top of Object_6."""
+    POST_T       = 0.040          # arm thickness (X) — wider, matches reference
+    POST_D       = 0.022          # arm depth (Y)
+    EXTEND_BELOW = 0.30           # arms extend this far below Object_6 bottom
+
+    arm_z_top = bracket_z_top
+    arm_z_bot = bracket_z_bot - EXTEND_BELOW
+    H         = arm_z_top - arm_z_bot
+    Z_CTR     = (arm_z_top + arm_z_bot) / 2
+    Y_CTR     = bracket_y_front - POST_D / 2     # touching Object_6 (no gap)
 
     posts = []
     for sx in (-post_dx, +post_dx):
         p = make_box(f"arm_{'L' if sx < 0 else 'R'}",
                      (sx, Y_CTR, Z_CTR),
                      (POST_T, POST_D, H), mat)
+        _drill_holes(p, sx, Y_CTR, arm_z_bot, arm_z_top, POST_D)
         reparent(p, tilt)
         posts.append(p)
 
-    return Y_CTR, posts
+    return Y_CTR, posts, arm_z_bot
 
 
 def build_tilt_mount():
@@ -303,7 +347,7 @@ def build_tilt_mount():
     tilt = bpy.context.object
     tilt.name = "TiltPivot"
 
-    arms_y_ctr, _posts = build_arms(
+    arms_y_ctr, _posts, arm_z_bot = build_arms(
         tilt, mat,
         bracket_y_front=bracket_y_front,
         bracket_z_top=bracket_z_top,
@@ -314,7 +358,7 @@ def build_tilt_mount():
     # Strings hang from each arm bottom.
     strings = []
     for side, sx in (("L", -post_dx), ("R", +post_dx)):
-        anchor_pos = (sx, arms_y_ctr, bracket_z_bot)
+        anchor_pos = (sx, arms_y_ctr, arm_z_bot)
         bpy.ops.object.empty_add(type='PLAIN_AXES', location=anchor_pos)
         anchor = bpy.context.object
         anchor.name = f"StringAnchor_{side}"
