@@ -86,6 +86,13 @@ const CABLE_RENDERS: Record<string, string> = {
   "Yes, use cable covers":        "/assets/renders/cable-covers.png",
   "No, cables visible is fine":   "/assets/renders/cable-visible.png",
 }
+// Video versions — cable being routed inside wall, raceway sliding down,
+// or just dangling. Falls back to the static PNG above when absent.
+const CABLE_VIDEOS: Record<string, string> = {
+  "Yes, hide all cables in wall": "/assets/renders/cable-hidden.webm",
+  "Yes, use cable covers":        "/assets/renders/cable-covers.webm",
+  "No, cables visible is fine":   "/assets/renders/cable-visible.webm",
+}
 function isCableRender(opt: string): boolean {
   return opt in CABLE_RENDERS
 }
@@ -1489,13 +1496,24 @@ const MessageItem = memo(
                       </div>
                     ) : isCableRender(option) ? (
                       <div className="w-full h-full relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0.08) 35%, transparent 60%), linear-gradient(135deg, #ede9ff 0%, #c4b8f5 100%)' }}>
-                        <Image
-                          src={CABLE_RENDERS[option]}
-                          alt={option}
-                          fill
-                          className="object-contain"
-                          sizes="(max-width: 768px) 45vw, 200px"
-                        />
+                        {CABLE_VIDEOS[option] ? (
+                          <video
+                            src={CABLE_VIDEOS[option]}
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            className="absolute inset-0 w-full h-full object-contain"
+                          />
+                        ) : (
+                          <Image
+                            src={CABLE_RENDERS[option]}
+                            alt={option}
+                            fill
+                            className="object-contain"
+                            sizes="(max-width: 768px) 45vw, 200px"
+                          />
+                        )}
                       </div>
                     ) : (
                       <Option3DPreview
