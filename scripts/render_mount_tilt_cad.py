@@ -296,20 +296,29 @@ def _drill_holes(arm, world_x, world_y_ctr, z_bot, z_top, post_d,
         bpy.data.objects.remove(cutter, do_unlink=True)
 
 
-def build_arms(tilt, mat, bracket_y_front, bracket_z_top, bracket_z_bot,
-               post_dx):
-    """Two long thin vertical arms with VESA hole pattern, attached flush to
-    the front of Object_6 (no gap) and extending below the hook bracket
-    by EXTEND_BELOW. Pivots from the top of Object_6."""
-    POST_T       = 0.040          # arm thickness (X) — wider, matches reference
-    POST_D       = 0.022          # arm depth (Y)
-    EXTEND_BELOW = 0.30           # arms extend this far below Object_6 bottom
+def build_arms(tilt, mat, bracket_y_front, bracket_y_back,
+               bracket_z_top, bracket_z_bot, post_dx):
+    """Two long thin vertical arms with VESA hole pattern. Arms intersect
+    Object_6 — the rear half of each arm is INSIDE the hook bracket's rail
+    body so the arm reads as part of the hook-mount assembly (not a
+    separate piece floating in front). Extends slightly ABOVE Object_6 top
+    and well BELOW the bottom. Pivots from the top of Object_6."""
+    POST_T       = 0.048          # arm thickness (X) — closer to rail width
+    POST_D       = 0.040          # arm depth (Y) — bigger so it visibly merges
+    EXTEND_BELOW = 0.30
+    EXTEND_ABOVE = 0.05           # small portion above Object_6 top
 
-    arm_z_top = bracket_z_top
+    arm_z_top = bracket_z_top + EXTEND_ABOVE
     arm_z_bot = bracket_z_bot - EXTEND_BELOW
     H         = arm_z_top - arm_z_bot
     Z_CTR     = (arm_z_top + arm_z_bot) / 2
-    Y_CTR     = bracket_y_front - POST_D / 2     # touching Object_6 (no gap)
+    # Arm Y center sits at Object_6's front face → arm front protrudes by
+    # POST_D/2 in front of the hooks, arm back is buried INSIDE Object_6 by
+    # POST_D/2. The intersection makes the arm read as integral to the hook
+    # bracket. We use the bracket front face as the merge plane.
+    bracket_depth = bracket_y_back - bracket_y_front
+    embed = min(POST_D / 2, bracket_depth * 0.6)  # don't poke out the back
+    Y_CTR = bracket_y_front - POST_D / 2 + embed
 
     posts = []
     for sx in (-post_dx, +post_dx):
@@ -350,6 +359,7 @@ def build_tilt_mount():
     arms_y_ctr, _posts, arm_z_bot = build_arms(
         tilt, mat,
         bracket_y_front=bracket_y_front,
+        bracket_y_back=bmaxs[1],
         bracket_z_top=bracket_z_top,
         bracket_z_bot=bracket_z_bot,
         post_dx=post_dx,
