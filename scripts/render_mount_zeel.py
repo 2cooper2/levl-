@@ -615,10 +615,17 @@ def keyframe_tilt(parts):
         o.location.y -= 0.35
     bpy.context.view_layer.update()
 
-    # Add pull strings hanging from the bottom of each rail (real tilt
-    # mounts have these for tilt-release). Thin cylinders, 12cm long.
+    # Add visible hooks at top of each rail — extending backward from
+    # rail top over the plate's top edge, so rails look mechanically
+    # attached to the plate (the hook latches over the plate's top).
     bar_mat = bpy.data.materials.get("BlackMetal")
-    pull_strings = []
+    plate = bpy.data.objects.get("Rectangle201")
+    plate_y_max = -0.434
+    if plate:
+        for c in plate.bound_box:
+            w = plate.matrix_world @ Vector(c)
+            plate_y_max = max(plate_y_max, w.y)
+    hooks = []
     for r in rails:
         if r is None: continue
         rmins = [float('inf')]*3; rmaxs = [float('-inf')]*3
@@ -626,19 +633,22 @@ def keyframe_tilt(parts):
             w = r.matrix_world @ Vector(c)
             for i in range(3):
                 rmins[i] = min(rmins[i], w[i]); rmaxs[i] = max(rmaxs[i], w[i])
-        bot_z = rmins[2]
-        cx = (rmins[0] + rmaxs[0]) / 2
-        cy = (rmins[1] + rmaxs[1]) / 2
-        bpy.ops.mesh.primitive_cylinder_add(
-            radius=0.006, depth=0.18,
-            location=Vector((cx, cy, bot_z - 0.10)))
-        s = bpy.context.object
-        s.name = f"PullString_{r.name}"
+        rail_x_center = (rmins[0] + rmaxs[0]) / 2
+        rail_back_y = rmaxs[1]
+        rail_top_z = rmaxs[2]
+        hook_length = (plate_y_max - rail_back_y) + 0.05
+        hook_y_center = rail_back_y + hook_length / 2
+        bpy.ops.mesh.primitive_cube_add(size=1.0,
+            location=Vector((rail_x_center, hook_y_center, rail_top_z - 0.02)))
+        hook = bpy.context.object
+        hook.name = f"Hook_{r.name}"
+        hook.scale = (0.085, hook_length, 0.05)
         bpy.context.view_layer.update()
         bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
+        bev = hook.modifiers.new("Bevel", 'BEVEL'); bev.width = 0.005; bev.segments = 2
         if bar_mat:
-            s.data.materials.clear(); s.data.materials.append(bar_mat)
-        pull_strings.append(s)
+            hook.data.materials.clear(); hook.data.materials.append(bar_mat)
+        hooks.append(hook)
     bpy.context.view_layer.update()
 
     bpy.context.view_layer.update()
@@ -658,7 +668,7 @@ def keyframe_tilt(parts):
     tilt.parent = main_ctrl
     tilt.matrix_parent_inverse = main_ctrl.matrix_world.inverted()
     tilt.matrix_world = old
-    for o in movers + pull_strings:
+    for o in movers + hooks:
         old = o.matrix_world.copy()
         o.parent = tilt
         o.matrix_parent_inverse = tilt.matrix_world.inverted()
