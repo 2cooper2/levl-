@@ -1,16 +1,13 @@
 """
-render_mount_tilt_cad.py — Sketchfab tilting-mount asset with cloth-sim strings:
-  * Source GLB: sketchfab_mount_tilting.glb (elizbarzoidze 600x400 20° tilt)
-    — long thin vertical TV-side bracket rails, central tilt-detent pivot
-    mechanism, top/bottom clamping bolts that match the user's reference.
-  * The asset's Object_3 / Object_4 split is by material zones, not by
-    plate-vs-bracket — rotating only one scrambles the visible surfaces.
-    So all GLB objects (Object_2 + Object_3 + Object_4) are parented to a
-    single TiltPivot and rocked together at low amplitude. The asset's
-    natural pose already shows a forward tilt — animation is a small ±4°
-    sway around that pose.
-  * Pull strings hang from each bracket-rail bottom — REAL Blender cloth
-    simulation (pinned top, free bottom, gravity + air damping, baked).
+render_mount_tilt_cad.py — Sketchfab-bracket tilt mount with cloth-sim strings:
+  * Wall plate (Object_4) + hook bracket (Object_6) + clamps (Object_10) from
+    sketchfab_mount_fixed.glb — all STATIONARY, locked to the wall.
+  * TV-side: just two vertical arms (long thin posts) attached to the hook
+    bracket and pivoting from its top edge.
+  * Tilt pivot at the top of Object_6. Arms top stays anchored at the hook
+    line; arms bottom swings forward / back as it tilts.
+  * Pull strings hang from each arm bottom — REAL Blender cloth simulation
+    (pinned top, free bottom, gravity + air damping). Baked before render.
 """
 import bpy, bmesh, math, os, subprocess, shutil
 from mathutils import Vector, Matrix
@@ -22,7 +19,7 @@ OUT_DIR  = os.path.join(PROJECT, "public", "assets", "renders")
 ANIM_TMP = os.path.join(OUT_DIR, "anim_tilt_cad")
 FFMPEG   = "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/imageio_ffmpeg/binaries/ffmpeg-macos-aarch64-v7.1"
 
-TILTING_GLB = os.path.join(MODELS, "sketchfab_mount_tilting.glb")
+PLATE_GLB = os.path.join(MODELS, "sketchfab_mount_fixed.glb")
 
 W, H    = 480, 780
 FRAMES  = int(os.environ.get("LEVL_FRAMES", "144"))
@@ -83,7 +80,7 @@ def setup_world():
     nt.links.new(bg.outputs['Background'], out.inputs['Surface'])
 
 
-def add_camera(fov_deg=42, cam_pos=(1.85, -1.62, 1.10), look_at=(0, 0, 1.00)):
+def add_camera(fov_deg=42, cam_pos=(2.05, -1.78, 1.10), look_at=(0, 0, 1.00)):
     cd = bpy.data.cameras.new('Camera')
     cd.lens_unit = 'FOV'; cd.angle = math.radians(fov_deg)
     cd.clip_start = 0.01; cd.clip_end = 50.0
@@ -131,6 +128,17 @@ def reparent(o, p):
     o.matrix_world = old
 
 
+def make_box(name, location, size, mat, bevel_w=0.003):
+    """Beveled cube primitive — used for cradle posts and cross-bars."""
+    bpy.ops.mesh.primitive_cube_add(size=1.0, location=location)
+    o = bpy.context.object; o.name = name; o.scale = size
+    bpy.context.view_layer.update()
+    bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
+    bev = o.modifiers.new("Bevel", 'BEVEL'); bev.width = bevel_w; bev.segments = 2
+    o.data.materials.clear(); o.data.materials.append(mat)
+    return o
+
+
 def _world_bbox(o):
     mins = [float('inf')]*3; maxs = [float('-inf')]*3
     for c in o.bound_box:
@@ -141,47 +149,50 @@ def _world_bbox(o):
 
 
 def import_assembly(mat):
-    """Import sketchfab_mount_tilting.glb. The asset is one rigid tilt-mount
-    in its naturally-tilted pose; treat all GLB meshes as a single rigid
-    group. Scale uniformly so the assembly width = 1.10m, center at origin,
-    lift to Z=1.00. Returns the list of GLB mesh objects."""
+    """Import Object_4 (plate), Object_6 (TV-side hook bracket — two rails +
+    hooks at top), Object_10 (clamp tabs). Scale ALL three uniformly by the
+    same factor (plate target width = 1.20m), then translate as a group so
+    plate is centered at X=0/Y=0 with vertical center at Z=1.00. Returns
+    (plate, bracket, clamps)."""
     before = set(bpy.context.scene.objects)
-    bpy.ops.import_scene.gltf(filepath=TILTING_GLB)
+    bpy.ops.import_scene.gltf(filepath=PLATE_GLB)
     new_objs = [o for o in bpy.context.scene.objects if o not in before]
-    meshes = [o for o in new_objs if o.type == 'MESH']
-    for o in meshes:
+    plate   = bpy.data.objects.get("Object_4")
+    bracket = bpy.data.objects.get("Object_6")
+    clamps  = bpy.data.objects.get("Object_10")
+    keep = {plate, bracket, clamps}
+    for o in new_objs:
+        if o not in keep:
+            bpy.data.objects.remove(o, do_unlink=True)
+    if plate is None or bracket is None:
+        return None, None, None
+    for o in (plate, bracket, clamps):
+        if o is None: continue
         o.data.materials.clear()
         o.data.materials.append(mat)
 
-    # Compute combined bbox across all meshes for proper scaling/centering
+    # Scale all three by plate-width factor
     bpy.context.view_layer.update()
-    mins = [float('inf')]*3; maxs = [float('-inf')]*3
-    for o in meshes:
-        m, M = _world_bbox(o)
-        for i in range(3):
-            mins[i] = min(mins[i], m[i]); maxs[i] = max(maxs[i], M[i])
-    sc = 1.10 / max(maxs[0] - mins[0], 0.001)
-    for o in meshes:
+    pmins, pmaxs = _world_bbox(plate)
+    sc = 1.20 / max(pmaxs[0] - pmins[0], 0.001)
+    for o in (plate, bracket, clamps):
+        if o is None: continue
         o.scale = (sc * o.scale[0], sc * o.scale[1], sc * o.scale[2])
     bpy.context.view_layer.update()
 
-    # Recompute combined bbox after scale; center XY, lift so vertical
-    # midpoint = 1.00.
-    mins = [float('inf')]*3; maxs = [float('-inf')]*3
-    for o in meshes:
-        m, M = _world_bbox(o)
-        for i in range(3):
-            mins[i] = min(mins[i], m[i]); maxs[i] = max(maxs[i], M[i])
-    cx = (mins[0] + maxs[0]) / 2
-    cy = (mins[1] + maxs[1]) / 2
-    cz = (mins[2] + maxs[2]) / 2
+    # Translate group so plate is centered at (0,0) in X/Y and Z-mid = 1.00
+    pmins, pmaxs = _world_bbox(plate)
+    cx = (pmins[0] + pmaxs[0]) / 2
+    cy = (pmins[1] + pmaxs[1]) / 2
+    cz = (pmins[2] + pmaxs[2]) / 2
     dx, dy, dz = -cx, -cy, (1.00 - cz)
-    for o in meshes:
+    for o in (plate, bracket, clamps):
+        if o is None: continue
         o.location.x += dx
         o.location.y += dy
         o.location.z += dz
     bpy.context.view_layer.update()
-    return meshes
+    return plate, bracket, clamps
 
 
 def make_cloth_string(name, world_top, mat, length=0.30, radius=0.012,
@@ -245,41 +256,65 @@ def make_cloth_string(name, world_top, mat, length=0.30, radius=0.012,
     return obj
 
 
+def build_arms(tilt, mat, bracket_y_front, bracket_z_top, bracket_z_bot,
+               post_dx):
+    """Two vertical arms (only) — long thin posts at x=±post_dx, parented to
+    `tilt`. Sits just in front of Object_6 (the stationary hook bracket);
+    pivots from the top where the arms pin onto the hook bracket."""
+    H      = bracket_z_top - bracket_z_bot          # arm height
+    Z_CTR  = (bracket_z_top + bracket_z_bot) / 2
+    POST_T = 0.032                                  # arm thickness (X)
+    POST_D = 0.024                                  # arm depth (Y)
+    GAP    = 0.002                                  # mm-thin gap from bracket
+    Y_CTR  = bracket_y_front - GAP - POST_D / 2     # arms Y center
+
+    posts = []
+    for sx in (-post_dx, +post_dx):
+        p = make_box(f"arm_{'L' if sx < 0 else 'R'}",
+                     (sx, Y_CTR, Z_CTR),
+                     (POST_T, POST_D, H), mat)
+        reparent(p, tilt)
+        posts.append(p)
+
+    return Y_CTR, posts
+
+
 def build_tilt_mount():
     mat = black_metal_mat()
-    meshes = import_assembly(mat)
-    if not meshes:
+    plate, bracket, clamps = import_assembly(mat)
+    if plate is None or bracket is None:
         return None, [], None
 
+    # Object_6 + Object_10 are STATIONARY (locked to plate). Do not parent to
+    # TiltPivot — only the cradle tilts.
     bpy.context.view_layer.update()
-    # Combined assembly bbox after import_assembly's centering/lift
-    mins = [float('inf')]*3; maxs = [float('-inf')]*3
-    for o in meshes:
-        m, M = _world_bbox(o)
-        for i in range(3):
-            mins[i] = min(mins[i], m[i]); maxs[i] = max(maxs[i], M[i])
-    z_top = maxs[2]
-    z_bot = mins[2]
-    z_ctr = (z_top + z_bot) / 2
-    y_back  = maxs[1]                       # wall side
-    y_front = mins[1]                       # closest to camera
-    y_ctr   = (y_front + y_back) / 2
+    bmins, bmaxs = _world_bbox(bracket)
 
-    # Tilt pivot at assembly back-mid (where the central detent sits in the
-    # asset, against the wall plate). Whole rigid group rocks on this line.
+    bracket_y_front = bmins[1]                  # front face of Object_6
+    bracket_z_top   = bmaxs[2]                  # top of Object_6 (hook line)
+    bracket_z_bot   = bmins[2]                  # bottom of Object_6
+    # Cradle vertical posts mirror Object_6's two-rail X positions
+    post_dx = (bmaxs[0] - bmins[0]) * 0.44
+
+    # Tilt pivot at the TOP of Object_6, on its front face — where the cradle
+    # pins onto the hook bracket. Cradle rocks on this line.
     bpy.ops.object.empty_add(type='PLAIN_AXES',
-        location=(0, y_back, z_ctr))
+        location=(0, bracket_y_front, bracket_z_top))
     tilt = bpy.context.object
     tilt.name = "TiltPivot"
 
-    for o in meshes:
-        reparent(o, tilt)
+    arms_y_ctr, _posts = build_arms(
+        tilt, mat,
+        bracket_y_front=bracket_y_front,
+        bracket_z_top=bracket_z_top,
+        bracket_z_bot=bracket_z_bot,
+        post_dx=post_dx,
+    )
 
-    # String anchors on each outer rail bottom (rails are at the X extremes)
-    rail_dx = (maxs[0] - mins[0]) * 0.46
+    # Strings hang from each arm bottom.
     strings = []
-    for side, sx in (("L", -rail_dx), ("R", +rail_dx)):
-        anchor_pos = (sx, y_front, z_bot + 0.02)
+    for side, sx in (("L", -post_dx), ("R", +post_dx)):
+        anchor_pos = (sx, arms_y_ctr, bracket_z_bot)
         bpy.ops.object.empty_add(type='PLAIN_AXES', location=anchor_pos)
         anchor = bpy.context.object
         anchor.name = f"StringAnchor_{side}"
@@ -288,15 +323,14 @@ def build_tilt_mount():
         reparent(cord, anchor)
         strings.append({"anchor": anchor, "cord": cord})
 
-    return tilt, strings, meshes[0]
+    return tilt, strings, plate
 
 
 def keyframe_tilt(tilt):
-    """Whole asset gently rocks ±5° around X at the back-mid pivot. The asset
-    is naturally pre-tilted, so the small sway shows the bracket-tilt
-    motion without distorting the plate too much. Cloth-sim strings swing
-    naturally from the bracket motion."""
-    AMP = math.radians(5)
+    """Single TiltPivot rocks ±14° around X. Bracket top stays anchored at
+    plate top edge (the hook line); bottom swings forward then back. The
+    cord physics is handled by the cloth solver — no keyframes needed."""
+    AMP = math.radians(14)
     for f in range(1, FRAMES + 1):
         t = (f - 1) / FRAMES
         tilt.rotation_euler[0] = AMP * math.sin(2 * math.pi * t)
