@@ -1,35 +1,23 @@
 """
-render_mount_tilt_cad.py — CAD tilt mount with TWO INDEPENDENT pivots per
-side, mirroring build_clean_mount() / keyframe_swivel() in render_mount_zeel.py.
-
-Per side:
-  TopPivot  (analog of WallPiv) — rotates around X at plate's top edge
-    ├── HookKnuckle (visible cylinder pin)
-    ├── Hook (slab)
-    ├── UpperRail (top half of rail)
-    └── KneePivot  (analog of ElbowPiv, child of TopPivot)
-        ├── KneeKnuckle
-        ├── LowerRail (bottom half of rail)
-        ├── Knobs (3 cylindrical pins)
-        ├── PullString (thin cylinder)
-        └── PullTag
-
-Each pivot has its OWN keyframed rotation_euler[0] (X axis tilt).
-Animation:
-  θ_top  = AMP_TOP  * sin(2π * t)             — main tilt
-  θ_knee = AMP_KNEE * sin(2π * t + π/3)       — slight phase-shifted flex
-Both pivots animate independently; downstream parts inherit naturally.
-
-Wall plate is fully static. Both sides synchronized.
+render_mount_tilt_cad.py — CAD tilt mount with proper mechanics:
+  * Wall plate from Sketchfab fixed-mount GLB (Object_4 — has bolt slots)
+  * Per side: CAD rail + hook (top) + pivot bolt (middle) + pull string (bottom)
+  * Tilt pivot at MID-RAIL (where bolt connects rail to plate) — when rail
+    tilts forward, top swings BACK toward wall, bottom swings FORWARD.
+    Matches real tilt-mount physics.
+  * Two pivots per side (both at mid-rail, one per side) animate synchronously.
 """
 import bpy, math, os, subprocess, shutil
 from mathutils import Vector
 
 HERE     = os.path.dirname(__file__)
 PROJECT  = os.path.join(HERE, "..")
+MODELS   = os.path.join(HERE, "models")
 OUT_DIR  = os.path.join(PROJECT, "public", "assets", "renders")
 ANIM_TMP = os.path.join(OUT_DIR, "anim_tilt_cad")
 FFMPEG   = "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/imageio_ffmpeg/binaries/ffmpeg-macos-aarch64-v7.1"
+
+PLATE_GLB = os.path.join(MODELS, "sketchfab_mount_fixed.glb")
 
 W, H    = 480, 780
 FRAMES  = int(os.environ.get("LEVL_FRAMES", "144"))
@@ -164,124 +152,142 @@ def reparent(o, p):
     o.matrix_world = old
 
 
+def import_wall_plate(mat):
+    """Import sketchfab_mount_fixed.glb, keep only Object_4 (the wall plate
+    with bolt slots), apply BlackMetal, scale to ~1.2m wide, center at origin."""
+    before = set(bpy.context.scene.objects)
+    bpy.ops.import_scene.gltf(filepath=PLATE_GLB)
+    new_objs = [o for o in bpy.context.scene.objects if o not in before]
+    plate = bpy.data.objects.get("Object_4")
+    for o in new_objs:
+        if o is plate: continue
+        bpy.data.objects.remove(o, do_unlink=True)
+    if not plate: return None
+    plate.data.materials.clear()
+    plate.data.materials.append(mat)
+
+    # Scale to target width (1.2m) and center at origin
+    bpy.context.view_layer.update()
+    mins = [float('inf')]*3; maxs = [float('-inf')]*3
+    for c in plate.bound_box:
+        w = plate.matrix_world @ Vector(c)
+        for i in range(3):
+            mins[i] = min(mins[i], w[i]); maxs[i] = max(maxs[i], w[i])
+    width = maxs[0] - mins[0]
+    sc = 1.20 / max(width, 0.001)
+    plate.scale = (sc, sc, sc)
+    bpy.context.view_layer.update()
+    mins2 = [float('inf')]*3; maxs2 = [float('-inf')]*3
+    for c in plate.bound_box:
+        w = plate.matrix_world @ Vector(c)
+        for i in range(3):
+            mins2[i] = min(mins2[i], w[i]); maxs2[i] = max(maxs2[i], w[i])
+    cx = (mins2[0] + maxs2[0]) / 2
+    cy = (mins2[1] + maxs2[1]) / 2
+    cz = (mins2[2] + maxs2[2]) / 2
+    plate.location.x -= cx
+    plate.location.y -= cy
+    plate.location.z += (1.00 - cz)   # center vertically at Z=1.00
+    bpy.context.view_layer.update()
+    return plate
+
+
 def build_tilt_mount():
-    """Two-pivot articulating tilt mount per side (TopPivot + KneePivot).
-    Mirrors build_clean_mount() architecture."""
     mat = black_metal_mat()
+    plate = import_wall_plate(mat)
+    if plate is None:
+        return [], None
 
-    PLATE_W, PLATE_H, PLATE_T = 1.20, 0.55, 0.045
-    RAIL_W, RAIL_T            = 0.07, 0.045
-    UPPER_H                   = 0.30   # upper rail height
-    LOWER_H                   = 0.35   # lower rail height
-    HOOK_T                    = 0.045
-    GAP                       = 0.05
-    RAIL_X                    = 0.40
-    Z_BASE                    = 1.00
+    # Get plate world bbox after positioning
+    bpy.context.view_layer.update()
+    pmins = [float('inf')]*3; pmaxs = [float('-inf')]*3
+    for c in plate.bound_box:
+        w = plate.matrix_world @ Vector(c)
+        for i in range(3):
+            pmins[i] = min(pmins[i], w[i]); pmaxs[i] = max(pmaxs[i], w[i])
+    plate_y_min, plate_y_max = pmins[1], pmaxs[1]
+    plate_z_top = pmaxs[2]
+    plate_z_bot = pmins[2]
+    plate_z_ctr = (plate_z_top + plate_z_bot) / 2
+    plate_h = plate_z_top - plate_z_bot
 
-    plate_y_min = -PLATE_T / 2
-    plate_y_max = +PLATE_T / 2
-    plate_z_top = Z_BASE + PLATE_H / 2
+    # Rail dimensions
+    RAIL_W   = 0.07
+    RAIL_T   = 0.04
+    RAIL_EXT = 0.18           # how far rail extends above/below plate
+    GAP      = 0.04
+    RAIL_X   = 0.42
 
-    # Wall plate (static)
-    plate = make_box("WallPlate",
-        (0, 0, Z_BASE), (PLATE_W, PLATE_T, PLATE_H), mat)
+    rail_y_ctr = plate_y_min - GAP - RAIL_T / 2
+    rail_z_top = plate_z_top + RAIL_EXT
+    rail_z_bot = plate_z_bot - RAIL_EXT
+    rail_z_ctr = (rail_z_top + rail_z_bot) / 2
+    rail_h     = rail_z_top - rail_z_bot
+    pivot_z    = plate_z_ctr               # tilt pivot at MID-rail/plate-mid
 
-    pivots = {}
+    pivots = []
     for side, sign in (("L", -1), ("R", +1)):
         rail_x = sign * RAIL_X
-        rail_y_ctr = plate_y_min - GAP - RAIL_T / 2
 
-        # Heights
-        upper_z_top = plate_z_top + 0.05
-        upper_z_bot = upper_z_top - UPPER_H
-        upper_z_ctr = (upper_z_top + upper_z_bot) / 2
-        lower_z_top = upper_z_bot
-        lower_z_bot = lower_z_top - LOWER_H
-        lower_z_ctr = (lower_z_top + lower_z_bot) / 2
+        # ── Rail ──────────────────────────────────────────────
+        rail = make_box(f"Rail_{side}",
+            (rail_x, rail_y_ctr, rail_z_ctr),
+            (RAIL_W, RAIL_T, rail_h), mat)
 
-        # ── TopPivot at plate's top-near edge ────────────────────
-        bpy.ops.object.empty_add(type='PLAIN_AXES',
-            location=(rail_x, plate_y_min, plate_z_top))
-        top_piv = bpy.context.object; top_piv.name = f"TopPiv_{side}"
-
-        # Hook (slab over plate top, parented to TopPivot)
+        # ── Hook at top of rail (curves backward over plate top) ──
         hook_y_start = rail_y_ctr + RAIL_T/2
         hook_y_end   = plate_y_max + 0.04
         hook_y_len   = hook_y_end - hook_y_start
         hook = make_box(f"Hook_{side}",
-            (rail_x, (hook_y_start+hook_y_end)/2,
-             upper_z_top + HOOK_T/2 + 0.003),
-            (RAIL_W * 1.15, hook_y_len, HOOK_T), mat)
-        reparent(hook, top_piv)
+            (rail_x, (hook_y_start + hook_y_end)/2,
+             rail_z_top - 0.025),
+            (RAIL_W * 1.1, hook_y_len, 0.05), mat)
 
-        # Hook knuckle (visible pin at TopPivot)
-        hook_kn = make_cylinder(f"HookKnuckle_{side}",
-            (rail_x, plate_y_min, plate_z_top),
-            radius=0.018, depth=RAIL_W + 0.04, mat=mat, axis='X')
-        reparent(hook_kn, top_piv)
+        # ── Pivot bolt at MID — visible knuckle bridging rail and plate ──
+        bolt_y_start = rail_y_ctr + RAIL_T/2
+        bolt_y_end   = plate_y_min - 0.005
+        bolt_y_len   = bolt_y_end - bolt_y_start
+        bolt = make_box(f"PivotBolt_{side}",
+            (rail_x, (bolt_y_start + bolt_y_end)/2, pivot_z),
+            (0.045, bolt_y_len, 0.045), mat)
+        # Bolt head visible on rail face
+        bolt_head = make_cylinder(f"BoltHead_{side}",
+            (rail_x, rail_y_ctr - RAIL_T/2 - 0.012, pivot_z),
+            radius=0.022, depth=0.025, mat=mat, axis='Y')
 
-        # Upper rail (parented to TopPivot)
-        upper = make_box(f"UpperRail_{side}",
-            (rail_x, rail_y_ctr, upper_z_ctr),
-            (RAIL_W, RAIL_T, UPPER_H), mat)
-        reparent(upper, top_piv)
-
-        # ── KneePivot at upper-rail bottom (child of TopPivot) ───
-        bpy.ops.object.empty_add(type='PLAIN_AXES',
-            location=(rail_x, rail_y_ctr, upper_z_bot))
-        knee_piv = bpy.context.object; knee_piv.name = f"KneePiv_{side}"
-        reparent(knee_piv, top_piv)
-
-        # Knee knuckle (visible)
-        knee_kn = make_cylinder(f"KneeKnuckle_{side}",
-            (rail_x, rail_y_ctr, upper_z_bot),
-            radius=0.014, depth=RAIL_W + 0.025, mat=mat, axis='X')
-        reparent(knee_kn, knee_piv)
-
-        # Lower rail (parented to KneePivot)
-        lower = make_box(f"LowerRail_{side}",
-            (rail_x, rail_y_ctr, lower_z_ctr),
-            (RAIL_W, RAIL_T, LOWER_H), mat)
-        reparent(lower, knee_piv)
-
-        # Knobs (3) on lower rail, parented to KneePivot
-        knob_y = rail_y_ctr - RAIL_T/2 - 0.015
-        for i, dz in enumerate([+0.10, +0.00, -0.10]):
-            kn = make_cylinder(f"Knob_{side}_{i}",
-                (rail_x, knob_y, lower_z_ctr + dz),
-                radius=0.014, depth=0.04, mat=mat, axis='Y')
-            reparent(kn, knee_piv)
-
-        # Pull string + tag, parented to KneePivot
+        # ── Pull string + tag at BOTTOM of rail ──
         pull = make_cylinder(f"PullString_{side}",
-            (rail_x, rail_y_ctr, lower_z_bot - 0.12),
+            (rail_x, rail_y_ctr, rail_z_bot - 0.12),
             radius=0.0035, depth=0.20, mat=mat, axis='Z')
-        reparent(pull, knee_piv)
         tag = make_box(f"PullTag_{side}",
-            (rail_x, rail_y_ctr, lower_z_bot - 0.245),
+            (rail_x, rail_y_ctr, rail_z_bot - 0.245),
             (0.025, 0.012, 0.022), mat)
-        reparent(tag, knee_piv)
 
-        pivots[side] = {"top": top_piv, "knee": knee_piv}
+        # ── TiltPivot at MID-rail (the bolt pivot axis, X-axis horizontal) ──
+        bpy.ops.object.empty_add(type='PLAIN_AXES',
+            location=(rail_x, plate_y_min, pivot_z))
+        tilt = bpy.context.object
+        tilt.name = f"TiltPivot_{side}"
+
+        for o in [rail, hook, bolt, bolt_head, pull, tag]:
+            reparent(o, tilt)
+
+        pivots.append(tilt)
 
     return pivots, plate
 
 
 def keyframe_tilt(pivots):
-    """TopPivot does the main tilt; KneePivot adds a phase-shifted flex —
-    independent rotations create articulation across the rail length."""
-    AMP_TOP  = math.radians(15)
-    AMP_KNEE = math.radians(4)
+    """Both TiltPivots rotate ±15° around X axis at MID-rail. Top of rails
+    swings back, bottom swings forward — matches real tilt-mount motion."""
+    amp = math.radians(15)
     for f in range(1, FRAMES + 1):
         t = (f - 1) / FRAMES
         bpy.context.scene.frame_set(f)
-        theta_top  = AMP_TOP  * math.sin(2 * math.pi * t)
-        theta_knee = AMP_KNEE * math.sin(2 * math.pi * t + math.pi / 3)
-        for side, p in pivots.items():
-            p["top"].rotation_euler[0] = theta_top
-            p["top"].keyframe_insert("rotation_euler", index=0, frame=f)
-            p["knee"].rotation_euler[0] = theta_knee
-            p["knee"].keyframe_insert("rotation_euler", index=0, frame=f)
+        angle = math.sin(t * 2 * math.pi) * amp
+        for p in pivots:
+            p.rotation_euler[0] = angle
+            p.keyframe_insert("rotation_euler", index=0, frame=f)
 
 
 def main():
