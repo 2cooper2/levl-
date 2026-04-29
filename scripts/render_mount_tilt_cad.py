@@ -296,29 +296,43 @@ def _drill_holes(arm, world_x, world_y_ctr, z_bot, z_top, post_d,
         bpy.data.objects.remove(cutter, do_unlink=True)
 
 
-def build_arms(tilt, mat, bracket_y_front, bracket_y_back,
-               bracket_z_top, bracket_z_bot, post_dx):
-    """Two long thin vertical arms with VESA hole pattern. Arms intersect
-    Object_6 — the rear half of each arm is INSIDE the hook bracket's rail
-    body so the arm reads as part of the hook-mount assembly (not a
-    separate piece floating in front). Extends slightly ABOVE Object_6 top
-    and well BELOW the bottom. Pivots from the top of Object_6."""
-    POST_T       = 0.048          # arm thickness (X) — closer to rail width
-    POST_D       = 0.040          # arm depth (Y) — bigger so it visibly merges
+def build_detents(mat, bracket_y_front, bracket_z_ctr, post_dx, depth):
+    """Tilt-detent housings — STATIONARY blocks that protrude forward from
+    Object_6's front face at each arm's X position. They provide the
+    forward pivot point that the arm rocks around (matches the curved-arc
+    detent + central pin you see in real tilt mounts). Returns (detents,
+    pivot_y) where pivot_y is the front face of the detents."""
+    DETENT_T      = 0.058           # slightly wider than arm so it shows
+    DETENT_HEIGHT = 0.110            # short — just centered at middle
+    d_y_back  = bracket_y_front
+    d_y_front = bracket_y_front - depth
+    d_y_ctr   = (d_y_back + d_y_front) / 2
+    detents = []
+    for sx in (-post_dx, +post_dx):
+        d = make_box(f"detent_{'L' if sx < 0 else 'R'}",
+                     (sx, d_y_ctr, bracket_z_ctr),
+                     (DETENT_T, depth, DETENT_HEIGHT), mat)
+        detents.append(d)
+    return detents, d_y_front
+
+
+def build_arms(tilt, mat, pivot_y, bracket_z_top, bracket_z_bot, post_dx):
+    """Two long thin vertical arms with VESA hole pattern. Arms sit ENTIRELY
+    in front of the detent housings (no clipping into Object_6/plate),
+    pivoting around the detent front (the middle of the assembly).
+    Extends slightly ABOVE bracket top and well BELOW the bottom."""
+    POST_T       = 0.048          # arm thickness (X)
+    POST_D       = 0.022          # arm depth (Y) — thin
     EXTEND_BELOW = 0.30
-    EXTEND_ABOVE = 0.05           # small portion above Object_6 top
+    EXTEND_ABOVE = 0.05
 
     arm_z_top = bracket_z_top + EXTEND_ABOVE
     arm_z_bot = bracket_z_bot - EXTEND_BELOW
     H         = arm_z_top - arm_z_bot
     Z_CTR     = (arm_z_top + arm_z_bot) / 2
-    # Arm Y center sits at Object_6's front face → arm front protrudes by
-    # POST_D/2 in front of the hooks, arm back is buried INSIDE Object_6 by
-    # POST_D/2. The intersection makes the arm read as integral to the hook
-    # bracket. We use the bracket front face as the merge plane.
-    bracket_depth = bracket_y_back - bracket_y_front
-    embed = min(POST_D / 2, bracket_depth * 0.6)  # don't poke out the back
-    Y_CTR = bracket_y_front - POST_D / 2 + embed
+    # Arm back face touches the detent front face — pivot_y. Arm body
+    # extends forward from there. No overlap with anything behind.
+    Y_CTR = pivot_y - POST_D / 2
 
     posts = []
     for sx in (-post_dx, +post_dx):
@@ -344,22 +358,28 @@ def build_tilt_mount():
     bmins, bmaxs = _world_bbox(bracket)
 
     bracket_y_front = bmins[1]                  # front face of Object_6
-    bracket_z_top   = bmaxs[2]                  # top of Object_6 (hook line)
+    bracket_z_top   = bmaxs[2]                  # top of Object_6
     bracket_z_bot   = bmins[2]                  # bottom of Object_6
-    # Cradle vertical posts mirror Object_6's two-rail X positions
+    bracket_z_ctr   = (bracket_z_top + bracket_z_bot) / 2
+    # Vertical-arm X centers mirror Object_6's two-rail positions
     post_dx = (bmaxs[0] - bmins[0]) * 0.44
 
-    # Tilt pivot at the TOP of Object_6, on its front face — where the cradle
-    # pins onto the hook bracket. Cradle rocks on this line.
+    # Stationary tilt-detent housings sticking forward from Object_6 at the
+    # MIDDLE of the assembly. The arms pivot on the detent front face.
+    DETENT_DEPTH = 0.045
+    _detents, pivot_y = build_detents(
+        mat, bracket_y_front, bracket_z_ctr, post_dx, DETENT_DEPTH)
+
+    # TiltPivot at the MIDDLE Z (where the detent sits) and forward at the
+    # detent front face — that's the real-world pivot pin location.
     bpy.ops.object.empty_add(type='PLAIN_AXES',
-        location=(0, bracket_y_front, bracket_z_top))
+        location=(0, pivot_y, bracket_z_ctr))
     tilt = bpy.context.object
     tilt.name = "TiltPivot"
 
     arms_y_ctr, _posts, arm_z_bot = build_arms(
         tilt, mat,
-        bracket_y_front=bracket_y_front,
-        bracket_y_back=bmaxs[1],
+        pivot_y=pivot_y,
         bracket_z_top=bracket_z_top,
         bracket_z_bot=bracket_z_bot,
         post_dx=post_dx,
@@ -381,10 +401,10 @@ def build_tilt_mount():
 
 
 def keyframe_tilt(tilt):
-    """Single TiltPivot rocks ±14° around X. Bracket top stays anchored at
-    plate top edge (the hook line); bottom swings forward then back. The
-    cord physics is handled by the cloth solver — no keyframes needed."""
-    AMP = math.radians(14)
+    """Arms rock ±8° around X at the middle detent pivot — top swings back
+    toward the wall, bottom swings out forward (real tilt-mount motion).
+    Cord physics is handled by the cloth solver — no string keyframes."""
+    AMP = math.radians(8)
     for f in range(1, FRAMES + 1):
         t = (f - 1) / FRAMES
         tilt.rotation_euler[0] = AMP * math.sin(2 * math.pi * t)
