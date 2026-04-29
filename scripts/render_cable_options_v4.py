@@ -180,9 +180,9 @@ def drywall_mat(tile_u=2.0, tile_v=2.8, norm_strength=0.8, disp_scale=0.0):
         return nd
 
     # Skip the bundled diffuse (it's too orange in this lighting). Use a
-    # neutral off-white base and let the normal+roughness maps add the
+    # bright clean white base and let the normal+roughness maps add the
     # micro-surface drywall feel.
-    bsdf.inputs['Base Color'].default_value = (0.92, 0.91, 0.88, 1.0)
+    bsdf.inputs['Base Color'].default_value = (0.97, 0.96, 0.95, 1.0)
     if os.path.exists(DW_ROUGH):
         r = img(DW_ROUGH, 'Non-Color')
         nt.links.new(r.outputs['Color'], bsdf.inputs['Roughness'])
@@ -212,10 +212,11 @@ TV_H         = 0.50           # TV height Z
 TV_D         = 0.040
 TV_FRONT_FACE_Y = WALL_FRONT_Y - TV_D - 0.005   # TV face just in front of wall
 TV_X         = WALL_X         # TV centered on wall
-TV_Z         = 1.20           # TV vertical center
+TV_Z         = 1.45           # TV vertical center — raised to leave more
+                              # room below for the cable management visuals
 TV_BOT_Z     = TV_Z - TV_H / 2
 
-OUTLET_Z     = 0.30
+OUTLET_Z     = 0.18
 CABLE_TV_Z   = TV_BOT_Z - 0.005
 CABLE_OUT_Z  = OUTLET_Z + 0.04
 CABLE_X_OFF  = WALL_X         # cable centered on wall too
@@ -284,19 +285,45 @@ def build_wall(cutout=None):
 
 
 def screen_mat_glossy(name="TVScreen"):
-    """Glossy glass-like TV screen with clearcoat for window-pane reflection.
-    Base is near-black, clearcoat adds the bright highlight that makes a
-    real flat-panel TV read as glass instead of flat black."""
+    """Powered-on flat-panel TV screen — gradient-emissive panel mixed with
+    a glossy clearcoat top so the screen reads as both 'on' (faint glow)
+    and 'glass' (sharp window-pane highlight). Replaces the flat-black
+    look that read as 'TV is off'."""
     m = bpy.data.materials.new(name)
     m.use_nodes = True
-    p = m.node_tree.nodes["Principled BSDF"]
-    p.inputs["Base Color"].default_value = (0.008, 0.008, 0.012, 1.0)
-    p.inputs["Metallic"].default_value   = 0.0
-    p.inputs["Roughness"].default_value  = 0.05
-    # Coat (Blender 4+) — adds a glass-like top layer over the base
-    if "Coat Weight" in p.inputs:
-        p.inputs["Coat Weight"].default_value     = 1.0
-        p.inputs["Coat Roughness"].default_value  = 0.04
+    nt = m.node_tree
+    for n in list(nt.nodes): nt.nodes.remove(n)
+
+    # Vertical gradient color for the screen — cool grey-blue top fading
+    # toward warmer dark-grey at bottom, as a faint TV-on hint.
+    tc       = nt.nodes.new('ShaderNodeTexCoord')
+    grad     = nt.nodes.new('ShaderNodeTexGradient')
+    cramp    = nt.nodes.new('ShaderNodeValToRGB')
+    cramp.color_ramp.elements[0].color = (0.06, 0.10, 0.18, 1.0)
+    cramp.color_ramp.elements[1].color = (0.020, 0.030, 0.060, 1.0)
+    nt.links.new(tc.outputs['Generated'], grad.inputs['Vector'])
+    nt.links.new(grad.outputs['Color'], cramp.inputs['Fac'])
+
+    em = nt.nodes.new('ShaderNodeEmission')
+    em.inputs['Strength'].default_value = 1.6
+    nt.links.new(cramp.outputs['Color'], em.inputs['Color'])
+
+    bsdf = nt.nodes.new('ShaderNodeBsdfPrincipled')
+    bsdf.inputs["Base Color"].default_value = (0.005, 0.005, 0.008, 1.0)
+    bsdf.inputs["Metallic"].default_value   = 0.0
+    bsdf.inputs["Roughness"].default_value  = 0.04
+    if "Coat Weight" in bsdf.inputs:
+        bsdf.inputs["Coat Weight"].default_value     = 1.0
+        bsdf.inputs["Coat Roughness"].default_value  = 0.03
+
+    # Mix BSDF (reflective glass) over emission base
+    mix = nt.nodes.new('ShaderNodeMixShader')
+    mix.inputs['Fac'].default_value = 0.55          # 55% bsdf / 45% emission
+    nt.links.new(em.outputs['Emission'], mix.inputs[1])
+    nt.links.new(bsdf.outputs['BSDF'],   mix.inputs[2])
+
+    out = nt.nodes.new('ShaderNodeOutputMaterial')
+    nt.links.new(mix.outputs['Shader'], out.inputs['Surface'])
     return m
 
 
@@ -344,6 +371,13 @@ def build_tv():
              (TV_X, TV_FRONT_FACE_Y + TV_D + 0.014, TV_Z),
              (TV_W * 0.52, 0.020, TV_H * 0.42),
              bracket_mat, bevel_w=0.003)
+
+    # Tiny status LED on the bottom bezel (the 'TV is on' dot)
+    led_mat = emission_mat("TVLed", (0.20, 1.00, 0.30), strength=8.0)
+    make_box("TVLed",
+             (TV_X, bz_y - 0.0005, TV_Z - TV_H / 2 + BEZEL_T / 2),
+             (0.006, 0.001, 0.003), led_mat, bevel_w=0.0)
+
     return None, []
 
 
@@ -487,11 +521,76 @@ def setup_hidden():
             d.keyframe_insert("scale", index=0, frame=f)
             d.keyframe_insert("scale", index=2, frame=f)
 
-    # ── 5. Outlet face plug (small black nub at outlet) ─────────────────
+    # ── 5. Wall faceplate at the BOTTOM of the cutout (cable exit hole) ─
+    # Sized prominently so the user can clearly see "cable exits HERE
+    # through a wall faceplate, then plugs into the outlet below".
+    fp_mat = mat_pbr("Faceplate", (0.97, 0.96, 0.94), 0.0, 0.42)
+    fp_hole_mat = mat_pbr("FpHole", (0.05, 0.05, 0.06), 0.0, 0.55)
+    fp_z = CUT_BOT_Z - 0.015                  # just below cutout opening
+    make_box("Faceplate",
+             (CABLE_X_OFF, WALL_FRONT_Y - 0.004, fp_z),
+             (0.13, 0.007, 0.072), fp_mat, bevel_w=0.003)
+    make_box("FaceplateHole",
+             (CABLE_X_OFF, WALL_FRONT_Y - 0.008, fp_z),
+             (0.038, 0.001, 0.026), fp_hole_mat, bevel_w=0.0)
+
+    # ── 6. Visible cord from faceplate down to outlet plug ──────────────
+    cord_mat = mat_pbr("Cord", (0.05, 0.05, 0.06), 0.0, 0.55)
+    cord_curve = bpy.data.curves.new("Cord_curve", 'CURVE')
+    cord_curve.dimensions = '3D'
+    cord_curve.bevel_depth = 0.006
+    cord_curve.bevel_resolution = 6
+    sp = cord_curve.splines.new('BEZIER')
+    cord_pts = [
+        (CABLE_X_OFF, WALL_FRONT_Y - 0.008, fp_z - 0.012),
+        (CABLE_X_OFF, WALL_FRONT_Y - 0.018, (fp_z + OUTLET_Z) / 2),
+        (CABLE_X_OFF, WALL_FRONT_Y - 0.012, OUTLET_Z + 0.018),
+    ]
+    sp.bezier_points.add(len(cord_pts) - 1)
+    for i, (x, y, z) in enumerate(cord_pts):
+        bp = sp.bezier_points[i]
+        bp.handle_left_type = bp.handle_right_type = 'AUTO'
+        bp.co = Vector((x, y, z))
+    cord_obj = bpy.data.objects.new("FpCord", cord_curve)
+    bpy.context.collection.objects.link(cord_obj)
+    cord_obj.data.materials.append(cord_mat)
+
+    # ── 7. Outlet face plug (the cord plug at the outlet) ───────────────
     plug_mat = mat_pbr("OutletPlug", (0.05, 0.05, 0.06), 0.0, 0.45)
     make_box("OutletPlug",
              (CABLE_X_OFF, WALL_FRONT_Y - 0.012, OUTLET_Z + 0.018),
              (0.022, 0.018, 0.022), plug_mat, bevel_w=0.002)
+
+    # ── 8. Drywall PATCH that fades in to COVER the cutaway at the end ──
+    # Sized to cover the entire cutout opening; fades from alpha 0 (fully
+    # transparent at frame 1) to alpha 1 (fully opaque drywall) over the
+    # last quarter of the animation. Uses the same drywall PBR so it
+    # blends in seamlessly when fully visible.
+    patch_mat = drywall_mat()
+    patch_mat.blend_method = 'BLEND'
+    try: patch_mat.shadow_method = 'HASHED'
+    except Exception: pass
+    # Add an Alpha-driving Math node into the BSDF
+    nt = patch_mat.node_tree
+    bsdf = next(n for n in nt.nodes if n.type == 'BSDF_PRINCIPLED')
+    val_node = nt.nodes.new('ShaderNodeValue')
+    val_node.outputs[0].default_value = 0.0
+    val_node.name = "PatchAlpha"
+    nt.links.new(val_node.outputs[0], bsdf.inputs["Alpha"])
+    patch = make_box("CutoutPatch",
+             (CABLE_X_OFF, WALL_FRONT_Y - 0.0008, cut_z_ctr),
+             (CUT_W + 0.020, 0.004, cut_h + 0.020),
+             patch_mat, bevel_w=0.0)
+
+    # Animate the alpha value: 0 (transparent) hold, then ramp to 1.
+    val_node.outputs[0].default_value = 0.0
+    val_node.outputs[0].keyframe_insert("default_value", frame=1)
+    val_node.outputs[0].keyframe_insert("default_value",
+                                         frame=int(FRAMES * 0.65))
+    val_node.outputs[0].default_value = 1.0
+    val_node.outputs[0].keyframe_insert("default_value",
+                                         frame=int(FRAMES * 0.95))
+    val_node.outputs[0].keyframe_insert("default_value", frame=FRAMES)
 
 
 # ── Scenario B: COVERS — cover GROWS DOWN from TV bottom over the cable ──────
@@ -510,26 +609,32 @@ def setup_covers():
     make_cable_curve("Cable", spine)
     cover_y_ctr = WALL_FRONT_Y - 0.062
 
-    # Cover sized to fully wrap the cord from TV-bottom down to just above
-    # the outlet. Slides DOWN as one piece (translate, not grow) — like
-    # someone is installing it.
+    # Cover anchored at TV bottom edge, grows DOWNWARD over the cord.
+    # Build it at full final size, then move the object's origin to the
+    # TOP edge of the cover so scaling Z scales it downward only.
     cover_top    = CABLE_TV_Z - 0.005
-    cover_bot    = CABLE_OUT_Z + 0.010
+    cover_bot    = CABLE_OUT_Z + 0.020
     cover_h      = cover_top - cover_bot
-    cover_z_end  = (cover_top + cover_bot) / 2     # final Z (over cord)
-    cover_z_off  = (TV_Z + 0.40) + cover_h         # starting Z (above TV)
-    cover_mat = mat_pbr("Raceway", (0.96, 0.95, 0.93), 0.0, 0.35)
+    cover_mat    = mat_pbr("Raceway", (0.97, 0.96, 0.94), 0.0, 0.32)
+
+    # Create cover centered on its final position
     cover = make_box("Raceway",
-                     (CABLE_X_OFF, cover_y_ctr, cover_z_off),
+                     (CABLE_X_OFF, cover_y_ctr, (cover_top + cover_bot) / 2),
                      (0.115, 0.085, cover_h),
                      cover_mat, bevel_w=0.030, bevel_segs=5)
+    # Re-anchor: move origin to the TOP edge of the cover so scale Z
+    # extends downward instead of from the center.
+    cover.location.z = cover_top
+    for v in cover.data.vertices:
+        v.co.z -= 0.5            # base mesh was centered at 0; shift so top=0
 
-    # Translate downward over time — final position fully covers cord.
-    cover.location.z = cover_z_off
-    cover.keyframe_insert("location", index=2, frame=1)
-    cover.location.z = cover_z_end
-    cover.keyframe_insert("location", index=2, frame=int(FRAMES * 0.70))
-    cover.keyframe_insert("location", index=2, frame=FRAMES)
+    # Animate Z scale 0.02 (effectively zero — at TV bottom) → 1.0 (full
+    # cord covered). Cover GROWS DOWNWARD from the TV-bottom anchor.
+    cover.scale.z = 0.02
+    cover.keyframe_insert("scale", index=2, frame=1)
+    cover.scale.z = 1.0
+    cover.keyframe_insert("scale", index=2, frame=int(FRAMES * 0.75))
+    cover.keyframe_insert("scale", index=2, frame=FRAMES)
 
 
 # ── Scenario C: VISIBLE — cable just dangles, no animation ───────────────────
