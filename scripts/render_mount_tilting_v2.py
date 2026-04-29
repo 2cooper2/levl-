@@ -79,15 +79,17 @@ def setup_world():
     nt.links.new(bg.outputs['Background'], out.inputs['Surface'])
 
 
-def add_camera(fov_deg=48, cam_pos=(2.80, -1.75, 1.30), look_at=(0.30, 0, 1.00)):
+def add_camera_fitted(center, size, fov_deg=42):
+    """Place camera at a 3/4 angle so the mount fills the 480x780 frame."""
     cd = bpy.data.cameras.new('Camera')
     cd.lens_unit = 'FOV'; cd.angle = math.radians(fov_deg)
     cd.clip_start = 0.01; cd.clip_end = 50.0
     co = bpy.data.objects.new('Camera', cd)
     bpy.context.collection.objects.link(co)
     bpy.context.scene.camera = co
-    co.location = Vector(cam_pos)
-    co.rotation_euler = (Vector(look_at) - Vector(cam_pos)).to_track_quat('-Z', 'Y').to_euler()
+    cam_dist = size * 1.85
+    co.location = Vector(center) + Vector((cam_dist, -cam_dist, cam_dist * 0.3))
+    co.rotation_euler = (Vector(center) - co.location).to_track_quat('-Z', 'Y').to_euler()
 
 
 def add_lights():
@@ -121,9 +123,8 @@ def black_metal_mat():
 
 
 def import_and_setup():
-    """Import the tilting GLB, scale + center, return (static_parts,
-    moving_part). The GLB has 3 objects: Object_2 (small detail), Object_3
-    (back plate / static), Object_4 (front bracket / movable)."""
+    """Import the tilting GLB and return (new_objs, root, world_center, world_size).
+    Mount is centered at origin and scaled to ~2 units max dimension."""
     before = set(bpy.context.scene.objects)
     bpy.ops.import_scene.gltf(filepath=GLB)
     new_objs = [o for o in bpy.context.scene.objects if o not in before]
@@ -133,7 +134,6 @@ def import_and_setup():
             o.data.materials.clear()
             o.data.materials.append(mat)
 
-    # Compute combined bbox
     mins = [float('inf')]*3; maxs = [float('-inf')]*3
     for o in new_objs:
         if o.type != 'MESH': continue
@@ -145,7 +145,6 @@ def import_and_setup():
     sc = 2.0 / max(biggest, 0.001)
     cx = (mins[0]+maxs[0])/2; cy = (mins[1]+maxs[1])/2; cz_min = mins[2]
 
-    # Wrap under root for unified scale + position
     bpy.ops.object.empty_add(type='PLAIN_AXES', location=(0, 0, 0))
     root = bpy.context.object; root.name = "TiltMountRoot"
     for o in list(new_objs):
@@ -159,7 +158,9 @@ def import_and_setup():
     root.scale = (sc, sc, sc)
     root.location = (-sc * cx, -sc * cy, -sc * cz_min + 0.6)
     bpy.context.view_layer.update()
-    return new_objs, root
+    world_center = Vector((0, 0, sc * (maxs[2] - cz_min) / 2 + 0.6))
+    world_size = sc * biggest
+    return new_objs, root, world_center, world_size
 
 
 def keyframe_tilt(moving_part, root):
@@ -203,10 +204,10 @@ def main():
     reset()
     setup_render(frame_dir)
     setup_world()
-    add_camera()
     add_lights()
     add_shadow_catcher()
-    new_objs, root = import_and_setup()
+    new_objs, root, world_center, world_size = import_and_setup()
+    add_camera_fitted(world_center, world_size)
 
     # Object_4 is the front bracket (movable in real tilting mounts)
     moving = bpy.data.objects.get("Object_4")
