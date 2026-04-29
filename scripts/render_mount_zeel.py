@@ -610,11 +610,35 @@ def keyframe_tilt(parts):
     if not (movers and main_ctrl):
         return
 
-    # Shift rails far forward (toward camera) so they're clearly in front
-    # of the plate's near face — far enough that even the VESA slots don't
-    # show the rails behind them.
+    # Shift rails forward so they sit in front of the plate (no clipping).
     for o in movers:
         o.location.y -= 0.35
+    bpy.context.view_layer.update()
+
+    # Add pull strings hanging from the bottom of each rail (real tilt
+    # mounts have these for tilt-release). Thin cylinders, 12cm long.
+    bar_mat = bpy.data.materials.get("BlackMetal")
+    pull_strings = []
+    for r in rails:
+        if r is None: continue
+        rmins = [float('inf')]*3; rmaxs = [float('-inf')]*3
+        for c in r.bound_box:
+            w = r.matrix_world @ Vector(c)
+            for i in range(3):
+                rmins[i] = min(rmins[i], w[i]); rmaxs[i] = max(rmaxs[i], w[i])
+        bot_z = rmins[2]
+        cx = (rmins[0] + rmaxs[0]) / 2
+        cy = (rmins[1] + rmaxs[1]) / 2
+        bpy.ops.mesh.primitive_cylinder_add(
+            radius=0.006, depth=0.18,
+            location=Vector((cx, cy, bot_z - 0.10)))
+        s = bpy.context.object
+        s.name = f"PullString_{r.name}"
+        bpy.context.view_layer.update()
+        bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
+        if bar_mat:
+            s.data.materials.clear(); s.data.materials.append(bar_mat)
+        pull_strings.append(s)
     bpy.context.view_layer.update()
 
     bpy.context.view_layer.update()
@@ -634,7 +658,7 @@ def keyframe_tilt(parts):
     tilt.parent = main_ctrl
     tilt.matrix_parent_inverse = main_ctrl.matrix_world.inverted()
     tilt.matrix_world = old
-    for o in movers:
+    for o in movers + pull_strings:
         old = o.matrix_world.copy()
         o.parent = tilt
         o.matrix_parent_inverse = tilt.matrix_world.inverted()
