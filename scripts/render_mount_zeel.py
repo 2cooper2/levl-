@@ -610,11 +610,11 @@ def keyframe_tilt(parts):
     if not (movers and main_ctrl):
         return
 
-    # Shift rails forward (toward camera) so they sit fully in front of the
-    # VESA plate (no Y overlap = no clipping). At -0.22 the rails' max Y is
-    # just past the plate's near face.
+    # Shift rails far forward (toward camera) so they're clearly in front
+    # of the plate's near face — far enough that even the VESA slots don't
+    # show the rails behind them.
     for o in movers:
-        o.location.y -= 0.22
+        o.location.y -= 0.35
     bpy.context.view_layer.update()
 
     bpy.context.view_layer.update()
