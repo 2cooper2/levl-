@@ -1,16 +1,15 @@
 """
-render_mount_tilt_cad.py — Sketchfab-bracket tilt mount with cloth-sim strings:
+render_mount_tilt_cad.py — Sketchfab-bracket tilt mount with rounded arms:
   * Wall plate (Object_4) + hook bracket (Object_6) + clamps (Object_10) from
     sketchfab_mount_fixed.glb — all STATIONARY, locked to the wall.
-  * TV-side: just two vertical arms (long thin posts) attached to the hook
-    bracket and pivoting from its top edge.
-  * Tilt pivot at the top of Object_6. Arms top stays anchored at the hook
-    line; arms bottom swings forward / back as it tilts.
-  * Pull strings hang from each arm bottom — REAL Blender cloth simulation
-    (pinned top, free bottom, gravity + air damping). Baked before render.
+  * Round tilt-housings stick forward from Object_6 at each arm's X
+    position (the round black piece between bracket and arm).
+  * Two heavily-beveled rounded vertical arms (full-motion-mount profile)
+    with VESA holes drilled through. Centered Z = housing center, so the
+    arm pivots around its own middle.
 """
-import bpy, bmesh, math, os, subprocess, shutil
-from mathutils import Vector, Matrix
+import bpy, math, os, subprocess, shutil
+from mathutils import Vector
 
 HERE     = os.path.dirname(__file__)
 PROJECT  = os.path.join(HERE, "..")
@@ -128,10 +127,30 @@ def reparent(o, p):
     o.matrix_world = old
 
 
-def make_box(name, location, size, mat, bevel_w=0.003):
-    """Beveled cube primitive — used for cradle posts and cross-bars."""
+def make_box(name, location, size, mat, bevel_w=0.003, bevel_segments=2):
+    """Beveled cube primitive — heavy bevel makes the box read as a rounded
+    rod (full-motion-arm profile)."""
     bpy.ops.mesh.primitive_cube_add(size=1.0, location=location)
     o = bpy.context.object; o.name = name; o.scale = size
+    bpy.context.view_layer.update()
+    bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
+    bev = o.modifiers.new("Bevel", 'BEVEL')
+    bev.width = bevel_w
+    bev.segments = bevel_segments
+    o.data.materials.clear(); o.data.materials.append(mat)
+    return o
+
+
+def make_cylinder_y(name, location, radius, depth, mat, segments=32, bevel_w=0.003):
+    """Cylinder oriented with axis along Y — appears as a circle from the
+    front camera (which looks along +Y). Used for the round tilt-housing
+    that pokes forward from Object_6."""
+    bpy.ops.mesh.primitive_cylinder_add(
+        radius=radius, depth=depth, vertices=segments,
+        location=location,
+        rotation=(math.radians(90), 0, 0),
+    )
+    o = bpy.context.object; o.name = name
     bpy.context.view_layer.update()
     bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
     bev = o.modifiers.new("Bevel", 'BEVEL'); bev.width = bevel_w; bev.segments = 2
@@ -195,67 +214,6 @@ def import_assembly(mat):
     return plate, bracket, clamps
 
 
-def make_cloth_string(name, world_top, mat, length=0.30, radius=0.012,
-                      segments=24, sides=10):
-    """Subdivided cylinder mesh with Cloth modifier. Top ring is in 'Pin'
-    vertex group with weight 1.0 → the cloth solver clamps those verts to
-    their object-local origin position. Object is parented to anchor empty,
-    so when the anchor moves with the rail, the pinned top moves in WORLD,
-    and gravity + bending make the rest swing physically."""
-    mesh = bpy.data.meshes.new(name + "_mesh")
-    obj  = bpy.data.objects.new(name, mesh)
-    bpy.context.collection.objects.link(obj)
-    bm = bmesh.new()
-    rings = []
-    for i in range(segments + 1):
-        z = -i * (length / segments)         # local: top at z=0
-        ring = []
-        for j in range(sides):
-            ang = 2 * math.pi * j / sides
-            ring.append(bm.verts.new((radius * math.cos(ang),
-                                      radius * math.sin(ang), z)))
-        rings.append(ring)
-    bm.verts.ensure_lookup_table()
-    for i in range(segments):
-        for j in range(sides):
-            j2 = (j + 1) % sides
-            bm.faces.new([rings[i][j], rings[i][j2],
-                          rings[i+1][j2], rings[i+1][j]])
-    bm.faces.new(rings[0])                       # top cap
-    bm.faces.new(list(reversed(rings[segments]))) # bottom cap
-    bm.to_mesh(mesh); bm.free()
-    obj.data.materials.append(mat)
-
-    # Place object so its origin (z=0 local) sits at world_top — set the
-    # matrix directly so the world transform is committed *before* reparent
-    # reads matrix_world.
-    obj.matrix_world = Matrix.Translation(Vector(world_top))
-    bpy.context.view_layer.update()
-
-    # Pin group — top ring (vertices with z >= -1e-4)
-    vg = obj.vertex_groups.new(name="Pin")
-    top_idxs = [v.index for v in obj.data.vertices if v.co.z > -1e-4]
-    vg.add(top_idxs, 1.0, 'REPLACE')
-
-    cloth = obj.modifiers.new("Cloth", 'CLOTH')
-    cs = cloth.settings
-    cs.vertex_group_mass     = "Pin"
-    cs.pin_stiffness         = 1.0
-    cs.mass                  = 0.012          # 12g per cord — light pull cord
-    cs.tension_stiffness     = 35             # rigid in length
-    cs.compression_stiffness = 35
-    cs.shear_stiffness       = 35
-    cs.bending_stiffness     = 0.04           # very floppy → swings
-    cs.bending_damping       = 0.4
-    cs.air_damping           = 1.8            # natural settle
-    cs.tension_damping       = 5
-    cs.compression_damping   = 5
-    cs.shear_damping         = 5
-    cloth.collision_settings.use_collision      = False
-    cloth.collision_settings.use_self_collision = False
-    return obj
-
-
 def _drill_holes(arm, world_x, world_y_ctr, z_bot, z_top, post_d,
                  n_holes=10, hole_radius=0.006):
     """Punch round VESA-style holes down the arm (matches the reference
@@ -296,108 +254,90 @@ def _drill_holes(arm, world_x, world_y_ctr, z_bot, z_top, post_d,
         bpy.data.objects.remove(cutter, do_unlink=True)
 
 
-def build_detents(mat, bracket_y_front, bracket_z_ctr, post_dx, depth):
-    """Tilt-detent housings — STATIONARY blocks that protrude forward from
-    Object_6's front face at each arm's X position. They provide the
-    forward pivot point that the arm rocks around (matches the curved-arc
-    detent + central pin you see in real tilt mounts). Returns (detents,
-    pivot_y) where pivot_y is the front face of the detents."""
-    DETENT_T      = 0.058           # slightly wider than arm so it shows
-    DETENT_HEIGHT = 0.110            # short — just centered at middle
-    d_y_back  = bracket_y_front
-    d_y_front = bracket_y_front - depth
-    d_y_ctr   = (d_y_back + d_y_front) / 2
-    detents = []
+def build_housings(mat, bracket_y_front, bracket_z_ctr, post_dx, depth):
+    """Round tilt-housings — STATIONARY cylinders (axis along Y) that poke
+    forward from Object_6's front face at each arm's X position. From the
+    front camera they read as filled circles. The arm pivots on the
+    housing's front face center (where the pivot pin would be). Returns
+    (housings, pivot_y) where pivot_y is the front face of the housings."""
+    HOUSING_R = 0.058               # ~12 cm diameter housing
+    h_y_back  = bracket_y_front
+    h_y_front = bracket_y_front - depth
+    h_y_ctr   = (h_y_back + h_y_front) / 2
+    housings = []
     for sx in (-post_dx, +post_dx):
-        d = make_box(f"detent_{'L' if sx < 0 else 'R'}",
-                     (sx, d_y_ctr, bracket_z_ctr),
-                     (DETENT_T, depth, DETENT_HEIGHT), mat)
-        detents.append(d)
-    return detents, d_y_front
+        h = make_cylinder_y(f"housing_{'L' if sx < 0 else 'R'}",
+                            (sx, h_y_ctr, bracket_z_ctr),
+                            HOUSING_R, depth, mat, segments=40, bevel_w=0.003)
+        housings.append(h)
+    return housings, h_y_front
 
 
-def build_arms(tilt, mat, pivot_y, bracket_z_top, bracket_z_bot, post_dx):
-    """Two long thin vertical arms with VESA hole pattern. Arms sit ENTIRELY
-    in front of the detent housings (no clipping into Object_6/plate),
-    pivoting around the detent front (the middle of the assembly).
-    Extends slightly ABOVE bracket top and well BELOW the bottom."""
-    POST_T       = 0.048          # arm thickness (X)
-    POST_D       = 0.022          # arm depth (Y) — thin
-    EXTEND_BELOW = 0.30
-    EXTEND_ABOVE = 0.05
+def build_arms(tilt, mat, pivot_y, bracket_z_ctr, post_dx):
+    """Two heavily-beveled rounded vertical arms (full-motion-mount profile)
+    with VESA holes. CENTERED on bracket_z_ctr so the arm pivots around
+    its own middle = the housing's middle. Sits entirely in front of
+    everything (no clipping)."""
+    POST_T       = 0.052          # arm width (X)
+    POST_D       = 0.038          # arm depth (Y) — thicker for rod-like profile
+    H            = 0.85           # total arm height — symmetric around center
+    BEVEL        = 0.014          # heavy bevel → rounded rod look
 
-    arm_z_top = bracket_z_top + EXTEND_ABOVE
-    arm_z_bot = bracket_z_bot - EXTEND_BELOW
-    H         = arm_z_top - arm_z_bot
-    Z_CTR     = (arm_z_top + arm_z_bot) / 2
-    # Arm back face touches the detent front face — pivot_y. Arm body
-    # extends forward from there. No overlap with anything behind.
-    Y_CTR = pivot_y - POST_D / 2
+    Z_CTR     = bracket_z_ctr     # center of arm = center of housing
+    arm_z_top = Z_CTR + H / 2
+    arm_z_bot = Z_CTR - H / 2
+    Y_CTR     = pivot_y - POST_D / 2
 
     posts = []
     for sx in (-post_dx, +post_dx):
         p = make_box(f"arm_{'L' if sx < 0 else 'R'}",
                      (sx, Y_CTR, Z_CTR),
-                     (POST_T, POST_D, H), mat)
+                     (POST_T, POST_D, H), mat,
+                     bevel_w=BEVEL, bevel_segments=5)
         _drill_holes(p, sx, Y_CTR, arm_z_bot, arm_z_top, POST_D)
         reparent(p, tilt)
         posts.append(p)
 
-    return Y_CTR, posts, arm_z_bot
+    return Y_CTR, posts
 
 
 def build_tilt_mount():
     mat = black_metal_mat()
     plate, bracket, clamps = import_assembly(mat)
     if plate is None or bracket is None:
-        return None, [], None
+        return None, plate
 
-    # Object_6 + Object_10 are STATIONARY (locked to plate). Do not parent to
-    # TiltPivot — only the cradle tilts.
+    # Plate + Object_6 + Object_10 are STATIONARY (locked to wall).
     bpy.context.view_layer.update()
     bmins, bmaxs = _world_bbox(bracket)
 
     bracket_y_front = bmins[1]                  # front face of Object_6
-    bracket_z_top   = bmaxs[2]                  # top of Object_6
-    bracket_z_bot   = bmins[2]                  # bottom of Object_6
+    bracket_z_top   = bmaxs[2]
+    bracket_z_bot   = bmins[2]
     bracket_z_ctr   = (bracket_z_top + bracket_z_bot) / 2
     # Vertical-arm X centers mirror Object_6's two-rail positions
     post_dx = (bmaxs[0] - bmins[0]) * 0.44
 
-    # Stationary tilt-detent housings sticking forward from Object_6 at the
-    # MIDDLE of the assembly. The arms pivot on the detent front face.
-    DETENT_DEPTH = 0.045
-    _detents, pivot_y = build_detents(
-        mat, bracket_y_front, bracket_z_ctr, post_dx, DETENT_DEPTH)
+    # Stationary round tilt-housings sticking forward from Object_6 at the
+    # MIDDLE of the assembly. Arms pivot on the housing front face.
+    HOUSING_DEPTH = 0.045
+    _housings, pivot_y = build_housings(
+        mat, bracket_y_front, bracket_z_ctr, post_dx, HOUSING_DEPTH)
 
-    # TiltPivot at the MIDDLE Z (where the detent sits) and forward at the
-    # detent front face — that's the real-world pivot pin location.
+    # TiltPivot at the MIDDLE Z (housing center) and forward at the housing
+    # front face — the real-world pivot pin location.
     bpy.ops.object.empty_add(type='PLAIN_AXES',
         location=(0, pivot_y, bracket_z_ctr))
     tilt = bpy.context.object
     tilt.name = "TiltPivot"
 
-    arms_y_ctr, _posts, arm_z_bot = build_arms(
+    build_arms(
         tilt, mat,
         pivot_y=pivot_y,
-        bracket_z_top=bracket_z_top,
-        bracket_z_bot=bracket_z_bot,
+        bracket_z_ctr=bracket_z_ctr,
         post_dx=post_dx,
     )
-
-    # Strings hang from each arm bottom.
-    strings = []
-    for side, sx in (("L", -post_dx), ("R", +post_dx)):
-        anchor_pos = (sx, arms_y_ctr, arm_z_bot)
-        bpy.ops.object.empty_add(type='PLAIN_AXES', location=anchor_pos)
-        anchor = bpy.context.object
-        anchor.name = f"StringAnchor_{side}"
-        reparent(anchor, tilt)
-        cord = make_cloth_string(f"PullString_{side}", anchor_pos, mat)
-        reparent(cord, anchor)
-        strings.append({"anchor": anchor, "cord": cord})
-
-    return tilt, strings, plate
+    return tilt, plate
 
 
 def keyframe_tilt(tilt):
@@ -411,19 +351,6 @@ def keyframe_tilt(tilt):
         tilt.keyframe_insert("rotation_euler", index=0, frame=f)
 
 
-def bake_cloth():
-    """Set cloth point-cache range = scene range, then bake all caches."""
-    s = bpy.context.scene
-    for obj in bpy.data.objects:
-        for mod in obj.modifiers:
-            if mod.type == 'CLOTH':
-                pc = mod.point_cache
-                pc.frame_start = s.frame_start
-                pc.frame_end   = s.frame_end
-    s.frame_set(s.frame_start)
-    bpy.ops.ptcache.bake_all(bake=True)
-
-
 def main():
     if os.path.exists(ANIM_TMP): shutil.rmtree(ANIM_TMP)
     os.makedirs(ANIM_TMP, exist_ok=True)
@@ -434,11 +361,10 @@ def main():
     add_camera()
     add_lights()
     add_shadow_catcher()
-    tilt, strings, plate = build_tilt_mount()
+    tilt, plate = build_tilt_mount()
     if tilt is None:
         print("[ERR] assembly import failed"); return
     keyframe_tilt(tilt)
-    bake_cloth()
 
     bpy.ops.render.render(animation=True)
 
