@@ -71,7 +71,7 @@ def setup_world():
     nt.links.new(bg.outputs['Background'], out.inputs['Surface'])
 
 
-def add_camera(fov_deg=42, cam_pos=(1.85, -1.74, 1.22), look_at=(0, 0, 1.22)):
+def add_camera(fov_deg=42, cam_pos=(2.05, -1.92, 1.08), look_at=(0, 0, 1.08)):
     cd = bpy.data.cameras.new('Camera')
     cd.lens_unit = 'FOV'; cd.angle = math.radians(fov_deg)
     cd.clip_start = 0.01; cd.clip_end = 50.0
