@@ -1,12 +1,16 @@
 """
 render_mount_tilt_cad.py — Sketchfab-bracket tilt mount with cloth-sim strings:
-  * Wall plate from Sketchfab fixed-mount GLB (Object_4)
-  * TV-side bracket = Object_6 (real two-rail hook bracket from same GLB) +
-    Object_10 (the clamp tabs). These tilt as one rigid assembly.
-  * Tilt pivot at PLATE TOP front edge — where the hooks engage. When the
-    bracket tilts forward, top stays anchored at hook line, bottom swings out.
-  * Pull strings hang from each rail bottom — REAL Blender cloth simulation
-    (pinned top, free bottom, gravity + air damping). Bake before render.
+  * Wall plate (Object_4) + hook bracket (Object_6) + clamps (Object_10) from
+    sketchfab_mount_fixed.glb — all STATIONARY, locked to the wall.
+  * TV-side cradle: vertical posts + top/bot/mid horizontal cross-bars
+    (matching the cradle from render_mount_animations.py full-motion mount).
+    The cradle is what tilts.
+  * Tilt pivot at the top of Object_6 (where the cradle pins onto the hook
+    bracket). Cradle top stays anchored at the hook line; cradle bottom
+    swings forward / back as it tilts.
+  * Pull strings hang from each cradle vertical post bottom — REAL Blender
+    cloth simulation (pinned top, free bottom, gravity + air damping).
+    Baked before render.
 """
 import bpy, bmesh, math, os, subprocess, shutil
 from mathutils import Vector, Matrix
@@ -127,6 +131,17 @@ def reparent(o, p):
     o.matrix_world = old
 
 
+def make_box(name, location, size, mat, bevel_w=0.003):
+    """Beveled cube primitive — used for cradle posts and cross-bars."""
+    bpy.ops.mesh.primitive_cube_add(size=1.0, location=location)
+    o = bpy.context.object; o.name = name; o.scale = size
+    bpy.context.view_layer.update()
+    bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
+    bev = o.modifiers.new("Bevel", 'BEVEL'); bev.width = bevel_w; bev.segments = 2
+    o.data.materials.clear(); o.data.materials.append(mat)
+    return o
+
+
 def _world_bbox(o):
     mins = [float('inf')]*3; maxs = [float('-inf')]*3
     for c in o.bound_box:
@@ -244,44 +259,89 @@ def make_cloth_string(name, world_top, mat, length=0.30, radius=0.012,
     return obj
 
 
+def build_cradle(tilt, mat, bracket_y_front, bracket_z_top, bracket_z_bot,
+                 post_dx):
+    """Vertical-post cradle (matches the TV bracket from
+    render_mount_animations.py full-motion mount): two vertical posts at
+    x=±post_dx, top + bottom + 2 mid horizontal cross-bars, all parented to
+    `tilt`. Sits in front of Object_6 with cradle back face touching the
+    bracket front; pivots from cradle top edge (= bracket top edge)."""
+    H      = bracket_z_top - bracket_z_bot          # cradle height
+    Z_CTR  = (bracket_z_top + bracket_z_bot) / 2
+    POST_T = 0.032                                  # post thickness (X)
+    POST_D = 0.024                                  # depth (Y)
+    BAR_T  = 0.032                                  # cross-bar thickness (Z)
+    GAP    = 0.002                                  # mm-thin gap from bracket
+    Y_CTR  = bracket_y_front - GAP - POST_D / 2     # cradle Y center
+
+    bar_w = 2 * post_dx + POST_T                    # spans outer edges of posts
+
+    # Vertical posts (the "vertical arms")
+    posts = []
+    for sx in (-post_dx, +post_dx):
+        p = make_box(f"crad_post_{'L' if sx < 0 else 'R'}",
+                     (sx, Y_CTR, Z_CTR),
+                     (POST_T, POST_D, H), mat)
+        posts.append(p)
+
+    # Top + bottom horizontal cross-bars
+    top_bar = make_box("crad_top",
+                       (0, Y_CTR, bracket_z_top - BAR_T / 2),
+                       (bar_w, POST_D, BAR_T), mat)
+    bot_bar = make_box("crad_bot",
+                       (0, Y_CTR, bracket_z_bot + BAR_T / 2),
+                       (bar_w, POST_D, BAR_T), mat)
+
+    # Two thinner mid horizontal cross-bars at ±22 % of cradle height
+    mid_bars = []
+    for sz_off in (+H * 0.22, -H * 0.22):
+        m = make_box(f"crad_mid_{'U' if sz_off > 0 else 'D'}",
+                     (0, Y_CTR, Z_CTR + sz_off),
+                     (bar_w, POST_D, BAR_T * 0.65), mat)
+        mid_bars.append(m)
+
+    for o in posts + [top_bar, bot_bar] + mid_bars:
+        reparent(o, tilt)
+
+    return Y_CTR, posts
+
+
 def build_tilt_mount():
     mat = black_metal_mat()
     plate, bracket, clamps = import_assembly(mat)
     if plate is None or bracket is None:
         return None, [], None
 
+    # Object_6 + Object_10 are STATIONARY (locked to plate). Do not parent to
+    # TiltPivot — only the cradle tilts.
     bpy.context.view_layer.update()
-    pmins, pmaxs = _world_bbox(plate)
     bmins, bmaxs = _world_bbox(bracket)
 
-    plate_y_front = pmins[1]                    # front face of plate
-    plate_z_top   = pmaxs[2]                    # top edge of plate
-    bracket_z_bot = bmins[2]                    # bottom of bracket (string anchor)
-    bracket_y_ctr = (bmins[1] + bmaxs[1]) / 2
+    bracket_y_front = bmins[1]                  # front face of Object_6
+    bracket_z_top   = bmaxs[2]                  # top of Object_6 (hook line)
+    bracket_z_bot   = bmins[2]                  # bottom of Object_6
+    # Cradle vertical posts mirror Object_6's two-rail X positions
+    post_dx = (bmaxs[0] - bmins[0]) * 0.44
 
-    # Per-side rail X centers — Object_6 has two clusters at native ±0.15;
-    # after the assembly's uniform scale these land at the bracket's outer
-    # peaks. Pull strings hang from each rail bottom.
-    rail_dx = (bmaxs[0] - bmins[0]) * 0.44      # approx ±44% of bracket width
-    rail_xs = (-rail_dx, +rail_dx)
-
-    # Single TiltPivot empty at plate top FRONT edge — where Object_6's
-    # hooks engage the plate. The whole TV-side bracket rocks on this line.
+    # Tilt pivot at the TOP of Object_6, on its front face — where the cradle
+    # pins onto the hook bracket. Cradle rocks on this line.
     bpy.ops.object.empty_add(type='PLAIN_AXES',
-        location=(0, plate_y_front, plate_z_top))
+        location=(0, bracket_y_front, bracket_z_top))
     tilt = bpy.context.object
     tilt.name = "TiltPivot"
 
-    reparent(bracket, tilt)
-    if clamps is not None:
-        reparent(clamps, tilt)
+    cradle_y_ctr, _posts = build_cradle(
+        tilt, mat,
+        bracket_y_front=bracket_y_front,
+        bracket_z_top=bracket_z_top,
+        bracket_z_bot=bracket_z_bot,
+        post_dx=post_dx,
+    )
 
-    # String anchors + cloth strings — anchors parented to TiltPivot so
-    # their world position follows the bracket bottom as it tilts; cloth
-    # solver sees the moving pinned-top and lets the rest swing freely.
+    # Strings hang from each cradle post bottom (just below the bottom bar).
     strings = []
-    for side, rail_x in zip(("L", "R"), rail_xs):
-        anchor_pos = (rail_x, bracket_y_ctr, bracket_z_bot)
+    for side, sx in (("L", -post_dx), ("R", +post_dx)):
+        anchor_pos = (sx, cradle_y_ctr, bracket_z_bot)
         bpy.ops.object.empty_add(type='PLAIN_AXES', location=anchor_pos)
         anchor = bpy.context.object
         anchor.name = f"StringAnchor_{side}"
