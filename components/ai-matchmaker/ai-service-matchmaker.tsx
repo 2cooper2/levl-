@@ -1455,6 +1455,7 @@ const MessageItem = memo(
                             loop
                             muted
                             playsInline
+                            style={{ background: 'transparent' }}
                             className="absolute inset-0 w-full h-full object-contain"
                           />
                         ) : (
