@@ -3525,156 +3525,80 @@ function MetalStudsScene() {
  * signal individually.  TV sits above; duplex outlet sits at the base.
  */
 function HiddenCableScene() {
-  const p1Ref = useRef<THREE.Mesh>(null)
-  const p2Ref = useRef<THREE.Mesh>(null)
-  const p3Ref = useRef<THREE.Mesh>(null)
-
-  // Pulse positions: y travels from grommet-top to outlet grommet-bottom
-  const PULSE_TOP = 0.30
-  const PULSE_TRAVEL = 1.42
-
-  useFrame(({ clock }) => {
-    const t = clock.elapsedTime
-    const advance = (speed: number, offset: number) => ((t * speed + offset) % 1.0)
-
-    const drives = [
-      { ref: p1Ref, a: advance(0.65, 0.0),  col: C.purpleGlow, sz: 0.022, ei: 3.2 },
-      { ref: p2Ref, a: advance(0.65, 0.42), col: C.purple,     sz: 0.016, ei: 2.6 },
-      { ref: p3Ref, a: advance(0.80, 0.71), col: "#60a5fa",    sz: 0.013, ei: 2.4 },
-    ]
-    drives.forEach(({ ref, a, col, sz, ei }) => {
-      if (!ref.current) return
-      ref.current.position.y = PULSE_TOP - a * PULSE_TRAVEL
-      const m = ref.current.material as THREE.MeshStandardMaterial
-      m.color.set(col); m.emissive.set(col); m.emissiveIntensity = ei
-      m.opacity = a < 0.90 ? 0.92 : 0
-    })
-  })
-
-  // Four cable specs: power (thick), HDMI (medium), ethernet (slim), coax (medium-slim)
-  const cableSpecs = useMemo(() => [
-    { ox: -0.068, r: 0.0105, col: "#181818",  seg: 30 },  // power
-    { ox: -0.020, r: 0.0085, col: "#2a2a34",  seg: 26 },  // HDMI
-    { ox:  0.024, r: 0.0055, col: "#1a3a6a",  seg: 24 },  // ethernet (blue jacket)
-    { ox:  0.062, r: 0.0075, col: "#383430",  seg: 26 },  // coax
-  ], [])
-
-  const cableGeos = useMemo(() => cableSpecs.map(({ ox, r, seg }) => {
-    const pts = [
-      new THREE.Vector3(ox,         PULSE_TOP,           -0.085),
-      new THREE.Vector3(ox + 0.008, PULSE_TOP - 0.30,   -0.095),
-      new THREE.Vector3(ox - 0.006, PULSE_TOP - 0.64,   -0.088),
-      new THREE.Vector3(ox + 0.004, PULSE_TOP - 1.00,   -0.092),
-      new THREE.Vector3(ox,         PULSE_TOP - PULSE_TRAVEL, -0.086),
-    ]
-    return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), seg, r, 8, false)
-  }), [cableSpecs])
-
-  const grommetMat = useMemo(() => mkGunmetal(0.28), [])
-
+  // Minimal reference-matching scene: floating white wall slab + flush black
+  // glossy TV mounted upper-third + vertical wood plank cable-cover running
+  // from below TV to outlet + small outlet at bottom. Soft contact shadow
+  // beneath. Static — no animation (matches the reference image's product-shot
+  // aesthetic).
   return (
     <group>
-      <Wall color="#e0ddd5" />
-      <Floor color="#ccc8c2" />
-
-      {/* ── Translucent drywall face over the cutaway bay ── */}
-      <mesh position={[0, -0.28, -0.020]}>
-        <boxGeometry args={[0.80, 1.72, 0.095]} />
+      {/* ── Floating wall slab — white speckled finish ── */}
+      <RoundedBox args={[0.74, 1.36, 0.07]} radius={0.012} smoothness={4}
+                  position={[0, 0.05, 0]} castShadow receiveShadow>
         <meshPhysicalMaterial
-          color="#f0ede6" roughness={0.82} transparent opacity={0.22}
-          depthWrite={false} side={THREE.DoubleSide}
-          clearcoat={0.55} clearcoatRoughness={0.08} envMapIntensity={0.6}
+          color="#f6f4ef" roughness={0.62} metalness={0}
+          clearcoat={0.18} clearcoatRoughness={0.55}
+          envMapIntensity={0.55}
         />
-      </mesh>
-      {/* Cutaway perimeter outline (darkened drywall edge) */}
-      {([
-        [0,  0.86,  0.04, 0.80, 0.014],   // top edge
-        [0, -1.14,  0.04, 0.80, 0.014],   // bottom edge
-        [-0.40, -0.28, 0.04, 0.014, 1.72], // left edge
-        [ 0.40, -0.28, 0.04, 0.014, 1.72], // right edge
-      ] as [number,number,number,number,number][]).map(([x,y,z,w,h], i) => (
-        <mesh key={i} position={[x, y, z]}>
-          <boxGeometry args={[w, h, 0.012]} />
-          <meshStandardMaterial color="#b4b0a8" roughness={0.88} />
-        </mesh>
-      ))}
+      </RoundedBox>
 
-      {/* ── Left and right king studs ── */}
-      {([-0.36, 0.36] as const).map(sx => (
-        <group key={sx} position={[sx, -0.28, -0.112]}>
-          <mesh castShadow>
-            <boxGeometry args={[0.038, 1.68, 0.089]} />
-            <meshStandardMaterial color="#d2c49a" roughness={0.80} />
-          </mesh>
-          {/* Wood grain streaks */}
-          {[-0.55, -0.18, 0.20, 0.55].map(gy => (
-            <mesh key={gy} position={[0, gy, 0.046]}>
-              <boxGeometry args={[0.036, 0.003, 0.001]} />
-              <meshStandardMaterial color="#b8a880" roughness={1} />
-            </mesh>
-          ))}
-        </group>
-      ))}
-
-      {/* ── Middle cripple stud (cable runs alongside it) ── */}
-      <group position={[0, -0.28, -0.112]}>
-        <mesh castShadow>
-          <boxGeometry args={[0.038, 1.68, 0.089]} />
-          <meshStandardMaterial color="#cebe94" roughness={0.82} />
+      {/* ── Flat glossy TV mounted upper-third of wall ── */}
+      <group position={[0, 0.32, 0.045]}>
+        {/* TV body / bezel */}
+        <RoundedBox args={[0.50, 0.28, 0.018]} radius={0.005} smoothness={3}
+                    castShadow>
+          <meshPhysicalMaterial color="#0a0a0c" roughness={0.35} metalness={0.05} />
+        </RoundedBox>
+        {/* Glossy black screen — reflects HDRI as sharp diagonal highlight */}
+        <mesh position={[0, 0, 0.0095]}>
+          <planeGeometry args={[0.485, 0.265]} />
+          <meshPhysicalMaterial
+            color="#040408" roughness={0.025} metalness={0}
+            clearcoat={1.0} clearcoatRoughness={0.005}
+            envMapIntensity={1.6}
+          />
         </mesh>
       </group>
 
-      {/* ── Fire blocks × 2 (mid-cavity horizontal braces) ── */}
-      {([-0.10, -0.52] as const).map((fy, fi) => (
-        <group key={fi} position={[0, fy, -0.112]}>
-          <mesh castShadow>
-            <boxGeometry args={[0.68, 0.040, 0.089]} />
-            <meshStandardMaterial color="#c8ba90" roughness={0.82} />
+      {/* ── Vertical wood plank — cable cover (front of wall) ── */}
+      <RoundedBox args={[0.075, 0.66, 0.025]} radius={0.004} smoothness={3}
+                  position={[0, -0.27, 0.045]} castShadow>
+        <meshPhysicalMaterial
+          color="#a07840" roughness={0.78} metalness={0}
+          clearcoat={0.10} clearcoatRoughness={0.55}
+        />
+      </RoundedBox>
+
+      {/* ── Small outlet at bottom of wall ── */}
+      <group position={[0, -0.58, 0.040]}>
+        {/* White plate */}
+        <RoundedBox args={[0.085, 0.052, 0.005]} radius={0.003} smoothness={3}
+                    castShadow>
+          <meshPhysicalMaterial
+            color="#fafaf6" roughness={0.40} metalness={0.10}
+            clearcoat={0.55} clearcoatRoughness={0.18}
+          />
+        </RoundedBox>
+        {/* Two small dark slots (receptacles) */}
+        {[-0.018, 0.018].map((x, i) => (
+          <mesh key={i} position={[x, 0.0, 0.0035]}>
+            <boxGeometry args={[0.012, 0.018, 0.001]} />
+            <meshStandardMaterial color="#161618" roughness={0.6} />
           </mesh>
-          {/* Cable notch cutout (visual only — dark slot) */}
-          <mesh position={[0, 0, 0.050]}>
-            <boxGeometry args={[0.12, 0.040, 0.012]} />
-            <meshStandardMaterial color="#1a1610" roughness={0.95} />
-          </mesh>
-        </group>
-      ))}
+        ))}
+      </group>
 
-      {/* ── Entry grommet (top of cavity) ── */}
-      <mesh position={[0, PULSE_TOP + 0.02, -0.065]} castShadow rotation={[Math.PI/2, 0, 0]}>
-        <torusGeometry args={[0.052, 0.010, 10, 22]} />
-        <primitive object={grommetMat} />
-      </mesh>
-
-      {/* ── Exit grommet (bottom of cavity) ── */}
-      <mesh position={[0, PULSE_TOP - PULSE_TRAVEL - 0.02, -0.065]} castShadow rotation={[Math.PI/2, 0, 0]}>
-        <torusGeometry args={[0.052, 0.010, 10, 22]} />
-        <primitive object={grommetMat} />
-      </mesh>
-
-      {/* ── Four routed cables ── */}
-      {cableGeos.map((geo, i) => (
-        <mesh key={i} geometry={geo} castShadow>
-          <meshStandardMaterial color={cableSpecs[i].col} roughness={0.58} metalness={0.06} />
-        </mesh>
-      ))}
-
-      {/* ── Signal pulses (3 independent) ── */}
-      {[p1Ref, p2Ref, p3Ref].map((r, i) => (
-        <mesh key={i} ref={r} position={[0, PULSE_TOP, -0.088]}>
-          <sphereGeometry args={[i === 0 ? 0.022 : 0.015, 10, 10]} />
-          <meshStandardMaterial color={C.purpleGlow} emissive={C.purpleGlow} emissiveIntensity={3}
-            transparent opacity={0.9} depthWrite={false} />
-        </mesh>
-      ))}
-
-      {/* ── Wall mount plate + TV ── */}
-      <WallPlate w={0.22} h={0.28} />
-      <group position={[0, 0.16, 0.18]}><TVPanel /></group>
-
-      {/* ── Outlet low on wall ── */}
-      <Outlet position={[0, -1.02, -0.065]} />
-
-      <ContactShadows frames={1} position={[0, -1.10, -0.06]} blur={2.8} opacity={0.30} scale={3.5} color="#20102a" />
+      {/* ── Soft floating drop shadow on the lavender ground ── */}
+      <ContactShadows
+        frames={1}
+        position={[0, -0.78, 0]}
+        blur={3.0}
+        opacity={0.45}
+        scale={2.6}
+        far={1.4}
+        resolution={1024}
+        color="#1f1448"
+      />
     </group>
   )
 }
@@ -4033,7 +3957,9 @@ function SceneCanvas({
       performance={{ min: 0.5 }}
       style={{ width: "100%", height: "100%" }}
     >
-      {!thumbnail && <SoftShadows size={25} samples={16} focus={0.5} />}
+      {/* Canvas shadows="soft" already provides soft PCSS shadows.
+          Adding <SoftShadows> on top causes duplicate shader injection
+          ("function already has a body" + unpackRGBAToDepth missing). */}
       <PerspectiveCamera makeDefault position={cam.pos} fov={cam.fov} near={0.05} far={200} />
 
       {thumbnail ? (

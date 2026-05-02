@@ -1398,7 +1398,7 @@ const MessageItem = memo(
           transition={{ duration: 0.2 }}
           layout={false}
         >
-          <div className={`relative bg-gradient-to-br from-white via-[#fefeff] to-[#fbf9ff] dark:from-gray-800 dark:via-gray-800 dark:to-lavender-950 rounded-3xl px-5 py-3 ${(message.options?.some(o => isMountOption(o) || isMountTypeRender(o)) || message.content === "What size is your TV?") ? 'w-full' : message.options?.some(o => isWallRender(o)) ? 'max-w-[92%]' : 'max-w-[80%]'} shadow-[0_0_0_1px_rgba(88,82,100,0.09),0_16px_16px_rgba(64,58,84,0.20),0_28px_20px_rgba(60,54,80,0.09),0_-1px_0_rgba(255,255,255,0.88)] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.05),0_16px_16px_rgba(0,0,0,0.32),0_28px_20px_rgba(0,0,0,0.14),0_-1px_0_rgba(255,255,255,0.05)] translate-y-[-14px] transition-all duration-300 transform`}>
+          <div className={`relative bg-gradient-to-br from-white via-[#fefeff] to-[#fbf9ff] dark:from-gray-800 dark:via-gray-800 dark:to-lavender-950 rounded-3xl ${message.options?.some(o => isCableRender(o)) ? 'px-2 py-2' : 'px-5 py-3'} ${(message.options?.some(o => isMountOption(o) || isMountTypeRender(o) || isCableRender(o)) || message.content === "What size is your TV?") ? 'w-full' : message.options?.some(o => isWallRender(o)) ? 'max-w-[92%]' : 'max-w-[80%]'} shadow-[0_0_0_1px_rgba(88,82,100,0.09),0_16px_16px_rgba(64,58,84,0.20),0_28px_20px_rgba(60,54,80,0.09),0_-1px_0_rgba(255,255,255,0.88)] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.05),0_16px_16px_rgba(0,0,0,0.32),0_28px_20px_rgba(0,0,0,0.14),0_-1px_0_rgba(255,255,255,0.05)] translate-y-[-14px] transition-all duration-300 transform`}>
             <div className="absolute inset-x-0 bottom-0 h-1/2 rounded-b-3xl bg-gradient-to-t from-black/5 to-transparent dark:from-white/5"></div>
 
             <p className="text-sm relative z-10">
@@ -1422,24 +1422,30 @@ const MessageItem = memo(
                 {message.options.some(opt => THREE_D_OPTIONS.has(opt)) ? (
                   // No translateZ/backfaceVisibility here — those fight the Canvas WebGL layer
                   <div className="flex flex-col gap-2">
-                    {/* cards — 2 columns mobile, 3 on md+ */}
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-1.5">
+                    {/* cards — 2 columns mobile, 3 on md+. Cable management
+                        cards get a wider gap + taller aspect so the
+                        animation reads better. */}
+                    {(() => { const isCableQ = (message.options ?? []).every(isCableRender); return (
+                    <div className={isCableQ
+                      ? "grid grid-cols-1 sm:grid-cols-3 gap-2"
+                      : "grid grid-cols-2 md:grid-cols-3 gap-1.5"}>
                       {message.options.filter(opt => THREE_D_OPTIONS.has(opt)).map((option, index) => (
                 <motion.button
                   key={`${message.id}-${option}-${index}`}
                   initial={{ opacity: 0, y: 20, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
+                  whileHover={isCableRender(option) ? { scale: 1.015, y: -2 } : undefined}
                   whileTap={{ scale: 0.98 }}
                   transition={{ delay: index * 0.05, type: "spring", stiffness: 260, damping: 20 }}
-                  className="group relative flex flex-col items-center
+                  className={`group relative flex flex-col items-center
                     bg-gradient-to-b from-white/95 to-white/80 dark:from-gray-800/95 dark:to-gray-900/80
                     rounded-2xl text-xs font-semibold
                     shadow-[0_2px_6px_rgba(44,38,80,0.07),0_8px_24px_rgba(44,38,80,0.06),0_20px_48px_rgba(38,32,72,0.05),0_36px_72px_rgba(30,26,64,0.03)]
                     dark:shadow-[0_2px_6px_rgba(0,0,0,0.24),0_8px_24px_rgba(0,0,0,0.18),0_20px_48px_rgba(0,0,0,0.12),0_36px_72px_rgba(0,0,0,0.07)]
-                    backdrop-blur-md"
+                    ${isCableRender(option) ? '' : 'backdrop-blur-md'}`}
                   onClick={() => handleOptionClick(option)}
                 >
-                  <div className="w-full aspect-[8/13] relative overflow-hidden">
+                  <div className={`w-full ${isCableRender(option) ? 'aspect-[1/2]' : 'aspect-[8/13]'} relative overflow-hidden`}>
                     {isMountTypeRender(option) ? (
                       <div className="w-full h-full relative" style={{ background: 'linear-gradient(180deg, #e8ddf2 0%, #d0bfe8 45%, #b9a3dc 100%)' }}>
                         {MOUNT_TYPE_VIDEOS[option] ? (
@@ -1495,21 +1501,71 @@ const MessageItem = memo(
                         />
                       </div>
                     ) : isCableRender(option) ? (
-                      <div className="w-full h-full relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0.08) 35%, transparent 60%), linear-gradient(135deg, #ede9ff 0%, #c4b8f5 100%)' }}>
+                      <div
+                        className="w-full h-full relative overflow-hidden ring-1 ring-black/[0.06] ring-inset"
+                        style={{
+                          background: 'linear-gradient(180deg, #ede9ff 0%, #d6cbff 65%, #c4b8f5 100%)',
+                          contain: 'layout paint',
+                        }}
+                      >
+                        {/* faux-device top edge highlight */}
+                        <div
+                          aria-hidden
+                          className="absolute inset-x-0 top-0 h-px pointer-events-none z-20"
+                          style={{ background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.7), transparent)' }}
+                        />
+                        {/* "polished floor" horizon line — subtle reflective surface
+                            implied by a brighter band where the subject would meet
+                            the ground (matches reference image's floor reflection). */}
+                        <div
+                          aria-hidden
+                          className="absolute inset-x-0 pointer-events-none z-[5]"
+                          style={{
+                            bottom: '12%',
+                            height: '1px',
+                            background: 'linear-gradient(to right, transparent 5%, rgba(255,255,255,0.55) 50%, transparent 95%)',
+                          }}
+                        />
+                        {/* soft contact shadow ellipse beneath the subject */}
+                        <div
+                          aria-hidden
+                          className="absolute pointer-events-none z-[6]"
+                          style={{
+                            bottom: '6%',
+                            left: '20%',
+                            right: '20%',
+                            height: '2.5%',
+                            background: 'radial-gradient(ellipse at center, rgba(60,40,120,0.30), transparent 70%)',
+                            filter: 'blur(4px)',
+                          }}
+                        />
                         {CABLE_VIDEOS[option] ? (
                           <video
-                            src={CABLE_VIDEOS[option]}
                             autoPlay
                             loop
                             muted
                             playsInline
-                            className="absolute inset-0 w-full h-full object-contain"
-                          />
+                            preload="auto"
+                            disablePictureInPicture
+                            disableRemotePlayback
+                            controlsList="nodownload noremoteplayback"
+                            width={900}
+                            height={1800}
+                            poster={CABLE_RENDERS[option]}
+                            className="absolute inset-0 w-full h-full object-contain z-10"
+                            style={{
+                              filter: 'contrast(1.06) saturate(1.10) brightness(1.01) drop-shadow(0 6px 12px rgba(60,40,120,0.18))',
+                              WebkitBoxReflect: 'below 4px linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.18) 100%)',
+                            }}
+                          >
+                            <source src={CABLE_VIDEOS[option]} type='video/webm; codecs="vp9"' />
+                          </video>
                         ) : (
                           <Image
                             src={CABLE_RENDERS[option]}
                             alt={option}
                             fill
+                            quality={100}
                             className="object-contain"
                             sizes="(max-width: 768px) 45vw, 200px"
                           />
@@ -1536,6 +1592,7 @@ const MessageItem = memo(
                 </motion.button>
                       ))}
                     </div>
+                    );})()}
                     {/* Non-3D options (e.g. "Other") — full width below the grid */}
                     {message.options.filter(opt => !THREE_D_OPTIONS.has(opt)).map((option, index) => (
                       <motion.button
@@ -1771,13 +1828,24 @@ const [detectedPreferences, setDetectedPreferences] = useState<{
   // Track whether the user has interacted (clicked a category or sent a message)
   const [hasUserInteracted, setHasUserInteracted] = useState(false)
 
-  // Auto-scroll to show new questions only AFTER the user has interacted
+  // Auto-scroll to show new questions only AFTER the user has interacted.
+  // Scrolls the TOP of the latest message into view with a small gap above so
+  // the message bubble's rounded corners aren't clipped.
   useEffect(() => {
     if (!hasUserInteracted) return
     if (messages.length > 1 && messagesEndRef.current) {
-      // Delay to ensure DOM has updated with new message
       const timeout = setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+        const lastMessage = messagesEndRef.current?.previousElementSibling as HTMLElement | null
+        if (lastMessage) {
+          const rect = lastMessage.getBoundingClientRect()
+          const offset = 24   // px gap above message top
+          window.scrollTo({
+            top: window.scrollY + rect.top - offset,
+            behavior: 'smooth',
+          })
+        } else {
+          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
       }, 200)
       return () => clearTimeout(timeout)
     }

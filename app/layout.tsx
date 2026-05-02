@@ -48,6 +48,11 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Levl" />
         <link rel="apple-touch-icon" href="/apple-icon.png" />
+        {/* Preload cable-management webms so they decode at full quality before
+            the AI matchmaker reaches that step (Next.js docs: preloading video). */}
+        <link rel="preload" as="video" href="/assets/renders/cable-hidden.webm" type="video/webm" />
+        <link rel="preload" as="video" href="/assets/renders/cable-covers.webm" type="video/webm" />
+        <link rel="preload" as="video" href="/assets/renders/cable-visible.webm" type="video/webm" />
         <script dangerouslySetInnerHTML={{ __html: `
           if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
