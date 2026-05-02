@@ -1449,25 +1449,14 @@ const MessageItem = memo(
                     {isMountTypeRender(option) ? (
                       <div className="w-full h-full relative" style={{ background: 'linear-gradient(180deg, #e8ddf2 0%, #d0bfe8 45%, #b9a3dc 100%)' }}>
                         {MOUNT_TYPE_VIDEOS[option] ? (
-                          (() => {
-                            const isIOS = typeof navigator !== 'undefined' && /iP(hone|ad|od)/.test(navigator.userAgent)
-                            // iOS gets the HEVC+alpha mp4 (Safari hardware-decodes via VideoToolbox).
-                            // Other browsers get the VP9+alpha webm.
-                            const src = isIOS
-                              ? MOUNT_TYPE_VIDEOS[option].replace(/\.webm$/, '.mp4')
-                              : MOUNT_TYPE_VIDEOS[option]
-                            return (
-                              <video
-                                src={src}
-                                autoPlay
-                                loop
-                                muted
-                                playsInline
-                                style={{ background: 'transparent' }}
-                                className="absolute inset-0 w-full h-full object-contain"
-                              />
-                            )
-                          })()
+                          <video
+                            src={MOUNT_TYPE_VIDEOS[option]}
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            className="absolute inset-0 w-full h-full object-contain"
+                          />
                         ) : (
                           <Image
                             src={MOUNT_TYPE_RENDERS[option]}
