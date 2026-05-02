@@ -82,9 +82,9 @@ const MOUNT_OBJECT_SERVICE_MAP: Record<string, string> = {
 
 // Static Blender renders for cable management cards (replaces WebGL cable scenes)
 const CABLE_RENDERS: Record<string, string> = {
-  "Yes, hide all cables in wall": "/assets/renders/cable-hidden.webp",
-  "Yes, use cable covers":        "/assets/renders/cable-covers.webp",
-  "No, cables visible is fine":   "/assets/renders/cable-visible.webp",
+  "Yes, hide all cables in wall": "/assets/renders/cable-hidden.png",
+  "Yes, use cable covers":        "/assets/renders/cable-covers.png",
+  "No, cables visible is fine":   "/assets/renders/cable-visible.png",
 }
 // Video versions — cable being routed inside wall, raceway sliding down,
 // or just dangling. Falls back to the static PNG above when absent.
@@ -1539,7 +1539,7 @@ const MessageItem = memo(
                             filter: 'blur(4px)',
                           }}
                         />
-                        {CABLE_VIDEOS[option] && !(typeof navigator !== 'undefined' && /iP(hone|ad|od)/.test(navigator.userAgent)) ? (
+                        {CABLE_VIDEOS[option] ? (
                           <video
                             autoPlay
                             loop
@@ -1562,15 +1562,13 @@ const MessageItem = memo(
                             <source src={CABLE_VIDEOS[option]} type='video/webm; codecs="vp9"' />
                           </video>
                         ) : (
-                          // Animated WebP via raw <img> so animation isn't stripped by next/image optimization.
-                          // transform: translateZ(0) forces GPU compositing for smooth playback.
-                          <img
+                          <Image
                             src={CABLE_RENDERS[option]}
                             alt={option}
-                            loading="lazy"
-                            decoding="async"
-                            className="absolute inset-0 w-full h-full object-contain z-10"
-                            style={{ background: 'transparent', transform: 'translateZ(0)', willChange: 'transform' }}
+                            fill
+                            quality={100}
+                            className="object-contain"
+                            sizes="(max-width: 768px) 45vw, 200px"
                           />
                         )}
                       </div>
