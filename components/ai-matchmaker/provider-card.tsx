@@ -15,12 +15,33 @@ interface ProviderCardProps {
 
 export function ProviderCard({ provider, onSelect, onViewServices, onContact }: ProviderCardProps) {
   return (
-    <div className="relative rounded-xl overflow-hidden group transition-all bg-gradient-to-br from-lavender-50/95 via-white/95 to-lavender-50/90 backdrop-blur-sm shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15),0_10px_20px_-5px_rgba(0,0,0,0.1),0_0_0_1px_rgba(0,0,0,0.03)] border-t border-l border-r border-lavender-100/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-600/30 border-b-2 border-b-lavender-200/60 dark:border-b-2 dark:border-b-lavender-600/60 transform translate-y-0 hover:translate-y-[-4px] transition-all duration-300">
-      {/* Header with background gradient - using exact AI chat bubble colors */}
-      <div className="h-24 bg-gradient-to-br from-lavender-50/80 via-white/90 to-lavender-100/70 dark:from-lavender-800/20 dark:via-gray-800/20 dark:to-lavender-700/20 relative">
-        {/* Add decorative corner accent */}
+    <div
+      className="relative rounded-2xl overflow-hidden group transition-all transform translate-y-0 hover:translate-y-[-4px] duration-300"
+      style={{
+        background: "linear-gradient(135deg,rgba(255,255,255,0.97),rgba(237,233,254,0.82))",
+        border: "1px solid rgba(167,139,250,0.45)",
+        boxShadow:
+          "0 24px 48px -8px rgba(0,0,0,0.4), 0 12px 20px -6px rgba(0,0,0,0.25), 0 -2px 6px 0 rgba(255,255,255,0.9) inset",
+      }}
+    >
+      {/* Header with subtle lavender gradient */}
+      <div
+        className="h-24 relative"
+        style={{
+          background:
+            "linear-gradient(135deg,rgba(167,139,250,0.18) 0%,rgba(237,233,254,0.55) 45%,rgba(255,255,255,0.85) 100%)",
+        }}
+      >
+        {/* Decorative corner accent */}
         <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-lavender-200/30 to-transparent rounded-bl-[100px] dark:from-lavender-500/15"></div>
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-lavender-300/70 to-lavender-400/70 rounded-t-xl"></div>
+        {/* Purple top accent bar (matches the Schedule card's accent) */}
+        <div
+          className="absolute top-0 left-0 w-full h-1.5"
+          style={{
+            background:
+              "linear-gradient(135deg,rgba(167,139,250,0.72) 0%,rgba(139,92,246,0.65) 45%,rgba(109,40,217,0.55) 100%)",
+          }}
+        />
         {/* Avatar */}
         <div className="absolute -bottom-10 left-4">
           <div className="h-20 w-20 rounded-full border-4 border-lavender-300/70 dark:border-lavender-500/70 overflow-hidden shadow-[0_8px_16px_-4px_rgba(0,0,0,0.08),0_4px_8px_-4px_rgba(0,0,0,0.06)] flex items-center justify-center bg-lavender-100/70 dark:bg-lavender-600/70">
@@ -101,7 +122,14 @@ export function ProviderCard({ provider, onSelect, onViewServices, onContact }: 
         {/* Action button */}
         <div>
           <Button
-            className="w-full bg-gradient-to-r from-lavender-400 to-lavender-500 hover:from-lavender-500 hover:to-lavender-600 text-white shadow-[0_4px_12px_-2px_rgba(124,58,237,0.2),0_2px_6px_-1px_rgba(124,58,237,0.1)] hover:shadow-[0_6px_18px_-2px_rgba(124,58,237,0.3),0_3px_8px_-1px_rgba(124,58,237,0.2)] transition-all duration-300 relative overflow-hidden group/button"
+            className="w-full text-white transition-all duration-300 relative overflow-hidden group/button rounded-xl py-2.5 font-bold"
+            style={{
+              background:
+                "linear-gradient(135deg,rgba(167,139,250,0.72) 0%,rgba(139,92,246,0.65) 45%,rgba(109,40,217,0.55) 100%)",
+              border: "1px solid rgba(167,139,250,0.5)",
+              boxShadow:
+                "0 6px 14px -4px rgba(0,0,0,0.35), 0 3px 6px -3px rgba(0,0,0,0.2), 0 -1px 0 rgba(255,255,255,0.25) inset",
+            }}
             onClick={() => onSelect(provider.id)}
           >
             <span className="relative z-10">Select</span>
