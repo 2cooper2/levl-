@@ -1448,13 +1448,14 @@ const MessageItem = memo(
                   <div className={`w-full ${isCableRender(option) ? 'aspect-[1/2]' : 'aspect-[8/13]'} relative overflow-hidden`}>
                     {isMountTypeRender(option) ? (
                       <div className="w-full h-full relative" style={{ background: 'linear-gradient(180deg, #e8ddf2 0%, #d0bfe8 45%, #b9a3dc 100%)' }}>
-                        {MOUNT_TYPE_VIDEOS[option] ? (
+                        {MOUNT_TYPE_VIDEOS[option] && !(typeof navigator !== 'undefined' && /iP(hone|ad|od)/.test(navigator.userAgent)) ? (
                           <video
                             src={MOUNT_TYPE_VIDEOS[option]}
                             autoPlay
                             loop
                             muted
                             playsInline
+                            style={{ background: 'transparent' }}
                             className="absolute inset-0 w-full h-full object-contain"
                           />
                         ) : (
