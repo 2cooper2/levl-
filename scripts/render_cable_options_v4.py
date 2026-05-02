@@ -1471,9 +1471,15 @@ def render_one(name):
 
     out_webm = os.path.join(OUT_DIR, f"cable-{name}.webm")
     if os.path.exists(out_webm): os.remove(out_webm)
+    # VP9 alpha encoding REQUIRES three things or it silently strips alpha:
+    #   1. -pix_fmt yuva420p  (request alpha-aware format)
+    #   2. -auto-alt-ref 0    (alt-ref frames break alpha)
+    #   3. -metadata:s:v:0 alpha_mode=1  (mark stream as alpha-bearing)
     cmd = [FFMPEG, "-y", "-framerate", str(FPS),
            "-i", os.path.join(out_dir, "frame_%04d.png"),
            "-c:v", "libvpx-vp9", "-pix_fmt", "yuva420p",
+           "-auto-alt-ref", "0",
+           "-metadata:s:v:0", "alpha_mode=1",
            "-b:v", "0", "-crf", "32", "-an", out_webm]
     subprocess.run(cmd, check=True)
     print(f"DONE -> {out_webm}", flush=True)

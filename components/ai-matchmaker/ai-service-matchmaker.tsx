@@ -1539,7 +1539,7 @@ const MessageItem = memo(
                             filter: 'blur(4px)',
                           }}
                         />
-                        {CABLE_VIDEOS[option] ? (
+                        {CABLE_VIDEOS[option] && !(typeof navigator !== 'undefined' && /iP(hone|ad|od)/.test(navigator.userAgent)) ? (
                           <video
                             autoPlay
                             loop
@@ -1554,6 +1554,7 @@ const MessageItem = memo(
                             poster={CABLE_RENDERS[option]}
                             className="absolute inset-0 w-full h-full object-contain z-10"
                             style={{
+                              background: 'transparent',
                               filter: 'contrast(1.06) saturate(1.10) brightness(1.01) drop-shadow(0 6px 12px rgba(60,40,120,0.18))',
                               WebkitBoxReflect: 'below 4px linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.18) 100%)',
                             }}
