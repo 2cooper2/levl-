@@ -24,24 +24,16 @@ export function ProviderCard({ provider, onSelect, onViewServices, onContact }: 
           "0 24px 48px -8px rgba(0,0,0,0.4), 0 12px 20px -6px rgba(0,0,0,0.25), 0 -2px 6px 0 rgba(255,255,255,0.9) inset",
       }}
     >
-      {/* Header with subtle lavender gradient */}
+      {/* Header with very light gradient (matches the light date cells, not the selected one) */}
       <div
         className="h-24 relative"
         style={{
           background:
-            "linear-gradient(135deg,rgba(167,139,250,0.18) 0%,rgba(237,233,254,0.55) 45%,rgba(255,255,255,0.85) 100%)",
+            "linear-gradient(135deg,rgba(255,255,255,0.97),rgba(237,233,254,0.6))",
         }}
       >
-        {/* Decorative corner accent */}
-        <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-lavender-200/30 to-transparent rounded-bl-[100px] dark:from-lavender-500/15"></div>
-        {/* Purple top accent bar (matches the Schedule card's accent) */}
-        <div
-          className="absolute top-0 left-0 w-full h-1.5"
-          style={{
-            background:
-              "linear-gradient(135deg,rgba(167,139,250,0.72) 0%,rgba(139,92,246,0.65) 45%,rgba(109,40,217,0.55) 100%)",
-          }}
-        />
+        {/* Subtle corner accent */}
+        <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-lavender-200/15 to-transparent rounded-bl-[100px]"></div>
         {/* Avatar */}
         <div className="absolute -bottom-10 left-4">
           <div className="h-20 w-20 rounded-full border-4 border-lavender-300/70 dark:border-lavender-500/70 overflow-hidden shadow-[0_8px_16px_-4px_rgba(0,0,0,0.08),0_4px_8px_-4px_rgba(0,0,0,0.06)] flex items-center justify-center bg-lavender-100/70 dark:bg-lavender-600/70">
@@ -122,13 +114,14 @@ export function ProviderCard({ provider, onSelect, onViewServices, onContact }: 
         {/* Action button */}
         <div>
           <Button
-            className="w-full text-white transition-all duration-300 relative overflow-hidden group/button rounded-xl py-2.5 font-bold"
+            className="w-full transition-all duration-300 relative overflow-hidden group/button rounded-xl py-2.5 font-bold"
             style={{
               background:
-                "linear-gradient(135deg,rgba(167,139,250,0.72) 0%,rgba(139,92,246,0.65) 45%,rgba(109,40,217,0.55) 100%)",
-              border: "1px solid rgba(167,139,250,0.5)",
+                "linear-gradient(135deg,rgba(255,255,255,0.97),rgba(237,233,254,0.8))",
+              border: "1px solid rgba(167,139,250,0.45)",
               boxShadow:
-                "0 6px 14px -4px rgba(0,0,0,0.35), 0 3px 6px -3px rgba(0,0,0,0.2), 0 -1px 0 rgba(255,255,255,0.25) inset",
+                "0 4px 10px -3px rgba(0,0,0,0.25), 0 2px 4px -2px rgba(0,0,0,0.15), 0 -1px 3px 0 rgba(255,255,255,0.9) inset",
+              color: "#7c3aed",
             }}
             onClick={() => onSelect(provider.id)}
           >
