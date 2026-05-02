@@ -1449,20 +1449,14 @@ const MessageItem = memo(
                     {isMountTypeRender(option) ? (
                       <div className="w-full h-full relative" style={{ background: 'linear-gradient(180deg, #e8ddf2 0%, #d0bfe8 45%, #b9a3dc 100%)' }}>
                         {MOUNT_TYPE_VIDEOS[option] ? (
-                          // Multi-source video: HEVC+alpha mp4 first (iOS picks this — hardware
-                          // decoded, alpha-preserving), webm second (other browsers).
                           <video
+                            src={MOUNT_TYPE_VIDEOS[option]}
                             autoPlay
                             loop
                             muted
                             playsInline
-                            preload="auto"
-                            style={{ background: 'transparent', transform: 'translateZ(0)', willChange: 'transform' }}
                             className="absolute inset-0 w-full h-full object-contain"
-                          >
-                            <source src={MOUNT_TYPE_VIDEOS[option].replace(/\.webm$/, '.mp4')} type='video/mp4; codecs="hvc1"' />
-                            <source src={MOUNT_TYPE_VIDEOS[option]} type='video/webm; codecs="vp9"' />
-                          </video>
+                          />
                         ) : (
                           <Image
                             src={MOUNT_TYPE_RENDERS[option]}
