@@ -1448,34 +1448,30 @@ const MessageItem = memo(
                   <div className={`w-full ${isCableRender(option) ? 'aspect-[1/2]' : 'aspect-[8/13]'} relative overflow-hidden`}>
                     {isMountTypeRender(option) ? (
                       <div className="w-full h-full relative" style={{ background: 'linear-gradient(180deg, #e8ddf2 0%, #d0bfe8 45%, #b9a3dc 100%)' }}>
-                        {(() => {
-                          const isIOS = typeof navigator !== 'undefined' && /iP(hone|ad|od)/.test(navigator.userAgent)
-                          if (MOUNT_TYPE_VIDEOS[option] && !isIOS) {
-                            return (
-                              <video
-                                src={MOUNT_TYPE_VIDEOS[option]}
-                                autoPlay
-                                loop
-                                muted
-                                playsInline
-                                style={{ background: 'transparent' }}
-                                className="absolute inset-0 w-full h-full object-contain"
-                              />
-                            )
-                          }
-                          // iOS or no video: animated WebP via <img> — preserves alpha + animation.
-                          // transform: translateZ(0) forces GPU compositing for smooth playback.
-                          return (
-                            <img
-                              src={MOUNT_TYPE_RENDERS[option]}
-                              alt={option}
-                              loading="lazy"
-                              decoding="async"
-                              className="absolute inset-0 w-full h-full object-contain"
-                              style={{ background: 'transparent', transform: 'translateZ(0)', willChange: 'transform' }}
-                            />
-                          )
-                        })()}
+                        {MOUNT_TYPE_VIDEOS[option] ? (
+                          // Multi-source video: HEVC+alpha mp4 first (iOS picks this — hardware
+                          // decoded, alpha-preserving), webm second (other browsers).
+                          <video
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            preload="auto"
+                            style={{ background: 'transparent', transform: 'translateZ(0)', willChange: 'transform' }}
+                            className="absolute inset-0 w-full h-full object-contain"
+                          >
+                            <source src={MOUNT_TYPE_VIDEOS[option].replace(/\.webm$/, '.mp4')} type='video/mp4; codecs="hvc1"' />
+                            <source src={MOUNT_TYPE_VIDEOS[option]} type='video/webm; codecs="vp9"' />
+                          </video>
+                        ) : (
+                          <Image
+                            src={MOUNT_TYPE_RENDERS[option]}
+                            alt={option}
+                            fill
+                            className="object-contain"
+                            sizes="(max-width: 768px) 45vw, 200px"
+                          />
+                        )}
                       </div>
                     ) : isMountOption(option) ? (
                       MOUNT_RENDERS[option] ? (
