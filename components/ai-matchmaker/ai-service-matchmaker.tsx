@@ -1551,6 +1551,13 @@ const MessageItem = memo(
                           }}
                         />
                         {CABLE_VIDEOS[option] ? (
+                          (() => {
+                            const isIOS = typeof navigator !== 'undefined' && /iP(hone|ad|od)/.test(navigator.userAgent)
+                            // iOS gets H.264 mp4 with lavender BG composited in (no alpha needed).
+                            const videoSrc = isIOS
+                              ? CABLE_VIDEOS[option].replace(/\.webm$/, '.mp4')
+                              : CABLE_VIDEOS[option]
+                            return (
                           <video
                             autoPlay
                             loop
@@ -1570,8 +1577,10 @@ const MessageItem = memo(
                               WebkitBoxReflect: 'below 4px linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.18) 100%)',
                             }}
                           >
-                            <source src={CABLE_VIDEOS[option]} type='video/webm; codecs="vp9"' />
+                            <source src={videoSrc} type={isIOS ? 'video/mp4' : 'video/webm; codecs="vp9"'} />
                           </video>
+                            )
+                          })()
                         ) : (
                           <Image
                             src={CABLE_RENDERS[option]}
