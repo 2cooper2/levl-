@@ -1463,14 +1463,16 @@ const MessageItem = memo(
                               />
                             )
                           }
-                          // iOS or no video: animated WebP via <img> — preserves alpha + animation
-                          // (the .webp at MOUNT_TYPE_RENDERS path is now an animated WebP)
+                          // iOS or no video: animated WebP via <img> — preserves alpha + animation.
+                          // transform: translateZ(0) forces GPU compositing for smooth playback.
                           return (
                             <img
                               src={MOUNT_TYPE_RENDERS[option]}
                               alt={option}
+                              loading="lazy"
+                              decoding="async"
                               className="absolute inset-0 w-full h-full object-contain"
-                              style={{ background: 'transparent' }}
+                              style={{ background: 'transparent', transform: 'translateZ(0)', willChange: 'transform' }}
                             />
                           )
                         })()}
@@ -1570,12 +1572,15 @@ const MessageItem = memo(
                             <source src={CABLE_VIDEOS[option]} type='video/webm; codecs="vp9"' />
                           </video>
                         ) : (
-                          // Animated WebP via raw <img> so animation isn't stripped by next/image optimization
+                          // Animated WebP via raw <img> so animation isn't stripped by next/image optimization.
+                          // transform: translateZ(0) forces GPU compositing for smooth playback.
                           <img
                             src={CABLE_RENDERS[option]}
                             alt={option}
+                            loading="lazy"
+                            decoding="async"
                             className="absolute inset-0 w-full h-full object-contain z-10"
-                            style={{ background: 'transparent' }}
+                            style={{ background: 'transparent', transform: 'translateZ(0)', willChange: 'transform' }}
                           />
                         )}
                       </div>
