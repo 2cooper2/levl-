@@ -82,9 +82,9 @@ const MOUNT_OBJECT_SERVICE_MAP: Record<string, string> = {
 
 // Static Blender renders for cable management cards (replaces WebGL cable scenes)
 const CABLE_RENDERS: Record<string, string> = {
-  "Yes, hide all cables in wall": "/assets/renders/cable-hidden.png",
-  "Yes, use cable covers":        "/assets/renders/cable-covers.png",
-  "No, cables visible is fine":   "/assets/renders/cable-visible.png",
+  "Yes, hide all cables in wall": "/assets/renders/cable-hidden.webp",
+  "Yes, use cable covers":        "/assets/renders/cable-covers.webp",
+  "No, cables visible is fine":   "/assets/renders/cable-visible.webp",
 }
 // Video versions — cable being routed inside wall, raceway sliding down,
 // or just dangling. Falls back to the static PNG above when absent.
@@ -1448,25 +1448,32 @@ const MessageItem = memo(
                   <div className={`w-full ${isCableRender(option) ? 'aspect-[1/2]' : 'aspect-[8/13]'} relative overflow-hidden`}>
                     {isMountTypeRender(option) ? (
                       <div className="w-full h-full relative" style={{ background: 'linear-gradient(180deg, #e8ddf2 0%, #d0bfe8 45%, #b9a3dc 100%)' }}>
-                        {MOUNT_TYPE_VIDEOS[option] && !(typeof navigator !== 'undefined' && /iP(hone|ad|od)/.test(navigator.userAgent)) ? (
-                          <video
-                            src={MOUNT_TYPE_VIDEOS[option]}
-                            autoPlay
-                            loop
-                            muted
-                            playsInline
-                            style={{ background: 'transparent' }}
-                            className="absolute inset-0 w-full h-full object-contain"
-                          />
-                        ) : (
-                          <Image
-                            src={MOUNT_TYPE_RENDERS[option]}
-                            alt={option}
-                            fill
-                            className="object-contain"
-                            sizes="(max-width: 768px) 45vw, 200px"
-                          />
-                        )}
+                        {(() => {
+                          const isIOS = typeof navigator !== 'undefined' && /iP(hone|ad|od)/.test(navigator.userAgent)
+                          if (MOUNT_TYPE_VIDEOS[option] && !isIOS) {
+                            return (
+                              <video
+                                src={MOUNT_TYPE_VIDEOS[option]}
+                                autoPlay
+                                loop
+                                muted
+                                playsInline
+                                style={{ background: 'transparent' }}
+                                className="absolute inset-0 w-full h-full object-contain"
+                              />
+                            )
+                          }
+                          // iOS or no video: animated WebP via <img> — preserves alpha + animation
+                          // (the .webp at MOUNT_TYPE_RENDERS path is now an animated WebP)
+                          return (
+                            <img
+                              src={MOUNT_TYPE_RENDERS[option]}
+                              alt={option}
+                              className="absolute inset-0 w-full h-full object-contain"
+                              style={{ background: 'transparent' }}
+                            />
+                          )
+                        })()}
                       </div>
                     ) : isMountOption(option) ? (
                       MOUNT_RENDERS[option] ? (
@@ -1563,13 +1570,12 @@ const MessageItem = memo(
                             <source src={CABLE_VIDEOS[option]} type='video/webm; codecs="vp9"' />
                           </video>
                         ) : (
-                          <Image
+                          // Animated WebP via raw <img> so animation isn't stripped by next/image optimization
+                          <img
                             src={CABLE_RENDERS[option]}
                             alt={option}
-                            fill
-                            quality={100}
-                            className="object-contain"
-                            sizes="(max-width: 768px) 45vw, 200px"
+                            className="absolute inset-0 w-full h-full object-contain z-10"
+                            style={{ background: 'transparent' }}
                           />
                         )}
                       </div>
