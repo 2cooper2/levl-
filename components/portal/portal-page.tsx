@@ -286,7 +286,7 @@ function CredentialCenter({
                   <div className="flex items-center gap-3 min-w-0">
                     <div
                       className="w-10 h-10 rounded-lg flex items-center justify-center text-xs font-black flex-shrink-0"
-                      style={{ ...levlActiveStyle, color: "#fff" }}
+                      style={{ ...levlCardStyle, color: "#7c3aed" }}
                     >
                       {p.logo}
                     </div>
@@ -309,8 +309,8 @@ function CredentialCenter({
                   </div>
                   <button
                     onClick={() => onVerify(p.id)}
-                    className="text-[10px] font-bold uppercase tracking-wide flex items-center gap-1 px-3 py-1.5 rounded-md text-white transition-transform hover:-translate-y-0.5"
-                    style={levlActiveStyle}
+                    className="text-[10px] font-bold uppercase tracking-wide flex items-center gap-1 px-3 py-1.5 rounded-md transition-transform hover:-translate-y-0.5"
+                    style={{ ...levlCardStyle, color: "#7c3aed" }}
                   >
                     <Plus size={11} /> Verify
                   </button>
@@ -385,13 +385,13 @@ function QuickActions() {
             transition={{ delay: i * 0.05, duration: 0.3 }}
             whileHover={{ y: -2 }}
             className="relative p-4 flex items-center justify-between gap-2 rounded-xl"
-            style={{ ...levlActiveStyle, zIndex: 1, display: "flex" }}
+            style={{ ...levlCardStyle, zIndex: 1, display: "flex" }}
           >
-            <span className="flex items-center gap-2 text-xs font-bold text-white">
-              <span className="text-white/90">{a.icon}</span>
+            <span className="flex items-center gap-2 text-xs font-bold" style={{ color: "#7c3aed" }}>
+              <span style={{ color: "#a78bfa" }}>{a.icon}</span>
               {a.label}
             </span>
-            <ArrowRight size={12} className="text-white/70" />
+            <ArrowRight size={12} style={{ color: "#a78bfa" }} />
           </motion.a>
         </div>
       ))}

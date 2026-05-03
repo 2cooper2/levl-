@@ -88,14 +88,7 @@ export function EnhancedMainNav() {
         </nav>
 
         <div className="flex items-center gap-4">
-          {isLoggedIn ? (
-            <Button variant="outline" size="sm" className="hidden md:flex bg-transparent" asChild>
-              <Link href="/dashboard">
-                <User className="mr-2 h-4 w-4" />
-                Dashboard
-              </Link>
-            </Button>
-          ) : (
+          {!isLoggedIn && (
             <div className="hidden md:flex items-center gap-2">
               <Button variant="ghost" size="sm" asChild>
                 <Link href="/auth/login">
@@ -136,14 +129,7 @@ export function EnhancedMainNav() {
               </Link>
             ))}
 
-            {isLoggedIn ? (
-              <Button variant="outline" size="sm" className="w-full bg-transparent" asChild>
-                <Link href="/dashboard">
-                  <User className="mr-2 h-4 w-4" />
-                  Dashboard
-                </Link>
-              </Button>
-            ) : (
+            {!isLoggedIn && (
               <div className="flex flex-col gap-2 pt-2 border-t">
                 <Button variant="outline" size="sm" className="w-full bg-transparent" asChild>
                   <Link href="/auth/login">

@@ -17,7 +17,7 @@ export default async function SkillProgressPage() {
 
   // Redirect clients away from this page
   if (!userProfile || userProfile.role !== "provider") {
-    redirect("/dashboard")
+    redirect("/portal")
   }
 
   return (

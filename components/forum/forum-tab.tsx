@@ -20,6 +20,7 @@ import {
   Layers,
   ThumbsUp,
   Eye,
+  BarChart3,
   ArrowRight,
   CheckCircle,
   Truck,
@@ -104,53 +105,28 @@ function ReviewStarBadge({ authorName }: { authorName: string }) {
     <span className="inline-flex items-center gap-1 ml-1.5">
       <span
         className="relative inline-flex items-center justify-center"
-        style={{
-          width: 24,
-          height: 24,
-          filter: "drop-shadow(0 2px 3px rgba(124, 58, 237, 0.5)) drop-shadow(0 1px 1px rgba(124, 58, 237, 0.3))",
-        }}
+        style={{ width: 30, height: 30 }}
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <linearGradient id={`sg-${authorName}`} x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#A78BFA" />
-              <stop offset="40%" stopColor="#8B5CF6" />
-              <stop offset="100%" stopColor="#6D28D9" />
-            </linearGradient>
-            <linearGradient id={`ss-${authorName}`} x1="20%" y1="0%" x2="80%" y2="50%">
-              <stop offset="0%" stopColor="rgba(255,255,255,0.4)" />
-              <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+              <stop offset="0%" stopColor="#d4ccff" />
+              <stop offset="100%" stopColor="#beaff0" />
             </linearGradient>
           </defs>
           <path
             d="M12 2L14.9 8.6L22 9.3L16.8 14L18.2 21L12 17.5L5.8 21L7.2 14L2 9.3L9.1 8.6L12 2Z"
             fill={`url(#sg-${authorName})`}
-            stroke="#5B21B6"
-            strokeWidth="0.5"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M12 2L14.9 8.6L22 9.3L16.8 14L18.2 21L12 17.5L5.8 21L7.2 14L2 9.3L9.1 8.6L12 2Z"
-            fill={`url(#ss-${authorName})`}
-          />
-          <path
-            d="M12 5L13.8 9L18 9.4L14.9 12.2L15.7 16.5L12 14.4L8.3 16.5L9.1 12.2L6 9.4L10.2 9L12 5Z"
-            fill="rgba(255,255,255,0.1)"
           />
         </svg>
         <span
-          className="absolute inset-0 flex items-center justify-center font-black text-white"
-          style={{
-            fontSize: 11,
-            lineHeight: 1,
-            paddingTop: 1,
-            textShadow: "0 1px 2px rgba(0,0,0,0.35)",
-          }}
+          className="absolute inset-0 flex items-center justify-center font-black text-black"
+          style={{ fontSize: 11, lineHeight: 1, paddingTop: 1 }}
         >
           {rating}
         </span>
       </span>
-      <span className="text-xs font-bold" style={{ color: "#7C3AED" }}>
+      <span className="text-xs font-bold text-black">
         ({reviewCount.toLocaleString()})
       </span>
     </span>
@@ -1094,6 +1070,25 @@ const forumTopics = [
   },
 ]
 
+// ─── Levl gradient look — pearlescent white (inner cards) ───────────────
+const levlCardStyle: React.CSSProperties = {
+  background:
+    "radial-gradient(ellipse at 25% 30%, rgba(240,235,250,0.35) 0%, transparent 55%), radial-gradient(ellipse at 80% 80%, rgba(235,230,248,0.35) 0%, transparent 55%), radial-gradient(ellipse at 60% 50%, rgba(245,240,250,0.3) 0%, transparent 60%), linear-gradient(135deg, #ffffff 0%, #fcfaff 100%)",
+  boxShadow: "0 4px 10px -3px rgba(0,0,0,0.25), 0 2px 4px -2px rgba(0,0,0,0.15), 0 -1px 3px 0 rgba(255,255,255,0.9) inset",
+}
+// ─── Background card — light lavender gradient (outer container cards) ──
+const levlBackgroundCardStyle: React.CSSProperties = {
+  background: "linear-gradient(135deg, #f8f5ff, #ede8fe)",
+  boxShadow: "0 8px 16px -4px rgba(0,0,0,0.3), 0 4px 8px -4px rgba(0,0,0,0.18), 0 -2px 4px 0 rgba(255,255,255,0.6) inset",
+}
+const tagChipStyle: React.CSSProperties = {
+  background: "rgba(167,139,250,0.15)",
+  color: "#111",
+}
+// Lavender pearlescent (matches client/user chat bubble in matchmaker)
+const lavenderPearlBg =
+  "radial-gradient(ellipse at 25% 30%, rgba(250,240,255,0.45) 0%, transparent 55%), radial-gradient(ellipse at 80% 80%, rgba(190,175,240,0.4) 0%, transparent 55%), radial-gradient(ellipse at 60% 50%, rgba(225,215,255,0.35) 0%, transparent 60%), linear-gradient(135deg, #ede8ff 0%, #d4ccff 100%)"
+
 export function ForumTab() {
   const [searchQuery, setSearchQuery] = useState("")
   const [activeTopic, setActiveTopic] = useState<number | null>(null)
@@ -1534,7 +1529,8 @@ export function ForumTab() {
       <AnimatePresence>
         {showNotification && (
           <motion.div
-            className="fixed top-4 right-4 z-50 bg-gradient-to-r from-lavender-400 to-lavender-600 text-white px-4 py-2 rounded-lg shadow-lg flex items-center"
+            className="fixed top-4 right-4 z-50 px-4 py-2 rounded-lg flex items-center"
+            style={{ background: lavenderPearlBg, color: "#111" }}
             initial={{ opacity: 0, y: -20, scale: 0.8 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.8 }}
@@ -1547,10 +1543,10 @@ export function ForumTab() {
       </AnimatePresence>
 
       {/* Header with search and new topic button - Enhanced with Levl UI/UX */}
-      <div className="flex flex-col p-4 md:p-6 rounded-xl border bg-card text-card-foreground transition-all relative overflow-visible bg-gradient-to-br from-lavender-50/95 via-white/90 to-lavender-100/90 backdrop-blur-sm shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25),0_10px_20px_-5px_rgba(0,0,0,0.2),0_0_0_1px_rgba(0,0,0,0.05)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 transform translate-y-0 translateZ-0 filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.15)]">
-        {/* Decorative elements exactly like category cards */}
-        <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-lavender-400/10 to-transparent rounded-bl-full transform transition-transform duration-700 group-hover:scale-110"></div>
-        <div className="absolute -bottom-8 -left-8 w-40 h-40 bg-gradient-to-tr from-lavender-500/15 to-transparent rounded-tr-full transform transition-transform duration-700 group-hover:scale-110"></div>
+      <div
+        className="flex flex-col p-4 md:p-6 text-card-foreground relative overflow-visible"
+        style={{ ...levlBackgroundCardStyle, borderRadius: "0.75rem" }}
+      >
         <div
           className="absolute inset-0 opacity-40 transition-opacity duration-500 group-hover:opacity-60"
           style={{
@@ -1560,22 +1556,17 @@ export function ForumTab() {
           }}
         ></div>
 
-        {/* Animated accent line exactly like category cards */}
-        <div className="absolute h-[2px] w-1/3 bg-gradient-to-r from-transparent via-lavender-400/60 to-transparent top-0 left-0 animate-shimmer"></div>
-
-        {/* Additional decorative elements from category cards */}
-        <div className="absolute bottom-0 right-0 w-24 h-24 bg-gradient-to-tl from-lavender-300/5 to-transparent rounded-tl-full"></div>
-        <div className="absolute top-1/2 left-0 w-12 h-24 bg-gradient-to-r from-lavender-400/5 to-transparent"></div>
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 relative z-10">
           <div className="relative flex-1">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-lavender-500/70 transition-colors duration-200" />
+              <Search className="h-4 w-4 text-black transition-colors duration-200" />
             </div>
             <Input
               type="text"
               placeholder="Search forum topics..."
-              className="pl-10 pr-4 py-2.5 w-full rounded-lg border border-lavender-200 focus:border-lavender-400/60 focus:ring-2 focus:ring-lavender-300/30 bg-white/80 transition-all duration-200 text-sm placeholder:text-gray-400"
+              className="pl-10 pr-4 py-2.5 w-full rounded-lg text-sm placeholder:text-black focus:outline-none"
+              style={levlCardStyle}
               value={searchQuery}
               onChange={handleSearch}
             />
@@ -1586,7 +1577,8 @@ export function ForumTab() {
               transition={{ duration: 0.2 }}
             >
               <button
-                className="h-5 w-5 bg-lavender-100 rounded-full flex items-center justify-center text-lavender-500 hover:bg-lavender-200 transition-colors"
+                className="h-5 w-5 rounded-full flex items-center justify-center"
+                style={tagChipStyle}
                 onClick={() => setSearchQuery("")}
               >
                 <span className="sr-only">Clear search</span>
@@ -1607,10 +1599,16 @@ export function ForumTab() {
             </motion.div>
           </div>
           <button
-            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-lavender-300 to-lavender-500 text-white rounded-lg font-medium text-sm transition-all duration-200 shadow-lavender-400/20"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm"
+            style={{
+              background: "linear-gradient(135deg, rgba(255,255,255,0.97), rgba(237,233,254,0.82))",
+              border: "1px solid rgba(167,139,250,0.45)",
+              boxShadow: "0 4px 10px -3px rgba(0,0,0,0.25), 0 2px 4px -2px rgba(0,0,0,0.15), 0 -1px 3px 0 rgba(255,255,255,0.9) inset",
+              color: "#111",
+            }}
             onClick={() => setShowNewTopicForm(true)}
           >
-            <PlusCircle className="h-4 w-4 transition-transform duration-300" />
+            <PlusCircle className="h-4 w-4" />
             <span>New Topic</span>
           </button>
         </div>
@@ -1621,11 +1619,8 @@ export function ForumTab() {
             (category) => (
               <button
                 key={category}
-                className={`px-3 py-1.5 text-xs rounded-full transition-all duration-200 ${
-                  category === "All Topics"
-                    ? "bg-lavender-100/80 text-lavender-700 font-medium border-2 border-lavender-300/40"
-                    : "bg-lavender-50 text-gray-600 border border-lavender-200/50"
-                }`}
+                className="px-3 py-1.5 text-xs rounded-full"
+                style={{ ...levlCardStyle, fontWeight: category === "All Topics" ? 700 : 500 }}
               >
                 {category}
               </button>
@@ -1634,14 +1629,14 @@ export function ForumTab() {
         </div>
 
         {/* Sort options */}
-        <div className="flex items-center justify-between text-xs text-gray-500 relative z-10">
+        <div className="flex items-center justify-between text-xs text-black relative z-10">
           <div className="flex items-center gap-3">
             <span className="font-medium">Sort by:</span>
             <div className="flex items-center gap-3">
               {["Latest", "Popular", "Unanswered"].map((option, index) => (
                 <button
                   key={option}
-                  className={`transition-colors duration-200 ${index === 0 ? "text-lavender-600 font-medium" : ""}`}
+                  className={`transition-colors duration-200 ${index === 0 ? "text-black font-medium" : ""}`}
                   onClick={() => setSortBy(index === 0 ? "recent" : index === 1 ? "popular" : "replies")}
                 >
                   {option}
@@ -1650,7 +1645,7 @@ export function ForumTab() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Filter className="h-3 w-3 text-lavender-500" />
+            <Filter className="h-3 w-3 text-black" />
             <span>Filters</span>
           </div>
         </div>
@@ -1664,13 +1659,14 @@ export function ForumTab() {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="flex flex-col p-6 rounded-xl border bg-card text-card-foreground transition-all relative overflow-visible bg-gradient-to-br from-lavender-50/95 via-white/90 to-lavender-100/90 backdrop-blur-sm shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25),0_10px_20px_-5px_rgba(0,0,0,0.2),0_0_0_1px_rgba(0,0,0,0.05)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 transform translate-y-0 translateZ-0 filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.15)] mb-4"
+            className="flex flex-col p-6 text-card-foreground relative overflow-visible mb-4"
+            style={{ ...levlBackgroundCardStyle, borderRadius: "0.75rem" }}
           >
             {/* Background pattern */}
             <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_10px_10px,rgba(var(--primary-rgb),0.4)_1px,transparent_1px)] bg-[length:20px_20px] pointer-events-none"></div>
 
-            <h3 className="text-sm font-semibold text-gray-800 mb-3 flex items-center">
-              <Sparkles className="h-4 w-4 mr-2 text-lavender-600" />
+            <h3 className="text-sm font-semibold text-black mb-3 flex items-center">
+              <Sparkles className="h-4 w-4 mr-2 text-black" />
               Create New Discussion
             </h3>
 
@@ -1682,7 +1678,7 @@ export function ForumTab() {
                   value={newTopicTitle}
                   onChange={(e) => setNewTopicTitle(e.target.value)}
                 />
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-500">
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-black">
                   {newTopicTitle.length}/100
                 </div>
               </div>
@@ -1690,17 +1686,18 @@ export function ForumTab() {
               <div className="relative">
                 <textarea
                   placeholder="What would you like to discuss?"
-                  className="w-full h-24 px-3 py-2 text-sm bg-white/5 dark:bg-black/20 rounded-md border border-white/10 focus:border-lavender-500/50 focus:ring-1 focus:ring-lavender-400/30 outline-none transition-colors resize-none text-gray-800"
+                  className="w-full h-24 px-3 py-2 text-sm rounded-md outline-none resize-none text-black"
+                  style={levlCardStyle}
                   value={newTopicContent}
                   onChange={(e) => setNewTopicContent(e.target.value)}
                 />
-                <div className="absolute right-2 bottom-2 text-xs text-gray-500">{newTopicContent.length}/500</div>
+                <div className="absolute right-2 bottom-2 text-xs text-black">{newTopicContent.length}/500</div>
               </div>
 
               <div className="flex items-center">
                 <div className="relative flex-1">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Target className="h-3.5 w-3.5 text-lavender-500/60" />
+                    <Target className="h-3.5 w-3.5 text-black" />
                   </div>
                   <Input
                     placeholder="Tags (comma separated)"
@@ -1712,11 +1709,17 @@ export function ForumTab() {
               </div>
 
               <div className="flex justify-between items-center">
-                <div className="text-xs text-gray-500">Use tags to help others find your topic</div>
+                <div className="text-xs text-black">Use tags to help others find your topic</div>
                 <Button
                   variant="default"
                   size="sm"
-                  className="gap-1 text-xs bg-gradient-to-r from-lavender-300 to-lavender-500 hover:from-lavender-400 hover:to-lavender-600 text-white"
+                  className="gap-1 text-xs"
+                  style={{
+                    background: "linear-gradient(135deg, rgba(255,255,255,0.97), rgba(237,233,254,0.82))",
+                    border: "1px solid rgba(167,139,250,0.45)",
+                    boxShadow: "0 4px 10px -3px rgba(0,0,0,0.25), 0 2px 4px -2px rgba(0,0,0,0.15), 0 -1px 3px 0 rgba(255,255,255,0.9) inset",
+                    color: "#111",
+                  }}
                   onClick={handleCreateTopic}
                   disabled={!newTopicTitle.trim() || !newTopicContent.trim()}
                 >
@@ -1730,22 +1733,21 @@ export function ForumTab() {
       </AnimatePresence>
 
       {/* Category tabs - Enhanced with Levl UI/UX */}
-      <div className="flex overflow-x-auto pb-1 -mx-0.5 px-0.5 hide-scrollbar space-x-1.5 mb-1 relative">
-        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-lavender-400/30 to-transparent"></div>
+      <div className="flex overflow-x-auto pb-1 px-1 pr-3 hide-scrollbar space-x-1.5 mb-1 relative">
 
         {categories.map((category) => (
           <motion.button
             key={category.id}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 flex items-center relative whitespace-nowrap ${
-              activeCategory === category.id
-                ? "bg-gradient-to-r from-lavender-400 to-lavender-600 text-white shadow-lg shadow-lavender-400/20"
-                : "bg-white/90 text-gray-700 hover:bg-lavender-50 border border-lavender-200/70"
-            }`}
+            className="px-3 py-1.5 rounded-full text-xs font-medium flex items-center relative whitespace-nowrap shrink-0"
+            style={{
+              ...levlCardStyle,
+              color: "#111",
+              fontWeight: activeCategory === category.id ? 700 : 500,
+            }}
             onClick={() => setActiveCategory(category.id)}
             whileHover={{ scale: 1.05, y: -1 }}
             whileTap={{ scale: 0.98 }}
           >
-            <span className="mr-1.5">{category.icon}</span>
             {category.name}
             {activeCategory === category.id && (
               <>
@@ -1775,10 +1777,10 @@ export function ForumTab() {
       </div>
 
       {/* Trending Topics - Enhanced with Levl UI/UX */}
-      <div className="flex flex-col p-6 rounded-xl border bg-card text-card-foreground transition-all group relative overflow-visible bg-gradient-to-br from-lavender-50/95 via-white/90 to-lavender-100/90 backdrop-blur-sm shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25),0_10px_20px_-5px_rgba(0,0,0,0.2),0_0_0_1px_rgba(0,0,0,0.05)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 transform translate-y-0 translateZ-0 filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.15)] mb-3">
-        {/* Decorative elements */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-lavender-400/10 to-transparent rounded-bl-full transform transition-transform duration-700 group-hover:scale-110"></div>
-        <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-gradient-to-tr from-lavender-500/15 to-transparent rounded-tr-full transform transition-transform duration-700 group-hover:scale-110"></div>
+      <div
+        className="flex flex-col p-6 text-card-foreground group relative overflow-visible mb-3"
+        style={{ ...levlBackgroundCardStyle, borderRadius: "0.75rem" }}
+      >
         <div
           className="absolute inset-0 opacity-30 transition-opacity duration-500"
           style={{
@@ -1787,13 +1789,13 @@ export function ForumTab() {
           }}
         ></div>
 
-        {/* Animated accent line */}
-        <div className="absolute h-[2px] w-1/3 bg-gradient-to-r from-transparent via-lavender-400/60 to-transparent top-0 left-0 animate-shimmer"></div>
-
         <div className="flex items-center justify-between mb-3 relative z-10">
-          <h4 className="text-sm font-semibold text-gray-800 flex items-center">
-            <div className="h-6 w-6 rounded-full bg-gradient-to-r from-lavender-300 to-lavender-400 flex items-center justify-center mr-2 shadow-sm shadow-lavender-300/30">
-              <TrendingUp className="h-3 w-3 text-white" />
+          <h4 className="text-sm font-semibold text-black flex items-center">
+            <div
+              className="h-6 w-6 rounded-full flex items-center justify-center mr-2"
+              style={{ background: lavenderPearlBg }}
+            >
+              <TrendingUp className="h-3 w-3" style={{ color: "#111" }} />
             </div>
             <span className="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
               Trending Discussions
@@ -1802,7 +1804,8 @@ export function ForumTab() {
           <motion.button
             whileHover={{ scale: 1.05, x: 2 }}
             whileTap={{ scale: 0.95 }}
-            className="text-xs text-lavender-600 flex items-center font-medium px-2 py-1 rounded-full bg-lavender-50/80 border border-lavender-200/50 hover:bg-lavender-100/80 transition-colors duration-200"
+            className="text-xs flex items-center font-medium px-2 py-1 rounded-full"
+            style={tagChipStyle}
           >
             View All <ArrowRight className="h-3 w-3 ml-1" />
           </motion.button>
@@ -1829,42 +1832,37 @@ export function ForumTab() {
           ].map((topic, i) => (
             <motion.div
               key={i}
-              className="group/card cursor-pointer bg-white/70 hover:bg-white rounded-lg p-3 border border-lavender-200/30 hover:border-lavender-300/50 transition-all duration-200 relative overflow-hidden"
-              whileHover={{ y: -2, boxShadow: "0 8px 20px rgba(147, 51, 234, 0.08)" }}
+              className="group/card cursor-pointer rounded-lg p-3 relative overflow-hidden"
+              style={{ ...levlCardStyle, borderRadius: "0.5rem" }}
             >
-              {/* Card accent */}
-              <div className="absolute top-0 left-0 h-full w-1 bg-gradient-to-b from-lavender-300/40 via-lavender-400/20 to-lavender-300/40 rounded-l-lg"></div>
-
-              <div className="flex justify-between items-start pl-2">
-                <div className="text-sm text-gray-800 group-hover/card:text-lavender-700 transition-colors line-clamp-1 font-medium">
+              <div className="flex justify-between items-start">
+                <div className="text-sm font-medium line-clamp-1" style={{ color: "#111" }}>
                   {topic.title}
                 </div>
               </div>
 
               <div className="flex items-center justify-between mt-2 pl-2">
                 <div className="flex items-center space-x-3">
-                  <div className="flex items-center text-xs text-gray-500">
-                    <Eye className="h-3 w-3 mr-1 text-lavender-400" />
+                  <div className="flex items-center text-xs text-black">
+                    <BarChart3 className="h-3 w-3 mr-1 text-black" />
                     <span>{topic.views}</span>
                   </div>
-                  <div className="flex items-center text-xs text-gray-500">
-                    <MessageSquare className="h-3 w-3 mr-1 text-lavender-400" />
+                  <div className="flex items-center text-xs text-black">
+                    <MessageSquare className="h-3 w-3 mr-1 text-black" />
                     <span>{topic.replies}</span>
                   </div>
                 </div>
 
                 <div className="flex items-center">
                   {topic.hot && (
-                    <span className="mr-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] bg-lavender-100 text-lavender-700 font-medium">
+                    <span className="mr-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium text-black" style={{ background: lavenderPearlBg }}>
                       <TrendingUp className="h-2 w-2 mr-0.5" /> Hot
                     </span>
                   )}
-                  <div className="text-xs text-gray-400">{topic.time}</div>
+                  <div className="text-xs text-black">{topic.time}</div>
                 </div>
               </div>
 
-              {/* Hover indicator */}
-              <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-lavender-300 to-lavender-400 transform scale-x-0 group-hover/card:scale-x-100 transition-transform duration-300 origin-left"></div>
             </motion.div>
           ))}
         </div>
@@ -1889,25 +1887,18 @@ export function ForumTab() {
               key={topic.id}
               className={`${
                 viewMode === "card" ? "p-4 md:p-6" : "p-4 md:p-5"
-              } flex flex-col rounded-xl border bg-card text-card-foreground cursor-pointer group relative overflow-visible bg-gradient-to-br from-lavender-50/95 via-white/90 to-lavender-100/90 backdrop-blur-sm shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25),0_10px_20px_-5px_rgba(0,0,0,0.2),0_0_0_1px_rgba(0,0,0,0.05)] border-t border-l border-r border-lavender-200/70 dark:border-t dark:border-l dark:border-r dark:border-lavender-700/40 border-b-2 border-b-lavender-300/80 dark:border-b-2 dark:border-b-lavender-700/80 transform translate-y-0 translateZ-0 filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.15)] ${activeTopic === topic.id ? "border-lavender-400/60 bg-lavender-50/40" : "hover:border-lavender-300/60"}
-${viewMode === "card" ? "min-h-[180px] md:min-h-[240px]" : "min-h-[100px] md:min-h-[120px]"}`}
+              } flex flex-col text-card-foreground cursor-pointer group relative overflow-visible ${viewMode === "card" ? "min-h-[180px] md:min-h-[240px]" : "min-h-[100px] md:min-h-[120px]"}`}
+              style={{ ...levlBackgroundCardStyle, borderRadius: "0.75rem" }}
               onClick={() => setActiveTopic(activeTopic === topic.id ? null : topic.id)}
             >
               {/* Decorative elements */}
-              <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-lavender-400/10 to-transparent rounded-bl-full transform transition-transform duration-700 group-hover:scale-110"></div>
-              <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-gradient-to-tr from-lavender-500/10 to-transparent rounded-tr-full transform transition-transform duration-700 group-hover:scale-110"></div>
-
-              {/* Animated accent line */}
-              <div
-                className={`absolute h-[3px] w-1/2 bg-gradient-to-r from-transparent via-lavender-500/70 to-transparent top-0 left-0 ${activeTopic === topic.id ? "opacity-100" : "opacity-0"} transition-opacity duration-500`}
-              ></div>
 
               {/* Background pattern */}
               <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_10px_10px,rgba(var(--primary-rgb),0.4)_1px,transparent_1px)] bg-[length:20px_20px] pointer-events-none"></div>
 
               {/* Bookmark button with enhanced styling */}
               <div
-                className="absolute top-3 right-3 z-10"
+                className="absolute top-1 right-1 z-10"
                 onClick={(e) => {
                   e.stopPropagation()
                   toggleBookmark(topic.id)
@@ -1916,17 +1907,21 @@ ${viewMode === "card" ? "min-h-[180px] md:min-h-[240px]" : "min-h-[100px] md:min
                 <motion.button
                   whileHover={{ scale: 1.2, rotate: userBookmarks.includes(topic.id) ? 0 : 20 }}
                   whileTap={{ scale: 0.9 }}
-                  className={`h-8 w-8 flex items-center justify-center rounded-full transition-all duration-200 ${
+                  className="h-8 w-8 flex items-center justify-center rounded-full transition-all duration-200"
+                  style={
                     userBookmarks.includes(topic.id)
-                      ? "bg-gradient-to-br from-yellow-100 to-yellow-200 shadow-md shadow-yellow-200/30"
-                      : "bg-white/80 hover:bg-white shadow-sm hover:shadow-md"
-                  }`}
+                      ? { background: "linear-gradient(135deg, #fef9c3, #fde68a)" }
+                      : {
+                          background:
+                            "radial-gradient(ellipse at 25% 30%, rgba(250,240,255,0.45) 0%, transparent 55%), radial-gradient(ellipse at 80% 80%, rgba(190,175,240,0.4) 0%, transparent 55%), radial-gradient(ellipse at 60% 50%, rgba(225,215,255,0.35) 0%, transparent 60%), linear-gradient(135deg, #ede8ff 0%, #d4ccff 100%)",
+                        }
+                  }
                 >
                   <Star
                     className={`h-4 w-4 ${
                       userBookmarks.includes(topic.id)
                         ? "text-yellow-500 fill-yellow-500"
-                        : "text-lavender-400 hover:text-lavender-500"
+                        : "text-black hover:text-black"
                     }`}
                   />
                 </motion.button>
@@ -1934,227 +1929,215 @@ ${viewMode === "card" ? "min-h-[180px] md:min-h-[240px]" : "min-h-[100px] md:min
 
               {viewMode === "card" ? (
                 <>
-                  <div className="flex justify-between items-start pr-8">
+                  <div className="flex justify-between items-center pr-8">
                     <div className="flex-1">
-                      <div className="flex items-center">
-                        <div className="text-base font-medium text-gray-800 group-hover:text-lavender-700 transition-colors duration-200">
-                          {topic.title}
-                        </div>
+                      <div className="flex items-center flex-wrap gap-2">
+                        <span className="text-base font-medium text-black">{topic.title}</span>
                         {topic.replies > 10 && (
-                          <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-lavender-100 text-lavender-700 rounded-full flex items-center">
+                          <span className="px-2 py-0.5 text-xs font-medium rounded-full inline-flex items-center text-black" style={{ background: lavenderPearlBg }}>
                             <TrendingUp className="h-3 w-3 mr-1" /> Hot
                           </span>
                         )}
                       </div>
-                      <div className="flex flex-wrap gap-1.5 mt-2.5">
-                        {topic.tags.map((tag) => (
-                          <div
-                            key={tag}
-                            className="px-2.5 py-0.5 rounded-full bg-white/80 text-xs flex items-center text-lavender-700 font-medium border border-lavender-200/70 shadow-sm hover:bg-lavender-50 hover:border-lavender-300/70 transition-all duration-200"
-                          >
-                            <span className="h-1.5 w-1.5 rounded-full bg-lavender-400 mr-1.5"></span>
-                            {tag}
-                          </div>
-                        ))}
-                      </div>
                     </div>
                     <div className="text-right text-xs">
-                      <div className="text-gray-500 font-medium">{topic.lastActive}</div>
-                      <div className="flex items-center justify-end mt-1.5 space-x-3">
-                        <div className="flex items-center px-2 py-1 rounded-full bg-white/70 border border-lavender-200/50 shadow-sm">
-                          <MessageSquare className="h-3 w-3 mr-1 text-lavender-500" />
-                          <span className="text-gray-700 font-medium">{topic.replies}</span>
-                        </div>
-                        <div className="flex items-center px-2 py-1 rounded-full bg-white/70 border border-lavender-200/50 shadow-sm">
-                          <ThumbsUp className="h-3 w-3 mr-1 text-lavender-500" />
-                          <span className="text-gray-700 font-medium">{topic.likes}</span>
-                        </div>
-                      </div>
+                      <div className="text-black font-medium">{topic.lastActive}</div>
                     </div>
                   </div>
 
                   {/* Author original post */}
                   <div
-                    className="mt-5 pt-4 border-t border-lavender-200/30"
+                    className="mt-5 rounded-lg p-4 pb-7 relative"
+                    style={levlCardStyle}
                     onMouseEnter={() => setShowUserTooltip(topic.id)}
                     onMouseLeave={() => setShowUserTooltip(null)}
                   >
                     <div className="flex items-start">
                       <div className="relative flex-shrink-0">
-                        <div className="h-9 w-9 rounded-full bg-gradient-to-r from-lavender-300 to-lavender-400 flex items-center justify-center text-sm font-bold text-white border border-lavender-200/50 shadow-md">
+                        <div className="h-9 w-9 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: lavenderPearlBg, color: "#111" }}>
                           {topic.author.charAt(0)}
                         </div>
 
                         {showUserTooltip === topic.id && (
                           <motion.div
-                            className="absolute bottom-full left-0 mb-2 w-60 bg-white rounded-lg shadow-xl p-4 z-50 border border-lavender-200"
+                            className="absolute bottom-full left-0 mb-2 w-60 rounded-lg p-4 z-50"
+                            style={levlCardStyle}
                             initial={{ opacity: 0, y: 10, scale: 0.95 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             transition={{ duration: 0.2, type: "spring", stiffness: 500 }}
                           >
                             <div className="flex items-start gap-3">
-                              <div className="h-12 w-12 rounded-full bg-gradient-to-r from-lavender-400 to-lavender-500 flex items-center justify-center text-base font-bold text-white shadow-md">
+                              <div className="h-12 w-12 rounded-full flex items-center justify-center text-base font-bold" style={{ background: lavenderPearlBg, color: "#111" }}>
                                 {topic.author.charAt(0)}
                               </div>
                               <div>
-                                <div className="flex items-center font-medium text-gray-800">
+                                <div className="flex items-center font-medium text-black">
                                   {topic.author}
                                   <ReviewStarBadge authorName={topic.author} />
                                 </div>
-                                <div className="text-xs text-gray-500">Member since 2023</div>
-                                <div className="flex items-center mt-2 text-xs text-gray-600">
-                                  <div className="flex items-center bg-lavender-50 px-2 py-1 rounded-full">
+                                <div className="text-xs text-black">Member since 2023</div>
+                                <div className="flex items-center mt-2 text-xs text-black">
+                                  <div className="flex items-center px-2 py-1 rounded-full" style={tagChipStyle}>
                                     <Star className="h-3 w-3 text-yellow-500 fill-yellow-500 mr-1" />
                                     <span>4.8</span>
                                   </div>
                                   <span className="mx-1.5">•</span>
-                                  <div className="flex items-center bg-lavender-50 px-2 py-1 rounded-full">
-                                    <MessageSquare className="h-3 w-3 text-lavender-500 mr-1" />
+                                  <div className="flex items-center px-2 py-1 rounded-full" style={tagChipStyle}>
+                                    <MessageSquare className="h-3 w-3 text-black mr-1" />
                                     <span>42 topics</span>
                                   </div>
                                 </div>
                               </div>
                             </div>
-                            <div className="absolute -bottom-2 left-4 w-4 h-4 bg-white border-b border-r border-lavender-200 transform rotate-45"></div>
+                            <div className="absolute -bottom-2 left-4 w-4 h-4 bg-white border-b border-r transform rotate-45"></div>
                           </motion.div>
                         )}
                       </div>
                       <div className="ml-2 flex-1 min-w-0">
                         <div className="flex items-center">
-                          <span className="text-sm font-medium text-gray-700">{topic.author}</span>
+                          <span className="text-sm font-medium text-black">{topic.author}</span>
                           <ReviewStarBadge authorName={topic.author} />
                         </div>
-                        <div className="text-xs text-gray-500">Active contributor</div>
-                        <div className="mt-2 text-sm text-gray-600 leading-relaxed">{topic.preview}</div>
+                        <div className="text-xs text-black">Active contributor</div>
+                        <div className="mt-2 text-sm text-black leading-relaxed">{topic.preview}</div>
                       </div>
                     </div>
+                    <div className="absolute bottom-2 left-3 flex items-center text-black">
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        className="flex items-center"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleVote(topic.id, -1, "up")
+                        }}
+                      >
+                        <ThumbsUp className="h-3 w-3 mr-1" />
+                        <span className="text-[10px]">{topic.likes}</span>
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        className="ml-2 flex items-center"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleVote(topic.id, -1, "down")
+                        }}
+                      >
+                        <ThumbsUp className="h-3 w-3 transform rotate-180" />
+                      </motion.button>
+                    </div>
+                    <div className="absolute bottom-2 right-3 text-[10px] text-black">{topic.time}</div>
                   </div>
 
                   {/* First 3 comments always visible in topic box */}
                   {topic.responses && topic.responses.length > 0 && (
                     <div className="space-y-3 mt-4">
-                      {topic.responses.slice(0, 3).map((response, index) => (
+                      {topic.responses.slice(0, 2).map((response, index) => (
                         <div
                           key={index}
-                          className="bg-white/80 rounded-lg p-4 shadow-sm border border-lavender-100/50"
+                          className="rounded-lg p-4 pb-7 relative"
+                          style={levlCardStyle}
                         >
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <div className="flex items-center">
-                                <div className="h-7 w-7 rounded-full bg-gradient-to-r from-lavender-300 to-lavender-400 flex items-center justify-center text-sm font-bold text-white border border-lavender-200/50 shadow-md mr-2">
-                                  {response.author.charAt(0)}
-                                </div>
-                                <span className="text-sm font-medium text-gray-700">{response.author}</span>
-                                <ReviewStarBadge authorName={response.author} />
-                              </div>
-                              <div className="text-xs text-gray-500 mt-1">{response.time}</div>
-                              <div className="mt-2 text-gray-600">{response.content}</div>
-                            </div>
+                          <div>
                             <div className="flex items-center">
-                              <motion.button
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                className={`flex items-center px-2 py-1 rounded-full transition-colors duration-200 ${
-                                  userVotes[`${topic.id}-${index}`]?.up
-                                    ? "bg-lavender-100 text-lavender-700"
-                                    : "bg-white/70 text-gray-600 hover:bg-lavender-50"
-                                }`}
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleVote(topic.id, index, "up")
-                                }}
-                              >
-                                <ThumbsUp className="h-3 w-3 mr-1" />
-                                <span>{response.likes}</span>
-                              </motion.button>
-                              <motion.button
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                className={`ml-2 flex items-center px-2 py-1 rounded-full transition-colors duration-200 ${
-                                  userVotes[`${topic.id}-${index}`]?.down
-                                    ? "bg-red-100 text-red-700"
-                                    : "bg-white/70 text-gray-600 hover:bg-red-50"
-                                }`}
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleVote(topic.id, index, "down")
-                                }}
-                              >
-                                <ThumbsUp className="h-3 w-3 mr-1 transform rotate-180" />
-                              </motion.button>
+                              <div className="h-7 w-7 rounded-full flex items-center justify-center text-sm font-bold mr-2" style={{ background: lavenderPearlBg, color: "#111" }}>
+                                {response.author.charAt(0)}
+                              </div>
+                              <span className="text-sm font-medium text-black">{response.author}</span>
+                              <ReviewStarBadge authorName={response.author} />
                             </div>
+                            <div className="mt-2 text-black">{response.content}</div>
                           </div>
+                          <div className="absolute bottom-2 left-3 flex items-center text-black">
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              className="flex items-center"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleVote(topic.id, index, "up")
+                              }}
+                            >
+                              <ThumbsUp className="h-3 w-3 mr-1" />
+                              <span className="text-[10px]">{response.likes}</span>
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              className="ml-2 flex items-center"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleVote(topic.id, index, "down")
+                              }}
+                            >
+                              <ThumbsUp className="h-3 w-3 transform rotate-180" />
+                            </motion.button>
+                          </div>
+                          <div className="absolute bottom-2 right-3 text-[10px] text-black">{response.time}</div>
                         </div>
                       ))}
 
-                      {/* Show More button - shows 7 more comments */}
-                      {topic.responses.length > 3 && !expandedComments[topic.id] && (
+                      {/* Show More button — adds 3rd comment onwards */}
+                      {topic.responses.length > 2 && !expandedComments[topic.id] && (
                         <button
-                          className="w-full py-2.5 px-4 rounded-lg border border-lavender-200/60 bg-lavender-50/50 text-sm font-medium text-lavender-700 hover:bg-lavender-100/60 hover:border-lavender-300/60 transition-colors duration-200 flex items-center justify-center gap-2"
+                          className="w-full py-2.5 px-4 rounded-lg text-sm font-medium flex items-center justify-center gap-2"
+                          style={{ ...levlCardStyle, color: "#111" }}
                           onClick={(e) => {
                             e.stopPropagation()
                             setExpandedComments((prev) => ({ ...prev, [topic.id]: true }))
                           }}
                         >
                           <MessageSquare className="h-3.5 w-3.5" />
-                          Show {Math.min(topic.responses.length - 3, 7)} more {Math.min(topic.responses.length - 3, 7) === 1 ? "reply" : "replies"}
+                          Show {topic.responses.length - 2} more {topic.responses.length - 2 === 1 ? "reply" : "replies"}
                         </button>
                       )}
 
-                      {/* Expanded comments - 7 more after the initial 3 */}
-                      {expandedComments[topic.id] && topic.responses.slice(3, 10).map((response, idx) => {
-                        const index = idx + 3
+                      {/* Expanded comments — 3rd onwards */}
+                      {expandedComments[topic.id] && topic.responses.slice(2).map((response, idx) => {
+                        const index = idx + 2
                         return (
                           <div
                             key={index}
-                            className="bg-white/80 rounded-lg p-4 shadow-sm border border-lavender-100/50"
+                            className="rounded-lg p-4 pb-7 relative"
+                          style={levlCardStyle}
                           >
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <div className="flex items-center">
-                                  <div className="h-7 w-7 rounded-full bg-gradient-to-r from-lavender-300 to-lavender-400 flex items-center justify-center text-sm font-bold text-white border border-lavender-200/50 shadow-md mr-2">
-                                    {response.author.charAt(0)}
-                                  </div>
-                                  <span className="text-sm font-medium text-gray-700">{response.author}</span>
-                                  <ReviewStarBadge authorName={response.author} />
-                                </div>
-                                <div className="text-xs text-gray-500 mt-1">{response.time}</div>
-                                <div className="mt-2 text-gray-600">{response.content}</div>
-                              </div>
+                            <div>
                               <div className="flex items-center">
-                                <motion.button
-                                  whileHover={{ scale: 1.1 }}
-                                  whileTap={{ scale: 0.9 }}
-                                  className={`flex items-center px-2 py-1 rounded-full transition-colors duration-200 ${
-                                    userVotes[`${topic.id}-${index}`]?.up
-                                      ? "bg-lavender-100 text-lavender-700"
-                                      : "bg-white/70 text-gray-600 hover:bg-lavender-50"
-                                  }`}
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    handleVote(topic.id, index, "up")
-                                  }}
-                                >
-                                  <ThumbsUp className="h-3 w-3 mr-1" />
-                                  <span>{response.likes}</span>
-                                </motion.button>
-                                <motion.button
-                                  whileHover={{ scale: 1.1 }}
-                                  whileTap={{ scale: 0.9 }}
-                                  className={`ml-2 flex items-center px-2 py-1 rounded-full transition-colors duration-200 ${
-                                    userVotes[`${topic.id}-${index}`]?.down
-                                      ? "bg-red-100 text-red-700"
-                                      : "bg-white/70 text-gray-600 hover:bg-red-50"
-                                  }`}
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    handleVote(topic.id, index, "down")
-                                  }}
-                                >
-                                  <ThumbsUp className="h-3 w-3 mr-1 transform rotate-180" />
-                                </motion.button>
+                                <div className="h-7 w-7 rounded-full flex items-center justify-center text-sm font-bold mr-2" style={{ background: lavenderPearlBg, color: "#111" }}>
+                                  {response.author.charAt(0)}
+                                </div>
+                                <span className="text-sm font-medium text-black">{response.author}</span>
+                                <ReviewStarBadge authorName={response.author} />
                               </div>
+                              <div className="mt-2 text-black">{response.content}</div>
                             </div>
+                            <div className="absolute bottom-2 left-3 flex items-center text-black">
+                              <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                className="flex items-center"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleVote(topic.id, index, "up")
+                                }}
+                              >
+                                <ThumbsUp className="h-3 w-3 mr-1" />
+                                <span className="text-[10px]">{response.likes}</span>
+                              </motion.button>
+                              <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                className="ml-2 flex items-center"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleVote(topic.id, index, "down")
+                                }}
+                              >
+                                <ThumbsUp className="h-3 w-3 transform rotate-180" />
+                              </motion.button>
+                            </div>
+                            <div className="absolute bottom-2 right-3 text-[10px] text-black">{response.time}</div>
                           </div>
                         )
                       })}
@@ -2163,11 +2146,12 @@ ${viewMode === "card" ? "min-h-[180px] md:min-h-[240px]" : "min-h-[100px] md:min
 
                   {/* Reply input - always visible at bottom of topic box */}
                   {activeTopic === topic.id && (
-                    <div className="mt-5 pt-5 border-t border-lavender-200/30">
+                    <div className="mt-5 pt-5">
                       <div className="mt-0">
                         <textarea
                           placeholder="Write your reply..."
-                          className="w-full h-20 px-3 py-2 text-sm bg-white/5 dark:bg-black/20 rounded-md border border-white/10 focus:border-lavender-500/50 focus:ring-1 focus:ring-lavender-400/30 outline-none transition-colors resize-none text-gray-800"
+                          className="w-full h-20 px-3 py-2 text-sm rounded-md outline-none resize-none text-black"
+                          style={levlCardStyle}
                           value={replyContent}
                           onChange={(e) => setReplyContent(e.target.value)}
                         />
@@ -2175,7 +2159,8 @@ ${viewMode === "card" ? "min-h-[180px] md:min-h-[240px]" : "min-h-[100px] md:min
                           <Button
                             variant="default"
                             size="sm"
-                            className="gap-1 text-xs bg-gradient-to-r from-lavender-300 to-lavender-500 hover:from-lavender-400 hover:to-lavender-600 text-white"
+                            className="gap-1 text-xs"
+                            style={{ background: lavenderPearlBg, color: "#111" }}
                             onClick={() => handleReply(topic.id)}
                             disabled={!replyContent.trim()}
                           >
@@ -2190,30 +2175,25 @@ ${viewMode === "card" ? "min-h-[180px] md:min-h-[240px]" : "min-h-[100px] md:min
               ) : (
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <div className="text-base font-medium text-gray-800 group-hover:text-lavender-700 transition-colors duration-200">
-                      {topic.title}
+                    <div className="flex items-center flex-wrap gap-2">
+                      <span className="text-base font-medium text-black">{topic.title}</span>
+                      {topic.replies > 10 && (
+                        <span className="px-2 py-0.5 text-xs font-medium rounded-full inline-flex items-center" style={tagChipStyle}>
+                          <TrendingUp className="h-3 w-3 mr-1" /> Hot
+                        </span>
+                      )}
                     </div>
-                    <div className="text-sm text-gray-600 line-clamp-1">{topic.preview}</div>
+                    <div className="text-sm text-black line-clamp-1">{topic.preview}</div>
                   </div>
                   <div className="text-right text-xs">
-                    <div className="text-gray-500 font-medium">{topic.lastActive}</div>
-                    <div className="flex items-center justify-end mt-1.5 space-x-3">
-                      <div className="flex items-center px-2 py-1 rounded-full bg-white/70 border border-lavender-200/50 shadow-sm">
-                        <MessageSquare className="h-3 w-3 mr-1 text-lavender-500" />
-                        <span className="text-gray-700 font-medium">{topic.replies}</span>
-                      </div>
-                      <div className="flex items-center px-2 py-1 rounded-full bg-white/70 border border-lavender-200/50 shadow-sm">
-                        <ThumbsUp className="h-3 w-3 mr-1 text-lavender-500" />
-                        <span className="text-gray-700 font-medium">{topic.likes}</span>
-                      </div>
-                    </div>
+                    <div className="text-black font-medium">{topic.lastActive}</div>
                   </div>
                 </div>
               )}
             </div>
           ))
         ) : (
-          <div className="text-gray-500">No topics found.</div>
+          <div className="text-black">No topics found.</div>
         )}
         {isLoading && <div className="text-center">Loading more topics...</div>}
         {!isLoading && filteredTopics.length > 0 && (

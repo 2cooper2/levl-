@@ -21,10 +21,13 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(({ className, type,
         {...props}
       />
       <div
-        className="absolute right-1 flex items-center justify-center h-8 w-8 rounded-full cursor-pointer bg-violet-400 border border-violet-300 shadow-[0_0_10px_rgba(139,92,246,0.5)] overflow-hidden"
+        className="absolute right-1 flex items-center justify-center h-8 w-8 rounded-full cursor-pointer overflow-hidden"
+        style={{
+          background:
+            "radial-gradient(ellipse at 25% 30%, rgba(250,240,255,0.45) 0%, transparent 55%), radial-gradient(ellipse at 80% 80%, rgba(190,175,240,0.4) 0%, transparent 55%), radial-gradient(ellipse at 60% 50%, rgba(225,215,255,0.35) 0%, transparent 60%), linear-gradient(135deg, #ede8ff 0%, #d4ccff 100%)",
+        }}
         onClick={onSend}
       >
-        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent"></div>
         <Send className="h-4 w-4 text-white relative z-10" />
       </div>
     </div>

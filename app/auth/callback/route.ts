@@ -38,9 +38,9 @@ export async function GET(request: NextRequest) {
         return NextResponse.redirect(new URL("/auth/login?verified=success", requestUrl.origin))
       }
 
-      // Default: If we have a user, redirect to dashboard
+      // Default: If we have a user, redirect to portal
       if (data?.session) {
-        return NextResponse.redirect(new URL("/dashboard", requestUrl.origin))
+        return NextResponse.redirect(new URL("/portal", requestUrl.origin))
       }
     } catch (err) {
       console.error("Exception in auth callback:", err)

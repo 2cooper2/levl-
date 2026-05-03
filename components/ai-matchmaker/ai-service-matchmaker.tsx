@@ -19,6 +19,7 @@ import {
   Layers,
   HardHat,
   ChevronLeft,
+  Send,
 } from "lucide-react"
 import { LevlLogo } from "@/components/levl-logo"
 
@@ -1382,7 +1383,15 @@ const MessageItem = memo(
           transition={{ duration: 0.2 }}
           layout={false}
         >
-          <div className="relative bg-gradient-to-br from-[#ede8ff] via-[#e0d8ff] to-[#d4ccff] dark:from-lavender-950 dark:via-lavender-950 dark:to-lavender-950 rounded-3xl px-5 py-3 max-w-[80%] shadow-[0_0_0_1px_rgba(88,82,100,0.10),0_16px_16px_rgba(68,62,86,0.22),0_28px_20px_rgba(64,58,82,0.10),0_-1px_0_rgba(255,255,255,0.65)] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_16px_16px_rgba(0,0,0,0.34),0_28px_20px_rgba(0,0,0,0.16),0_-1px_0_rgba(255,255,255,0.07)] translate-y-[-14px] hover:translate-y-[-20px] transition-all duration-300 transform">
+          <div
+            className="relative rounded-3xl px-5 py-3 max-w-[80%] translate-y-[-14px] hover:translate-y-[-20px] transition-all duration-300 transform"
+            style={{
+              background:
+                "radial-gradient(ellipse at 25% 30%, rgba(250,240,255,0.45) 0%, transparent 55%), radial-gradient(ellipse at 80% 80%, rgba(190,175,240,0.4) 0%, transparent 55%), radial-gradient(ellipse at 60% 50%, rgba(225,215,255,0.35) 0%, transparent 60%), linear-gradient(135deg, #ede8ff 0%, #d4ccff 100%)",
+              boxShadow:
+                "0 0 0 1px rgba(88,82,100,0.10), 0 16px 16px rgba(68,62,86,0.22), 0 28px 20px rgba(64,58,82,0.10), 0 -1px 0 rgba(255,255,255,0.65)",
+            }}
+          >
             <p className="text-sm text-gray-800 dark:text-gray-100 relative z-10">{message.content}</p>
           </div>
         </motion.div>
@@ -1398,9 +1407,15 @@ const MessageItem = memo(
           transition={{ duration: 0.2 }}
           layout={false}
         >
-          <div className={`relative bg-gradient-to-br from-white via-[#fefeff] to-[#fbf9ff] dark:from-gray-800 dark:via-gray-800 dark:to-lavender-950 rounded-3xl ${message.options?.some(o => isCableRender(o)) ? 'px-2 py-2' : 'px-5 py-3'} ${(message.options?.some(o => isMountOption(o) || isMountTypeRender(o) || isCableRender(o)) || message.content === "What size is your TV?") ? 'w-full' : message.options?.some(o => isWallRender(o)) ? 'max-w-[92%]' : 'max-w-[80%]'} shadow-[0_0_0_1px_rgba(88,82,100,0.09),0_16px_16px_rgba(64,58,84,0.20),0_28px_20px_rgba(60,54,80,0.09),0_-1px_0_rgba(255,255,255,0.88)] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.05),0_16px_16px_rgba(0,0,0,0.32),0_28px_20px_rgba(0,0,0,0.14),0_-1px_0_rgba(255,255,255,0.05)] translate-y-[-14px] transition-all duration-300 transform`}>
-            <div className="absolute inset-x-0 bottom-0 h-1/2 rounded-b-3xl bg-gradient-to-t from-black/5 to-transparent dark:from-white/5"></div>
-
+          <div
+            className={`relative rounded-3xl ${message.options?.some(o => isCableRender(o)) ? 'px-2 py-2' : 'px-5 py-3'} ${(message.options?.some(o => isMountOption(o) || isMountTypeRender(o) || isCableRender(o)) || message.content === "What size is your TV?") ? 'w-full' : message.options?.some(o => isWallRender(o)) ? 'max-w-[92%]' : 'max-w-[80%]'} translate-y-[-14px] transition-all duration-300 transform`}
+            style={{
+              background:
+                "radial-gradient(ellipse at 25% 30%, rgba(245,240,255,0.35) 0%, transparent 55%), radial-gradient(ellipse at 80% 80%, rgba(230,240,255,0.35) 0%, transparent 55%), radial-gradient(ellipse at 60% 50%, rgba(248,245,252,0.3) 0%, transparent 60%), linear-gradient(135deg, #ffffff 0%, #fdfcff 100%)",
+              boxShadow:
+                "0 0 0 1px rgba(88,82,100,0.09), 0 16px 16px rgba(64,58,84,0.20), 0 28px 20px rgba(60,54,80,0.09), 0 -1px 0 rgba(255,255,255,0.88)",
+            }}
+          >
             <p className="text-sm relative z-10">
               {message.content.split(/(\*[^*]+\*)/).map((part, i) =>
                 part.startsWith('*') && part.endsWith('*') && part.length > 2 ? (
@@ -1437,12 +1452,12 @@ const MessageItem = memo(
                   whileHover={isCableRender(option) ? { scale: 1.015, y: -2 } : undefined}
                   whileTap={{ scale: 0.98 }}
                   transition={{ delay: index * 0.05, type: "spring", stiffness: 260, damping: 20 }}
-                  className={`group relative flex flex-col items-center
-                    bg-gradient-to-b from-white/95 to-white/80 dark:from-gray-800/95 dark:to-gray-900/80
-                    rounded-2xl text-xs font-semibold
-                    shadow-[0_2px_6px_rgba(44,38,80,0.07),0_8px_24px_rgba(44,38,80,0.06),0_20px_48px_rgba(38,32,72,0.05),0_36px_72px_rgba(30,26,64,0.03)]
-                    dark:shadow-[0_2px_6px_rgba(0,0,0,0.24),0_8px_24px_rgba(0,0,0,0.18),0_20px_48px_rgba(0,0,0,0.12),0_36px_72px_rgba(0,0,0,0.07)]
-                    ${isCableRender(option) ? '' : 'backdrop-blur-md'}`}
+                  className={`group relative flex flex-col items-center rounded-none overflow-hidden text-xs font-semibold ${isCableRender(option) ? '' : 'backdrop-blur-md'}`}
+                  style={{
+                    background:
+                      "radial-gradient(ellipse at 25% 30%, rgba(245,240,255,0.35) 0%, transparent 55%), radial-gradient(ellipse at 80% 80%, rgba(230,240,255,0.35) 0%, transparent 55%), radial-gradient(ellipse at 60% 50%, rgba(248,245,252,0.3) 0%, transparent 60%), linear-gradient(135deg, #ffffff 0%, #fdfcff 100%)",
+                    boxShadow: "0 0 0 1px rgba(88,82,100,0.09), 0 -1px 0 rgba(255,255,255,0.88)",
+                  }}
                   onClick={() => handleOptionClick(option)}
                 >
                   <div className={`w-full ${isCableRender(option) ? 'aspect-[1/2]' : 'aspect-[8/13]'} relative overflow-hidden`}>
@@ -1622,14 +1637,12 @@ const MessageItem = memo(
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         whileTap={{ scale: 0.98 }}
                         transition={{ delay: (message.options!.length + index) * 0.05, type: "spring", stiffness: 260, damping: 20 }}
-                        className="w-full group relative flex flex-col items-center justify-center overflow-hidden
-                          min-h-[52px]
-                          bg-gradient-to-b from-white/95 to-white/80 dark:from-gray-800/95 dark:to-gray-900/80
-                          rounded-2xl text-xs font-semibold
-                          border border-white/30
-                          shadow-[0_2px_6px_rgba(44,38,80,0.07),0_8px_24px_rgba(44,38,80,0.06),0_20px_48px_rgba(38,32,72,0.05),0_36px_72px_rgba(30,26,64,0.03),0_-1px_0_rgba(255,255,255,0.82)]
-                          dark:shadow-[0_2px_6px_rgba(0,0,0,0.24),0_8px_24px_rgba(0,0,0,0.18),0_20px_48px_rgba(0,0,0,0.12),0_36px_72px_rgba(0,0,0,0.07),0_-1px_0_rgba(255,255,255,0.05)]
-                          backdrop-blur-md"
+                        className="w-full group relative flex flex-col items-center justify-center overflow-hidden min-h-[52px] rounded-2xl text-xs font-semibold backdrop-blur-md"
+                        style={{
+                          background: "linear-gradient(135deg, #f7f5fb, #ece7f4)",
+                          boxShadow:
+                            "0 2px 6px rgba(44,38,80,0.07), 0 8px 24px rgba(44,38,80,0.06), 0 20px 48px rgba(38,32,72,0.05), 0 36px 72px rgba(30,26,64,0.03), 0 -1px 0 rgba(255,255,255,0.82)",
+                        }}
                         onClick={() => handleOptionClick(option)}
                       >
                         <span className="bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 bg-clip-text text-transparent px-3 py-2.5">
@@ -1646,7 +1659,12 @@ const MessageItem = memo(
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: index * 0.05, duration: 0.2 }}
-                        className="px-3 py-1.5 bg-gradient-to-br from-white via-[#fefeff] to-[#fbf9ff] dark:bg-gray-800 rounded-full text-xs font-medium transition-all duration-200 shadow-[0_0_0_1px_rgba(88,82,100,0.09),0_2px_6px_rgba(44,38,80,0.07),0_6px_18px_rgba(44,38,80,0.06),0_-1px_0_rgba(255,255,255,0.78)] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.05),0_2px_6px_rgba(0,0,0,0.22),0_6px_18px_rgba(0,0,0,0.16),0_-1px_0_rgba(255,255,255,0.05)] hover:shadow-[0_0_0_1px_rgba(88,82,100,0.12),0_3px_10px_rgba(44,38,80,0.10),0_10px_28px_rgba(44,38,80,0.08),0_-1px_0_rgba(255,255,255,0.82)] hover:translate-y-[-2px]"
+                        className="px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 hover:translate-y-[-2px]"
+                        style={{
+                          background: "linear-gradient(135deg, #f7f5fb, #ece7f4)",
+                          boxShadow:
+                            "0 0 0 1px rgba(88,82,100,0.09), 0 2px 6px rgba(44,38,80,0.07), 0 6px 18px rgba(44,38,80,0.06), 0 -1px 0 rgba(255,255,255,0.78)",
+                        }}
                         onClick={() => handleOptionClick(option)}
                       >
                         {option}
@@ -1727,11 +1745,9 @@ const MessageItem = memo(
             style={{
               color: "rgba(85,75,110,0.80)",
               textShadow: "0 1px 2px rgba(255,255,255,1), 0 -1px 1px rgba(0,0,0,0.22)",
-              background: "rgba(255,255,255,0.18)",
-              backdropFilter: "blur(12px)",
-              WebkitBackdropFilter: "blur(12px)",
-              border: "1px solid rgba(255,255,255,0.70)",
-              boxShadow: "0 2px 8px rgba(80,70,120,0.08), inset 0 1px 0 rgba(255,255,255,0.90)",
+              background:
+                "radial-gradient(ellipse at 25% 30%, rgba(245,240,255,0.35) 0%, transparent 55%), radial-gradient(ellipse at 80% 80%, rgba(230,240,255,0.35) 0%, transparent 55%), radial-gradient(ellipse at 60% 50%, rgba(248,245,252,0.3) 0%, transparent 60%), linear-gradient(135deg, #ffffff 0%, #fdfcff 100%)",
+              boxShadow: "0 0 0 1px rgba(88,82,100,0.09), 0 -1px 0 rgba(255,255,255,0.88)",
             }}
           >
             {new Date(message.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
@@ -1807,6 +1823,7 @@ export function AIServiceMatchmaker() {
   const [messages, setMessages] = useState<Message[]>(initialMessages)
   const [inputValue, setInputValue] = useState("")
   const [isTyping, setIsTyping] = useState(false)
+  const [inputOpen, setInputOpen] = useState(false)
   const [conversationStage, setConversationStage] = useState<
     "initial" | "understanding" | "service-specific" | "recommending" | "refining" | "finalizing"
   >("initial")
@@ -2560,46 +2577,77 @@ const [detectedPreferences, setDetectedPreferences] = useState<{
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.4 }}
             >
-              <form onSubmit={handleSubmit} className="flex items-center gap-2 max-w-4xl mx-auto">
-                <div className="relative flex-1 border-none">
-                  <Input
+              <form onSubmit={handleSubmit} className="flex items-center justify-end max-w-4xl mx-auto">
+                {/* Single wrapper — width animates between collapsed (48px) and expanded (full).
+                    When collapsed, the input is hidden and only the send icon is visible. */}
+                <div
+                  className="relative overflow-hidden rounded-full transition-[width,padding] duration-300 ease-out"
+                  style={{
+                    width: inputOpen ? "100%" : "48px",
+                    height: "48px",
+                    background: inputOpen
+                      ? "radial-gradient(ellipse at 25% 30%, rgba(245,240,255,0.35) 0%, transparent 55%), radial-gradient(ellipse at 80% 80%, rgba(230,240,255,0.35) 0%, transparent 55%), radial-gradient(ellipse at 60% 50%, rgba(248,245,252,0.3) 0%, transparent 60%), linear-gradient(135deg, #ffffff 0%, #fdfcff 100%)"
+                      : "radial-gradient(ellipse at 25% 30%, rgba(250,240,255,0.45) 0%, transparent 55%), radial-gradient(ellipse at 80% 80%, rgba(190,175,240,0.4) 0%, transparent 55%), radial-gradient(ellipse at 60% 50%, rgba(225,215,255,0.35) 0%, transparent 60%), linear-gradient(135deg, #ede8ff 0%, #d4ccff 100%)",
+                    boxShadow: "0 0 0 1px rgba(88,82,100,0.09), 0 -1px 0 rgba(255,255,255,0.88)",
+                  }}
+                >
+                  <input
                     ref={inputRef}
                     type="text"
                     placeholder={isTyping ? "AI is thinking..." : "Type your message..."}
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
-                    disabled={isTyping}
-                    className="pl-4 pr-12 py-6 bg-gradient-to-br from-white via-[#fefeff] to-[#fbf9ff] dark:bg-gray-800 border-0
-      focus:ring-0 focus:outline-none focus:border-0
-      rounded-full shadow-[0_0_0_1px_rgba(88,82,100,0.09),0_8px_32px_rgba(64,58,84,0.13),0_20px_56px_rgba(60,54,80,0.07),0_-1px_0_rgba(255,255,255,0.88)]
-      hover:shadow-[0_0_0_1px_rgba(88,82,100,0.13),0_10px_36px_rgba(64,58,84,0.16),0_24px_64px_rgba(60,54,80,0.09),0_-1px_0_rgba(255,255,255,0.95)]
-      dark:shadow-[0_0_0_1px_rgba(255,255,255,0.05),0_4px_12px_rgba(0,0,0,0.22),0_10px_28px_rgba(0,0,0,0.16)]
-      transform hover:-translate-y-1 transition-all duration-300"
+                    disabled={isTyping || !inputOpen}
+                    className="absolute inset-0 pl-5 pr-14 border-0 bg-transparent text-sm text-gray-800 dark:text-gray-100 placeholder:text-gray-400 focus:ring-0 focus:outline-none focus:border-0"
+                    style={{
+                      opacity: inputOpen ? 1 : 0,
+                      transition: "opacity 0.2s",
+                      pointerEvents: inputOpen ? "auto" : "none",
+                    }}
                   />
 
-                  {inputValue && (
+                  {inputOpen && inputValue && (
                     <button
                       type="button"
                       onClick={() => setInputValue("")}
-                      className="absolute right-12 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                      className="absolute right-14 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10"
                       aria-label="Clear input"
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <line x1="18" y1="6" x2="6" y2="18" />
                         <line x1="6" y1="6" x2="18" y2="18" />
                       </svg>
                     </button>
                   )}
+
+                  {/* Single send button — opens input when closed, submits when open.
+                      Sized to fit perfectly when collapsed (full pill) or as inline button when expanded. */}
+                  <button
+                    type={inputOpen && inputValue ? "submit" : "button"}
+                    disabled={inputOpen && inputValue ? isTyping : false}
+                    onClick={() => {
+                      if (!inputOpen) {
+                        setInputOpen(true)
+                        setTimeout(() => inputRef.current?.focus(), 60)
+                      } else if (!inputValue) {
+                        setInputOpen(false)
+                      }
+                      // else: submit handled by form (type="submit")
+                    }}
+                    className="absolute top-1/2 -translate-y-1/2 rounded-full flex items-center justify-center transition-all duration-300 hover:-translate-y-[calc(50%+2px)] disabled:opacity-50"
+                    style={{
+                      right: inputOpen ? "6px" : "0px",
+                      height: inputOpen ? "36px" : "48px",
+                      width: inputOpen ? "36px" : "48px",
+                      background: inputOpen
+                        ? "radial-gradient(ellipse at 25% 30%, rgba(250,240,255,0.45) 0%, transparent 55%), radial-gradient(ellipse at 80% 80%, rgba(190,175,240,0.4) 0%, transparent 55%), radial-gradient(ellipse at 60% 50%, rgba(225,215,255,0.35) 0%, transparent 60%), linear-gradient(135deg, #ede8ff 0%, #d4ccff 100%)"
+                        : "transparent",
+                      color: "#ffffff",
+                    }}
+                    aria-label={inputOpen ? "Send message" : "Open message input"}
+                  >
+                    <Send className={inputOpen ? "h-4 w-4" : "h-5 w-5"} />
+                  </button>
                 </div>
               </form>
             </motion.div>

@@ -828,13 +828,6 @@ export default function WorkPage() {
                 </div>
               </DialogContent>
             </Dialog>
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none text-black dark:text-white"
-              style={{ textShadow: "0px 2px 4px rgba(66,60,86,0.17), 0px 5px 12px rgba(62,56,82,0.11)" }}
-            >
-              Dashboard
-            </Link>
             <button
               onClick={switchToClient}
               className="text-xs font-black px-3 py-1.5 rounded-full transition-all active:scale-95 hover:scale-105"

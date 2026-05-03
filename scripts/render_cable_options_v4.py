@@ -442,7 +442,7 @@ def drywall_mat(tile_u=2.0, tile_v=2.8, norm_strength=0.30, disp_scale=0.0):
 # Wall slab is a chunky 3D block (like the wall_types render): visibly thick
 # from the side, taller than wide, TV mounted on the front face.
 WALL_W       = 1.65           # wall width X
-WALL_D       = 0.38           # wall depth Y
+WALL_D       = 0.13           # wall depth Y — realistic drywall+stud bay thickness
 WALL_H       = 2.65           # wall height Z — taller
 WALL_X       = -0.10          # wall slightly LEFT so its right side edge
                               # shows for the side-perspective look
@@ -498,11 +498,13 @@ def build_wall(cutout=None):
     cx = cutout['x']; cz = cutout['z']
     cw = cutout['w']; ch = cutout['h']
 
-    # Cutter cube — slightly thicker than wall on Y for clean Boolean
+    # Cutter cube — full intended dims; Y slightly larger than wall so the
+    # Boolean cuts cleanly through both faces. (size=1 cube spans -0.5..+0.5,
+    # so scale = full target dimension on each axis.)
     bpy.ops.mesh.primitive_cube_add(size=1, location=(cx, wall_y_ctr, cz))
     cutter = bpy.context.active_object
     cutter.name = "Cutter"
-    cutter.scale = (cw/2, WALL_D, ch/2)
+    cutter.scale = (cw, WALL_D * 1.2, ch)
     bpy.ops.object.transform_apply(scale=True)
     cutter.display_type = 'WIRE'
 
@@ -992,10 +994,11 @@ def emission_mat(name, color, strength=8.0):
 # ── Scenario A: HIDDEN — narrative cutaway: seamless wall → panel slides out
 # → cord drops down cavity, exits STL plate, plug docks → panel slides back ───
 def setup_hidden():
-    # Cutout vertical bounds: top TOUCHING TV bottom, bottom just above STL.
-    CUT_TOP_Z = TV_BOT_Z                  # exactly at TV bottom (0 gap)
-    CUT_BOT_Z = OUTLET_Z + 0.10           # just above STL plate top edge
-    CUT_W     = 0.32
+    # Cutout: at TV bottom, bottom raised so outlet + STL plate sit BELOW
+    # the cavity opening (not inside it).
+    CUT_TOP_Z = TV_BOT_Z                  # at TV bottom
+    CUT_BOT_Z = OUTLET_Z + 0.12           # ~12 cm above outlet — plate sits clearly below cavity
+    CUT_W     = 0.40                      # wider
     cut_h     = CUT_TOP_Z - CUT_BOT_Z
     cut_z_ctr = (CUT_TOP_Z + CUT_BOT_Z) / 2
 
@@ -1005,11 +1008,12 @@ def setup_hidden():
         'w': CUT_W,       'h': cut_h,
     }, with_passthrough=True)
 
-    # ── 1. Cavity backdrop — dark, so its bounce light doesn't leak through
-    # the patch boundary when the patch is covered.
+    # ── 1. Cavity backdrop — sits ~20cm behind the wall back face. Gives
+    # enough depth for stud + cord to sit IN the cavity without looking
+    # like an infinitely deep tunnel.
     cavity_mat = mat_pbr("Cavity", (0.10, 0.09, 0.10), metal=0.0, rough=0.85)
     make_box("Cavity",
-             (CABLE_X_OFF, WALL_BACK_Y + 0.005, cut_z_ctr),
+             (CABLE_X_OFF, WALL_BACK_Y + 0.20, cut_z_ctr),
              (CUT_W * 1.6, 0.003, cut_h * 1.05),
              cavity_mat, bevel_w=0.0)
 
@@ -1044,7 +1048,12 @@ def setup_hidden():
         _di = bpy.data.images.load(_diff_path); _di.colorspace_settings.name = 'sRGB'
         _dn = _nt.nodes.new('ShaderNodeTexImage'); _dn.image = _di
         _nt.links.new(_mp.outputs['Vector'], _dn.inputs['Vector'])
-        _nt.links.new(_dn.outputs['Color'], _bsdf.inputs['Base Color'])
+        # Slightly darker than the +0.18 baseline — small step, not crushed.
+        _bc = _nt.nodes.new('ShaderNodeBrightContrast')
+        _bc.inputs['Bright'].default_value = 0.08
+        _bc.inputs['Contrast'].default_value = 0.10
+        _nt.links.new(_dn.outputs['Color'], _bc.inputs['Color'])
+        _nt.links.new(_bc.outputs['Color'], _bsdf.inputs['Base Color'])
     if os.path.exists(_rough_path):
         _ri = bpy.data.images.load(_rough_path); _ri.colorspace_settings.name = 'Non-Color'
         _rn = _nt.nodes.new('ShaderNodeTexImage'); _rn.image = _ri
@@ -1061,21 +1070,40 @@ def setup_hidden():
     _bsdf.inputs['Metallic'].default_value = 0.0
     _nt.links.new(_bsdf.outputs['BSDF'], _out.inputs['Surface'])
 
-    STUD_W = 0.100
-    STUD_D = WALL_D - 0.020
+    # Stud sits in the actual cavity SPACE BEHIND the wall slab (not
+    # embedded inside the wall material). Front face starts ~3cm behind
+    # the wall back face, fully in the open cavity. Width extends LEFT
+    # only — right edge stays anchored where the cord runs.
+    STUD_W = 0.110        # wider — extension goes to the LEFT
+    STUD_D = 0.130        # 5" deep
+    stud_right_x = CABLE_X_OFF - CUT_W * 0.32 + 0.075 / 2   # original right edge anchor
+    stud_x_ctr   = stud_right_x - STUD_W / 2
+    stud_y_ctr   = WALL_BACK_Y + 0.030 + STUD_D / 2    # behind wall, clearly in the cavity
     make_box("StudLeft",
-             (CABLE_X_OFF - CUT_W * 0.32,
-              (WALL_FRONT_Y + WALL_BACK_Y) / 2,
+             (stud_x_ctr,
+              stud_y_ctr,
               cut_z_ctr),
              (STUD_W, STUD_D, cut_h * 1.04),
              wood_mat, bevel_w=0.002, bevel_segs=2)
 
+    # ── 2b. Stud-side accent light — barely grazes the right face of the
+    # stud so the cord pops slightly. Low energy intentionally.
+    stud_accent = bpy.data.lights.new("StudAccent", type='AREA')
+    stud_accent.size = 0.30
+    stud_accent.energy = 0     # keyframed in animation block
+    stud_accent.color = (1.0, 0.96, 0.88)
+    sao = bpy.data.objects.new("StudAccent", stud_accent)
+    bpy.context.collection.objects.link(sao)
+    sao.location = (stud_right_x + 0.30, WALL_FRONT_Y - 0.30, cut_z_ctr + 0.10)
+    sao.rotation_euler = (Vector((stud_right_x, stud_y_ctr, cut_z_ctr))
+                          - Vector(sao.location)).to_track_quat('-Z', 'Y').to_euler()
+
     # ── 3. Real cord (curve tube) — through cavity → out STL plate hood
     # → across to outlet. Animated drawn-in via bevel_factor_end.
-    cord_mat = mat_pbr("HiddenCord", (0.05, 0.05, 0.06), 0.0, 0.55)
+    cord_mat = mat_pbr("HiddenCord", (0.005, 0.005, 0.008), 0.0, 0.45)
     cord_curve = bpy.data.curves.new("HiddenCord_curve", 'CURVE')
     cord_curve.dimensions = '3D'
-    cord_curve.bevel_depth = 0.012
+    cord_curve.bevel_depth = 0.010
     cord_curve.bevel_resolution = 6
     sp = cord_curve.splines.new('BEZIER')
     mid_y = (WALL_FRONT_Y + WALL_BACK_Y) / 2
@@ -1084,19 +1112,31 @@ def setup_hidden():
     # Cord exits through STL plate hood center: hood opens at plate front,
     # centered at plate Z = OUTLET_Z, extending forward by ~5cm hood depth.
     PLATE_HOOD_Y = WALL_FRONT_Y - 0.045   # hood front opening in front of wall
+    # Cord runs STRAIGHT DOWN alongside the RIGHT side of the stud — no
+    # bend toward stud, just a vertical line, then jogs out at the bottom
+    # toward the STL plate.
+    CORD_X = stud_right_x + 0.025                  # 2.5 cm right of stud right edge (anchor unchanged)
+    CORD_Y = stud_y_ctr - 0.005                    # roughly aligned with stud front
     cord_pts = [
-        (CABLE_X_OFF + 0.04, mid_y,                CUT_TOP_Z + 0.02),   # top of cavity
-        (CABLE_X_OFF + 0.06, mid_y,                cut_z_ctr + 0.05),   # mid cavity
-        (PLATE_X,            mid_y,                OUTLET_Z + 0.05),    # approach plate from inside
-        (PLATE_X,            WALL_FRONT_Y - 0.005, OUTLET_Z),           # at plate front face center
-        (PLATE_X,            PLATE_HOOD_Y,         OUTLET_Z),           # exit out the hood opening
-        (CABLE_X_OFF,        PLATE_HOOD_Y - 0.005, OUTLET_Z),           # cross to outlet (in front of plate)
-        (OUTLET_PLUG_X,      WALL_FRONT_Y - 0.010, OUTLET_Z),           # plug into outlet
+        (CORD_X,        CORD_Y, CUT_TOP_Z + 0.02),    # top of cavity
+        (CORD_X,        CORD_Y, cut_z_ctr),           # straight down through middle
+        (CORD_X,        CORD_Y, OUTLET_Z + 0.04),     # straight down PAST cavity bottom (closes the gap)
+        # Skip mid-wall waypoint — direct to plate front so hidden segment
+        # is short (no long invisible gap before the cord exits the faceplate).
+        (PLATE_X,       WALL_FRONT_Y - 0.005, OUTLET_Z),    # at plate front face
+        (PLATE_X,       PLATE_HOOD_Y, OUTLET_Z),            # exit out hood
+        (CABLE_X_OFF,   PLATE_HOOD_Y - 0.005, OUTLET_Z),    # cross to outlet
+        (OUTLET_PLUG_X, WALL_FRONT_Y - 0.010, OUTLET_Z),    # plug into outlet
     ]
     sp.bezier_points.add(len(cord_pts) - 1)
     for i, (x, y, z) in enumerate(cord_pts):
         bp = sp.bezier_points[i]
-        bp.handle_left_type = bp.handle_right_type = 'AUTO'
+        # First 3 points = inside the cavity, force VECTOR handles for a
+        # perfectly straight vertical line (AUTO would curve toward next pt).
+        if i < 3:
+            bp.handle_left_type = bp.handle_right_type = 'VECTOR'
+        else:
+            bp.handle_left_type = bp.handle_right_type = 'AUTO'
         bp.co = Vector((x, y, z))
     cord_obj = bpy.data.objects.new("HiddenCord", cord_curve)
     bpy.context.collection.objects.link(cord_obj)
@@ -1191,11 +1231,18 @@ def setup_hidden():
     print(f"[DEBUG] UVs transferred + patch material boosted", flush=True)
 
     # ── ANIMATION ───────────────────────────────────────────────────────
-    f_phase1_end  = max(1, int(FRAMES * 0.15))
-    f_slide_out   = max(f_phase1_end + 1, int(FRAMES * 0.30))
-    f_draw_start  = f_slide_out
-    f_draw_end    = max(f_draw_start + 1, int(FRAMES * 0.65))
-    f_slide_back  = max(f_draw_end + 1, int(FRAMES * 0.85))
+    # Sequence: patch slides out (natural cadence) → cord cavity descent (2.5s,
+    # slightly faster than 3.0s cover) → 1-frame hidden jump → cord plate-emerge
+    # to plug (~0.42s) → patch slides back (natural cadence).
+    f_phase1_end       = 4                                          # cover hold (3 frames)
+    f_forward_end      = 9                                          # patch slides forward (5 frames)
+    f_slide_out        = 14                                         # patch slides left, cavity exposed (5 frames)
+    f_draw_start       = f_slide_out                                # cord starts at cavity-exposed
+    f_cavity_done      = f_draw_start + 60                          # 60 frames = 2.50s cavity
+    f_hidden_done      = f_cavity_done + 1                          # 1-frame hidden jump (cord behind wall)
+    f_draw_end         = f_hidden_done + 14                         # 14 frames = ~0.58s VISIBLY emerging from STL plate
+    f_back_to_forward  = f_draw_end + 4                             # patch slides right back (4 frames)
+    f_slide_back       = f_back_to_forward + 3                      # patch fully back into wall (3 frames)
     f_end         = FRAMES
 
     # Patch position constants for two-stage animation
@@ -1203,7 +1250,19 @@ def setup_hidden():
     orig_y = patch.location.y
     forward_y = orig_y - 0.25        # 25 cm FORWARD (clear of wall plane)
     out_x  = orig_x - 0.50           # 50 cm to the LEFT
-    f_forward_end = max(f_phase1_end + 1, int(FRAMES * 0.22))
+    f_forward_end = max(f_phase1_end + 1, int(FRAMES * 0.16))
+
+    # FRAMES=1 → static preview of the OUT state (cavity exposed, cord drawn)
+    if FRAMES == 1:
+        patch.location.x = out_x
+        patch.location.y = forward_y
+        cord_curve.bevel_factor_end = 1.0
+        cavity_light.energy = 30
+        stud_accent.energy = 12
+        for o in [plug_body] + prongs:
+            o.hide_render = False
+            o.hide_viewport = False
+        return  # skip the keyframe animation entirely
 
     # Two-stage patch animation:
     # 1-f_phase1_end: covered (X=orig, Y=orig)
@@ -1230,7 +1289,7 @@ def setup_hidden():
     patch.keyframe_insert("location", index=0, frame=f_draw_end)
     patch.keyframe_insert("location", index=1, frame=f_draw_end)
     # Reverse Stage B — slide right back to forward
-    f_back_to_forward = max(f_draw_end + 1, int(FRAMES * 0.78))
+    f_back_to_forward = max(f_draw_end + 1, int(FRAMES * 0.96))
     patch.location.x = orig_x; patch.location.y = forward_y
     patch.keyframe_insert("location", index=0, frame=f_back_to_forward)
     patch.keyframe_insert("location", index=1, frame=f_back_to_forward)
@@ -1241,11 +1300,17 @@ def setup_hidden():
     patch.keyframe_insert("location", index=0, frame=f_end)
     patch.keyframe_insert("location", index=1, frame=f_end)
 
-    # Cord drawn animation via bevel_factor_end (only DURING phase 3)
+    # Cord drawn animation via bevel_factor_end — multi-step so the cavity
+    # descent runs at user-specified pace (1.75s), the hidden segment is
+    # an instant 1-frame jump, and plate-emerge to plug runs at 0.50s.
     cord_curve.bevel_factor_end = 0.0
     cord_curve.keyframe_insert("bevel_factor_end", frame=1)
     cord_curve.keyframe_insert("bevel_factor_end", frame=f_draw_start)
-    cord_curve.bevel_factor_end = 1.0
+    cord_curve.bevel_factor_end = 0.624                                     # cavity portion done
+    cord_curve.keyframe_insert("bevel_factor_end", frame=f_cavity_done)
+    cord_curve.bevel_factor_end = 0.836                                     # hidden + at plate front
+    cord_curve.keyframe_insert("bevel_factor_end", frame=f_hidden_done)
+    cord_curve.bevel_factor_end = 1.0                                       # plate-to-plug
     cord_curve.keyframe_insert("bevel_factor_end", frame=f_draw_end)
     cord_curve.keyframe_insert("bevel_factor_end", frame=f_end)
 
@@ -1270,12 +1335,24 @@ def setup_hidden():
     cavity_light.energy = 0
     cavity_light.keyframe_insert("energy", frame=1)
     cavity_light.keyframe_insert("energy", frame=f_phase1_end)
-    cavity_light.energy = 40   # was 80 — reduced so cavity backdrop stays dark
+    cavity_light.energy = 30   # subtle — below default 40
     cavity_light.keyframe_insert("energy", frame=f_slide_out)
     cavity_light.keyframe_insert("energy", frame=f_draw_end)
     cavity_light.energy = 0
     cavity_light.keyframe_insert("energy", frame=f_slide_back)
     cavity_light.keyframe_insert("energy", frame=f_end)
+
+    # Stud-side accent — same on/off schedule as cavity_light, low energy.
+    stud_accent.energy = 0
+    stud_accent.keyframe_insert("energy", frame=1)
+    stud_accent.keyframe_insert("energy", frame=f_phase1_end)
+    stud_accent.energy = 12
+    stud_accent.keyframe_insert("energy", frame=f_slide_out)
+    stud_accent.keyframe_insert("energy", frame=f_draw_end)
+    stud_accent.energy = 0
+    stud_accent.keyframe_insert("energy", frame=f_slide_back)
+    stud_accent.keyframe_insert("energy", frame=f_end)
+
 
 
 def _fp_fallback(fp_z):
