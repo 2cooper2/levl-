@@ -20,6 +20,12 @@ const cardStyle: React.CSSProperties = {
 type SignupRole = "client" | "worker"
 type Profile = { role: "client" | "worker" | "both"; background_check_status: string } | null
 
+// ⚠️ TEMPORARY: when true, the landing buttons skip the signup modal and route
+// directly to /client and /work so the app is browsable without auth.
+// Flip back to false once Vercel env vars + Supabase are wired up to re-enable
+// the role/bg-check gating.
+const AUTH_GATING_DISABLED = true
+
 export default function Home() {
   const router = useRouter()
   const [modalOpen, setModalOpen] = useState(false)
@@ -54,6 +60,11 @@ export default function Home() {
   }, [])
 
   const handlePick = (target: SignupRole) => {
+    if (AUTH_GATING_DISABLED) {
+      router.push(target === "worker" ? "/work" : "/client")
+      return
+    }
+
     // Not signed in yet → open signup modal pre-set to that role
     if (!profile) {
       setModalRole(target)
@@ -63,12 +74,9 @@ export default function Home() {
 
     // Signed in: route based on role + bg-check status
     if (target === "client") {
-      // Anyone signed in can access /client
       router.push("/client")
       return
     }
-
-    // target === 'worker'
     if (profile.role === "both") {
       router.push("/work")
       return
@@ -77,7 +85,6 @@ export default function Home() {
       router.push("/work")
       return
     }
-    // Client wants worker side, OR worker without cleared check
     router.push("/auth/background-check")
   }
 
@@ -141,7 +148,7 @@ export default function Home() {
           <button
             type="button"
             onClick={() => handlePick("client")}
-            disabled={!profileChecked}
+            disabled={!AUTH_GATING_DISABLED && !profileChecked}
             className="group relative flex w-full flex-col items-center justify-center gap-2 px-8 py-10 transition-transform hover:scale-[1.02] active:scale-[0.99]"
             style={cardStyle}
           >
@@ -162,7 +169,7 @@ export default function Home() {
           <button
             type="button"
             onClick={() => handlePick("worker")}
-            disabled={!profileChecked}
+            disabled={!AUTH_GATING_DISABLED && !profileChecked}
             className="group relative flex w-full flex-col items-center justify-center gap-2 px-8 py-10 transition-transform hover:scale-[1.02] active:scale-[0.99]"
             style={cardStyle}
           >

@@ -111,34 +111,41 @@ export async function middleware(request: NextRequest) {
 
   const { data: { session } } = await supabase.auth.getSession()
 
-  // Client-side: any signed-in user (anonymous → home, where the signup modal lives)
-  if (SIGNED_IN_ROUTES.some((route) => pathname === route || pathname.startsWith(route + "/"))) {
-    if (!session) {
-      return NextResponse.redirect(new URL("/", request.url))
+  // ⚠️ TEMPORARY: auth gating on /client and /work disabled so the app is
+  // browsable without sign-in. Flip AUTH_GATING_DISABLED back to false to
+  // re-enable the SIGNED_IN_ROUTES + WORKER_ROUTES guards.
+  const AUTH_GATING_DISABLED = true
+
+  if (!AUTH_GATING_DISABLED) {
+    // Client-side: any signed-in user (anonymous → home)
+    if (SIGNED_IN_ROUTES.some((route) => pathname === route || pathname.startsWith(route + "/"))) {
+      if (!session) {
+        return NextResponse.redirect(new URL("/", request.url))
+      }
     }
-  }
 
-  // Worker-side: must be role IN ('worker','both') AND bg_check 'cleared'
-  if (WORKER_ROUTES.some((route) => pathname === route || pathname.startsWith(route + "/"))) {
-    if (!session) {
-      return NextResponse.redirect(new URL("/", request.url))
-    }
-    try {
-      const { data: profile } = await supabase
-        .from("users")
-        .select("role, background_check_status")
-        .eq("id", session.user.id)
-        .single()
+    // Worker-side: must be role IN ('worker','both') AND bg_check 'cleared'
+    if (WORKER_ROUTES.some((route) => pathname === route || pathname.startsWith(route + "/"))) {
+      if (!session) {
+        return NextResponse.redirect(new URL("/", request.url))
+      }
+      try {
+        const { data: profile } = await supabase
+          .from("users")
+          .select("role, background_check_status")
+          .eq("id", session.user.id)
+          .single()
 
-      const role = profile?.role
-      const bg = profile?.background_check_status
-      const allowed = (role === "worker" || role === "both") && bg === "cleared"
+        const role = profile?.role
+        const bg = profile?.background_check_status
+        const allowed = (role === "worker" || role === "both") && bg === "cleared"
 
-      if (!allowed) {
+        if (!allowed) {
+          return NextResponse.redirect(new URL("/auth/background-check", request.url))
+        }
+      } catch {
         return NextResponse.redirect(new URL("/auth/background-check", request.url))
       }
-    } catch {
-      return NextResponse.redirect(new URL("/auth/background-check", request.url))
     }
   }
 
