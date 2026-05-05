@@ -2677,39 +2677,44 @@ function ArtFrameScene() {
       <MountFloor />
       <MountSceneLights />
 
-      {/* Outer walnut frame body — portrait format */}
-      <mesh castShadow receiveShadow><boxGeometry args={[1.04, 1.52, 0.090]} /><primitive object={woodMat} /></mesh>
+      {/* Frame body + molding + canvas + ornaments — wrapped in an offset group
+          so the whole picture sits left-of-centre in the card frame, leaving
+          breathing room on the right for the wall texture / lighting. */}
+      <group position={[-0.30, 0, 0]}>
+        {/* Outer walnut frame body — portrait format */}
+        <mesh castShadow receiveShadow><boxGeometry args={[1.04, 1.52, 0.090]} /><primitive object={woodMat} /></mesh>
 
-      {/* Chiseled molding — 4 DisplacedBars for portrait frame */}
-      {frameMaps && <>
-        {/* Left bar */}
-        <DisplacedBar pos={[-0.455, 0, FZ]} size={[0.13, 1.26]} maps={frameMaps} dispScale={0.050} normScale={5.5} />
-        {/* Right bar */}
-        <DisplacedBar pos={[ 0.455, 0, FZ]} size={[0.13, 1.26]} maps={frameMaps} dispScale={0.050} normScale={5.5} />
-        {/* Top bar */}
-        <DisplacedBar pos={[0,  0.695, FZ]} size={[0.13, 1.04]} maps={frameMaps} dispScale={0.050} normScale={5.5} rotZ={Math.PI / 2} />
-        {/* Bottom bar */}
-        <DisplacedBar pos={[0, -0.695, FZ]} size={[0.13, 1.04]} maps={frameMaps} dispScale={0.050} normScale={5.5} rotZ={Math.PI / 2} />
-      </>}
+        {/* Chiseled molding — 4 DisplacedBars for portrait frame */}
+        {frameMaps && <>
+          {/* Left bar */}
+          <DisplacedBar pos={[-0.455, 0, FZ]} size={[0.13, 1.26]} maps={frameMaps} dispScale={0.050} normScale={5.5} />
+          {/* Right bar */}
+          <DisplacedBar pos={[ 0.455, 0, FZ]} size={[0.13, 1.26]} maps={frameMaps} dispScale={0.050} normScale={5.5} />
+          {/* Top bar */}
+          <DisplacedBar pos={[0,  0.695, FZ]} size={[0.13, 1.04]} maps={frameMaps} dispScale={0.050} normScale={5.5} rotZ={Math.PI / 2} />
+          {/* Bottom bar */}
+          <DisplacedBar pos={[0, -0.695, FZ]} size={[0.13, 1.04]} maps={frameMaps} dispScale={0.050} normScale={5.5} rotZ={Math.PI / 2} />
+        </>}
 
-      {/* Shadow reveal behind mat board */}
-      <mesh position={[0, 0, 0.044]}>
-        <boxGeometry args={[0.84, 1.32, 0.012]} /><meshStandardMaterial color="#130804" roughness={0.45} metalness={0.04} />
-      </mesh>
-      {/* Mat board */}
-      <mesh position={[0, 0, 0.052]}><boxGeometry args={[0.78, 1.26, 0.006]} /><primitive object={matBoardMat} /></mesh>
-      {/* Painting — portrait canvas texture */}
-      <mesh position={[0, 0, 0.058]}>
-        <boxGeometry args={[0.64, 1.12, 0.005]} />
-        <meshStandardMaterial map={paintingTex ?? undefined} roughness={0.90} />
-      </mesh>
-      {/* Gold corner ornaments */}
-      {([[-0.46,-0.70],[0.46,-0.70],[-0.46,0.70],[0.46,0.70]] as [number,number][]).map(([cx,cy],i) => (
-        <mesh key={i} position={[cx, cy, 0.044]} castShadow>
-          <boxGeometry args={[0.065, 0.065, 0.018]} /><primitive object={goldAccent} />
+        {/* Shadow reveal behind mat board */}
+        <mesh position={[0, 0, 0.044]}>
+          <boxGeometry args={[0.84, 1.32, 0.012]} /><meshStandardMaterial color="#130804" roughness={0.45} metalness={0.04} />
         </mesh>
-      ))}
-      <ContactShadows frames={1} position={[0, -0.90, -0.07]} blur={2.4} opacity={0.32} scale={3} color="#20102a" />
+        {/* Mat board */}
+        <mesh position={[0, 0, 0.052]}><boxGeometry args={[0.78, 1.26, 0.006]} /><primitive object={matBoardMat} /></mesh>
+        {/* Painting — portrait canvas texture */}
+        <mesh position={[0, 0, 0.058]}>
+          <boxGeometry args={[0.64, 1.12, 0.005]} />
+          <meshStandardMaterial map={paintingTex ?? undefined} roughness={0.90} />
+        </mesh>
+        {/* Gold corner ornaments */}
+        {([[-0.46,-0.70],[0.46,-0.70],[-0.46,0.70],[0.46,0.70]] as [number,number][]).map(([cx,cy],i) => (
+          <mesh key={i} position={[cx, cy, 0.044]} castShadow>
+            <boxGeometry args={[0.065, 0.065, 0.018]} /><primitive object={goldAccent} />
+          </mesh>
+        ))}
+        <ContactShadows frames={1} position={[0, -0.90, -0.07]} blur={2.4} opacity={0.32} scale={3} color="#20102a" />
+      </group>
     </group>
   )
 }
