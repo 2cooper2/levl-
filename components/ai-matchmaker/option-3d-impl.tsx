@@ -2347,11 +2347,13 @@ function TVSizeMeasureScene() {
     () => new THREE.MeshStandardMaterial({ color: "#dd0000", roughness: 0.35, metalness: 0.05, emissive: "#440000", emissiveIntensity: 0.3 }), []
   )
 
-  // ── Housing materials — high-gloss injection moulded deep lavender plastic ─
+  // ── Housing materials — deep lavender plastic, restrained clearcoat so the
+  // base color reads through under bright studio lights instead of washing
+  // out to white at the highlight band.
   const housingMat = useMemo(
     () => new THREE.MeshPhysicalMaterial({
-      color: "#6d28d9", roughness: 0.18, metalness: 0.0,
-      clearcoat: 1.0, clearcoatRoughness: 0.06, envMapIntensity: 1.4,
+      color: "#5b21b6", roughness: 0.32, metalness: 0.0,
+      clearcoat: 0.35, clearcoatRoughness: 0.32, envMapIntensity: 0.55,
     }), []
   )
   const housingClipMat   = useMemo(() => new THREE.MeshPhysicalMaterial({ color: "#c8cdd8", roughness: 0.08, metalness: 0.88, clearcoat: 0.6, clearcoatRoughness: 0.10 }), [])
@@ -2482,37 +2484,27 @@ function TVSizeMeasureScene() {
       <pointLight position={[0, -2.5, 2.5]} intensity={0.15} color="#8878cc" />
 
 
-      {/* ── TV bezel ── */}
-      <mesh castShadow receiveShadow position={[0, 0, 0.040]}>
-        <boxGeometry args={[2.20, 1.24, 0.065]} /><primitive object={bezelMat} />
-      </mesh>
-      {/* Screen glass — matches cable-management-card TV: deep glossy black with
-          aggressive clearcoat so the HDRI shows up as a sharp diagonal highlight,
-          no emission so it reads as an "off" TV (the tape-measure step doesn't
-          need the screen to look powered on). */}
+      {/* ── TV bezel — rounded corners + cable-card materials for the exact
+          modern thin-bezel TV look from the cable management cards. ── */}
+      <RoundedBox args={[2.20, 1.24, 0.065]} radius={0.018} smoothness={4}
+                  position={[0, 0, 0.040]} castShadow receiveShadow>
+        <primitive object={bezelMat} />
+      </RoundedBox>
+      {/* Screen glass — pure deep glossy black, NO scene reflections. The
+          cyclorama would otherwise bleed lavender into the screen face;
+          envMapIntensity=0 keeps the screen clean and clearcoatRoughness
+          softens the direct-light highlight so it doesn't look like a mirror. */}
       <mesh position={[0, SCR_Y, 0.074]}>
         <boxGeometry args={[2.00, 1.12, 0.003]} />
         <meshPhysicalMaterial
-          color="#040408" roughness={0.025} metalness={0}
-          clearcoat={1.0} clearcoatRoughness={0.005} envMapIntensity={1.6}
+          color="#040408" roughness={0.10} metalness={0}
+          clearcoat={1.0} clearcoatRoughness={0.10} envMapIntensity={0}
         />
       </mesh>
 
-      {/* ── Chrome hairline perimeter edge — all 4 sides of bezel face ────── */}
-      {/* Vertical sides behind (z=0.0726), shortened so they don't reach corners */}
-      <mesh position={[-1.098, 0, 0.0726]}>
-        <boxGeometry args={[0.004, 1.228, 0.0005]} /><primitive object={bezelChromeMat} />
-      </mesh>
-      <mesh position={[1.098, 0, 0.0726]}>
-        <boxGeometry args={[0.004, 1.228, 0.0005]} /><primitive object={bezelChromeMat} />
-      </mesh>
-      {/* Horizontal top/bottom in front (z=0.0728), full width to own corners cleanly */}
-      <mesh position={[0, 0.618, 0.0728]}>
-        <boxGeometry args={[2.210, 0.004, 0.0005]} /><primitive object={bezelChromeMat} />
-      </mesh>
-      <mesh position={[0, -0.618, 0.0728]}>
-        <boxGeometry args={[2.210, 0.004, 0.0005]} /><primitive object={bezelChromeMat} />
-      </mesh>
+      {/* Cable-card style: no chrome hairline edges, no power LED, no screen
+          glow — just the matte-charcoal RoundedBox bezel and the deep glossy
+          screen plane reflecting the HDRI. */}
 
       {/* Cable-management-card style: no screen glow, no vignette, no power LED.
           The deep clearcoat screen glass alone reflects the HDRI for an "off"
