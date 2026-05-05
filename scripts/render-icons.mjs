@@ -1,4 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="180 168 667 734" preserveAspectRatio="xMidYMid meet">
+// Render the new LevlLogo SVG to PNG files at the sizes we need for
+// favicon, iOS home-screen icon, and PWA manifest icon.
+//
+// Run: node scripts/render-icons.mjs
+
+import sharp from "sharp"
+import { writeFileSync } from "fs"
+import { join, dirname } from "path"
+import { fileURLToPath } from "url"
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const ROOT = join(__dirname, "..")
+
+// The SVG markup from components/levl-logo.tsx wrapped as a standalone document.
+// viewBox 230 218 567 634 - we render the icon with a small lavender background
+// box so the logo isn't visually clipped when displayed in a small square slot.
+const SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="180 168 667 734" preserveAspectRatio="xMidYMid meet">
   <defs>
     <radialGradient id="bg" cx="50%" cy="50%" r="75%">
       <stop offset="0%" stop-color="#FFFFFF"/>
@@ -60,4 +76,34 @@
   <circle cx="735.5" cy="516.6" r="30.5" fill="url(#dot-sphere)"/>
   <circle cx="609.0" cy="587.5" r="30.0" fill="url(#dot-sphere)"/>
   <circle cx="514.1" cy="634.7" r="26.0" fill="url(#dot-sphere)"/>
-</svg>
+</svg>`
+
+const buf = Buffer.from(SVG)
+
+// Save the SVG to public/icon.svg (browsers use this as scalable favicon)
+writeFileSync(join(ROOT, "public", "icon.svg"), SVG)
+console.log("✓ public/icon.svg")
+
+// 180×180 — iOS home-screen icon
+await sharp(buf, { density: 600 })
+  .resize(180, 180)
+  .png()
+  .toFile(join(ROOT, "public", "apple-icon.png"))
+console.log("✓ public/apple-icon.png (180×180)")
+
+// 512×512 — PWA install icon
+await sharp(buf, { density: 600 })
+  .resize(512, 512)
+  .png()
+  .toFile(join(ROOT, "public", "levl-icon.png"))
+console.log("✓ public/levl-icon.png (512×512)")
+
+// 32×32 — browser tab favicon (saved as .png; layout.tsx will reference /icon.svg
+// for modern browsers and /favicon.png as a fallback).
+await sharp(buf, { density: 600 })
+  .resize(32, 32)
+  .png()
+  .toFile(join(ROOT, "public", "favicon.png"))
+console.log("✓ public/favicon.png (32×32)")
+
+console.log("\nDone.")
