@@ -2302,12 +2302,10 @@ function TVSizeMeasureScene() {
 
   const bezelMat = useMemo(
     () => new THREE.MeshPhysicalMaterial({
-      // NO clearcoat — clearcoat applies to ALL faces including sides, which is what
-      // was creating the white border no matter what base roughness we used.
-      // Real TV bezels are matte-dark injection-molded plastic; the "glassy" look
-      // comes from the chrome hairline strips + screen glass on top, not the bezel body.
-      color: "#060708", metalness: 0.0, roughness: 0.72,
-      envMapIntensity: 0.4,
+      // Matches the cable-management-card TV bezel — slightly cooler charcoal
+      // with a hint of metalness for that injection-moulded plastic look.
+      color: "#0a0a0c", metalness: 0.05, roughness: 0.35,
+      envMapIntensity: 0.5,
     }), []
   )
   const bezelChromeMat = useMemo(() => new THREE.MeshPhysicalMaterial({
@@ -2349,10 +2347,10 @@ function TVSizeMeasureScene() {
     () => new THREE.MeshStandardMaterial({ color: "#dd0000", roughness: 0.35, metalness: 0.05, emissive: "#440000", emissiveIntensity: 0.3 }), []
   )
 
-  // ── Housing materials — high-gloss injection moulded lavender plastic ─────
+  // ── Housing materials — high-gloss injection moulded deep lavender plastic ─
   const housingMat = useMemo(
     () => new THREE.MeshPhysicalMaterial({
-      color: "#8b5cf6", roughness: 0.18, metalness: 0.0,
+      color: "#6d28d9", roughness: 0.18, metalness: 0.0,
       clearcoat: 1.0, clearcoatRoughness: 0.06, envMapIntensity: 1.4,
     }), []
   )
@@ -2469,6 +2467,9 @@ function TVSizeMeasureScene() {
       <hemisphereLight args={["#c8c0e8", "#3a2860", 0.05]} />
       {/* BVH acceleration — prerequisite for path tracing + faster shadow/reflection casts */}
       <Bvh firstHitOnly>
+      {/* Shift the whole TV + tape + housing rig left so it doesn't sit dead
+          centre — gives the side-angle camera more breathing room on the right. */}
+      <group position={[-0.30, 0, 0]}>
       {/* KEY — far upper-left, barely forward of TV plane */}
       <directionalLight position={[-6, 2.5, 0.8]} intensity={5.5} color="#fff8f0" castShadow
         shadow-mapSize={[8192, 8192]} shadow-camera-near={0.1} shadow-camera-far={22}
@@ -2485,12 +2486,16 @@ function TVSizeMeasureScene() {
       <mesh castShadow receiveShadow position={[0, 0, 0.040]}>
         <boxGeometry args={[2.20, 1.24, 0.065]} /><primitive object={bezelMat} />
       </mesh>
-      {/* Screen glass */}
+      {/* Screen glass — matches cable-management-card TV: deep glossy black with
+          aggressive clearcoat so the HDRI shows up as a sharp diagonal highlight,
+          no emission so it reads as an "off" TV (the tape-measure step doesn't
+          need the screen to look powered on). */}
       <mesh position={[0, SCR_Y, 0.074]}>
         <boxGeometry args={[2.00, 1.12, 0.003]} />
-        {/* Screen glass — emissive panel glow + faint studio env reflection (like real glass) */}
-        <meshPhysicalMaterial color={C.screen} emissive={screenEmissive} emissiveIntensity={1.40}
-          roughness={0.25} metalness={0.0} clearcoat={1.0} clearcoatRoughness={0.04} envMapIntensity={0.12} />
+        <meshPhysicalMaterial
+          color="#040408" roughness={0.025} metalness={0}
+          clearcoat={1.0} clearcoatRoughness={0.005} envMapIntensity={1.6}
+        />
       </mesh>
 
       {/* ── Chrome hairline perimeter edge — all 4 sides of bezel face ────── */}
@@ -2509,38 +2514,9 @@ function TVSizeMeasureScene() {
         <boxGeometry args={[2.210, 0.004, 0.0005]} /><primitive object={bezelChromeMat} />
       </mesh>
 
-      {/* ── Screen-edge inset ring — single plane behind screen glass ──────────
-          Sits at z=0.0740: in front of bezel face (0.0725) but behind screen
-          glass front face (0.0755). Screen glass covers the center; the 0.022
-          border peeks out on all 4 sides as one seamless rectangle — no corners,
-          no seams, no z-fighting. meshBasicMaterial = unlit, zero gradient.     */}
-      <mesh position={[0, 0, 0.0740]}>
-        <planeGeometry args={[2.044, 1.164]} />
-        <meshBasicMaterial color="#040506" />
-      </mesh>
-
-      {/* ── Screen glow gradient — radial blue panel glow, no point-light dot */}
-      <mesh position={[0, SCR_Y, 0.0757]}>
-        <planeGeometry args={[2.00, 1.12]} />
-        <meshBasicMaterial map={screenGlowTex} transparent depthWrite={false} />
-      </mesh>
-      {/* ── Screen vignette — black fade blended into edges, transparent center */}
-      <mesh position={[0, SCR_Y, 0.0759]}>
-        <planeGeometry args={[2.00, 1.12]} />
-        <meshBasicMaterial map={screenVignetteTex} transparent depthWrite={false} />
-      </mesh>
-
-      {/* ── Bottom chin — brushed chrome accent bar ─────────────────────────
-          Centered horizontal bar in the chin area below the screen.          */}
-      <mesh position={[0, -0.595, 0.0727]}>
-        <boxGeometry args={[1.40, 0.007, 0.0008]} /><primitive object={bezelChromeMat} />
-      </mesh>
-
-      {/* ── Power indicator — small red standby light on bezel chin ──────── */}
-      <mesh position={[0, -0.595, 0.0728]} rotation={[Math.PI / 2, 0, 0]}>
-        <cylinderGeometry args={[0.006, 0.006, 0.001, 16]} />
-        <meshStandardMaterial color="#ff1010" emissive="#ff0000" emissiveIntensity={3.0} roughness={1} metalness={0} />
-      </mesh>
+      {/* Cable-management-card style: no screen glow, no vignette, no power LED.
+          The deep clearcoat screen glass alone reflects the HDRI for an "off"
+          but premium look that matches the cable cards. */}
 
       {/* ══ Silver hook — fixed at OUTER top-left bezel corner ══════════════
           Chrome L-bracket sits on the physical outside corner of the TV housing.
@@ -2660,6 +2636,7 @@ function TVSizeMeasureScene() {
         </mesh>
       </group>
 
+      </group>
       </Bvh>
 
       {/* Soft floating contact shadow — depth-composited drop shadow beneath TV */}
