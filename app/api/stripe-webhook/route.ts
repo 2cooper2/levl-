@@ -61,7 +61,41 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
       return
     }
 
-    const { serviceId, providerId, clientId } = paymentIntent.metadata || {}
+    const { serviceId, providerId, clientId, purpose, userId } = paymentIntent.metadata || {}
+
+    // Background-check payment: flip the worker's status to 'pending'
+    if (purpose === "background_check" && userId) {
+      const { error: bgError } = await supabase
+        .from("users")
+        .update({
+          background_check_status: "pending",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", userId)
+
+      if (bgError) {
+        console.error("Error flipping bg_check_status to pending:", bgError)
+        return
+      }
+
+      // Optional: notification for the master so they see the new worker in the queue
+      try {
+        await supabase.from("notifications").insert({
+          id: crypto.randomUUID(),
+          user_id: userId,
+          type: "background_check_initiated",
+          title: "Background check started",
+          message: "Your $40 payment was received. We'll notify you when your check completes.",
+          created_at: new Date().toISOString(),
+        })
+      } catch (e) {
+        // Non-fatal
+        console.warn("Could not insert worker notification:", e)
+      }
+
+      console.log(`Background-check payment succeeded for user ${userId}, status → pending`)
+      return
+    }
 
     if (!serviceId || !providerId) {
       console.error("Missing metadata in payment intent", paymentIntent.id)

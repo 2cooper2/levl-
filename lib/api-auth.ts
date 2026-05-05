@@ -10,7 +10,7 @@ import { createServerClient } from "@/lib/supabase-server"
  *   // user is guaranteed non-null here
  */
 export async function requireAuth() {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
 
   if (!supabase) {
     return {

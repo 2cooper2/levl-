@@ -5,7 +5,7 @@ import { randomUUID } from "crypto"
 
 export async function createProfile(userId: string, data: any) {
   try {
-    const supabase = createServerClient()
+    const supabase = await createServerClient()
 
     if (!supabase) {
       return {

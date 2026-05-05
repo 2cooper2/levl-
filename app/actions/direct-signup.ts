@@ -61,33 +61,49 @@ export async function directSignup(name: string, email: string, password: string
       return { success: false, error: createUserError?.message || "Failed to create user" }
     }
 
-    // Map the role to match the database constraint
-    // The database only accepts 'worker', 'client', or 'both'
-    let dbRole = "client" // Default
+    // Map the role to match the database constraint (client | worker | both).
+    // 'both' is the master role — reserved for the platform owner email.
+    const masterEmail = (process.env.MASTER_EMAIL || "caydonac@gmail.com").toLowerCase()
+    const isMaster = email.toLowerCase() === masterEmail
 
-    if (role === "provider") {
+    let dbRole: "client" | "worker" | "both" = "client"
+    if (isMaster) {
+      dbRole = "both"
+    } else if (role === "worker" || role === "provider") {
       dbRole = "worker"
     } else if (role === "both") {
       dbRole = "both"
     }
 
-    console.log(`Mapping role from ${role} to ${dbRole} to match database constraint`)
+    // Master is auto-cleared. Workers start 'none' (will flip to 'pending' once they pay
+    // and we invite them to Checkr). Clients don't need a check.
+    const bgStatus: "none" | "pending" | "cleared" | "rejected" = isMaster
+      ? "cleared"
+      : dbRole === "worker"
+        ? "none"
+        : "cleared"
 
-    // Create user profile
-    console.log("Creating user profile...")
-    const { error: profileError } = await supabaseAdmin.from("users").insert([
-      {
-        id: authUser.user.id,
-        name,
-        email,
-        role: dbRole, // Use the mapped role
-        avatar_url: `/placeholder.svg?height=200&width=200&text=${name.charAt(0)}`,
-        is_active: true,
-        is_verified: true,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-    ])
+    console.log(`Signup → role=${dbRole} bg=${bgStatus} (master=${isMaster})`)
+
+    // Upsert user profile by id — handles the case where a Supabase trigger
+    // auto-creates a row in public.users when the auth user is created.
+    const { error: profileError } = await supabaseAdmin
+      .from("users")
+      .upsert(
+        {
+          id: authUser.user.id,
+          name,
+          email,
+          role: dbRole,
+          background_check_status: bgStatus,
+          avatar_url: `/placeholder.svg?height=200&width=200&text=${name.charAt(0)}`,
+          is_active: true,
+          is_verified: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "id" },
+      )
 
     if (profileError) {
       console.error("Error creating user profile:", profileError)

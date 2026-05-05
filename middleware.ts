@@ -27,8 +27,14 @@ const ALLOWED_ORIGINS = [
   "http://localhost:3000",
 ].filter(Boolean)
 
-// ─── Provider-only routes ─────────────────────────────────────────────────────
+// ─── Provider-only routes (legacy "provider" terminology = "worker" in DB) ───
 const PROVIDER_ROUTES = ["/skill-progress", "/dashboard/services/new", "/portfolio/edit"]
+
+// Routes that require any signed-in user
+const SIGNED_IN_ROUTES = ["/client"]
+
+// Routes that require role IN ('worker','both') AND background_check_status='cleared'
+const WORKER_ROUTES = ["/work"]
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -105,7 +111,38 @@ export async function middleware(request: NextRequest) {
 
   const { data: { session } } = await supabase.auth.getSession()
 
-  // Provider-only route protection
+  // Client-side: any signed-in user (anonymous → home, where the signup modal lives)
+  if (SIGNED_IN_ROUTES.some((route) => pathname === route || pathname.startsWith(route + "/"))) {
+    if (!session) {
+      return NextResponse.redirect(new URL("/", request.url))
+    }
+  }
+
+  // Worker-side: must be role IN ('worker','both') AND bg_check 'cleared'
+  if (WORKER_ROUTES.some((route) => pathname === route || pathname.startsWith(route + "/"))) {
+    if (!session) {
+      return NextResponse.redirect(new URL("/", request.url))
+    }
+    try {
+      const { data: profile } = await supabase
+        .from("users")
+        .select("role, background_check_status")
+        .eq("id", session.user.id)
+        .single()
+
+      const role = profile?.role
+      const bg = profile?.background_check_status
+      const allowed = (role === "worker" || role === "both") && bg === "cleared"
+
+      if (!allowed) {
+        return NextResponse.redirect(new URL("/auth/background-check", request.url))
+      }
+    } catch {
+      return NextResponse.redirect(new URL("/auth/background-check", request.url))
+    }
+  }
+
+  // Legacy provider-only routes (skill-progress, etc.)
   if (PROVIDER_ROUTES.some((route) => pathname.startsWith(route))) {
     if (!session) {
       return NextResponse.redirect(new URL("/auth/login", request.url))
@@ -122,8 +159,9 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL("/auth/login", request.url))
       }
 
-      if (!userProfile || userProfile.role !== "provider") {
-        return NextResponse.redirect(new URL("/dashboard", request.url))
+      const isWorker = userProfile?.role === "worker" || userProfile?.role === "both"
+      if (!userProfile || !isWorker) {
+        return NextResponse.redirect(new URL("/", request.url))
       }
     } catch {
       return NextResponse.redirect(new URL("/auth/login", request.url))
@@ -135,6 +173,8 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/client/:path*",
+    "/work/:path*",
     "/dashboard/:path*",
     "/skill-progress/:path*",
     "/portfolio/:path*",

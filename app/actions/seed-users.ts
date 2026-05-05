@@ -26,7 +26,7 @@ const sampleUsers = [
 
 export async function seedUsers() {
   try {
-    const supabase = createServerClient()
+    const supabase = await createServerClient()
 
     if (!supabase) {
       return {

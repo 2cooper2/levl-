@@ -4,7 +4,7 @@ import { createServerClient } from "@/lib/supabase-server"
 
 export async function checkEmailExists(email: string) {
   try {
-    const supabase = createServerClient()
+    const supabase = await createServerClient()
 
     if (!supabase) {
       return {

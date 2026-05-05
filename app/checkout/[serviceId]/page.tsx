@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, use } from "react"
 import { loadStripe } from "@stripe/stripe-js"
 import { Elements } from "@stripe/react-stripe-js"
 import { PaymentForm } from "@/components/checkout/payment-form"
@@ -15,7 +15,8 @@ import { useToast } from "@/components/ui/use-toast"
 // Initialize Stripe with the publishable key
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "")
 
-export default function CheckoutPage({ params }: { params: { serviceId: string } }) {
+export default function CheckoutPage({ params }: { params: Promise<{ serviceId: string }> }) {
+  const { serviceId } = use(params)
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -54,7 +55,7 @@ export default function CheckoutPage({ params }: { params: { serviceId: string }
     }
 
     fetchServiceDetails()
-  }, [params.serviceId, toast])
+  }, [serviceId, toast])
 
   useEffect(() => {
     if (!serviceDetails) return
@@ -64,7 +65,7 @@ export default function CheckoutPage({ params }: { params: { serviceId: string }
       try {
         console.log("Creating payment intent with:", {
           amount: serviceDetails.amount,
-          serviceId: params.serviceId,
+          serviceId: serviceId,
           providerId: serviceDetails.providerId,
         })
 
@@ -75,28 +76,28 @@ export default function CheckoutPage({ params }: { params: { serviceId: string }
           },
           body: JSON.stringify({
             amount: serviceDetails.amount,
-            serviceId: params.serviceId,
+            serviceId: serviceId,
             providerId: serviceDetails.providerId,
             description: serviceDetails.title,
           }),
         })
 
         const responseText = await response.text()
-        console.log("Response from create-payment-intent:", responseText)
+        console.log("Response from create-payment-intent:", response.status, responseText)
 
         let data
         try {
           data = JSON.parse(responseText)
         } catch (e) {
           console.error("Failed to parse response as JSON:", e)
-          setError(`Invalid response from server: ${responseText}`)
+          setError(`Server returned status ${response.status} with non-JSON body${responseText ? `: ${responseText.slice(0, 200)}` : " (empty)"}.`)
           setIsLoading(false)
           return
         }
 
         if (!response.ok) {
           console.error("Payment intent creation failed:", data.error || response.statusText)
-          setError(`Payment setup failed: ${data.error || response.statusText}`)
+          setError(`Payment setup failed (${response.status}): ${data.error || response.statusText}`)
           toast({
             title: "Payment Setup Failed",
             description: data.error || "Could not initialize payment. Please try again later.",
@@ -139,7 +140,7 @@ export default function CheckoutPage({ params }: { params: { serviceId: string }
     }
 
     createPaymentIntent()
-  }, [serviceDetails, params.serviceId, toast])
+  }, [serviceDetails, serviceId, toast])
 
   // Stripe Elements options
   const appearance = {
@@ -162,7 +163,7 @@ export default function CheckoutPage({ params }: { params: { serviceId: string }
       <main className="container py-12">
         <div className="mb-6">
           <Link
-            href={`/services/${params.serviceId}`}
+            href={`/services/${serviceId}`}
             className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -223,7 +224,7 @@ export default function CheckoutPage({ params }: { params: { serviceId: string }
                 clientSecret={clientSecret}
                 paymentIntentId={paymentIntentId}
                 amount={serviceDetails.amount}
-                serviceId={params.serviceId}
+                serviceId={serviceId}
                 providerId={serviceDetails.providerId}
                 isConnectedAccount={true}
               />

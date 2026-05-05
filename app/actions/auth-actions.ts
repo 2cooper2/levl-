@@ -13,7 +13,7 @@ export async function signIn(formData: FormData) {
     }
   }
 
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
 
   if (!supabase) {
     return {
@@ -79,7 +79,7 @@ export async function signUp(formData: FormData) {
     }
   }
 
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
 
   if (!supabase) {
     return {
@@ -116,7 +116,7 @@ export async function signUp(formData: FormData) {
 }
 
 export async function signOut() {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
 
   if (!supabase) {
     return {

@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
   }
 
   if (code) {
-    const supabase = createServerClient()
+    const supabase = await createServerClient()
 
     try {
       // Exchange the code for a session

@@ -22,7 +22,7 @@ async function getTransactionHistory(
   offset: number,
 ): Promise<{ transactions: any[]; total: number; error?: string }> {
   try {
-    const supabase = createServerClient({ cookies })
+    const supabase = await createServerClient()
     if (!supabase) {
       throw new Error("Could not connect to database")
     }
@@ -62,7 +62,7 @@ async function createConnectedAccount(userId: string, email: string): Promise<{ 
       },
     })
 
-    const supabase = createServerClient({ cookies })
+    const supabase = await createServerClient()
     if (!supabase) {
       throw new Error("Could not connect to database")
     }
@@ -106,7 +106,7 @@ async function createAccountLink(accountId: string, refreshUrl: string): Promise
 
 async function getConnectedAccountId(userId: string): Promise<string | null> {
   try {
-    const supabase = createServerClient({ cookies })
+    const supabase = await createServerClient()
     if (!supabase) {
       throw new Error("Failed to create Supabase client")
     }
@@ -150,7 +150,7 @@ async function getConnectedAccountStatus(userId: string): Promise<{
   payoutsEnabled?: boolean
 }> {
   try {
-    const supabase = createServerClient({ cookies })
+    const supabase = await createServerClient()
     if (!supabase) {
       throw new Error("Could not connect to database")
     }
@@ -197,7 +197,7 @@ async function updateConnectedAccountStatus(userId: string, accountId: string): 
   try {
     const account = await getStripe().accounts.retrieve(accountId)
 
-    const supabase = createServerClient({ cookies })
+    const supabase = await createServerClient()
     if (!supabase) {
       throw new Error("Could not connect to database")
     }
@@ -226,7 +226,7 @@ async function updateTransactionStatus(
   errorMessage?: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = createServerClient({ cookies })
+    const supabase = await createServerClient()
     if (!supabase) {
       throw new Error("Could not connect to database")
     }
@@ -297,17 +297,15 @@ async function createPaymentIntent({
   error?: string
 }> {
   try {
-    if (!stripe) {
-      throw new Error("Stripe is not initialized")
-    }
+    // getStripe() throws if STRIPE_SECRET_KEY isn't set — handled by outer catch.
+    getStripe()
 
-    const supabase = createServerClient({ cookies })
-    if (!supabase) {
-      throw new Error("Could not connect to database")
-    }
+    // Supabase optional in test mode — if missing, skip DB ops + Stripe Connect
+    // lookup and just create a direct payment intent.
+    const supabase = await createServerClient()
 
-    // Check if the provider has a connected Stripe account
-    const connectedAccountId = await getConnectedAccountId(providerId)
+    // Check if the provider has a connected Stripe account (only if DB available)
+    const connectedAccountId = supabase ? await getConnectedAccountId(providerId) : null
     const isConnectedAccount = !!connectedAccountId
 
     // Create payment intent parameters
@@ -349,7 +347,8 @@ async function createPaymentIntent({
     const transactionId = randomUUID()
 
     // Store payment intent in database - try payment_transactions first
-    try {
+    // (skip entirely if Supabase isn't configured — test mode)
+    if (supabase) try {
       const { error } = await supabase.from("payment_transactions").insert({
         transaction_id: transactionId,
         stripe_payment_intent_id: paymentIntent.id,

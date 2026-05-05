@@ -3,7 +3,7 @@ import { createServerClient } from "@/lib/supabase-server"
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServerClient()
+    const supabase = await createServerClient()
 
     if (!supabase) {
       return NextResponse.json({ error: "Could not connect to authentication service" }, { status: 500 })
