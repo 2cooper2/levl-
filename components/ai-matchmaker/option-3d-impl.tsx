@@ -2349,10 +2349,10 @@ function TVSizeMeasureScene() {
     () => new THREE.MeshStandardMaterial({ color: "#dd0000", roughness: 0.35, metalness: 0.05, emissive: "#440000", emissiveIntensity: 0.3 }), []
   )
 
-  // ── Housing materials — high-gloss injection moulded red plastic ───────────
+  // ── Housing materials — high-gloss injection moulded lavender plastic ─────
   const housingMat = useMemo(
     () => new THREE.MeshPhysicalMaterial({
-      color: "#c80e0e", roughness: 0.18, metalness: 0.0,
+      color: "#8b5cf6", roughness: 0.18, metalness: 0.0,
       clearcoat: 1.0, clearcoatRoughness: 0.06, envMapIntensity: 1.4,
     }), []
   )
@@ -3916,9 +3916,9 @@ function resolveScene(option: string): { scene: JSX.Element; cam: CamCfg; env: s
 // ─── Shared Canvas wrapper ────────────────────────────────────────────────────
 
 function SceneCanvas({
-  cam, scene, thumbnail = false, env = "city", frameloop = "always", postprocess = true, customLights = false, extraPostFX = false,
+  cam, scene, thumbnail = false, env = "city", frameloop = "always", postprocess = true, customLights = false, extraPostFX = false, ultraQuality = false,
 }: {
-  cam: CamCfg; scene: JSX.Element; thumbnail?: boolean; env?: string; frameloop?: "always" | "demand" | "never"; postprocess?: boolean; customLights?: boolean; extraPostFX?: boolean
+  cam: CamCfg; scene: JSX.Element; thumbnail?: boolean; env?: string; frameloop?: "always" | "demand" | "never"; postprocess?: boolean; customLights?: boolean; extraPostFX?: boolean; ultraQuality?: boolean
 }) {
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768
 
@@ -3944,7 +3944,7 @@ function SceneCanvas({
     <div style={{ width: "100%", height: "100%", position: "relative", background: gradientBg }}>
     <Canvas
       shadows="soft"
-      dpr={thumbnail ? 1 : (isMobile ? [1, 1.5] : [1, 2])}
+      dpr={thumbnail ? 1 : (ultraQuality ? (isMobile ? [2, 3] : [2, 4]) : (isMobile ? [1, 1.5] : [1, 2]))}
       frameloop={frameloop}
       gl={{
         antialias: !isMobile,
@@ -4047,6 +4047,8 @@ export function Option3DImpl({
  */
 export function TVSizeMeasure() {
   const { scene, cam } = resolveScene("__tv_measure")
-  // "city" = potsdamer platz neutral outdoor HDRI — no room/window reflections on screen
-  return <SceneCanvas cam={cam} env="studio" scene={scene} customLights={true} extraPostFX={true} />
+  // ultraQuality renders at dpr 2-4 for crisp 4K-like detail (matching cable
+  // management cards). extraPostFX disabled — DOF + tilt-shift blur the
+  // diagonal tape corners. customLights = true uses scene's own light rig.
+  return <SceneCanvas cam={cam} env="studio" scene={scene} customLights={true} extraPostFX={false} ultraQuality={true} />
 }

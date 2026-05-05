@@ -23,7 +23,7 @@ import {
 } from "lucide-react"
 import { LevlLogo } from "@/components/levl-logo"
 
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion"
 
 import { ProviderCard } from "@/components/ai-matchmaker/provider-card"
 import { Input } from "@/components/ui/input"
@@ -31,6 +31,11 @@ import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { Option3DPreview, THREE_D_OPTIONS } from "@/components/ai-matchmaker/option-3d-preview"
 import dynamic from "next/dynamic"
+
+const TVSizeMeasure = dynamic(
+  () => import("@/components/ai-matchmaker/option-3d-impl").then(m => m.TVSizeMeasure),
+  { ssr: false }
+)
 
 // Static render images for mount object option cards
 const MOUNT_RENDERS: Record<string, string> = {
@@ -1694,7 +1699,7 @@ const MessageItem = memo(
                   </>
                 )}
 
-                {/* TV size illustration — Blender render */}
+                {/* TV size illustration — live R3F component (replaces broken pre-render) */}
                 {message.content === "What size is your TV?" && (
                   <>
                     <motion.div
@@ -1704,13 +1709,7 @@ const MessageItem = memo(
                       transition={{ delay: 0.3, duration: 0.3 }}
                       style={{ background: 'linear-gradient(135deg, #ede9ff 0%, #c4b8f5 100%)' }}
                     >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src="/assets/renders/tv-measure.webp"
-                        alt="TV diagonal measurement"
-                        className="absolute inset-0 w-full h-full object-contain"
-                        style={{ zIndex: 2 }}
-                      />
+                      <TVSizeMeasure />
                     </motion.div>
                     <p className="mt-3 mb-1 text-xs font-medium text-black text-center">Measure corner to corner diagonally</p>
                   </>
@@ -1824,6 +1823,10 @@ export function AIServiceMatchmaker() {
   const [inputValue, setInputValue] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const [inputOpen, setInputOpen] = useState(false)
+
+  // Parallax: bg moves at 50% scroll speed (depth illusion)
+  const { scrollY } = useScroll()
+  const bgY = useTransform(scrollY, [0, 1000], [0, -500])
   const [conversationStage, setConversationStage] = useState<
     "initial" | "understanding" | "service-specific" | "recommending" | "refining" | "finalizing"
   >("initial")
@@ -2313,6 +2316,17 @@ const [detectedPreferences, setDetectedPreferences] = useState<{
 
   return (
     <section className="w-full pb-8 md:pb-12 relative order-first z-20 -mt-8">
+      {/* Parallax background — moves at half scroll speed for depth */}
+      <motion.div
+        aria-hidden
+        className="fixed inset-x-0 top-0 -z-10 pointer-events-none"
+        style={{
+          y: bgY,
+          height: "200vh",
+          background:
+            "linear-gradient(to bottom, rgba(237,233,254,0.6) 0%, rgba(255,255,255,1) 50%, rgba(237,233,254,0.5) 100%)",
+        }}
+      />
       {/* ─── Infinity cove / cyclorama wall ─────────────────────────────────────
           Simulates a seamless photography studio backdrop:
           · Bright white key-light zone at upper-centre (the "lit wall")
